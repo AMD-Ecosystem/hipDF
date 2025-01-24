@@ -436,7 +436,7 @@ class ColumnBase(Column, Serializable, BinaryOperand, Reducible):
                         self.to_pylibcudf(mode="read"),
                         begin,
                         end,
-                        fill_value,
+                        slr.device_value,
                     )
                 )
             if is_string_dtype(self.dtype):
@@ -456,7 +456,7 @@ class ColumnBase(Column, Serializable, BinaryOperand, Reducible):
                 self.to_pylibcudf(mode="write"),
                 begin,
                 end,
-                fill_value,
+                slr.device_value,
             )
         return self
 
@@ -734,7 +734,7 @@ class ColumnBase(Column, Serializable, BinaryOperand, Reducible):
                 plc_table = plc.copying.boolean_mask_scatter(
                     plc.Table([value.to_pylibcudf(mode="read")])
                     if isinstance(value, Column)
-                    else [value],
+                    else [value.device_value],
                     plc.Table([self.to_pylibcudf(mode="read")]),
                     key.to_pylibcudf(mode="read"),
                 )

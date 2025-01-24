@@ -3392,8 +3392,8 @@ def interval_range(
         bin_edges = libcudf.column.Column.from_pylibcudf(
             plc.filling.sequence(
                 size=periods + 1,
-                init=pa_scalar_to_plc_scalar(pa_start),
-                step=pa_scalar_to_plc_scalar(pa_freq),
+                init=start.device_value,
+                step=freq.device_value,
             )
         )
     return IntervalIndex.from_breaks(
