@@ -173,16 +173,6 @@ inline __device__ void compute_initial_large_strings_offset(page_state_s const* 
   }
 }
 
-template <int value>
-inline constexpr int log2_int()
-{
-  static_assert((value >= 1) && ((value & (value - 1)) == 0), "Only works for powers of 2!");
-  if constexpr (value == 1)
-    return 0;
-  else
-    return 1 + log2_int<value / 2>();
-}
-
 template <int block_size>
 __device__ inline int calc_threads_per_string_log2(int avg_string_length)  // returns log2(M)
 {
