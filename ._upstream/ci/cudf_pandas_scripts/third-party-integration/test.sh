@@ -11,6 +11,7 @@ extract_lib_from_dependencies_yaml() {
     # Parse all keys in dependencies.yaml under the "files" section,
     # extract all the keys that start with "test_", and extract the rest
     extracted_libs="$(yq -o json "$file" | jq -rc '.files | with_entries(select(.key | contains("test_"))) | keys | map(sub("^test_"; ""))')"
+    local extracted_libs
     echo "$extracted_libs"
 }
 
@@ -36,7 +37,7 @@ main() {
           --config "$dependencies_yaml" \
           --output conda \
           --file-key "test_${lib}" \
-          --matrix "cuda=${CUDA_VERSION};arch=$(arch);py=${RAPIDS_PY_VERSION}" | tee env.yaml
+          --matrix "cuda=${CUDA_MAJOR};arch=$(arch);py=${RAPIDS_PY_VERSION}" | tee env.yaml
 
         rapids-mamba-retry env create --yes -f env.yaml -n test
 
