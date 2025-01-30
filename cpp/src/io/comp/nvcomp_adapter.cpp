@@ -86,6 +86,49 @@
 namespace cudf::io::detail::nvcomp {
 namespace {
 
+[[nodiscard]] std::string nvcomp_status_to_string(nvcompStatus_t status)
+{
+  switch (status) {
+    case nvcompStatus_t::nvcompSuccess: return "nvcompSuccess";
+    case nvcompStatus_t::nvcompErrorInvalidValue: return "nvcompErrorInvalidValue";
+    case nvcompStatus_t::nvcompErrorNotSupported: return "nvcompErrorNotSupported";
+    case nvcompStatus_t::nvcompErrorCannotDecompress: return "nvcompErrorCannotDecompress";
+    case nvcompStatus_t::nvcompErrorBadChecksum: return "nvcompErrorBadChecksum";
+    case nvcompStatus_t::nvcompErrorCannotVerifyChecksums:
+      return "nvcompErrorCannotVerifyChecksums";
+    case nvcompStatus_t::nvcompErrorOutputBufferTooSmall: return "nvcompErrorOutputBufferTooSmall";
+    case nvcompStatus_t::nvcompErrorWrongHeaderLength: return "nvcompErrorWrongHeaderLength";
+    case nvcompStatus_t::nvcompErrorAlignment: return "nvcompErrorAlignment";
+    case nvcompStatus_t::nvcompErrorChunkSizeTooLarge: return "nvcompErrorChunkSizeTooLarge";
+    case nvcompStatus_t::nvcompErrorCudaError: return "nvcompErrorCudaError";
+    case nvcompStatus_t::nvcompErrorInternal: return "nvcompErrorInternal";
+  }
+  return "nvcompStatus_t(" + std::to_string(static_cast<int>(status)) + ")";
+}
+
+[[nodiscard]] std::string compression_type_name(compression_type compression)
+{
+  switch (compression) {
+    case compression_type::SNAPPY: return "Snappy";
+    case compression_type::ZSTD: return "Zstandard";
+    case compression_type::DEFLATE: return "Deflate";
+    case compression_type::LZ4: return "LZ4";
+    case compression_type::GZIP: return "GZIP";
+  }
+  return "compression_type(" + std::to_string(static_cast<int>(compression)) + ")";
+}
+
+#define CHECK_NVCOMP_STATUS(status)                                   \
+  do {                                                                \
+    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess,             \
+                 "nvCOMP error: " + nvcomp_status_to_string(status)); \
+  } while (0)
+
+#define UNSUPPORTED_COMPRESSION(compression)                                          \
+  do {                                                                                \
+    CUDF_FAIL("Unsupported compression type: " + compression_type_name(compression)); \
+  } while (0)
+
 // Dispatcher for nvcompBatched<format>DecompressGetTempSizeEx
 template <typename... Args>
 std::optional<nvcompStatus_t> batched_decompress_get_temp_size_ex(compression_type compression,
@@ -204,11 +247,9 @@ auto batched_compress_get_temp_size_ex(compression_type compression,
                                                             &temp_size,
                                                             max_total_uncompressed_bytes);
       break;
-    default: CUDF_FAIL("Unsupported compression type");
+    default: UNSUPPORTED_COMPRESSION(compression);
   }
-
-  CUDF_EXPECTS(nvcomp_status == nvcompStatus_t::nvcompSuccess,
-               "Unable to get scratch size for compression");
+  CHECK_NVCOMP_STATUS(nvcomp_status);
   return temp_size;
 }
 #endif
@@ -347,9 +388,9 @@ void batched_compress_async(compression_type compression,
                                                     nvcompBatchedLZ4DefaultOpts,
                                                     stream.value());
       break;
-    default: CUDF_FAIL("Unsupported compression type");
+    default: UNSUPPORTED_COMPRESSION(compression);
   }
-  CUDF_EXPECTS(nvcomp_status == nvcompStatus_t::nvcompSuccess, "Error in compression");
+  CHECK_NVCOMP_STATUS(nvcomp_status);
 }
 
 bool is_aligned(void const* ptr, std::uintptr_t alignment) noexcept
@@ -494,15 +535,7 @@ size_t batched_decompress_temp_size(compression_type compression,
   size_t temp_size                   = 0;
   auto nvcomp_status = batched_decompress_get_temp_size_ex(
     compression, num_chunks, max_uncomp_chunk_size, &temp_size, max_total_uncomp_size);
-  
-  if (nvcomp_status.value_or(nvcompStatus_t::nvcompErrorInternal) !=
-      nvcompStatus_t::nvcompSuccess) {
-    nvcomp_status =
-      batched_decompress_get_temp_size(compression, num_chunks,max_uncomp_chunk_size, &temp_size);
-  }
-
-  CUDF_EXPECTS(nvcomp_status == nvcompStatus_t::nvcompSuccess,
-               "Unable to get scratch size for decompression");
+  CHECK_NVCOMP_STATUS(nvcomp_status);
   return temp_size;
 }
 
@@ -535,7 +568,7 @@ void batched_decompress(compression_type compression,
                                                       nvcomp_args.output_data_ptrs.data(),
                                                       nvcomp_statuses.data(),
                                                       stream.value());
-  CUDF_EXPECTS(nvcomp_status == nvcompStatus_t::nvcompSuccess, "unable to perform decompression");
+  CHECK_NVCOMP_STATUS(nvcomp_status);
 
   update_compression_results(nvcomp_statuses, actual_uncompressed_data_sizes, results, stream);
 }
@@ -577,11 +610,9 @@ size_t compress_max_output_chunk_size(compression_type compression,
       status = nvcompBatchedLZ4CompressGetMaxOutputChunkSize(
         capped_uncomp_bytes, nvcompBatchedLZ4DefaultOpts, &max_comp_chunk_size);
       break;
-    default: CUDF_FAIL("Unsupported compression type");
+    default: UNSUPPORTED_COMPRESSION(compression);
   }
-
-  CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess,
-               "failed to get max uncompressed chunk size");
+  CHECK_NVCOMP_STATUS(status);
   return max_comp_chunk_size;
 }
 
