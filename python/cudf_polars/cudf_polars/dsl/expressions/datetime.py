@@ -59,7 +59,6 @@ class TemporalFunction(Expr):
         Quarter = auto()
         Replace = auto()
         ReplaceTimeZone = auto()
-        Replace = auto()
         Round = auto()
         Second = auto()
         Time = auto()
