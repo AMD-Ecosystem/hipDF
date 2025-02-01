@@ -45,7 +45,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-namespace cudf::io::orc::gpu {
+namespace cudf::io::orc::detail {
 
 /**
  * @brief Counts the number of characters in each rowgroup of each string column.
@@ -287,4 +287,4 @@ void get_dictionary_indices(device_2dspan<stripe_dictionary> dictionaries,
     <<<dictionaries.count(), block_size, 0, stream.value()>>>(dictionaries, columns);
 }
 
-}  // namespace cudf::io::orc::gpu
+}  // namespace cudf::io::orc::detail

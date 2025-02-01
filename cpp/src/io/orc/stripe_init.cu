@@ -47,10 +47,7 @@
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
 
-namespace cudf {
-namespace io {
-namespace orc {
-namespace gpu {
+namespace cudf::io::orc::detail {
 
 struct comp_in_out {
   uint8_t const* in_ptr{};
@@ -628,7 +625,4 @@ void __host__ reduce_pushdown_masks(device_span<orc_column_device_view const> co
     <<<num_blocks, block_size, 0, stream.value()>>>(columns, rowgroups, valid_counts);
 }
 
-}  // namespace gpu
-}  // namespace orc
-}  // namespace io
-}  // namespace cudf
+}  // namespace cudf::io::orc::detail
