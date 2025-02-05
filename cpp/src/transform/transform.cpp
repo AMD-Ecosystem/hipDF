@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2019-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,13 @@ void unary_operation(mutable_column_view output,
     parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
   }
   else if(is_ptx && !HIP_PLATFORM_AMD) {
-    cuda_source = cudf::jit::parse_single_function_ptx(udf,  //
-                                          "GENERIC_UNARY_OP",
-                                          cudf::type_to_name(output_type),
-                                          {0});
+    cuda_source = cudf::jit::parse_single_function_ptx(
+                              udf,  //
+                              "GENERIC_UNARY_OP",
+                              {
+                                {0, "void *"},                         // output argument
+                                {1, cudf::type_to_name(input.type())}  // input argument
+                              });
   }
   else { 
     cuda_source = cudf::jit::parse_single_function_cuda(udf,  //

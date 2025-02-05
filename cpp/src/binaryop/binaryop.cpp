@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2019-2025, NVIDIA CORPORATION.
  *
  * Copyright 2018-2019 BlazingDB, Inc.
  *     Copyright 2018 Christian Noboa Mardini <christian@blazingdb.com>
@@ -180,7 +180,13 @@ void binary_operation(mutable_column_view& out,
     parsed_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_llvm_ir);
   }
   else {
-    cuda_source = cudf::jit::parse_single_function_ptx(udf, "GENERIC_BINARY_OP", output_type_name);
+    cuda_source =  cudf::jit::parse_single_function_ptx(ptx,
+                                         "GENERIC_BINARY_OP",
+                                         {
+                                           {0, output_type_name + " *"},
+                                           {1, cudf::type_to_name(lhs.type())},
+                                           {2, cudf::type_to_name(rhs.type())},
+                                         });
   }
 
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
