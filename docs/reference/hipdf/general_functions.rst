@@ -49,7 +49,6 @@ Top-level conversions
    :toctree: api/
 
    to_numeric
-   from_dataframe
    from_dlpack
    from_pandas
 
