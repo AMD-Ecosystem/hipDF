@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2019-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,10 @@
 #pragma once
 
 #include <cudf/detail/iterator.cuh>
+#include <cudf/detail/utilities/cast_functor.cuh>
 #include <cudf/detail/utilities/device_operators.cuh>
 #include <cudf/detail/utilities/transform_unary_functions.cuh>
 #include <cudf/types.hpp>  //for CUDF_HOST_DEVICE
-
-#include <thrust/functional.h>
 
 #include <cmath>
 
@@ -177,7 +176,7 @@ struct sum : public simple_op<sum> {
   using op = cudf::DeviceSum;
 
   template <typename ResultType>
-  using transformer = thrust::identity<ResultType>;
+  using transformer = cudf::detail::cast_fn<ResultType>;
 };
 
 // operator for `product`
@@ -185,7 +184,7 @@ struct product : public simple_op<product> {
   using op = cudf::DeviceProduct;
 
   template <typename ResultType>
-  using transformer = thrust::identity<ResultType>;
+  using transformer = cudf::detail::cast_fn<ResultType>;
 };
 
 // operator for `sum_of_squares`
@@ -201,7 +200,7 @@ struct min : public simple_op<min> {
   using op = cudf::DeviceMin;
 
   template <typename ResultType>
-  using transformer = thrust::identity<ResultType>;
+  using transformer = cudf::detail::cast_fn<ResultType>;
 };
 
 // operator for `max`
@@ -209,7 +208,7 @@ struct max : public simple_op<max> {
   using op = cudf::DeviceMax;
 
   template <typename ResultType>
-  using transformer = thrust::identity<ResultType>;
+  using transformer = cudf::detail::cast_fn<ResultType>;
 };
 
 /**
@@ -267,7 +266,7 @@ struct mean : public compound_op<mean> {
   using op = cudf::DeviceSum;
 
   template <typename ResultType>
-  using transformer = thrust::identity<ResultType>;
+  using transformer = cudf::detail::cast_fn<ResultType>;
 
   template <typename ResultType>
   struct intermediate {
