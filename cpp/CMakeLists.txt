@@ -378,8 +378,8 @@ endif()
 rapids_cpm_init()
 
 include(${rapids-cmake-dir}/cpm/rapids_logger.cmake)
-rapids_cpm_rapids_logger()
-rapids_make_logger(cudf EXPORT_SET cudf-exports LOGGER_DEFAULT_LEVEL WARN)
+rapids_cpm_rapids_logger(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+create_logger_macros(CUDF "cudf::default_logger()" include/cudf)
 
 # find jitify
 include(cmake/thirdparty/get_jitify.cmake)
@@ -412,8 +412,6 @@ if(CUDA_BACKEND)
 include(cmake/thirdparty/get_kvikio.cmake)
 endif()
 
-# find fmt
-include(cmake/thirdparty/get_fmt.cmake)
 # find nanoarrow
 include(cmake/thirdparty/get_nanoarrow.cmake)
 # find thread_pool
@@ -892,6 +890,7 @@ add_library(
   src/utilities/host_memory.cpp
   src/utilities/jit_amd_utilities.cpp
   src/utilities/linked_column.cpp
+  src/utilities/logger.cpp
   src/utilities/prefetch.cpp
   src/utilities/stacktrace.cpp
   src/utilities/stream_pool.cpp
@@ -1495,16 +1494,11 @@ endif()
 # Specify the target module library dependencies
 target_link_libraries(
   cudf
-  PUBLIC CCCL::CCCL rmm::rmm rmm::rmm_logger $<BUILD_LOCAL_INTERFACE:BS::thread_pool> cudf_logger
-  PRIVATE $<BUILD_LOCAL_INTERFACE:$<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>>
-          cuco::cuco
-          ZLIB::ZLIB
-          nvcomp::nvcomp
+  PUBLIC CCCL::CCCL rapids_logger::rapids_logger rmm::rmm $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
+  PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
           $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
           $<TARGET_NAME_IF_EXISTS:CUDA::cuFile${_cufile_suffix}>
           nanoarrow
-          rmm::rmm_logger_impl
-          cudf_logger_impl
 )
 
 # Add Conda library, and include paths if specified
@@ -1648,8 +1642,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
-
+    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
     if(CUDF_BUILD_STACKTRACE_DEBUG)
       target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
     endif()
