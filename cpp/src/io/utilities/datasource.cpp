@@ -35,7 +35,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "file_io_utilities.hpp"
 #include "getenv_or.hpp"
 
 #include <cudf/detail/utilities/stream_pool.hpp>
@@ -79,40 +78,32 @@ class file_source : public datasource {
     detail::force_init_cuda_context();
     if (cufile_integration::is_kvikio_enabled()) {
 #ifdef CUDF_HAS_KVIKIO
-      cufile_integration::set_up_kvikio();
-      _kvikio_file = kvikio::FileHandle(filepath);
+      kvikio_integration::set_up_kvikio();
+      _kvikio_file = kvikio::FileHandle(filepath, "r");
+      CUDF_EXPECTS(!_kvikio_file.closed(), "KvikIO did not open the file successfully.");
       CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode %s.",
                     _kvikio_file.is_compat_mode_preferred() ? "on" : "off");
 #else
       //TODO(HIP): improve error handling
       throw std::runtime_error("Error: Kvikio is not supported\n");
 #endif
-    } else {
-      _cufile_in = detail::make_cufile_input(filepath);
     }
   }
 
   std::unique_ptr<buffer> host_read(size_t offset, size_t size) override
   {
-    lseek(_file.desc(), offset, SEEK_SET);
-
     // Clamp length to available data
-    ssize_t const read_size = std::min(size, _file.size() - offset);
-
+    auto const read_size = std::min(size, this->size() - offset);
     std::vector<uint8_t> v(read_size);
-    CUDF_EXPECTS(read(_file.desc(), v.data(), read_size) == read_size, "read failed");
+    CUDF_EXPECTS(_kvikio_file.pread(v.data(), read_size, offset).get() == read_size, "read failed");
     return buffer::create(std::move(v));
   }
 
   size_t host_read(size_t offset, size_t size, uint8_t* dst) override
   {
-    lseek(_file.desc(), offset, SEEK_SET);
-
     // Clamp length to available data
-    auto const read_size = std::min(size, _file.size() - offset);
-
-    CUDF_EXPECTS(read(_file.desc(), dst, read_size) == static_cast<ssize_t>(read_size),
-                 "read failed");
+    auto const read_size = std::min(size, this->size() - offset);
+    CUDF_EXPECTS(_kvikio_file.pread(dst, read_size, offset).get() == read_size, "read failed");
     return read_size;
   }
 
@@ -172,7 +163,7 @@ class file_source : public datasource {
     return datasource::buffer::create(std::move(out_data));
   }
 
-  [[nodiscard]] size_t size() const override { return _file.size(); }
+  [[nodiscard]] size_t size() const override { return _kvikio_file.nbytes(); }
 
  protected:
   detail::file_wrapper _file;
@@ -197,9 +188,9 @@ class memory_mapped_source : public file_source {
   explicit memory_mapped_source(char const* filepath, size_t offset, size_t max_size_estimate)
     : file_source(filepath)
   {
-    if (_file.size() != 0) {
+    if (this->size() != 0) {
       // Memory mapping is not exclusive, so we can include the whole region we expect to read
-      map(_file.desc(), offset, max_size_estimate);
+      map(_kvikio_file.fd(), offset, max_size_estimate);
     }
   }
 
@@ -211,7 +202,7 @@ class memory_mapped_source : public file_source {
   std::unique_ptr<buffer> host_read(size_t offset, size_t size) override
   {
     // Clamp length to available data
-    auto const read_size = std::min(size, +_file.size() - offset);
+    auto const read_size = std::min(size, this->size() - offset);
 
     // If the requested range is outside of the mapped region, read from the file
     if (offset < _map_offset or offset + read_size > (_map_offset + _map_size)) {
@@ -235,7 +226,7 @@ class memory_mapped_source : public file_source {
   size_t host_read(size_t offset, size_t size, uint8_t* dst) override
   {
     // Clamp length to available data
-    auto const read_size = std::min(size, +_file.size() - offset);
+    auto const read_size = std::min(size, this->size() - offset);
 
     // If the requested range is outside of the mapped region, read from the file
     if (offset < _map_offset or offset + read_size > (_map_offset + _map_size)) {
@@ -250,12 +241,12 @@ class memory_mapped_source : public file_source {
  private:
   void map(int fd, size_t offset, size_t size)
   {
-    CUDF_EXPECTS(offset < _file.size(), "Offset is past end of file", std::overflow_error);
+    CUDF_EXPECTS(offset < this->size(), "Offset is past end of file", std::overflow_error);
 
     // Offset for `mmap()` must be page aligned
     _map_offset = offset & ~(sysconf(_SC_PAGESIZE) - 1);
 
-    if (size == 0 || (offset + size) > _file.size()) { size = _file.size() - offset; }
+    if (size == 0 || (offset + size) > this->size()) { size = this->size() - offset; }
 
     // Size for `mmap()` needs to include the page padding
     _map_size = size + (offset - _map_offset);

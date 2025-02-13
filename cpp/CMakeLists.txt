@@ -143,8 +143,6 @@ option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilati
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
 option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
-option(CUDA_STATIC_CUFILE "Statically link cuFile" OFF)
-handle_unsupported_cmake_option("CUDA_STATIC_CUFILE" TRUE)
 option(BUILD_ASAN "Whether to build with address sanitization" OFF )
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
@@ -658,7 +656,6 @@ add_library(
   src/io/utilities/data_casting.cu
   src/io/utilities/data_sink.cpp
   src/io/utilities/datasource.cpp
-  src/io/utilities/file_io_utilities.cpp
   src/io/utilities/row_selection.cpp
   src/io/utilities/type_inference.cu
   src/io/utilities/trie.cu
@@ -1467,15 +1464,6 @@ target_compile_definitions(
 # Enable remote IO through KvikIO
 target_compile_definitions(cudf PRIVATE $<$<BOOL:${CUDF_KVIKIO_REMOTE_IO}>:CUDF_KVIKIO_REMOTE_IO>)
 
-# Enable cuFile support
-set(_cufile_suffix)
-if(CUDA_STATIC_CUFILE)
-  set(_cufile_suffix _static)
-endif()
-if(TARGET CUDA::cuFile${_cufile_suffix})
-  target_compile_definitions(cudf PRIVATE CUDF_CUFILE_FOUND)
-endif()
-
 # Remove this after upgrading to a CCCL that has a proper CMake option. See
 # https://github.com/NVIDIA/cccl/pull/2844
 target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
@@ -1496,7 +1484,6 @@ target_link_libraries(
   PUBLIC CCCL::CCCL rapids_logger::rapids_logger rmm::rmm $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
   PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
           $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
-          $<TARGET_NAME_IF_EXISTS:CUDA::cuFile${_cufile_suffix}>
           nanoarrow
 )
 
