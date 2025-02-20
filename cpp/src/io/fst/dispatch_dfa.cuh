@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2022-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,31 +235,25 @@ struct DispatchFSM : DeviceFSMPolicy {
                             FstScanTileStateT fst_tile_state)
 
   {
-    cudaError_t error = cudaSuccess;
-    // NOTE(HIP): hipcub doesnt support KernelConfig
-    // cub::KernelConfig dfa_simulation_config;
-
     using PolicyT = typename ActivePolicyT::AgentDFAPolicy;
-    // if (HipcubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
 
     // Kernel invocation
     uint32_t grid_size = std::max(
       1u, HIPCUB_QUOTIENT_CEILING(num_chars, PolicyT::BLOCK_THREADS * PolicyT::ITEMS_PER_THREAD));
-    // uint32_t block_threads = dfa_simulation_config.block_threads;
-    uint32_t block_threads = PolicyT::BLOCK_THREADS;
 
-    dfa_kernel<<<grid_size, block_threads, 0, stream>>>(dfa,
-                                                        d_chars_in,
-                                                        num_chars,
-                                                        seed_state,
-                                                        d_thread_state_transition,
-                                                        tile_state,
-                                                        fst_tile_state,
-                                                        transduced_out_it,
-                                                        transduced_out_idx_it,
-                                                        d_num_transduced_out_it);
+    dfa_kernel<<<grid_size, PolicyT::BLOCK_THREADS, 0, stream>>>(dfa,
+                                                                 d_chars_in,
+                                                                 num_chars,
+                                                                 seed_state,
+                                                                 d_thread_state_transition,
+                                                                 tile_state,
+                                                                 fst_tile_state,
+                                                                 transduced_out_it,
+                                                                 transduced_out_idx_it,
+                                                                 d_num_transduced_out_it);
 
     // Check for errors
+    cudaError_t error = cudaSuccess;
     if (HipcubDebug(error = cudaPeekAtLastError())) return error;
 
     return error;
@@ -422,8 +416,13 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
-    error =
-      hipcub::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
+    // TODO (@miscco): remove this once rapids moves to CCCL 2.8
+#if CCCL_VERSION_MAJOR >= 3
+    error = hipcub::detail::AliasTemporaries(
+#else   // ^^^ CCCL 3.x ^^^ / vvv CCCL 2.x vvv
+    error = hipcub::AliasTemporaries(
+#endif  // CCCL 2.x
+      d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
     if (error != cudaSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation
