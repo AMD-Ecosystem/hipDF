@@ -137,7 +137,7 @@ commit-files = [
 dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true"
 requires = [
-    "cmake>=3.26.4,!=3.30.0",
+    "cmake>=3.30.4",
     "cython>=3.0.3",
     "amd-libhipdf==2.*,>=2.0.0a0",
     "amd-libhipmm==3.0.*,>=3.0.0a0",
