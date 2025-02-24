@@ -885,6 +885,7 @@ add_library(
   src/utilities/default_stream.cpp
   src/utilities/host_memory.cpp
   src/utilities/jit_amd_utilities.cpp
+  src/utilities/host_worker_pool.cpp
   src/utilities/linked_column.cpp
   src/utilities/logger.cpp
   src/utilities/prefetch.cpp
