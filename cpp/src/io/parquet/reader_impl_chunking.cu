@@ -62,6 +62,7 @@
 #include <thrust/transform_scan.h>
 #include <thrust/unique.h>
 
+#include <functional>
 #include <numeric>
 
 namespace cudf::io::parquet::detail {
