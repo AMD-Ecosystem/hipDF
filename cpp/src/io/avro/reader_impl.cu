@@ -42,6 +42,7 @@
 #include "io/utilities/hostdevice_vector.hpp"
 
 #include <cudf/detail/null_mask.hpp>
+#include <cudf/detail/utilities/functional.hpp>
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/io/datasource.hpp>
 #include <cudf/io/detail/avro.hpp>
@@ -321,8 +322,10 @@ rmm::device_buffer decompress_data(datasource& source,
 
     size_t const uncompressed_data_size =
       std::reduce(uncompressed_data_sizes.begin(), uncompressed_data_sizes.end());
-    size_t const max_uncomp_block_size = std::reduce(
-      uncompressed_data_sizes.begin(), uncompressed_data_sizes.end(), 0, thrust::maximum<size_t>());
+    size_t const max_uncomp_block_size = std::reduce(uncompressed_data_sizes.begin(),
+                                                     uncompressed_data_sizes.end(),
+                                                     0,
+                                                     cudf::detail::maximum<size_t>());
 
     size_t temp_size = 0;
     status =

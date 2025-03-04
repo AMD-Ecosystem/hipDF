@@ -48,6 +48,7 @@
 #include <cudf/detail/sorting.hpp>
 #include <cudf/detail/tdigest/tdigest.hpp>
 #include <cudf/detail/utilities/cuda.cuh>
+#include <cudf/detail/utilities/functional.hpp>
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/unary.hpp>
 #include <cudf/utilities/memory_resource.hpp>
@@ -814,7 +815,7 @@ std::unique_ptr<column> compute_tdigests(int delta,
                         centroids_begin,                  // values
                         thrust::make_discard_iterator(),  // key output
                         output,                           // output
-                        thrust::equal_to{},               // key equality check
+                        cuda::std::equal_to{},            // key equality check
                         merge_centroids{});
 
   // create final tdigest column
@@ -1182,8 +1183,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         min_iter,
                         thrust::make_discard_iterator(),
                         merged_min_col->mutable_view().begin<double>(),
-                        thrust::equal_to<double>{},  // key equality check //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
-                        thrust::minimum<double>{}); //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        cuda::std::equal_to{},  // key equality check
+                        cudf::detail::minimum{});
 
   auto merged_max_col = cudf::make_numeric_column(
     data_type{type_id::FLOAT64}, num_groups, mask_state::UNALLOCATED, stream, mr);
@@ -1197,8 +1198,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         max_iter,
                         thrust::make_discard_iterator(),
                         merged_max_col->mutable_view().begin<double>(),
-                        thrust::equal_to<double>{},  // key equality check //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
-                        thrust::maximum<double>{}); //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        cuda::std::equal_to{},  // key equality check
+                        cudf::detail::maximum{});
 
   auto tdigest_offsets = tdv.centroids().offsets();
 
