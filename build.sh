@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019-2024, NVIDIA CORPORATION.
+# Copyright (c) 2019-2025, NVIDIA CORPORATION.
 
 # MIT License
 #
@@ -70,8 +70,7 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
 
-   default action (no args) is to build and install 'libcudf' then 'cudf'
-   then 'dask_cudf' targets
+   default action (no args) is to build and install 'libcudf', 'pylibcudf', 'cudf', 'cudf_polars', and 'dask_cudf' targets
 "
 
 # set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
