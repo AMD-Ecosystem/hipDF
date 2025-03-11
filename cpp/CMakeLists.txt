@@ -414,12 +414,14 @@ endif()
 include(cmake/thirdparty/get_nanoarrow.cmake)
 # find thread_pool
 include(cmake/thirdparty/get_thread_pool.cmake)
+# find zstd
+include(cmake/thirdparty/get_zstd.cmake)
 
 # Workaround until https://github.com/rapidsai/rapids-cmake/issues/176 is resolved
 if(NOT BUILD_SHARED_LIBS)
   include("${rapids-cmake-dir}/export/find_package_file.cmake")
   list(APPEND METADATA_KINDS BUILD INSTALL)
-  list(APPEND dependencies ZLIB hipcomp nanoarrow)
+  list(APPEND dependencies ZLIB nvcomp nanoarrow zstd)
   if(TARGET KvikIO)
     list(APPEND dependencies KvikIO)
   endif()
@@ -1414,6 +1416,7 @@ target_include_directories(
   PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
           "$<BUILD_INTERFACE:${nanoarrow_SOURCE_DIR}/src>"
           "$<BUILD_INTERFACE:${FlatBuffers_SOURCE_DIR}/include>"
+          "$<BUILD_INTERFACE:${ZSTD_INCLUDE_DIR}"
   INTERFACE "$<INSTALL_INTERFACE:include>"
 )
 
@@ -1487,8 +1490,7 @@ target_link_libraries(
   cudf
   PUBLIC CCCL::CCCL rapids_logger::rapids_logger rmm::rmm $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
   PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
-          $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
-          nanoarrow
+          $<TARGET_NAME_IF_EXISTS:kvikio::kvikio> nanoarrow zstd
 )
 
 # Add Conda library, and include paths if specified
