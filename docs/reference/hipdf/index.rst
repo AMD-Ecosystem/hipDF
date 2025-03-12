@@ -46,6 +46,7 @@ This page provides a list of all publicly accessible modules, methods and classe
     window
     io
     character_normalizer
+    wordpiece_tokenizer
     tokenize_vocabulary
     string_handling
     list_handling
