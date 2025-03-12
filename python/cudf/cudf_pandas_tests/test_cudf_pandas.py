@@ -1940,7 +1940,6 @@ def assert_functions_called(profiler, functions):
 
     # Get all called functions as (filename, lineno, func_name)
     called_functions = {func[2] for func in stats.stats.keys()}
-    print(called_functions)
     for func_str in functions:
         assert func_str in called_functions
 
