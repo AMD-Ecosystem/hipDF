@@ -42,7 +42,7 @@ authors = [
 license = { text = "Apache 2.0 AND MIT" }
 requires-python = ">=3.10"
 dependencies = [
-    "confluent-kafka>=2.8.0,<2.9.0a0",
+    "confluent-kafka>=2.5.0,<2.6.0a0",
     "amd-hipdf>=1.0,<2.0",
     "amd-hipdf_kafka==25.4.*,>=0.0.0a0",
     "streamz",

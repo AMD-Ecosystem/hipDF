@@ -35,5 +35,5 @@
 # SOFTWARE.
 # =============================================================================
 
-
+# TODO(HIP/AMD): Update tag for next release
 set(CUDF_TAG release/rocmds-25.10)
