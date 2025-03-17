@@ -122,20 +122,6 @@ struct DecompressTest : public cudf::test::BaseFixture, public testing::WithPara
   struct has_cpu_impl<T, std::void_t<decltype(&T::host_dispatch)>> : std::true_type {};
 };
 
-struct HostCompressTest : public cudf::test::BaseFixture,
-                          public ::testing::WithParamInterface<cudf::io::compression_type> {
-  HostCompressTest()
-  {
-    setenv("LIBCUDF_HOST_COMPRESSION", "ON", 1);
-    setenv("LIBCUDF_NVCOMP_POLICY", "ALWAYS", 1);
-  }
-  ~HostCompressTest() override
-  {
-    unsetenv("LIBCUDF_HOST_COMPRESSION");
-    unsetenv("LIBCUDF_NVCOMP_POLICY");
-  }
-};
-
 struct HostDecompressTest : public cudf::test::BaseFixture,
                             public ::testing::WithParamInterface<cudf::io::compression_type> {
   HostDecompressTest()

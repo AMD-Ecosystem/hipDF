@@ -441,7 +441,7 @@ std::vector<std::uint8_t> compress(compression_type compression,
     case compression_type::GZIP: return compress_gzip(src);
     case compression_type::SNAPPY: return snappy::compress(src);
     case compression_type::ZSTD: return compress_zstd(src);
-    default: CUDF_FAIL("Unsupported compression type: " + compression_type_name(compression));
+    default: CUDF_FAIL("Unsupported compression type");
   }
 }
 
