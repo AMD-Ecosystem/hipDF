@@ -57,6 +57,8 @@
 
 #include <cstdint>
 #include <cstring>  // memset
+#include <future>
+#include <numeric>
 #include <sstream>
 
 namespace cudf::io::detail {
@@ -570,7 +572,7 @@ size_t decompress(compression_type compression,
     case compression_type::ZLIB: return decompress_zlib(src, dst);
     case compression_type::SNAPPY: return decompress_snappy(src, dst);
     case compression_type::ZSTD: return decompress_zstd(src, dst);
-    default: CUDF_FAIL("Unsupported compression type");
+    default: CUDF_FAIL("Unsupported compression type: " + compression_type_name(compression));
   }
 }
 

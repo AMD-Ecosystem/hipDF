@@ -340,8 +340,9 @@ void host_compress(compression_type compression,
   });
 
   std::vector<std::future<size_t>> tasks;
-  auto const num_streams = std::min<std::size_t>(num_chunks, h_comp_pool().get_thread_count());
-  auto const streams     = cudf::detail::fork_streams(stream, num_streams);
+  auto const num_streams =
+    std::min<std::size_t>(num_chunks, cudf::detail::host_worker_pool().get_thread_count());
+  auto const streams = cudf::detail::fork_streams(stream, num_streams);
   for (size_t i = 0; i < num_chunks; ++i) {
     auto const idx        = task_order[i];
     auto const cur_stream = streams[i % streams.size()];
@@ -441,7 +442,7 @@ std::vector<std::uint8_t> compress(compression_type compression,
     case compression_type::GZIP: return compress_gzip(src);
     case compression_type::SNAPPY: return snappy::compress(src);
     case compression_type::ZSTD: return compress_zstd(src);
-    default: CUDF_FAIL("Unsupported compression type");
+    default: CUDF_FAIL("Unsupported compression type: " + compression_type_name(compression));
   }
 }
 
