@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2018-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,9 +66,9 @@ Mark Adler    madler@alumni.caltech.edu
 
 #include "cudf/cuda_runtime.h"
 
+#include "common_internal.hpp"
 #include "gpuinflate.hpp"
 #include "io/utilities/block_utils.cuh"
-#include "io_uncomp.hpp"
 
 #include <cudf/detail/utilities/cuda.cuh>
 
