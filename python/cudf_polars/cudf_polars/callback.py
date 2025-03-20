@@ -217,7 +217,7 @@ def _callback(
     memory_resource: int | None,
     executor: Literal["pylibcudf", "dask-experimental"] | None,
     timer: Timer | None,
-):
+) -> pl.DataFrame | tuple[pl.DataFrame, list[tuple[int, int, str]]]:
     assert with_columns is None
     assert pyarrow_predicate is None
     assert n_rows is None

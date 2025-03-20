@@ -27,8 +27,6 @@ from cudf_polars.typing import NodeTraverser
 from cudf_polars.utils import config, dtypes, sorting
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from polars import GPUEngine
 
     from cudf_polars.typing import NodeTraverser
