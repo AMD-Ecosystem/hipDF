@@ -73,6 +73,11 @@ class SubwordTokenizer:
         self.vocab_file = plc.nvtext.subword_tokenize.HashedVocabulary(
             hash_file
         )
+        warnings.warn(
+            "SubwordTokenizer is deprecated and will be removed in a future "
+            "version. Use WordPieceVocabulary instead.",
+            FutureWarning,
+        )
 
     def __call__(
         self,

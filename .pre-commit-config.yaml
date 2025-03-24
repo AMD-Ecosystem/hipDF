@@ -32,6 +32,62 @@
 #   submodules: false
 
 repos:
+  # Disabled hooks - only license verificator is enabled
+  # - repo: https://github.com/pre-commit/pre-commit-hooks
+  #   rev: v5.0.0
+  #   hooks:
+  #     - id: trailing-whitespace
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/cmake/thirdparty/patches/.*|
+  #           ^python/cudf/cudf/tests/data/vocab.txt
+  #         )
+  #     - id: end-of-file-fixer
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/cmake/thirdparty/patches/.*|
+  #           ^python/cudf/cudf/tests/data/vocab.txt
+  #         )
+  # - repo: https://github.com/MarcoGorelli/cython-lint
+  #   rev: v0.16.6
+  #   hooks:
+  #     - id: cython-lint
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: 'v1.13.0'
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-cachetools]
+  #       args: ["--config-file=pyproject.toml",
+  #              "python/cudf/cudf",
+  #              "python/custreamz/custreamz",
+  #              "python/cudf_kafka/cudf_kafka",
+  #              "python/cudf_polars/cudf_polars",
+  #              "python/dask_cudf/dask_cudf"]
+  #       pass_filenames: false
+  # - repo: https://github.com/pre-commit/mirrors-clang-format
+  #   rev: v16.0.6
+  #   hooks:
+  #     - id: clang-format
+  #       types_or: [c, c++, cuda]
+  #       args: ["-fallback-style=none", "-style=file", "-i"]
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/src/io/parquet/ipc/Schema_generated.h|
+  #           ^cpp/src/io/parquet/ipc/Message_generated.h|
+  #           ^cpp/include/cudf_test/cxxopts.hpp
+  #         )
+  # - repo: https://github.com/sirosen/texthooks
+  #   rev: 0.6.7
+  #   hooks:
+  #     - id: fix-smartquotes
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/src/io/parquet/ipc/Schema_generated.h|
+  #           ^cpp/src/io/parquet/ipc/Message_generated.h|
+  #           ^cpp/include/cudf_test/cxxopts.hpp|
+  #           ^python/cudf/cudf/tests/data/vocab.txt|
+  #           ^python/cudf/cudf/tests/text/test_text_methods.py
+  #         )
   - repo: local
     hooks:
           - id: check-license-installation
