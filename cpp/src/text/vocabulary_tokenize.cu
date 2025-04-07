@@ -65,8 +65,8 @@
 #include <hipcub/hipcub.hpp>
 #include <cuco/static_map.cuh>
 #include <cuda/std/functional>
+#include <cuda/std/iterator>
 #include <thrust/copy.h>
-#include <thrust/distance.h>
 #include <thrust/execution_policy.h>
 #include <thrust/functional.h>
 #include <thrust/logical.h>
@@ -366,7 +366,7 @@ struct transform_tokenizer_fn {
       itr += ch_size;
     }
 
-    auto const size  = static_cast<cudf::size_type>(thrust::distance(itr, end));
+    auto const size  = static_cast<cudf::size_type>(cuda::std::distance(itr, end));
     auto const token = cudf::string_view{itr, size};
     // lookup token in map
     auto const fitr = d_map.find(token);

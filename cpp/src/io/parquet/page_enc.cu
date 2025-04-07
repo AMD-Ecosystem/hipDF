@@ -55,11 +55,11 @@
 #include <hipcub/hipcub.hpp>
 #include <cuda/std/chrono>
 #include <cuda/std/functional>
+#include <cuda/std/iterator>
 #include <cuda/std/limits>
 #include <cuda/std/tuple>
 #include <cuda/std/utility>
 #include <thrust/binary_search.h>
-#include <thrust/distance.h>
 #include <thrust/gather.h>
 #include <thrust/iterator/discard_iterator.h>
 #include <thrust/iterator/reverse_iterator.h>
@@ -877,7 +877,7 @@ CUDF_KERNEL void __launch_bounds__(encode_block_size)
             }
             scratch += sizeof(size_type) * page_g.num_valid;
             page_offset =
-              thrust::distance(ck_g.uncompressed_bfr, reinterpret_cast<uint8_t*>(scratch));
+              cuda::std::distance(ck_g.uncompressed_bfr, reinterpret_cast<uint8_t*>(scratch));
           }
           if (not comp_page_sizes.empty()) {
             // V2 does not include level data in compressed size estimate

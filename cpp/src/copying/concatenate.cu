@@ -60,7 +60,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <thrust/advance.h>
+#include <cuda/std/iterator>
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
@@ -230,7 +230,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
   if (Nullable) { active_mask = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, output_index < output_size); } // NOTE(HIP/AMD): See SWDEV-490930
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
-    auto const offset_it            = thrust::prev(thrust::upper_bound(
+    auto const offset_it            = cuda::std::prev(thrust::upper_bound(
       thrust::seq, input_offsets, input_offsets + num_input_views, output_index));
     size_type const partition_index = offset_it - input_offsets;
 
