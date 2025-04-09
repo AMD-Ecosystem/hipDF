@@ -1427,8 +1427,9 @@ TEST_F(ParquetWriterTest, SkipCompression)
   cudf::io::parquet::FileMetaData fmd;
   read_footer(source, &fmd);
 
-  EXPECT_EQ(fmd.row_groups[0].columns[0].meta_data.codec, cudf::io::parquet::UNCOMPRESSED);
-  EXPECT_EQ(fmd.row_groups[0].columns[1].meta_data.codec, cudf::io::parquet::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+  EXPECT_EQ(fmd.row_groups[0].columns[0].meta_data.codec,
+            cudf::io::parquet::Compression::UNCOMPRESSED);
+  EXPECT_EQ(fmd.row_groups[0].columns[1].meta_data.codec, cudf::io::parquet::Compression::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
 }
 
 TEST_F(ParquetWriterTest, NoNullsAsNonNullable)
