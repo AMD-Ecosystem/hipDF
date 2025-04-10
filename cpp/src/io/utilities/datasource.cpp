@@ -154,7 +154,17 @@ class kvikio_source : public datasource {
 
 #ifdef CUDF_HAS_KVIKIO
     auto const read_size = std::min(size, this->size() - offset);
-    return _kvikio_handle.pread(dst, read_size, offset);
+    if constexpr (std::is_same_v<HandleT, kvikio::FileHandle>) {
+      return _kvikio_handle.pread(dst,
+                                  read_size,
+                                  offset,
+                                  kvikio::defaults::task_size(),
+                                  kvikio::defaults::gds_threshold(),
+                                  false /* not to sync_default_stream */);
+    } else {
+      // HandleT is kvikio::RemoteHandle
+      return _kvikio_handle.pread(dst, read_size, offset);
+    }
 #else
     return std::future<size_t>{};
 #endif
