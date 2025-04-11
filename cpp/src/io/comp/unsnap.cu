@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2018-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@
 
 #include "gpuinflate.hpp"
 #include "io/utilities/block_utils.cuh"
+
+#include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
 
@@ -752,6 +754,44 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
   dim3 dim_block(4 * cudf::detail::warp_size, 1);           // 4 warps per stream, 1 stream per block
   dim3 dim_grid(inputs.size(), 1);  // TODO: Check max grid dimensions vs max expected count
   unsnap_kernel<4 * cudf::detail::warp_size><<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
+}
+
+__global__ void get_snappy_uncompressed_size_kernel(
+  device_span<device_span<uint8_t const> const> inputs, device_span<size_t> uncompressed_sizes)
+{
+  auto const idx = cudf::detail::grid_1d::global_thread_id();
+  if (idx >= inputs.size()) return;
+
+  auto cur       = inputs[idx].begin();
+  auto const end = inputs[idx].end();
+
+  constexpr int payload_bits_per_byte = 7;
+  constexpr size_t payload_mask       = (1 << payload_bits_per_byte) - 1;
+  size_t uncompressed_size            = 0;
+  int shift                           = 0;
+  while (cur < end && shift + payload_bits_per_byte <= 8 * sizeof(size_t)) {
+    size_t const byte = *cur++;
+    uncompressed_size |= (byte & payload_mask) << shift;
+    if ((byte & (1 << payload_bits_per_byte)) == 0) {
+      uncompressed_sizes[idx] = uncompressed_size;
+      return;
+    }
+    shift += payload_bits_per_byte;
+  }
+  // Invalid varint
+  uncompressed_sizes[idx] = 0;
+}
+
+void get_snappy_uncompressed_size(device_span<device_span<uint8_t const> const> inputs,
+                                  device_span<size_t> uncompressed_sizes,
+                                  rmm::cuda_stream_view stream)
+{
+  int threads_per_block = 128;
+  auto const num_blocks =
+    cudf::util::div_rounding_up_safe<size_t>(inputs.size(), threads_per_block);
+
+  get_snappy_uncompressed_size_kernel<<<num_blocks, threads_per_block, 0, stream.value()>>>(
+    inputs, uncompressed_sizes);
 }
 
 }  // namespace cudf::io::detail
