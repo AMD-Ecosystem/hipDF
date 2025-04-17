@@ -47,8 +47,11 @@ try:
 except ImportError:
     pass
 
+del _setup_numba
+del validate_setup
+
 import cupy
-from numba import config as numba_config, cuda
+from numba import cuda
 
 import rmm
 from rmm.allocators.cupy import rmm_cupy_allocator
@@ -122,12 +125,18 @@ from cudf.utils.utils import clear_cache
 cuda.set_memory_manager(RMMNumbaManager)
 cupy.cuda.set_allocator(rmm_cupy_allocator)
 
+del cuda
+del cupy
+del rmm_cupy_allocator
+del RMMNumbaManager
 
 rmm.register_reinitialize_hook(clear_cache)
 
 from cuda import cuda as _cuda_python_cuda
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
 del _cuda_python_cuda
+del clear_cache
+del rmm
 
 __all__ = [
     "NA",
@@ -147,6 +156,7 @@ __all__ = [
     "ListDtype",
     "MultiIndex",
     "NaT",
+    "NamedAgg",
     "RangeIndex",
     "Scalar",
     "Series",
@@ -154,10 +164,14 @@ __all__ = [
     "TimedeltaIndex",
     "api",
     "concat",
+    "core",  # TODO: core should not be publicly exposed
     "crosstab",
     "cut",
+    "datasets",
     "date_range",
     "describe_option",
+    "dtype",  # TODO: dtype should not be a public function
+    "errors",
     "factorize",
     "from_dataframe",
     "from_dlpack",
@@ -165,10 +179,12 @@ __all__ = [
     "get_dummies",
     "get_option",
     "interval_range",
+    "io",
     "isclose",
     "melt",
     "merge",
     "option_context",
+    "options",  # TODO: Move options.py to core, not all objects should be public
     "pivot",
     "pivot_table",
     "read_avro",
@@ -179,9 +195,14 @@ __all__ = [
     "read_orc",
     "read_parquet",
     "read_text",
+    "register_dataframe_accessor",
+    "register_index_accessor",
+    "register_series_accessor",
     "set_option",
     "testing",
     "to_datetime",
     "to_numeric",
+    "unique",
     "unstack",
+    "utils",
 ]
