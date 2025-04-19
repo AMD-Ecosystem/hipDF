@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2023-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,13 @@
 
 #pragma once
 
+#ifndef CUDF_RUNTIME_JIT
+
 #include <cudf/utilities/type_dispatcher.hpp>
+
+#endif
+
+#include <cudf/utilities/traits.hpp>
 
 #include <type_traits>
 
@@ -243,6 +249,8 @@ struct alignas(16) base_normalator {
   };
 
  protected:
+#ifndef CUDF_RUNTIME_JIT  // TODO: refactor type_dispatcher to support NVRTC
+
   /**
    * @brief Constructor assigns width and type member variables for base class.
    */
@@ -250,6 +258,8 @@ struct alignas(16) base_normalator {
   {
     width_ = static_cast<int32_t>(type_dispatcher(dtype, integer_sizeof_fn{}));
   }
+
+#endif
 
   /**
    * @brief Constructor assigns width and type member variables for base class.
