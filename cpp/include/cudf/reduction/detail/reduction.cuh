@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2019-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,8 @@
 #include <rmm/exec_policy.hpp>
 
 #include <hipcub/device/device_reduce.hpp>
-
+#include <cuda/std/iterator>
 #include <thrust/for_each.h>
-#include <thrust/iterator/iterator_traits.h>
 
 #include <optional>
 
@@ -77,7 +76,7 @@ namespace detail {
  */
 template <typename Op,
           typename InputIterator,
-          typename OutputType = typename thrust::iterator_value<InputIterator>::type,
+          typename OutputType = cuda::std::iter_value_t<InputIterator>,
           std::enable_if_t<is_fixed_width<OutputType>() &&
                            not cudf::is_fixed_point<OutputType>()>* = nullptr>
 std::unique_ptr<scalar> reduce(InputIterator d_in,
@@ -121,7 +120,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
 
 template <typename Op,
           typename InputIterator,
-          typename OutputType = typename thrust::iterator_value<InputIterator>::type,
+          typename OutputType                             = cuda::std::iter_value_t<InputIterator>,
           std::enable_if_t<is_fixed_point<OutputType>()>* = nullptr>
 std::unique_ptr<scalar> reduce(InputIterator d_in,
                                cudf::size_type num_items,
@@ -138,7 +137,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
 // @brief string_view specialization of simple reduction
 template <typename Op,
           typename InputIterator,
-          typename OutputType = typename thrust::iterator_value<InputIterator>::type,
+          typename OutputType = cuda::std::iter_value_t<InputIterator>,
           std::enable_if_t<std::is_same_v<OutputType, string_view>>* = nullptr>
 std::unique_ptr<scalar> reduce(InputIterator d_in,
                                cudf::size_type num_items,
@@ -204,7 +203,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
 template <typename Op,
           typename InputIterator,
           typename OutputType,
-          typename IntermediateType = typename thrust::iterator_value<InputIterator>::type>
+          typename IntermediateType = cuda::std::iter_value_t<InputIterator>>
 std::unique_ptr<scalar> reduce(InputIterator d_in,
                                cudf::size_type num_items,
                                op::compound_op<Op> op,
