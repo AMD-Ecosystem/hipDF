@@ -36,7 +36,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "strings/split/split.cuh"
+#include "strings/positions.hpp"
 
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
@@ -56,6 +56,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
+#include <cuda/atomic>
 #include <cuda/functional>
 #include <cuda/std/iterator>
 #include <thrust/binary_search.h>
