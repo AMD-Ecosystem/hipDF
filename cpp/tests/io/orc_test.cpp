@@ -2063,6 +2063,11 @@ void round_trip_basic(cudf::io::compression_type compression_type)
 {
   constexpr auto num_rows = 12345;
 
+  if (not cudf::io::is_supported_read_orc(compression_type) or
+      not cudf::io::is_supported_write_orc(compression_type)) {
+    GTEST_SKIP() << "Compression not supported with the current configuration";
+  }
+
   // Generate compressible data
   auto int_sequence =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 100; });
