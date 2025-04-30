@@ -39,6 +39,7 @@
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_wrapper.hpp>
 #include <cudf_test/default_stream.hpp>
+#include <cudf_test/testing_main.hpp>
 
 #include <cudf/ast/expressions.hpp>
 #include <cudf/column/column_view.hpp>
@@ -233,3 +234,5 @@ TEST_F(TransformTest, SegmentedRowBitCount)
   auto constexpr segment_length = 2;
   cudf::segmented_row_bit_count(input, segment_length, cudf::test::get_default_stream());
 }
+
+CUDF_TEST_PROGRAM_MAIN()
