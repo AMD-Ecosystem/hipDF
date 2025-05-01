@@ -41,6 +41,8 @@
 
 #include "compute_column_kernel.hpp"
 
+#include "compute_column_kernel.hpp"
+
 #include <cudf/ast/detail/expression_evaluator.cuh>
 #include <cudf/ast/detail/expression_parser.hpp>
 #include <cudf/ast/expressions.hpp>
