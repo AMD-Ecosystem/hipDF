@@ -90,7 +90,6 @@ set(CUDF_CUDA_FLAGS "-Wno-c++11-narrowing-const-reference")
 add_compile_definitions(HIP_ENABLE_WARP_SYNC_BUILTINS)
 
 rapids_find_package(HIP REQUIRED)
-include(ConfigureCUDA) # set other CUDA compilation flags
 
 if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
   message(STATUS "Using per-thread default stream")
@@ -128,6 +127,11 @@ else()
 endif()
 
 rapids_find_package(cudf REQUIRED)
+
+get_target_property(CUDF_CXX_FLAGS cudf::cudf CUDF_CXX_FLAGS)
+get_target_property(CUDF_CUDA_FLAGS cudf::cudf CUDF_CUDA_FLAGS)
+get_target_property(CUDF_CXX_DEFINITIONS cudf::cudf CUDF_CXX_DEFINITIONS)
+get_target_property(CUDF_CUDA_DEFINITIONS cudf::cudf CUDF_CUDA_DEFINITIONS)
 
 # ##################################################################################################
 # * nvtx3 and nvcomp-------------------------------------------------------------------------------
