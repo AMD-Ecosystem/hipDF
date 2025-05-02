@@ -45,10 +45,6 @@ include(rapids-find)
 include(rapids-cpm)
 rapids_cpm_init()
 
-# Use GPU_ARCHS if it is defined
-if(DEFINED GPU_ARCHS)
-  set(CMAKE_HIP_ARCHITECTURES "${GPU_ARCHS}")
-endif()
 rapids_hip_init_architectures(CUDF_JNI)
 
 project(
