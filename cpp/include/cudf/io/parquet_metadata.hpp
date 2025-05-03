@@ -116,7 +116,7 @@ struct parquet_column_schema {
 
  private:
   std::string _name;
-  // 3 types available: Physical, Converted, Logical
+  // 3 types available: Physical, Converted, Logical.
   Type _type;  // Physical type
   std::vector<parquet_column_schema> _children;
 };
