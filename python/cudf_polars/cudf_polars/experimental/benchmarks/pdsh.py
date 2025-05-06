@@ -1271,18 +1271,22 @@ def run(args: argparse.Namespace) -> None:
             if run_config.executor == "cpu":
                 result = q.collect(new_streaming=True)
             else:
-                if run_config.executor == "in-memory":
-                    executor_options = {}
-                else:
+                executor_options: dict[str, Any] = {}
+                if run_config.executor == "streaming":
                     executor_options = {
-                        "parquet_blocksize": run_config.blocksize,
-                        "shuffle_method": run_config.shuffle,
-                        "broadcast_join_limit": run_config.broadcast_join_limit,
                         "cardinality_factor": {
                             "c_custkey": 0.05,  # Q10
                             "l_orderkey": 1.0,  # Q18
                         },
                     }
+                    if run_config.blocksize:
+                        executor_options["parquet_blocksize"] = run_config.blocksize
+                    if run_config.shuffle:
+                        executor_options["shuffle_method"] = run_config.shuffle
+                    if run_config.broadcast_join_limit:
+                        executor_options["broadcast_join_limit"] = (
+                            run_config.broadcast_join_limit
+                        )
                     if run_config.rapidsmpf_spill:
                         executor_options["rapidsmpf_spill"] = run_config.rapidsmpf_spill
                     if run_config.scheduler == "distributed":

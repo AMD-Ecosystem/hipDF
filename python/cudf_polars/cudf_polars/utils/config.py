@@ -126,7 +126,7 @@ def default_blocksize(scheduler: str) -> int:
         # Fall back to a conservative 12GiB default
         warnings.warn(
             "Failed to query the device size with NVML. Please "
-            "set 'target_partition_size' to a literal byte size to "
+            "set 'parquet_blocksize' to a literal byte size to "
             f"silence this warning. Original error: {err}",
             stacklevel=1,
         )
@@ -198,7 +198,7 @@ class StreamingExecutor:
     fallback_mode: StreamingFallbackMode = StreamingFallbackMode.WARN
     max_rows_per_partition: int = 1_000_000
     cardinality_factor: dict[str, float] = dataclasses.field(default_factory=dict)
-    target_partition_size: int = 0
+    parquet_blocksize: int = 0
     groupby_n_ary: int = 32
     broadcast_join_limit: int = 0
     shuffle_method: ShuffleMethod | None = None
@@ -214,9 +214,9 @@ class StreamingExecutor:
         object.__setattr__(
             self, "fallback_mode", StreamingFallbackMode(self.fallback_mode)
         )
-        if self.target_partition_size == 0:
+        if self.parquet_blocksize == 0:
             object.__setattr__(
-                self, "target_partition_size", default_blocksize(self.scheduler)
+                self, "parquet_blocksize", default_blocksize(self.scheduler)
             )
         if self.broadcast_join_limit == 0:
             object.__setattr__(
