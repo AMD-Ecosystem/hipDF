@@ -61,8 +61,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/conda-python-tests.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
@@ -73,8 +71,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/conda-python-tests.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
@@ -108,8 +104,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
@@ -119,8 +113,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
@@ -130,8 +122,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
@@ -153,8 +143,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
@@ -164,8 +152,6 @@ jobs:
     secrets: inherit
     uses: rapidsai/shared-workflows/.github/workflows/wheels-test.yaml@branch-25.06
     with:
-      # This selects "ARCH=amd64".
-      matrix_filter: map(select(.ARCH == "amd64"))
       build_type: ${{ inputs.build_type }}
       branch: ${{ inputs.branch }}
       date: ${{ inputs.date }}
