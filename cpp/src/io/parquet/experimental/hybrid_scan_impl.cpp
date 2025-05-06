@@ -178,7 +178,7 @@ std::vector<std::vector<size_type>> hybrid_scan_reader_impl::filter_row_groups_w
   return _metadata->filter_row_groups_with_stats(row_group_indices,
                                                  output_dtypes,
                                                  _output_column_schemas,
-                                                 expr_conv.get_converted_expr().value(),
+                                                 expr_conv.get_converted_expr(),
                                                  stream);
 }
 
