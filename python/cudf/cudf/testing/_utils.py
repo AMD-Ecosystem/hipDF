@@ -19,6 +19,7 @@ import pylibcudf as plc
 
 import cudf
 from cudf.core.column.column import as_column
+from cudf.core.column.timedelta import _unit_to_nanoseconds_conversion
 from cudf.core.udf.strings_lowering import cast_string_view_to_udf_string
 from cudf.core.udf.strings_typing import StringView, string_view, udf_string
 from cudf.utils import dtypes as dtypeutils
