@@ -25,6 +25,9 @@ if TYPE_CHECKING:
     from rmm.pylibrmm.memory_resource import DeviceMemoryResource
     from rmm.pylibrmm.stream import Stream
 
+    from cudf_polars.typing import ColumnHeader, ColumnOptions, DataFrameHeader
+
+
 __all__ = ["DaskRegisterManager", "register"]
 
 
@@ -173,14 +176,6 @@ def register() -> None:
             # Copy the second frame (the gpudata in host memory) back to the gpu
             frames = frames[0], plc.gpumemoryview(rmm.DeviceBuffer.to_device(frames[1]))
             return DataFrame.deserialize(header, frames)
-
-    @dask_deserialize.register(Column)
-    def _(header: ColumnHeader, frames: tuple[memoryview, memoryview]) -> Column:
-        with log_errors():
-            assert len(frames) == 2
-            # Copy the second frame (the gpudata in host memory) back to the gpu
-            frames = frames[0], plc.gpumemoryview(rmm.DeviceBuffer.to_device(frames[1]))
-            return Column.deserialize(header, frames)
 
     @sizeof_dispatch.register(Column)
     def _(x: Column) -> int:
