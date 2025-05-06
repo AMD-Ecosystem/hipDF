@@ -88,6 +88,7 @@ from cudf.core.column_accessor import ColumnAccessor
 from cudf.core.copy_types import BooleanMask
 from cudf.core.groupby.groupby import DataFrameGroupBy, groupby_doc_template
 from cudf.core.index import (
+    BaseIndex,
     Index,
     RangeIndex,
     _index_from_data,
@@ -128,6 +129,7 @@ from cudf.utils.performance_tracking import _performance_tracking
 from cudf.utils.performance_tracking import nvtx_annotate as annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (2/2)
 from cudf.utils.utils import (
     _EQUALITY_OPS,
+    GetAttrGetItemMixin,
     _external_only_api,
     _is_null_host_scalar,
 )

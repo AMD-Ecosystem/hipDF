@@ -45,7 +45,7 @@ from cudf.core.dtypes import (
     ListDtype,
     StructDtype,
 )
-from cudf.core.index import Index, RangeIndex, _index_from_data
+from cudf.core.index import _index_from_data
 from cudf.core.join._join_helpers import _match_join_keys
 from cudf.core.mixins import GetAttrGetItemMixin, Reducible, Scannable
 from cudf.core.multiindex import MultiIndex
@@ -1045,7 +1045,13 @@ class GroupBy(Serializable, Reducible, Scannable):
                     and len(col) == 0
                     and not isinstance(
                         col.dtype,
-                        (ListDtype, StructDtype, DecimalDtype),
+                        (
+                            cudf.ListDtype,
+                            cudf.StructDtype,
+                            cudf.Decimal32Dtype,
+                            cudf.Decimal64Dtype,
+                            cudf.Decimal128Dtype,
+                        ),
                     )
                 ):
                     data[key] = col.astype(orig_dtype)
@@ -1624,7 +1630,7 @@ class GroupBy(Serializable, Reducible, Scannable):
             itertools.chain(self.obj.index._columns, self.obj._columns)
         )
         grouped_keys = _index_from_data(dict(enumerate(grouped_key_cols)))
-        if isinstance(self.grouping.keys, MultiIndex):
+        if isinstance(self.grouping.keys, cudf.MultiIndex):
             grouped_keys.names = self.grouping.keys.names
             to_drop = self.grouping.keys.names
         else:

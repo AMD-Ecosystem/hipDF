@@ -24,17 +24,7 @@ from cudf.api.types import is_list_like
 from cudf.core.buffer import acquire_spill_lock
 from cudf.core.column import ColumnBase, as_column, column_empty
 from cudf.core.column.categorical import CategoricalColumn, as_unsigned_codes
-from cudf.core.dataframe import DataFrame
-from cudf.core.dtypes import (
-    CategoricalDtype,
-    DecimalDtype,
-    ListDtype,
-    StructDtype,
-)
-from cudf.core.index import Index, RangeIndex
-from cudf.core.multiindex import MultiIndex
-from cudf.core.reshape import concat
-from cudf.options import get_option
+from cudf.core.dtypes import DecimalDtype
 from cudf.utils import ioutils
 from cudf.utils.performance_tracking import _performance_tracking
 
@@ -2320,7 +2310,7 @@ def _process_metadata(
                 if len(filtered_idx) > 0:
                     idx = concat(filtered_idx)
                 else:
-                    idx = Index._from_column(column_empty(0))
+                    idx = cudf.Index._from_column(column_empty(0))
             else:
                 start = range_index_meta["start"] + skip_rows  # type: ignore[operator]
                 stop = range_index_meta["stop"]

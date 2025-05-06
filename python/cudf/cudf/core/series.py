@@ -45,6 +45,7 @@ from cudf.core.column.struct import StructMethods
 from cudf.core.column_accessor import ColumnAccessor
 from cudf.core.groupby.groupby import SeriesGroupBy, groupby_doc_template
 from cudf.core.index import (
+    BaseIndex,
     DatetimeIndex,
     Index,
     RangeIndex,

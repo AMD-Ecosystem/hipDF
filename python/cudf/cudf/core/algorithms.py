@@ -2,19 +2,15 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
 
 import cupy as cp
 import pyarrow as pa
 
 import cudf
 from cudf.core.column import as_column
-from cudf.core.dtypes import CategoricalDtype
+from cudf.core.index import Index
 from cudf.options import get_option
 from cudf.utils.dtypes import can_convert_to_column, cudf_dtype_to_pa_type
-
-if TYPE_CHECKING:
-    from cudf.core.index import Index
 
 
 def factorize(

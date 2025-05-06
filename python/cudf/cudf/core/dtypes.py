@@ -1181,7 +1181,7 @@ def _is_interval_dtype(obj):
             ),
         )
         or obj is IntervalDtype
-        or (isinstance(obj, cudf.Index) and obj._is_interval())
+        or (isinstance(obj, cudf.core.index.BaseIndex) and obj._is_interval())
         or (isinstance(obj, str) and obj == IntervalDtype.name)
         or (
             isinstance(
