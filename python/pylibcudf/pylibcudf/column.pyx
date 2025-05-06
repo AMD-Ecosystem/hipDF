@@ -55,12 +55,10 @@ from ._interop_helpers cimport (
 from .utils cimport _get_stream
 
 from .gpumemoryview import _datatype_from_dtype_desc
-from ._interop_helpers import ArrowLike, ColumnMetadata
+from ._interop_helpers import ColumnMetadata
 
 import array
 import functools
-import operator
-from typing import Iterable
 
 __all__ = ["Column", "ListColumnView", "is_c_contiguous"]
 
