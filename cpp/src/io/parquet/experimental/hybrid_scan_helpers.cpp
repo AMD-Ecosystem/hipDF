@@ -79,6 +79,17 @@ namespace {
 
 }  // namespace
 
+namespace {
+
+[[nodiscard]] auto all_row_group_indices(
+  host_span<std::vector<cudf::size_type> const> row_group_indices)
+{
+  return std::vector<std::vector<cudf::size_type>>(row_group_indices.begin(),
+                                                   row_group_indices.end());
+}
+
+}  // namespace
+
 metadata::metadata(cudf::host_span<uint8_t const> footer_bytes)
 {
   CompactProtocolReader cp(footer_bytes.data(), footer_bytes.size());

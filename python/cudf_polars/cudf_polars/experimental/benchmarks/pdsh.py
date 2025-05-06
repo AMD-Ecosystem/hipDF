@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     from cudf_polars.dsl.ir import IR
     from cudf_polars.experimental.base import PartitionInfo
 
-
 # Without this setting, the first IO task to run
 # on each worker takes ~15 sec extra
 os.environ["KVIKIO_COMPAT_MODE"] = os.environ.get("KVIKIO_COMPAT_MODE", "on")
