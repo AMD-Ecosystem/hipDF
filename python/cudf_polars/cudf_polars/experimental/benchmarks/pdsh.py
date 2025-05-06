@@ -200,15 +200,12 @@ class RunConfig:
                     print(f"threads: {self.threads}")
                     print(f"spill_device: {self.spill_device}")
                     print(f"rapidsmpf_spill: {self.rapidsmpf_spill}")
-            if len(records) > 0:
-                print(f"iterations: {self.iterations}")
-                print("---------------------------------------")
-                print(f"min time : {min([record.duration for record in records]):0.4f}")
-                print(f"max time : {max(record.duration for record in records):0.4f}")
-                print(
-                    f"mean time: {np.mean([record.duration for record in records]):0.4f}"
-                )
-                print("=======================================")
+            print(f"iterations: {self.iterations}")
+            print("---------------------------------------")
+            print(f"min time : {min([record.duration for record in records]):0.4f}")
+            print(f"max time : {max(record.duration for record in records):0.4f}")
+            print(f"mean time: {np.mean([record.duration for record in records]):0.4f}")
+            print("=======================================")
 
 
 def get_data(
@@ -1140,12 +1137,6 @@ parser.add_argument(
     help="RMM pool size (fractional).",
 )
 parser.add_argument(
-    "--rmm-async",
-    action=argparse.BooleanOptionalAction,
-    default=False,
-    help="Use RMM async memory resource.",
-)
-parser.add_argument(
     "--rapidsmpf-spill",
     action=argparse.BooleanOptionalAction,
     default=False,
@@ -1280,8 +1271,29 @@ def run(args: argparse.Namespace) -> None:
 
             if run_config.executor == "cpu":
                 result = q.collect(new_streaming=True)
-            elif CUDF_POLARS_AVAILABLE:
-                assert isinstance(engine, pl.GPUEngine)
+            else:
+                if run_config.executor == "in-memory":
+                    executor_options = {}
+                else:
+                    executor_options = {
+                        "parquet_blocksize": run_config.blocksize,
+                        "shuffle_method": run_config.shuffle,
+                        "broadcast_join_limit": run_config.broadcast_join_limit,
+                        "cardinality_factor": {
+                            "c_custkey": 0.05,  # Q10
+                            "l_orderkey": 1.0,  # Q18
+                        },
+                    }
+                    if run_config.rapidsmpf_spill:
+                        executor_options["rapidsmpf_spill"] = run_config.rapidsmpf_spill
+                    if run_config.scheduler == "distributed":
+                        executor_options["scheduler"] = "distributed"
+
+                engine = pl.GPUEngine(
+                    raise_on_fail=True,
+                    executor=run_config.executor,
+                    executor_options=executor_options,
+                )
                 if args.debug:
                     translator = Translator(q._ldf.visit(), engine)
                     ir = translator.translate_ir()
