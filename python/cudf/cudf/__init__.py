@@ -120,7 +120,6 @@ from cudf.options import (
     option_context,
     set_option,
 )
-from cudf.utils.utils import clear_cache
 
 cuda.set_memory_manager(RMMNumbaManager)
 cupy.cuda.set_allocator(rmm_cupy_allocator)
@@ -130,7 +129,7 @@ del cupy
 del rmm_cupy_allocator
 del RMMNumbaManager
 
-rmm.register_reinitialize_hook(clear_cache)
+rmm.register_reinitialize_hook(lambda: Scalar._clear_instance_cache())
 
 from cuda import cuda as _cuda_python_cuda
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
