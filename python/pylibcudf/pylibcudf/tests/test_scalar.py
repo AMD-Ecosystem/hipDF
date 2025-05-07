@@ -23,6 +23,8 @@ PY_SCALARS = [
     1.52,
     "",
     "a1!",
+    datetime.datetime(2020, 1, 1),
+    datetime.datetime(2020, 1, 1, microsecond=1),
     datetime.timedelta(1),
     datetime.timedelta(days=1, microseconds=1),
 ]
