@@ -570,7 +570,7 @@ class Scan(IR):
                     options.set_names([str(name) for name in column_names])
                 else:
                     if (
-                        not POLARS_VERSION_LT_128 and header > -1 and skip_rows > header
+                        not POLARS_VERSION_LT_128 and skip_rows > header
                     ):  # pragma: no cover
                         # We need to read the header otherwise we would skip it
                         column_names = read_csv_header(path, str(sep))

@@ -102,7 +102,7 @@ def test_scan(
         pytest.mark.xfail(
             condition=(
                 not POLARS_VERSION_LT_128
-                and zlice is not None
+                and slice is not None
                 and scan_fn is pl.scan_ndjson
             ),
             reason="slice pushdown not supported in the libcudf JSON reader",
@@ -422,43 +422,3 @@ def test_select_arbitrary_order_with_row_index_column(request, tmp_path):
         [pl.col("a"), pl.col("foo")]
     )
     assert_gpu_result_equal(q)
-
-
-@pytest.mark.parametrize(
-    "has_header,new_columns",
-    [
-        (True, None),
-        (False, ["a", "b", "c"]),
-    ],
-)
-def test_scan_csv_with_and_without_header(
-    df, tmp_path, has_header, new_columns, row_index, columns, zlice
-):
-    path = tmp_path / "test.csv"
-    make_partitioned_source(
-        df, path, "csv", write_kwargs={"include_header": has_header}
-    )
-
-    name, offset = row_index
-
-    q = pl.scan_csv(
-        path,
-        has_header=has_header,
-        new_columns=new_columns,
-        row_index_name=name,
-        row_index_offset=offset,
-    )
-
-    if zlice is not None:
-        q = q.slice(*zlice)
-    if columns is not None:
-        q = q.select(columns)
-
-    assert_gpu_result_equal(q)
-
-
-def test_scan_csv_without_header_and_new_column_names_raises(df, tmp_path):
-    path = tmp_path / "test.csv"
-    make_partitioned_source(df, path, "csv", write_kwargs={"include_header": False})
-    q = pl.scan_csv(path, has_header=False)
-    assert_ir_translation_raises(q, NotImplementedError)
