@@ -51,6 +51,12 @@ from pylibcudf.libcudf.wrappers.timestamps cimport (
     timestamp_us,
     timestamp_ns,
 )
+from pylibcudf.libcudf.wrappers.timestamps cimport (
+    timestamp_s,
+    timestamp_ms,
+    timestamp_us,
+    timestamp_ns,
+)
 
 from rmm.pylibrmm.memory_resource cimport get_current_device_resource
 
