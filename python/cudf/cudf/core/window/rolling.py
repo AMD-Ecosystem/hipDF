@@ -16,8 +16,6 @@ from cudf.core._internals import aggregation
 from cudf.core.buffer import acquire_spill_lock
 from cudf.core.column.column import ColumnBase, as_column
 from cudf.core.mixins import GetAttrGetItemMixin, Reducible
-from cudf.core.multiindex import MultiIndex
-from cudf.options import get_option
 from cudf.utils import cudautils
 from cudf.utils.dtypes import SIZE_TYPE_DTYPE
 

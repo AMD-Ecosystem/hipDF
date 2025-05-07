@@ -45,7 +45,6 @@ from cudf.core.buffer.buffer import (
 from cudf.core.buffer.exposure_tracked_buffer import ExposureTrackedBuffer
 from cudf.core.buffer.string import format_bytes
 from cudf.utils.performance_tracking import _get_color_for_nvtx
-from cudf.utils.performance_tracking import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (2/2)
 
 if TYPE_CHECKING:
     from cudf.core.buffer.spill_manager import SpillManager
