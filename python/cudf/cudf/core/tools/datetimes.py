@@ -17,8 +17,7 @@ import pylibcudf as plc
 from cudf.api.types import is_integer, is_scalar
 from cudf.core.buffer import acquire_spill_lock
 from cudf.core.column.column import ColumnBase, as_column
-from cudf.core.dataframe import DataFrame
-from cudf.core.index import DatetimeIndex, Index, ensure_index
+from cudf.core.index import ensure_index
 from cudf.core.scalar import pa_scalar_to_plc_scalar
 from cudf.core.series import Series
 from cudf.utils.dtypes import CUDF_STRING_DTYPE
@@ -849,7 +848,9 @@ def date_range(
         end = dtype.type(end, unit).astype(np.dtype(np.int64))
         arr = np.linspace(start=start, stop=end, num=periods).astype(dtype)
         result = as_column(arr)
-        return DatetimeIndex._from_column(result, name=name).tz_localize(tz)
+        return cudf.DatetimeIndex._from_column(result, name=name).tz_localize(
+            tz
+        )
 
     # The code logic below assumes `freq` is defined. It is first normalized
     # into `DateOffset` for further computation with timestamps.

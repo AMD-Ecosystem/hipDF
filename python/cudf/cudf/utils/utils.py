@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 
 import cudf
-from cudf.core import column
 
 # Mapping from ufuncs to the corresponding binary operators.
 _ufunc_binary_operations = {
