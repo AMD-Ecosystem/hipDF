@@ -106,7 +106,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 # * build options ---------------------------------------------------------------------------------
 option(USE_NVTX "Build with NVTX support" OFF)
 handle_unsupported_cmake_option("USE_NVTX" FALSE)
-option(BUILD_TESTS "Configure CMake to build tests" OFF)
+option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
@@ -125,6 +125,7 @@ option(
          stream to external libraries."
   OFF
 )
+
 # Option to add all symbols to the dynamic symbol table in the library file, allowing to retrieve
 # human-readable stacktrace for debugging.
 option(
@@ -149,6 +150,7 @@ set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
   set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
+
 option(
   CUDF_BUILD_STREAMS_TEST_UTIL
   "Whether to build the utilities for stream testing contained in libcudf"
@@ -227,6 +229,7 @@ message(VERBOSE "CUDF: Build with warp size 32 (for RDNA3): ${CUDF_USE_WARPSIZE_
 rapids_cmake_build_type("Release")
 set(CUDF_BUILD_TESTS ${BUILD_TESTS})
 set(CUDF_BUILD_BENCHMARKS ${BUILD_BENCHMARKS})
+
 if(BUILD_TESTS AND NOT CUDF_BUILD_TESTUTIL)
   message(
     FATAL_ERROR
@@ -275,12 +278,14 @@ if(CUDF_CLANG_TIDY)
   string(REGEX MATCH "LLVM version ([0-9]+\\.[0-9]+)\\.[0-9]+" LLVM_VERSION_MATCH
                "${CLANG_TIDY_OUTPUT}"
   )
+
   # Discard the patch version and allow it to float. Empirically, results between patch versions are
   # mostly stable, and looking at available packages on some package managers sometimes patch
   # versions are skipped so we don't want to constrain to a patch version that the user can't
   # install.
   set(LLVM_VERSION "${CMAKE_MATCH_1}")
   set(expected_clang_tidy_version 19.1)
+
   if(NOT expected_clang_tidy_version VERSION_EQUAL LLVM_VERSION)
     message(
       FATAL_ERROR
@@ -316,6 +321,7 @@ function(enable_static_checkers target)
       )
     endif()
   endif()
+
   if(_LINT_IWYU)
     # A few extra warnings pop up when building with IWYU. I'm not sure why, but they are not
     # relevant since they don't show up in any other build so it's better to suppress them until we
@@ -326,16 +332,19 @@ function(enable_static_checkers target)
     # on real builds.
     foreach(_flag -Wno-missing-braces -Wno-unneeded-internal-declaration)
       list(FIND CUDF_CXX_FLAGS "${_flag}" _flag_index)
+
       if(_flag_index EQUAL -1)
         list(APPEND CUDF_CXX_FLAGS ${_flag})
       endif()
     endforeach()
+
     set(CUDF_CXX_FLAGS
         "${CUDF_CXX_FLAGS}"
         PARENT_SCOPE
     )
     set_target_properties(${target} PROPERTIES CXX_INCLUDE_WHAT_YOU_USE "${IWYU_EXE}")
   endif()
+
   foreach(file IN LISTS _LINT_SKIPPED_FILES)
     set_source_files_properties(${file} PROPERTIES SKIP_LINTING ON)
   endforeach()
@@ -381,22 +390,29 @@ create_logger_macros(CUDF "cudf::default_logger()" include/cudf)
 
 # find jitify
 include(cmake/thirdparty/get_jitify.cmake)
+
 # find NVTX
 if(USE_NVTX)
   include(cmake/thirdparty/get_nvtx.cmake) #TODO(HIP/AMD): add rocTX
 endif()
 # find nvCOMP
 include(cmake/thirdparty/get_nvcomp.cmake)
+
 # find CCCL before rmm so that we get cudf's patched version of CCCL
 include(cmake/thirdparty/get_cccl.cmake)
+
 # find rmm
 include(cmake/thirdparty/get_rmm.cmake)
+
 # find flatbuffers
 include(cmake/thirdparty/get_flatbuffers.cmake)
+
 # find dlpack
 include(cmake/thirdparty/get_dlpack.cmake)
-# find cuCollections Should come after including thrust and libhipcxx
+
+# find cuCollections, should come after including CCCL
 include(cmake/thirdparty/get_cucollections.cmake)
+
 # find or install GoogleTest
 if(CUDF_BUILD_TESTUTIL)
   include(cmake/thirdparty/get_gtest.cmake)
@@ -412,8 +428,10 @@ endif()
 
 # find nanoarrow
 include(cmake/thirdparty/get_nanoarrow.cmake)
+
 # find thread_pool
 include(cmake/thirdparty/get_thread_pool.cmake)
+
 # find zstd
 include(cmake/thirdparty/get_zstd.cmake)
 
@@ -865,6 +883,7 @@ add_library(
   src/table/table.cpp
   src/table/table_device_view.cu
   src/table/table_view.cpp
+  src/text/deduplicate.cu
   src/text/detokenize.cu
   src/text/edit_distance.cu
   src/text/generate_ngrams.cu
@@ -1538,7 +1557,6 @@ add_library(cudf::cudf ALIAS cudf)
 
 # ##################################################################################################
 # * build cudftestutil ----------------------------------------------------------------------------
-
 if(CUDF_BUILD_TESTUTIL)
   add_library(
     cudftest_default_stream
@@ -1622,11 +1640,9 @@ if(CUDF_BUILD_TESTUTIL)
           tests/utilities/tdigest_utilities.cu
     DESTINATION src/cudftestutil/utilities
   )
-
 endif()
 
 # * build cudf_identify_stream_usage --------------------------------------------------------------
-
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
   if(GPU_STATIC_RUNTIME)
     message(
@@ -1643,6 +1659,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
     add_library(
       ${_tgt} SHARED src/utilities/stacktrace.cpp tests/utilities/identify_stream_usage.cpp
     )
+
     if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
       target_compile_definitions(
         ${_tgt} PUBLIC CUDA_API_PER_THREAD_DEFAULT_STREAM CUDF_USE_PER_THREAD_DEFAULT_STREAM
@@ -1661,9 +1678,11 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+
     if(CUDF_BUILD_STACKTRACE_DEBUG)
       target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
     endif()
+
     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
     add_library(cudf::${_tgt} ALIAS ${_tgt})
 
@@ -1675,7 +1694,6 @@ endif()
 
 # ##################################################################################################
 # * add tests -------------------------------------------------------------------------------------
-
 if(CUDF_BUILD_TESTS)
   # include CTest module -- automatically calls enable_testing()
   include(CTest)
@@ -1697,7 +1715,6 @@ endif()
 
 # ##################################################################################################
 # * add benchmarks --------------------------------------------------------------------------------
-
 if(CUDF_BUILD_BENCHMARKS)
   # Find or install GoogleBench
   include(${rapids-cmake-dir}/cpm/gbench.cmake)
@@ -1727,6 +1744,7 @@ install(FILES ${CUDF_BINARY_DIR}/include/cudf/version_config.hpp
 )
 
 set(_components_export_string)
+
 if(TARGET cudftestutil)
   install(
     TARGETS cudftest_default_stream cudftestutil cudftestutil_impl
