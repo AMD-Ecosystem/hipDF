@@ -1372,7 +1372,7 @@ class GroupBy(IR):
                     child = value.children[0]
                 else:
                     (child,) = value.children
-                col = child.evaluate(df, context=ExecutionContext.GROUPBY).obj
+                col = child.evaluate(df).obj
             else:
                 # Anything else, we pre-evaluate
                 col = value.evaluate(df, context=ExecutionContext.GROUPBY).obj

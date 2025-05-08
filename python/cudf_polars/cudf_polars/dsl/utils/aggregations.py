@@ -82,26 +82,11 @@ def decompose_single_agg(
     agg = named_expr.value
     name = named_expr.name
     if isinstance(agg, expr.Col):
-        # TODO: collect_list produces null for empty group in libcudf, empty list in polars.
-        # But we need the nested value type, so need to track proper dtypes in our DSL.
-        return [(named_expr, False)], named_expr.reconstruct(expr.Col(agg.dtype, name))
-    if is_top and isinstance(agg, expr.Cast) and isinstance(agg.children[0], expr.Len):
-        # Special case to fill nulls with zeros for empty group length calculations
-        (child,) = agg.children
-        child_agg, post = decompose_single_agg(
-            expr.NamedExpr(next(name_generator), child), name_generator, is_top=True
-        )
-        return child_agg, named_expr.reconstruct(
-            replace_nulls(
-                agg.reconstruct([post.value]),
-                0,
-                is_top=True,
-            )
-        )
+        return [named_expr], named_expr, False
     if isinstance(agg, expr.Len):
-        return [(named_expr, True)], named_expr.reconstruct(expr.Col(agg.dtype, name))
+        return [named_expr], named_expr.reconstruct(expr.Col(agg.dtype, name)), True
     if isinstance(agg, (expr.Literal, expr.LiteralColumn)):
-        return [], named_expr
+        return [], named_expr, False
     if isinstance(agg, expr.Agg):
         if agg.name == "quantile":
             # Second child the requested quantile (which is asserted
