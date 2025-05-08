@@ -5,8 +5,6 @@
 
 set -euo pipefail
 
-source rapids-init-pip
-
 EXITCODE=0
 trap "EXITCODE=1" ERR
 set +e
