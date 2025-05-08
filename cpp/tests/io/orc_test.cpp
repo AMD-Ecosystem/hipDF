@@ -35,6 +35,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "compression_common.hpp"
 
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
@@ -161,8 +162,9 @@ struct OrcStatisticsTest : public cudf::test::BaseFixture {};
 // Test fixture for metadata tests
 struct OrcMetadataReaderTest : public cudf::test::BaseFixture {};
 
-struct OrcCompressionTest : public cudf::test::BaseFixture,
-                            public ::testing::WithParamInterface<cudf::io::compression_type> {};
+using OrcCompressionTest = CompressionTest<OrcWriterTest>;
+
+using OrcDecompressionTest = DecompressionTest<OrcReaderTest>;
 
 namespace {
 // Generates a vector of uniform random values of type T
@@ -1755,15 +1757,18 @@ TEST_F(OrcWriterTest, CompStats)
   EXPECT_FALSE(std::isnan(stats->compression_ratio()));
 }
 
-TEST_F(OrcChunkedWriterTest, CompStats)
+TEST_P(OrcCompressionTest, CompStats)
 {
-  auto table = create_random_fixed_table<int>(1, 100000, true);
+  auto const compression_type = std::get<1>(GetParam());
+
+  auto table = create_random_fixed_table<int>(1, 55000, true);
 
   auto const stats = std::make_shared<cudf::io::writer_compression_statistics>();
 
   std::vector<char> unused_buffer;
   cudf::io::chunked_orc_writer_options opts =
     cudf::io::chunked_orc_writer_options::builder(cudf::io::sink_info{&unused_buffer})
+      .compression(compression_type)
       .compression_statistics(stats);
   cudf::io::orc_chunked_writer(opts).write(*table);
 
@@ -1782,7 +1787,7 @@ TEST_F(OrcChunkedWriterTest, CompStats)
   EXPECT_EQ(stats->num_skipped_bytes(), 0);
 }
 
-void expect_compression_stats_empty(std::shared_ptr<cudf::io::writer_compression_statistics> stats)
+void expect_compression_stats_empty(cudf::io::writer_compression_statistics const* stats)
 {
   EXPECT_EQ(stats->num_compressed_bytes(), 0);
   EXPECT_EQ(stats->num_failed_bytes(), 0);
@@ -1790,8 +1795,10 @@ void expect_compression_stats_empty(std::shared_ptr<cudf::io::writer_compression
   EXPECT_TRUE(std::isnan(stats->compression_ratio()));
 }
 
-TEST_F(OrcWriterTest, CompStatsEmptyTable)
+TEST_P(OrcCompressionTest, CompStatsEmptyTable)
 {
+  auto const compression_type = std::get<1>(GetParam());
+
   auto table_no_rows = create_random_fixed_table<int>(20, 0, false);
 
   auto const stats = std::make_shared<cudf::io::writer_compression_statistics>();
@@ -1799,14 +1806,17 @@ TEST_F(OrcWriterTest, CompStatsEmptyTable)
   std::vector<char> unused_buffer;
   cudf::io::orc_writer_options opts = cudf::io::orc_writer_options::builder(
                                         cudf::io::sink_info{&unused_buffer}, table_no_rows->view())
+                                        .compression(compression_type)
                                         .compression_statistics(stats);
   cudf::io::write_orc(opts);
 
-  expect_compression_stats_empty(stats);
+  expect_compression_stats_empty(stats.get());
 }
 
-TEST_F(OrcChunkedWriterTest, CompStatsEmptyTable)
+TEST_P(OrcCompressionTest, ChunkedCompStatsEmptyTable)
 {
+  auto const compression_type = std::get<1>(GetParam());
+
   auto table_no_rows = create_random_fixed_table<int>(20, 0, false);
 
   auto const stats = std::make_shared<cudf::io::writer_compression_statistics>();
@@ -1814,10 +1824,11 @@ TEST_F(OrcChunkedWriterTest, CompStatsEmptyTable)
   std::vector<char> unused_buffer;
   cudf::io::chunked_orc_writer_options opts =
     cudf::io::chunked_orc_writer_options::builder(cudf::io::sink_info{&unused_buffer})
+      .compression(compression_type)
       .compression_statistics(stats);
   cudf::io::orc_chunked_writer(opts).write(*table_no_rows);
 
-  expect_compression_stats_empty(stats);
+  expect_compression_stats_empty(stats.get());
 }
 
 TEST_F(OrcWriterTest, EmptyRowGroup)
@@ -2048,15 +2059,9 @@ TEST_F(OrcStatisticsTest, Empty)
   EXPECT_EQ(ts6.count[0], 0);
 }
 
-TEST_P(OrcCompressionTest, Basic)
+void round_trip_basic(cudf::io::compression_type compression_type)
 {
-  constexpr auto num_rows     = 12000;
-  auto const compression_type = GetParam();
-
-  if (not cudf::io::is_supported_read_orc(compression_type) or
-      not cudf::io::is_supported_write_orc(compression_type)) {
-    GTEST_SKIP() << "Compression not supported with the current configuration";
-  }
+  constexpr auto num_rows = 12345;
 
   // Generate compressible data
   auto int_sequence =
@@ -2069,10 +2074,13 @@ TEST_P(OrcCompressionTest, Basic)
 
   table_view expected({int_col, float_col});
 
+  auto const stats = std::make_shared<cudf::io::writer_compression_statistics>();
+
   std::vector<char> out_buffer;
   cudf::io::orc_writer_options out_opts =
     cudf::io::orc_writer_options::builder(cudf::io::sink_info{&out_buffer}, expected)
-      .compression(compression_type);
+      .compression(compression_type)
+      .compression_statistics(stats);
   cudf::io::write_orc(out_opts);
 
   cudf::io::orc_reader_options in_opts = cudf::io::orc_reader_options::builder(
@@ -2080,15 +2088,16 @@ TEST_P(OrcCompressionTest, Basic)
   auto result = cudf::io::read_orc(in_opts);
 
   CUDF_TEST_EXPECT_TABLES_EQUAL(expected, result.tbl->view());
+
+  EXPECT_NE(stats->num_compressed_bytes(), 0);
+  EXPECT_EQ(stats->num_failed_bytes(), 0);
+  EXPECT_EQ(stats->num_skipped_bytes(), 0);
+  EXPECT_FALSE(std::isnan(stats->compression_ratio()));
 }
 
-INSTANTIATE_TEST_CASE_P(OrcCompressionTest,
-                        OrcCompressionTest,
-                        ::testing::Values(cudf::io::compression_type::NONE,
-                                          cudf::io::compression_type::AUTO,
-                                          cudf::io::compression_type::SNAPPY,
-                                          cudf::io::compression_type::LZ4));
-                                          //cudf::io::compression_type::ZSTD));
+TEST_P(OrcCompressionTest, RoundTripBasic) { round_trip_basic(std::get<1>(GetParam())); }
+
+TEST_P(OrcDecompressionTest, RoundTripBasic) { round_trip_basic(std::get<1>(GetParam())); }
 
 TEST_F(OrcWriterTest, BounceBufferBug)
 {
@@ -2302,5 +2311,47 @@ TEST_F(OrcWriterTest, MultipleBlocksInStripeFooter)
   auto result = cudf::io::read_orc(in_opts);
   CUDF_TEST_EXPECT_TABLES_EQUAL(expected, result.tbl->view());
 }
+
+INSTANTIATE_TEST_CASE_P(Nvcomp,
+                        OrcCompressionTest,
+                        ::testing::Combine(::testing::Values("NVCOMP"),
+                                           ::testing::Values(cudf::io::compression_type::AUTO,
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::LZ4,
+                                                             cudf::io::compression_type::ZSTD)));
+
+INSTANTIATE_TEST_CASE_P(DeviceInternal,
+                        OrcCompressionTest,
+                        ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
+                                           ::testing::Values(cudf::io::compression_type::AUTO,
+                                                             cudf::io::compression_type::SNAPPY)));
+
+INSTANTIATE_TEST_CASE_P(Host,
+                        OrcCompressionTest,
+                        ::testing::Combine(::testing::Values("HOST"),
+                                           ::testing::Values(cudf::io::compression_type::AUTO,
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
+
+INSTANTIATE_TEST_CASE_P(Nvcomp,
+                        OrcDecompressionTest,
+                        ::testing::Combine(::testing::Values("NVCOMP"),
+                                           ::testing::Values(cudf::io::compression_type::AUTO,
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::LZ4,
+                                                             cudf::io::compression_type::ZSTD)));
+
+INSTANTIATE_TEST_CASE_P(DeviceInternal,
+                        OrcDecompressionTest,
+                        ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
+                                           ::testing::Values(cudf::io::compression_type::AUTO,
+                                                             cudf::io::compression_type::SNAPPY)));
+
+INSTANTIATE_TEST_CASE_P(Host,
+                        OrcDecompressionTest,
+                        ::testing::Combine(::testing::Values("HOST"),
+                                           ::testing::Values(cudf::io::compression_type::AUTO,
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
 
 CUDF_TEST_PROGRAM_MAIN()
