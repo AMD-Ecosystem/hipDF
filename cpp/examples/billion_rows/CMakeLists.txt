@@ -46,13 +46,13 @@ add_library(groupby_results OBJECT groupby_results.cpp)
 target_link_libraries(groupby_results PRIVATE cudf::cudf)
 
 add_executable(brc brc.cpp)
-target_link_libraries(brc PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(brc PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS brc DESTINATION bin/examples/libcudf)
 
 add_executable(brc_chunks brc_chunks.cpp)
-target_link_libraries(brc_chunks PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(brc_chunks PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS brc_chunks DESTINATION bin/examples/libcudf)
 
 add_executable(brc_pipeline brc_pipeline.cpp)
-target_link_libraries(brc_pipeline PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(brc_pipeline PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS brc_pipeline DESTINATION bin/examples/libcudf)

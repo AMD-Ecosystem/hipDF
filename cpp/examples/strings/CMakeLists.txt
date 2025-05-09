@@ -47,25 +47,25 @@ list(APPEND CUDF_CUDA_FLAGS --expt-extended-lambda --expt-relaxed-constexpr)
 
 add_executable(libcudf_apis libcudf_apis.cpp)
 target_compile_features(libcudf_apis PRIVATE cxx_std_17)
-target_link_libraries(libcudf_apis PRIVATE cudf::cudf) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(libcudf_apis PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS libcudf_apis DESTINATION bin/examples/libcudf)
 
 add_executable(custom_with_malloc custom_with_malloc.cu)
 target_compile_features(custom_with_malloc PRIVATE cxx_std_17)
 target_compile_options(custom_with_malloc PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>")
-target_link_libraries(custom_with_malloc PRIVATE cudf::cudf) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(custom_with_malloc PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS custom_with_malloc DESTINATION bin/examples/libcudf)
 
 add_executable(custom_prealloc custom_prealloc.cu)
 target_compile_features(custom_prealloc PRIVATE cxx_std_17)
 target_compile_options(custom_prealloc PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>")
-target_link_libraries(custom_prealloc PRIVATE cudf::cudf) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(custom_prealloc PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS custom_prealloc DESTINATION bin/examples/libcudf)
 
 add_executable(custom_optimized custom_optimized.cu)
 target_compile_features(custom_optimized PRIVATE cxx_std_17)
 target_compile_options(custom_optimized PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>")
-target_link_libraries(custom_optimized PRIVATE cudf::cudf) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+target_link_libraries(custom_optimized PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 install(TARGETS custom_optimized DESTINATION bin/examples/libcudf)
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/names.csv DESTINATION bin/examples/libcudf)
