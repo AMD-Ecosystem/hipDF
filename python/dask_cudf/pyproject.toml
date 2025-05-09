@@ -72,7 +72,7 @@ cudf = "dask_cudf.backends:CudfBackendEntrypoint"
 [project.optional-dependencies]
 test = [
     "dask-hip @ git+https://github.com/rocm/dask-hip@branch-24.06",
-    # "numba-cuda>=0.9.0,!=0.10.0", #TODO(HIP/AMD): numba-hip?
+    # "numba-cuda>=0.10.1,<0.11.0a0", #TODO(HIP/AMD): numba-hip?
     "numba>=0.59.1,<0.62.0a0",
     "pytest-cov",
     "pytest-xdist",
