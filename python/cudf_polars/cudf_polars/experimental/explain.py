@@ -123,5 +123,7 @@ def _(ir: Sort, *, offset: str = "") -> str:
 
 @_repr_ir.register
 def _(ir: Scan, *, offset: str = "") -> str:
-    label = f"SCAN {ir.typ.upper()}"
+    first_path = ir.paths[0]
+    suffix = " ..." if len(ir.paths) > 1 else ""
+    label = f"SCAN {ir.typ.upper()} {first_path}{suffix}"
     return _repr_header(offset, label, ir.schema)
