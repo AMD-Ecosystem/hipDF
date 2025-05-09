@@ -2531,9 +2531,9 @@ TEST_F(ParquetMetadataReaderTest, TestBasic)
     EXPECT_EQ(meta.schema().root().type(), cudf::io::parquet::Type::UNDEFINED);
     ASSERT_EQ(meta.schema().root().num_children(), 2);
 
-  EXPECT_EQ(meta.schema().root().name(), "schema");
-  EXPECT_EQ(meta.schema().root().type(), cudf::io::parquet::Type::UNDEFINED);
-  ASSERT_EQ(meta.schema().root().num_children(), 2);
+    EXPECT_EQ(meta.schema().root().child(0).name(), "int_col");
+    EXPECT_EQ(meta.schema().root().child(1).name(), "float_col");
+  };
 
   // Test with single file
   test_parquet_metadata(1);
