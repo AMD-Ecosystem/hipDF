@@ -324,6 +324,44 @@ def _prepare_array_metadata(
     return data_ptr, nbytes, shape, strides, dtype
 
 
+def _prepare_array_metadata(
+    iface: dict
+) -> tuple[int, int, tuple[int, ...], tuple[int, ...] | None, DataType]:
+    """
+    Parse and validate a CUDA or NumPy array interface dict.
+    """
+    typestr = iface["typestr"]
+    shape = iface["shape"]
+    strides = iface.get("strides")
+    data = iface.get("data")
+
+    if typestr[0] == ">":
+        raise ValueError("Big-endian data is not supported")
+    if not isinstance(data, tuple) or not isinstance(data[0], int):
+        raise ValueError(
+            "Expected a data field with an integer pointer in the array interface. "
+            "Objects with data set to None or a buffer object are not supported."
+        )
+    if not isinstance(shape, tuple) or len(shape) == 0:
+        raise ValueError("shape must be a non-empty tuple")
+    if len(shape) > 2:
+        raise ValueError("Only 1D or 2D arrays are supported")
+    dtype = _datatype_from_dtype_desc(typestr[1:])
+    itemsize = size_of(dtype)
+    if not is_c_contiguous(shape, strides, itemsize):
+        raise ValueError("Data must be C-contiguous")
+    if shape[0] >= numeric_limits[size_type].max():
+        raise ValueError(
+            "Number of rows exceeds size_type limit for offsets column construction."
+        )
+    flat_size = shape[0] if len(shape) == 1 else shape[0] * shape[1]
+    if flat_size > numeric_limits[size_type].max():
+        raise ValueError("Flat size exceeds size_type limit")
+    data_ptr = data[0]
+    nbytes = shape[0] * itemsize if len(shape) == 1 else shape[0] * shape[1] * itemsize
+    return data_ptr, nbytes, shape, strides, dtype
+
+
 cdef class Column:
     """A container of nullable device data as a column of elements.
 
