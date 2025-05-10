@@ -1443,28 +1443,7 @@ TEST_P(ParquetCompressionTest, RoundTripBasic)
   EXPECT_FALSE(std::isnan(stats->compression_ratio()));
 }
 
-INSTANTIATE_TEST_CASE_P(Nvcomp,
-                        ParquetCompressionTest,
-                        ::testing::Combine(::testing::Values("NVCOMP"),
-                                           ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4,
-                                                             cudf::io::compression_type::ZSTD)));
-
-INSTANTIATE_TEST_CASE_P(DeviceInternal,
-                        ParquetCompressionTest,
-                        ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
-                                           ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
-
-INSTANTIATE_TEST_CASE_P(Host,
-                        ParquetCompressionTest,
-                        ::testing::Combine(::testing::Values("HOST"),
-                                           ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::ZSTD)));
-
-TEST_F(ParquetWriterTest, SkipCompression)
+TEST_P(ParquetCompressionTest, SkipCompression)
 {
   constexpr auto page_rows      = 1000;
   constexpr auto row_group_rows = 2 * page_rows;
