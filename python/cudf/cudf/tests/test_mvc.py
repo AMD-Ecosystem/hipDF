@@ -30,7 +30,6 @@ import numba.cuda
 import cudf
 from cudf.utils._numba import _CUDFNumbaConfig, _setup_numba
 
-import cudf
 
 # Skip the entire file if running on the HIP AMD port
 if getattr(cudf, "__is_hip_amd_port__", False):
