@@ -513,6 +513,7 @@
                                 <exec dir="${native.build.path}"
                                       failonerror="true"
                                       executable="cmake">
+                                    <env key="CUDF_CPP_BUILD_DIR" value="${CUDF_CPP_BUILD_DIR}"/>
                                     <arg value="${basedir}/src/main/native"/>
                                     <arg line="${cmake.ccache.opts}"/>
                                     <arg value="-DCUDA_STATIC_RUNTIME=${CUDA_STATIC_RUNTIME}" />
@@ -520,7 +521,6 @@
                                     <arg value="-DUSE_GDS=${USE_GDS}" />
                                     <arg value="-DCMAKE_CXX_FLAGS=${cxx.flags}"/>
                                     <arg value="-DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}"/>
-                                    <arg value="-DCUDF_CPP_BUILD_DIR=${CUDF_CPP_BUILD_DIR}"/>
                                     <arg value="-DCMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES}"/>
                                     <arg value="-DCMAKE_HIP_ARCHITECTURES=${CMAKE_HIP_ARCHITECTURES}"/>
                                     <arg value="-DCUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32}"/>

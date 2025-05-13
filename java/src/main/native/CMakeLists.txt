@@ -78,19 +78,6 @@ message(VERBOSE "CUDF_JNI: Statically link the CUDA runtime: ${CUDA_STATIC_RUNTI
 message(VERBOSE "CUDF_JNI: Build with GPUDirect Storage support: ${USE_GDS}")
 message(VERBOSE "CUDF_JNI: Link with libcudf statically: ${CUDF_JNI_LIBCUDF_STATIC}")
 
-set(CUDF_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../cpp")
-if(NOT DEFINED CUDF_CPP_BUILD_DIR OR CUDF_CPP_BUILD_DIR STREQUAL "")
-  if(DEFINED ENV{CUDF_CPP_BUILD_DIR})
-    set(CUDF_CPP_BUILD_DIR "$ENV{CUDF_CPP_BUILD_DIR}")
-  else()
-    set(CUDF_CPP_BUILD_DIR "${CUDF_SOURCE_DIR}/build")
-  endif()
-endif()
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/"
-                      "${CUDF_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH}
-)
-
 # ##################################################################################################
 # * compiler options ------------------------------------------------------------------------------
 
@@ -110,38 +97,63 @@ if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
   add_compile_definitions(CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__ CUDF_USE_PER_THREAD_DEFAULT_STREAM)
 endif()
 
-# ##################################################################################################
-# * build type ------------------------------------------------------------------------------------
-#   Set a default build type if none was specified
+# Set a default build type if none was specified
 rapids_cmake_build_type("Release")
 
 # ##################################################################################################
 # * CUDF ------------------------------------------------------------------------------------------
-set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
+
+set(CUDF_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../cpp")
+
+# Search for libcudf in CUDF_INSTALL_DIR if it is specified. Otherwise, search in
+# CUDF_CPP_BUILD_DIR.
+if(DEFINED ENV{CUDF_INSTALL_DIR})
+  set(CUDF_INSTALL_DIR
+      "$ENV{CUDF_INSTALL_DIR}"
+      CACHE STRING "path to libcudf install root"
+  )
+  set(CMAKE_PREFIX_PATH ${CUDF_INSTALL_DIR} "${CUDF_INSTALL_DIR}/lib64/cmake")
+  message(STATUS "Using dependencies from libcudf installed path: ${CUDF_INSTALL_DIR}")
+else()
+  if(NOT DEFINED ENV{CUDF_CPP_BUILD_DIR})
+    message(FATAL_ERROR "Either CUDF_INSTALL_DIR or CUDF_CPP_BUILD_DIR must be defined.")
+  endif()
+
+  set(CUDF_CPP_BUILD_DIR
+      "$ENV{CUDF_CPP_BUILD_DIR}"
+      CACHE STRING "path to libcudf build root"
+  )
+  set(cudf_ROOT ${CUDF_CPP_BUILD_DIR})
+  message(STATUS "Using pre-configured libcudf from build path: ${CUDF_CPP_BUILD_DIR}")
+endif()
+
 rapids_find_package(cudf REQUIRED)
 
 # ##################################################################################################
-# * nvtx3-------------------------------------------------------------------------------------------
-include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvtx.cmake)
+# * nvtx3 and nvcomp-------------------------------------------------------------------------------
+#   Reuse any cached package that is already available after configuring/installing libcudf. Only
+#   fetch (and install) from source if the target does not exist to avoid name conflict when the
+#   same target is exported multiple times.
 
-# ##################################################################################################
-# * nvcomp------------------------------------------------------------------------------------------
+# TODO(HIP/AMD): Reenable nvtx equivalent later
+# if(NOT TARGET nvtx3::nvtx3-cpp AND NOT DEFINED ENV{CUDF_INSTALL_DIR})
+#  message(STATUS "Fetch package nvtx3 from source.")
+#  include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvtx.cmake)
+# endif()
+# find_package(nvtx3 REQUIRED)
 
-if(NOT DEFINED hipcomp_DIR)
-  set(hipcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/hipcomp-build")
+if(NOT TARGET hipcomp
+   AND NOT TARGET hipcomp::hipcomp
+   AND NOT DEFINED ENV{CUDF_INSTALL_DIR}
+)
+  include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvcomp.cmake)
 endif()
-rapids_find_package(hipcomp REQUIRED)
-if(TARGET hipcomp AND CUDF_USE_WARPSIZE_32)
-  target_compile_definitions(hipcomp PRIVATE USE_WARPSIZE_32)
-endif()
+find_package(hipcomp REQUIRED)
 
 
 message(STATUS "CUDF CPP BUILD DIR ${CUDF_CPP_BUILD_DIR}")
 # ##################################################################################################
-# * find JNI -------------------------------------------------------------------------------------
-
-set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
-
+# * find JNI --------------------------------------------------------------------------------------
 find_package(JNI REQUIRED)
 if(JNI_FOUND)
   message(STATUS "JDK with JNI in ${JNI_INCLUDE_DIRS}")
@@ -271,7 +283,7 @@ if(USE_GDS)
                POSITION_INDEPENDENT_CODE ON
                INTERFACE_POSITION_INDEPENDENT_CODE ON
   )
-  target_link_libraries(cufilejni PRIVATE cudfjni CUDA::cuFile${_cufile_suffix})
+  target_link_libraries(cufilejni PRIVATE cudfjni CUDA::cuFile${_cufile_suffix} cudf::cudf)
 endif()
 
 # ##################################################################################################
@@ -280,7 +292,7 @@ endif()
 set(CUDF_LINK PUBLIC cudf::cudf)
 if(CUDF_JNI_LIBCUDF_STATIC)
   # Whole-link libcudf.a into the shared library but not its dependencies
-  set(CUDF_LINK PRIVATE -Wl,--whole-archive cudf::cudf -Wl,--no-whole-archive PUBLIC cudf::cudf)
+  set(CUDF_LINK PRIVATE -Wl,--whole-archive cudf::cudf -Wl,--no-whole-archive)
 endif()
 
 # When nvcomp is installed we need to use nvcomp::nvcomp but from the cudf build directory it will
