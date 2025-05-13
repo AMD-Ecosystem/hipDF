@@ -55,7 +55,7 @@ from ._interop_helpers cimport (
 from .utils cimport _get_stream
 
 from .gpumemoryview import _datatype_from_dtype_desc
-from ._interop_helpers import ColumnMetadata
+from ._interop_helpers import ArrowLike, ColumnMetadata
 
 import array
 import functools
