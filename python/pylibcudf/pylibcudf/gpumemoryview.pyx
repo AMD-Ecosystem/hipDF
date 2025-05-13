@@ -6,8 +6,6 @@ import operator
 
 from .types cimport DataType, size_of, type_id
 
-from pylibcudf.libcudf.types cimport size_type
-
 
 __all__ = ["gpumemoryview"]
 
@@ -63,7 +61,7 @@ cdef class gpumemoryview:
         self.ptr = cai["data"][0]
 
         # Compute the buffer size.
-        cdef size_type itemsize = size_of(
+        cdef size_t itemsize = size_of(
             _datatype_from_dtype_desc(
                 cai["typestr"][1:]  # ignore the byteorder (the first char).
             )
