@@ -130,7 +130,7 @@ def test_row_limit_exceed_raises():
         ValueError,
         match="Number of rows exceeds size_type limit",
     ):
-        plc.Column.from_array(cp.zeros((SIZE_TYPE_LIMIT, 1)))
+        plc.Column.from_array(Foo((SIZE_TYPE_LIMIT, 1)))
 
 
 def test_flat_size_exceeds_size_type_limit():
