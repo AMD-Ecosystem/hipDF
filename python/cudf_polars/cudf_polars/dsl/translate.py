@@ -792,8 +792,8 @@ def _(
     assert isinstance(length, expr.Literal)
     return expr.Slice(
         dtype,
-        offset.value,
-        length.value,
+        offset.value.as_py(),
+        length.value.as_py(),
         translator.translate_expr(n=node.input, schema=schema),
     )
 

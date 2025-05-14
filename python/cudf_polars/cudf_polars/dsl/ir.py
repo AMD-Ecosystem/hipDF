@@ -1154,9 +1154,9 @@ class Rolling(IR):
     )
     index: expr.NamedExpr
     """Column being rolled over."""
-    preceding: plc.Scalar
+    preceding: pa.Scalar
     """Preceding window extent defining start of window."""
-    following: plc.Scalar
+    following: pa.Scalar
     """Following window extent defining end of window."""
     closed_window: ClosedInterval
     """Treatment of window endpoints."""
@@ -1171,8 +1171,8 @@ class Rolling(IR):
         self,
         schema: Schema,
         index: expr.NamedExpr,
-        preceding: plc.Scalar,
-        following: plc.Scalar,
+        preceding: pa.Scalar,
+        following: pa.Scalar,
         closed_window: ClosedInterval,
         keys: Sequence[expr.NamedExpr],
         agg_requests: Sequence[expr.NamedExpr],
@@ -1217,15 +1217,14 @@ class Rolling(IR):
     def do_evaluate(
         cls,
         index: expr.NamedExpr,
-        preceding: plc.Scalar,
-        following: plc.Scalar,
+        preceding: pa.Scalar,
+        following: pa.Scalar,
         closed_window: ClosedInterval,
         keys_in: Sequence[expr.NamedExpr],
         aggs: Sequence[expr.NamedExpr],
         zlice: Zlice | None,
         df: DataFrame,
     ) -> DataFrame:
-        """Evaluate and return a dataframe."""
         keys = broadcast(*(k.evaluate(df) for k in keys_in), target_length=df.num_rows)
         orderby = index.evaluate(df)
         # Polars casts integral orderby to int64, but only for calculating window bounds
@@ -1372,7 +1371,7 @@ class GroupBy(IR):
                     child = value.children[0]
                 else:
                     (child,) = value.children
-                col = child.evaluate(df).obj
+                col = child.evaluate(df, context=ExecutionContext.GROUPBY).obj
             else:
                 # Anything else, we pre-evaluate
                 col = value.evaluate(df, context=ExecutionContext.GROUPBY).obj
