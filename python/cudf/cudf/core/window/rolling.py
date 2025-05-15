@@ -16,6 +16,8 @@ from cudf.core._internals import aggregation
 from cudf.core.buffer import acquire_spill_lock
 from cudf.core.column.column import ColumnBase, as_column
 from cudf.core.mixins import GetAttrGetItemMixin, Reducible
+from cudf.core.multiindex import MultiIndex
+from cudf.options import get_option
 from cudf.utils import cudautils
 from cudf.utils.dtypes import SIZE_TYPE_DTYPE
 
@@ -495,7 +497,7 @@ class Rolling(GetAttrGetItemMixin, _RollingBase, Reducible):
                 self.min_periods = min_periods
                 return
 
-            if not isinstance(self.obj.index, cudf.DatetimeIndex):
+            if self.obj.index.dtype.kind != "M":
                 raise ValueError(
                     "window must be an integer for non datetime index"
                 )
