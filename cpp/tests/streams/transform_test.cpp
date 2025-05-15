@@ -68,6 +68,7 @@ void test_udf(char const* udf, Data data_init, cudf::size_type size, bool is_ptx
                   udf,
                   cudf::data_type(cudf::type_to_id<dtype>()),
                   is_ptx,
+                  std::nullopt,
                   cudf::test::get_default_stream());
 }
 
