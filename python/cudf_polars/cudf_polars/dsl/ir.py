@@ -872,7 +872,6 @@ class Sink(IR):
         options: dict[str, Any],
         df: DataFrame,
     ) -> DataFrame:
-        """Write the dataframe to a file."""
         target = plc.io.SinkInfo([path])
 
         if options.get("mkdir", False):
