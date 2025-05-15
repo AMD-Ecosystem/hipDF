@@ -63,4 +63,4 @@ def read_text(
         byte_range=byte_range, strip_delimiters=strip_delimiters
     )
     plc_column = plc.io.text.multibyte_split(datasource, delimiter, options)
-    return cudf.Series.from_pylibcudf(plc_column)
+    return Series.from_pylibcudf(plc_column)
