@@ -1888,6 +1888,7 @@ _original_Index_init = cudf.Index.__init__
 _original_from_pandas = cudf.from_pandas
 _original_DataFrame_from_pandas = cudf.DataFrame.from_pandas
 _original_Series_from_pandas = cudf.Series.from_pandas
+_original_BaseIndex_from_pandas = cudf.BaseIndex.from_pandas
 _original_Index_from_pandas = cudf.Index.from_pandas
 _original_MultiIndex_from_pandas = cudf.MultiIndex.from_pandas
 
@@ -2026,6 +2027,9 @@ def initial_setup():
     )
     cudf.Series.from_pandas = wrap_from_pandas_series(
         _original_Series_from_pandas
+    )
+    cudf.BaseIndex.from_pandas = wrap_from_pandas_index(
+        _original_BaseIndex_from_pandas
     )
     cudf.Index.from_pandas = wrap_from_pandas_index(
         _original_Index_from_pandas

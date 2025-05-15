@@ -219,7 +219,9 @@ class SingleColumnFrame(Frame, NotIterable):
 
     to_list = tolist
 
-    def _to_frame(self, name: Hashable, index: Index | None) -> DataFrame:
+    def _to_frame(
+        self, name: Hashable, index: cudf.Index | None
+    ) -> cudf.DataFrame:
         """Helper function for Series.to_frame, Index.to_frame"""
 
         if name is no_default:

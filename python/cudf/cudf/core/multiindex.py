@@ -569,6 +569,13 @@ class MultiIndex(Index):
             "get_slice_bound is not currently implemented."
         )
 
+    # TODO: Can remove once MultiIndex inherits from Index
+    @property
+    @_performance_tracking
+    def nlevels(self) -> int:
+        """Integer number of levels in this MultiIndex."""
+        return len(self._data)
+
     @property  # type: ignore
     @_performance_tracking
     def levels(self) -> list[cudf.Index]:
@@ -1955,11 +1962,13 @@ class MultiIndex(Index):
             dtype=SIZE_TYPE_DTYPE,
         )
         if not len(self):
-            return self._return_get_indexer_result(result.values)
+            # TODO: Replace cudf.Index with self once MultiIndex inherits from Index
+            return cudf.Index._return_get_indexer_result(result.values)
         try:
             target = cudf.MultiIndex.from_tuples(target)
         except TypeError:
-            return self._return_get_indexer_result(result.values)
+            # Replace cudf.Index with self once MultiIndex inherits from Index
+            return cudf.Index._return_get_indexer_result(result.values)
 
         join_keys = [
             _match_join_keys(lcol, rcol, "inner")
@@ -1998,7 +2007,8 @@ class MultiIndex(Index):
                 "{['ffill'/'pad', 'bfill'/'backfill', None]}"
             )
 
-        return self._return_get_indexer_result(result_series.to_cupy())
+        # Replace cudf.Index with self once MultiIndex inherits from Index
+        return cudf.Index._return_get_indexer_result(result_series.to_cupy())
 
     @_performance_tracking
     def get_loc(self, key):

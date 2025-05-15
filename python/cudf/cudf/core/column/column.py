@@ -2684,7 +2684,7 @@ def as_column(
         # Ignoring nan_as_null per the docstring
         if isinstance(arbitrary, cudf.Series):
             arbitrary = arbitrary._column
-        elif isinstance(arbitrary, cudf.Index):
+        elif isinstance(arbitrary, cudf.BaseIndex):
             arbitrary = arbitrary._column
         if dtype is not None:
             return arbitrary.astype(dtype)

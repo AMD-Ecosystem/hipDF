@@ -309,7 +309,7 @@ class Frame(BinaryOperand, Scannable, Serializable):
 
     @property
     @_performance_tracking
-    def empty(self) -> bool:
+    def empty(self):
         """
         Indicator whether DataFrame or Series is empty.
 
