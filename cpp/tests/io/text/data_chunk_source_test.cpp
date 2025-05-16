@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, NVIDIA CORPORATION.
+ * Copyright (c) 2021-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "../compression_common.hpp"
 
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/testing_main.hpp>
@@ -240,8 +241,9 @@ void write_bgzip(std::ostream& output_stream,
     cudf::io::text::detail::bgzip::write_uncompressed_block(output_stream, {});
   }
 }
+using DataChunkDecompressionTest = DecompressionTest<DataChunkSourceTest>;
 
-TEST_F(DataChunkSourceTest, BgzipSource)
+TEST_P(DataChunkDecompressionTest, BgzipSource)
 {
   auto const filename = temp_env->get_temp_filepath("bgzip_source");
   std::string input{"bananarama"};
@@ -406,5 +408,10 @@ TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsetsSingleCompressedGZipBlock)
 
   test_source(input, *source);
 }
+
+INSTANTIATE_TEST_CASE_P(Nvcomp,
+                        DataChunkDecompressionTest,
+                        ::testing::Combine(::testing::Values("NVCOMP", "DEVICE_INTERNAL", "HOST"),
+                                           ::testing::Values(cudf::io::compression_type::ZLIB)));
 
 CUDF_TEST_PROGRAM_MAIN()
