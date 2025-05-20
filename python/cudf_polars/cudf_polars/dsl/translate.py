@@ -755,8 +755,7 @@ def _(
         # TODO: Find an alternative to pa.infer_type
         data = pa.array(node.value, type=pa.infer_type(node.value))
         return expr.LiteralColumn(dtype, data)
-    value = pa.scalar(node.value, type=plc.interop.to_arrow(dtype))
-    return expr.Literal(dtype, value)
+    return expr.Literal(dtype, node.value)
 
 
 @_translate_expr.register
@@ -792,8 +791,8 @@ def _(
     assert isinstance(length, expr.Literal)
     return expr.Slice(
         dtype,
-        offset.value.as_py(),
-        length.value.as_py(),
+        offset.value,
+        length.value,
         translator.translate_expr(n=node.input, schema=schema),
     )
 

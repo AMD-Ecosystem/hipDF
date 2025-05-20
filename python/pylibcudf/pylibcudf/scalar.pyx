@@ -45,18 +45,6 @@ from pylibcudf.libcudf.wrappers.timestamps cimport (
     timestamp_ns,
     timestamp_D,
 )
-from pylibcudf.libcudf.wrappers.timestamps cimport (
-    timestamp_s,
-    timestamp_ms,
-    timestamp_us,
-    timestamp_ns,
-)
-from pylibcudf.libcudf.wrappers.timestamps cimport (
-    timestamp_s,
-    timestamp_ms,
-    timestamp_us,
-    timestamp_ns,
-)
 
 from rmm.pylibrmm.memory_resource cimport get_current_device_resource
 
@@ -462,23 +450,28 @@ def _(py_val: datetime.timedelta, dtype: DataType | None):
     return _new_scalar(move(c_obj), dtype)
 
 
-@_from_py.register(datetime.datetime)
-def _(py_val: datetime.datetime, dtype: DataType | None):
+@_from_py.register(datetime.date)
+def _(py_val: datetime.date, dtype: DataType | None):
     cdef unique_ptr[scalar] c_obj
     cdef duration_us c_duration_us
     cdef duration_ns c_duration_ns
     cdef duration_ms c_duration_ms
     cdef duration_s c_duration_s
+    cdef duration_D c_duration_D
     cdef timestamp_s c_timestamp_s
     cdef timestamp_ms c_timestamp_ms
     cdef timestamp_us c_timestamp_us
     cdef timestamp_ns c_timestamp_ns
+    cdef timestamp_D c_timestamp_D
     if dtype is None:
         dtype = DataType(type_id.TIMESTAMP_MICROSECONDS)
 
     cdef DataType c_dtype = dtype
     cdef type_id tid = c_dtype.id()
-    epoch_seconds = py_val.timestamp()
+    if isinstance(py_val, datetime.datetime):
+        epoch_seconds = py_val.timestamp()
+    else:
+        epoch_seconds = (py_val - datetime.date(1970, 1, 1)).total_seconds()
     if tid == type_id.TIMESTAMP_NANOSECONDS:
         epoch_nanoseconds = int(epoch_seconds * 1_000_000_000)
         if epoch_nanoseconds > numeric_limits[int64_t].max():
@@ -519,6 +512,16 @@ def _(py_val: datetime.datetime, dtype: DataType | None):
         c_duration_s = duration_s(<int64_t>epoch_seconds)
         c_timestamp_s = timestamp_s(c_duration_s)
         (<timestamp_scalar[timestamp_s]*>c_obj.get()).set_value(c_timestamp_s)
+    elif tid == type_id.TIMESTAMP_DAYS:
+        epoch_days = int(epoch_seconds // 86400)
+        if epoch_days > numeric_limits[int32_t].max():
+            raise OverflowError(
+                f"{epoch_days} days out of range for INT32 limit."
+            )
+        c_obj = make_timestamp_scalar(c_dtype.c_obj)
+        c_duration_D = duration_D(<int32_t>epoch_days)
+        c_timestamp_D = timestamp_D(c_duration_D)
+        (<timestamp_scalar[timestamp_D]*>c_obj.get()).set_value(c_timestamp_D)
     else:
         typ = c_dtype.id()
         raise TypeError(f"Cannot convert datetime to Scalar with dtype {typ.name}")
