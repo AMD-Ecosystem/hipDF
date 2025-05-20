@@ -28,9 +28,19 @@ import numpy as np
 
 import polars as pl
 
-from cudf_polars.dsl.translate import Translator
-from cudf_polars.experimental.explain import explain_query
-from cudf_polars.experimental.parallel import evaluate_streaming
+try:
+    import pynvml
+except ImportError:
+    pynvml = None
+
+try:
+    from cudf_polars.dsl.translate import Translator
+    from cudf_polars.experimental.explain import explain_query
+    from cudf_polars.experimental.parallel import evaluate_streaming
+
+    CUDF_POLARS_AVAILABLE = True
+except ImportError:
+    CUDF_POLARS_AVAILABLE = False
 
 if TYPE_CHECKING:
     import pathlib
@@ -1202,7 +1212,7 @@ def run(args: argparse.Namespace) -> None:
             if args.explain_logical:
                 print(f"\nQuery {q_id} - Logical plan\n")
                 print(q.explain())
-        else:
+        elif CUDF_POLARS_AVAILABLE:
             assert isinstance(engine, pl.GPUEngine)
             if args.explain_logical:
                 print(f"\nQuery {q_id} - Logical plan\n")
@@ -1210,6 +1220,10 @@ def run(args: argparse.Namespace) -> None:
             elif args.explain:
                 print(f"\nQuery {q_id} - Physical plan\n")
                 print(explain_query(q, engine))
+        else:
+            raise RuntimeError(
+                "Cannot provide the logical or physical plan because cudf_polars is not installed."
+            )
 
         records[q_id] = []
 
@@ -1218,7 +1232,7 @@ def run(args: argparse.Namespace) -> None:
 
             if run_config.executor == "cpu":
                 result = q.collect(new_streaming=True)
-            else:
+            elif CUDF_POLARS_AVAILABLE:
                 assert isinstance(engine, pl.GPUEngine)
                 if args.debug:
                     translator = Translator(q._ldf.visit(), engine)
