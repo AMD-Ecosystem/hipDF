@@ -33,14 +33,17 @@ from cudf.core.index import (
     ensure_index,
 )
 from cudf.core.join._join_helpers import _match_join_keys
-from cudf.core.mixins import NotIterable
 from cudf.utils.dtypes import (
     CUDF_STRING_DTYPE,
     SIZE_TYPE_DTYPE,
     is_column_like,
 )
 from cudf.utils.performance_tracking import _performance_tracking
-from cudf.utils.utils import _external_only_api, _is_same_name
+from cudf.utils.utils import (
+    _external_only_api,
+    _is_same_name,
+    _warn_no_dask_cudf,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Hashable, MutableMapping
@@ -70,7 +73,7 @@ def _maybe_indices_to_slice(indices: cp.ndarray) -> slice | cp.ndarray:
     return indices
 
 
-class MultiIndex(Frame, BaseIndex, NotIterable):  # type: ignore[misc]
+class MultiIndex(Index):
     """A multi-level or hierarchical index.
 
     Provides N-Dimensional indexing into Series and DataFrame objects.
@@ -568,13 +571,6 @@ class MultiIndex(Frame, BaseIndex, NotIterable):  # type: ignore[misc]
         raise NotImplementedError(
             "get_slice_bound is not currently implemented."
         )
-
-    # TODO: Can remove once MultiIndex inherits from Index
-    @property
-    @_performance_tracking
-    def nlevels(self) -> int:
-        """Integer number of levels in this MultiIndex."""
-        return len(self._data)
 
     @property  # type: ignore
     @_performance_tracking
@@ -1962,13 +1958,11 @@ class MultiIndex(Frame, BaseIndex, NotIterable):  # type: ignore[misc]
             dtype=SIZE_TYPE_DTYPE,
         )
         if not len(self):
-            # TODO: Replace cudf.Index with self once MultiIndex inherits from Index
-            return cudf.Index._return_get_indexer_result(result.values)
+            return self._return_get_indexer_result(result.values)
         try:
             target = cudf.MultiIndex.from_tuples(target)
         except TypeError:
-            # Replace cudf.Index with self once MultiIndex inherits from Index
-            return cudf.Index._return_get_indexer_result(result.values)
+            return self._return_get_indexer_result(result.values)
 
         join_keys = [
             _match_join_keys(lcol, rcol, "inner")
@@ -2007,8 +2001,7 @@ class MultiIndex(Frame, BaseIndex, NotIterable):  # type: ignore[misc]
                 "{['ffill'/'pad', 'bfill'/'backfill', None]}"
             )
 
-        # Replace cudf.Index with self once MultiIndex inherits from Index
-        return cudf.Index._return_get_indexer_result(result_series.to_cupy())
+        return self._return_get_indexer_result(result_series.to_cupy())
 
     @_performance_tracking
     def get_loc(self, key):
