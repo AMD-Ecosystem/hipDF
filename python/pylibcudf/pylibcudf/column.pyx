@@ -60,6 +60,7 @@ from ._interop_helpers import ArrowLike, ColumnMetadata
 import array
 import functools
 import operator
+from typing import Iterable
 
 __all__ = ["Column", "ListColumnView", "is_c_contiguous"]
 
@@ -126,6 +127,97 @@ cdef class OwnerMaskWithCAI:
     @property
     def __cuda_array_interface__(self):
         return self.cai
+
+
+def _infer_list_depth_and_dtype(obj: list) -> tuple[int, type]:
+    """Infer the nesting depth and final scalar type."""
+    depth = 0
+    current = obj
+
+    while isinstance(current, list) and current:
+        current = current[0]
+        depth += 1
+
+    if not current and depth == 0:
+        raise ValueError("Cannot infer dtype from empty input")
+
+    if not isinstance(current, (int, float, bool)):
+        raise TypeError(f"Unsupported scalar type: {type(current).__name__}")
+
+    return depth, type(current)
+
+
+def _flatten_nested_list(obj: list, depth: int) -> tuple[list, tuple[int, ...]]:
+    """Flatten a nested list and compute the shape"""
+    shape = _infer_shape(obj, depth)
+
+    flat = [None] * functools.reduce(operator.mul, shape)
+    _flatten(obj, flat, 0)
+    return flat, shape
+
+
+def _infer_shape(obj: list, depth: int) -> tuple[int, ...]:
+    shape = []
+    current = obj
+
+    for i in range(depth):
+        if not current:
+            raise ValueError("Cannot infer shape from empty list")
+
+        shape.append(len(current))
+
+        if i < depth - 1:
+            first = current[0]
+            if not all(
+                isinstance(sub, list) and len(sub) == len(first) for sub in current
+            ):
+                raise ValueError("Inconsistent inner list shapes")
+            current = first
+
+    return tuple(shape)
+
+
+def _flatten(obj: list, out: list, offset: int) -> int:
+    if not isinstance(obj[0], list):
+        out[offset:offset + len(obj)] = obj
+        return offset + len(obj)
+    for sub in obj:
+        offset = _flatten(sub, out, offset)
+    return offset
+
+
+def _python_typecode_from_dtype(dtype: DataType) -> str:
+    """The Python type string."""
+    return {
+        type_id.INT8: 'b',
+        type_id.INT16: 'h',
+        type_id.INT32: 'i',
+        type_id.INT64: 'q',
+        type_id.UINT8: 'B',
+        type_id.UINT16: 'H',
+        type_id.UINT32: 'I',
+        type_id.UINT64: 'Q',
+        type_id.FLOAT32: 'f',
+        type_id.FLOAT64: 'd',
+        type_id.BOOL8: 'b'
+    }[dtype.id()]
+
+
+def _typestr_from_dtype(dtype: DataType) -> str:
+    """The array interface type string."""
+    return {
+        type_id.INT8: "|i1",
+        type_id.INT16: "<i2",
+        type_id.INT32: "<i4",
+        type_id.INT64: "<i8",
+        type_id.UINT8: "|u1",
+        type_id.UINT16: "<u2",
+        type_id.UINT32: "<u4",
+        type_id.UINT64: "<u8",
+        type_id.FLOAT32: "<f4",
+        type_id.FLOAT64: "<f8",
+        type_id.BOOL8: "|b1",
+    }[dtype.id()]
 
 
 def _prepare_array_metadata(
