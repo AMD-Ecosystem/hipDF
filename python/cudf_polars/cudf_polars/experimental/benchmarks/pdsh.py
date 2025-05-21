@@ -1092,6 +1092,12 @@ parser.add_argument(
     help="RMM pool size (fractional).",
 )
 parser.add_argument(
+    "--rmm-async",
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help="Use RMM async memory resource.",
+)
+parser.add_argument(
     "--rapidsmpf-spill",
     action=argparse.BooleanOptionalAction,
     default=False,
