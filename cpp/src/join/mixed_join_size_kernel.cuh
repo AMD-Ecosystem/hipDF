@@ -35,6 +35,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#pragma once
+
 #include "join_common_utils.cuh"
 #include "join_common_utils.hpp"
 #include "mixed_join_common_utils.cuh"
