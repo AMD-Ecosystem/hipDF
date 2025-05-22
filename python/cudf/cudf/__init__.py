@@ -53,7 +53,6 @@ del validate_setup
 import cupy
 from numba import cuda
 
-import rmm
 from rmm.allocators.cupy import rmm_cupy_allocator
 from rmm.allocators.numba import RMMNumbaManager
 
@@ -98,7 +97,6 @@ from cudf.core.reshape import (
     pivot_table,
     unstack,
 )
-from cudf.core.scalar import Scalar
 from cudf.core.series import Series, isclose
 from cudf.core.tools.datetimes import DateOffset, date_range, to_datetime
 from cudf.core.tools.numeric import to_numeric
@@ -128,7 +126,6 @@ del cupy
 del rmm_cupy_allocator
 del RMMNumbaManager
 
-rmm.register_reinitialize_hook(lambda: Scalar._clear_instance_cache())
 
 from cuda import cuda as _cuda_python_cuda
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
@@ -155,7 +152,6 @@ __all__ = [
     "NaT",
     "NamedAgg",
     "RangeIndex",
-    "Scalar",
     "Series",
     "StructDtype",
     "TimedeltaIndex",
