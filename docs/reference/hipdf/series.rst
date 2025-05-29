@@ -417,7 +417,6 @@ String handling
    minhash
    ngrams
    ngrams_tokenize
-   normalize_characters
    normalize_spaces
    pad
    partition
