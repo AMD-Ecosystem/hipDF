@@ -85,12 +85,12 @@ macro(set_cudf_target_properties)
     PROPERTIES BUILD_RPATH "\$ORIGIN"
               INSTALL_RPATH "\$ORIGIN"
               # set target compile options
-              CXX_STANDARD 17
+              CXX_STANDARD 20
               CXX_STANDARD_REQUIRED ON
               # For std:: support of __int128_t. Can be removed once using cuda::std
               CXX_EXTENSIONS ON
               CXX_VISIBILITY_PRESET hidden
-              CUDA_STANDARD 17
+              CUDA_STANDARD 20
               CUDA_STANDARD_REQUIRED ON
               CUDA_VISIBILITY_PRESET hidden
               POSITION_INDEPENDENT_CODE ON
@@ -178,9 +178,9 @@ macro(set_cudftest_default_stream_target)
     PROPERTIES BUILD_RPATH "\$ORIGIN"
                INSTALL_RPATH "\$ORIGIN"
                # set target compile options
-               CXX_STANDARD 17
+               CXX_STANDARD 20
                CXX_STANDARD_REQUIRED ON
-               CUDA_STANDARD 17
+               CUDA_STANDARD 20
                CUDA_STANDARD_REQUIRED ON
                POSITION_INDEPENDENT_CODE ON
                INTERFACE_POSITION_INDEPENDENT_CODE ON
@@ -193,9 +193,9 @@ macro(set_cudftestutil_target)
     PROPERTIES BUILD_RPATH "\$ORIGIN"
                INSTALL_RPATH "\$ORIGIN"
                # set target compile options
-               CXX_STANDARD 17
+               CXX_STANDARD 20
                CXX_STANDARD_REQUIRED ON
-               CUDA_STANDARD 17
+               CUDA_STANDARD 20
                CUDA_STANDARD_REQUIRED ON
                POSITION_INDEPENDENT_CODE ON
                INTERFACE_POSITION_INDEPENDENT_CODE ON
