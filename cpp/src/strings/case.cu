@@ -57,7 +57,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <hipcub/hipcub.hpp>
+#include <hip/hip_cooperative_groups.h>
+//#include <hip/hip_cooperative_groups/reduce.h>
 #include <cuda/atomic>
 #include <cuda/functional>
 #include <thrust/binary_search.h>
@@ -307,18 +308,13 @@ CUDF_KERNEL void count_bytes_kernel(convert_char_fn converter,
                                     column_device_view d_strings,
                                     size_type* d_sizes)
 {
-  auto idx = cudf::detail::grid_1d::global_thread_id();
-  if (idx >= (d_strings.size() * cudf::detail::warp_size)) { return; }
+  namespace cg        = cooperative_groups;
+  auto const warp     = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
+  auto const lane_idx = warp.thread_rank();
 
-  auto const str_idx  = idx / cudf::detail::warp_size;
-  auto const lane_idx = idx % cudf::detail::warp_size;
+  auto const str_idx = warp.meta_group_rank();
+  if (str_idx >= d_strings.size() or d_strings.is_null(str_idx)) { return; }
 
-  // initialize the output for the atomicAdd
-  if (lane_idx == 0) { d_sizes[str_idx] = 0; }
-  //TODO(HIP/AMD): double check that this is not necessary
-  __syncwarp();
-
-  if (d_strings.is_null(str_idx)) { return; }
   auto const d_str   = d_strings.element<string_view>(str_idx);
   auto const str_ptr = d_str.data();
 
@@ -334,11 +330,9 @@ CUDF_KERNEL void count_bytes_kernel(convert_char_fn converter,
       size += converter.process_character(u8);
     }
   }
-  // this is slightly faster than using the cub::warp_reduce
-  if (size > 0) {
-    cuda::atomic_ref<size_type, cuda::thread_scope_block> ref{*(d_sizes + str_idx)};
-    ref.fetch_add(size, cuda::std::memory_order_relaxed);
-  }
+
+  auto out_size = cg::reduce(warp, size, cg::plus<size_type>());
+  if (lane_idx == 0) { d_sizes[str_idx] = out_size; }
 }
 
 /**
