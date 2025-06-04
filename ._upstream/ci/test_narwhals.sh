@@ -84,6 +84,12 @@ test_to_arrow_with_nulls or \
 test_pandas_object_series \
 "
 
+# test_dtypes: With cudf.pandas loaded, to_pandas() preserves Arrow dtypes like list and struct, so pandas
+# columns aren't object anymore. The test expects object, causing a mismatch.
+TESTS_THAT_NEED_NARWHALS_FIX_FOR_CUDF_PANDAS=" \
+test_dtypes \
+"
+
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 NARWHALS_DEFAULT_CONSTRUCTORS=pandas python -m pytest \
     -p cudf.pandas \
     --cache-clear \
