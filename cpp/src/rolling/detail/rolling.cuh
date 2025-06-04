@@ -147,12 +147,17 @@ struct DeviceRolling {
     }
 
     bool output_is_valid = (count >= min_periods);
-    // NOTE(HIP/AMD): we change count to 1 in case no valid values were found to
-    // avoid UB when calculating the mean with a count of 0 (division by zero)
-    count = std::max(count,1);
-    // store the output value, one per thread
-    cudf::detail::rolling_store_output_functor<OutputType, op == aggregation::MEAN>{}(
-      output.element<OutputType>(current_index), val, count);
+
+    if (output_is_valid) {
+      // store the output value, one per thread, but only if the
+      // output is valid. min_periods is required to be >= 1, and so
+      // here, count must be nonzero. We need to avoid storing if
+      // count is zero since this could cause UB in some aggregations,
+      // which may cause the compiler to deduce nonsense about the loop
+      // that increments count.
+      cudf::detail::rolling_store_output_functor<OutputType, op == aggregation::MEAN>{}(
+        output.element<OutputType>(current_index), val, count);
+    }
 
     return output_is_valid;
   }
