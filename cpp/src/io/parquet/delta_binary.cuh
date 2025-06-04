@@ -285,21 +285,21 @@ struct delta_binary_decoder {
         // negative indexes
         d_start += (batch_len * mb_bits) / 8;
 
-        // unpack deltas. modified from version in gpuDecodeDictionaryIndices(), but
-        // that one only unpacks up to bitwidths of 24. simplified some since this
-        // will always do batches of warp_size.
-        // NOTE: because this needs to handle up to 64 bits, the branching used in the other
-        // implementation has been replaced with a loop. While this uses more registers, the
-        // looping version is just as fast and easier to read. Might need to revisit this when
-        // DELTA_BYTE_ARRAY is implemented.
-        zigzag128_t delta = 0;
-        if (lane_id + current_value_idx < value_count) {
-          int32_t ofs      = (lane_id - batch_len) * mb_bits;
-          uint8_t const* p = d_start + (ofs >> 3);
-          ofs &= 7;
-          if (p < block_end) {
-            uint32_t c = 8 - ofs;  // 0 - 7 bits
-            delta      = (*p++) >> ofs;
+      // unpack deltas. modified from version in decode_dictionary_indices(), but
+      // that one only unpacks up to bitwidths of 24. simplified some since this
+      // will always do batches of 32.
+      // NOTE: because this needs to handle up to 64 bits, the branching used in the other
+      // implementation has been replaced with a loop. While this uses more registers, the
+      // looping version is just as fast and easier to read. Might need to revisit this when
+      // DELTA_BYTE_ARRAY is implemented.
+      zigzag128_t delta = 0;
+      if (lane_id + current_value_idx < value_count) {
+        int32_t ofs      = (lane_id - batch_len) * mb_bits;
+        uint8_t const* p = d_start + (ofs >> 3);
+        ofs &= 7;
+        if (p < block_end) {
+          uint32_t c = 8 - ofs;  // 0 - 7 bits
+          delta      = (*p++) >> ofs;
 
             while (c < mb_bits && p < block_end) {
               delta |= static_cast<zigzag128_t>(*p++) << c;

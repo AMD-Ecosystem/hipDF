@@ -82,7 +82,6 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                                 cudf::device_span<bool const> page_mask,
                                 kernel_error::pointer error_code)
 {
-  using cudf::detail::warp_size;
   //__shared__ __align__(16) page_state_s state_g;
   extern __shared__ __align__(16) page_state_s state_g[];
   __shared__ __align__(16)

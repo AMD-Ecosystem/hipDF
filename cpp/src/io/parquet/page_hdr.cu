@@ -585,7 +585,7 @@ CUDF_KERNEL void __launch_bounds__(build_string_dict_index_block_size)
 {
   auto constexpr num_warps_per_block = build_string_dict_index_block_size / cudf::detail::warp_size;
   //__shared__ ColumnChunkDesc chunk_g[num_warps_per_block];
-  extern __shared__ ColumnChunkDesc chunk_g[]
+  extern __shared__ ColumnChunkDesc chunk_g[];
 
   auto const block  = cg::this_thread_block();
   auto const warp   = cg::tiled_partition<cudf::detail::warp_size>(block);
@@ -666,8 +666,7 @@ void build_string_dictionary_index(ColumnChunkDesc* chunks,
   dim3 dim_block(build_string_dict_index_block_size, 1);
   dim3 dim_grid(num_blocks, 1);
 
-  build_string_dictionary_index_kernel<<<dim_grid, dim_block, sizeof(ColumnChunkDesc) * num_warps_per_block, stream.value()>>>(chunks,
-                                                                                   num_chunks);
+  build_string_dictionary_index_kernel<<<dim_grid, dim_block, sizeof(ColumnChunkDesc) * num_warps_per_block, stream.value()>>>(chunks, num_chunks);
 }
 
 }  // namespace cudf::io::parquet::detail

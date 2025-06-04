@@ -97,7 +97,6 @@ __device__ size_type delta_length_page_string_size(page_state_s* s, cg::thread_b
  */
 __device__ size_type delta_page_string_size(page_state_s* s, cg::thread_block const& block)
 {
-  using cudf::detail::warp_size;
   using WarpReduce = hipcub::WarpReduce<uleb128_t>;
   __shared__ typename WarpReduce::TempStorage temp_storage[2];
 
