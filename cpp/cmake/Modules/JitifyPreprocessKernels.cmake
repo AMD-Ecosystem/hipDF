@@ -72,7 +72,7 @@ function(jit_preprocess_files)
       COMMAND
         "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR}
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
-        ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
+        ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -std=c++20
         -D_FILE_OFFSET_BITS=64 # NOTE(HIP/AMD): -remove-unused-globals?
         -D__HIPCC_RTC__ -DCUDF_RUNTIME_JIT  ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS}  -I${CUDF_SOURCE_DIR}/include -I${CUDF_SOURCE_DIR}/src ${includes}
         -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
