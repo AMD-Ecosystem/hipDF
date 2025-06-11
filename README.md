@@ -105,8 +105,7 @@ print(tips_df.groupby("size").tip_percentage.mean())
 
 <!-- ### CUDA/GPU requirements
 
-* CUDA 11.2+
-* NVIDIA driver 450.80.02+
+* CUDA 12.0+ with a compatible NVIDIA driver
 * Volta architecture or better (Compute Capability >=7.0)
 
 ### Pip
@@ -114,14 +113,6 @@ print(tips_df.groupby("size").tip_percentage.mean())
 cuDF can be installed via `pip` from the NVIDIA Python Package Index.
 Be sure to select the appropriate cuDF package depending
 on the major version of CUDA available in your environment:
-
-For CUDA 11.x:
-
-```bash
-pip install --extra-index-url=https://pypi.nvidia.com cudf-cu11
-```
-
-For CUDA 12.x:
 
 ```bash
 pip install cudf-cu12
@@ -136,8 +127,7 @@ hipDF can be installed with conda (via [miniconda](https://conda.io/miniconda.ht
 
 ```bash
 # NOTE: Conda installation not supported for hipDF for AMD GPUs.
-conda install -c rapidsai -c conda-forge -c nvidia \
-    cudf=25.06 python=3.13 cuda-version=12.8
+conda install -c rapidsai -c conda-forge cudf=25.08
 ```
 
 We also provide [nightly Conda packages](https://anaconda.org/rapidsai-nightly) built from the HEAD
