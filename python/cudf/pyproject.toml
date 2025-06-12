@@ -43,7 +43,7 @@ requires-python = ">=3.10"
 dependencies = [
     "cachetools",
     #: "cubinlinker",
-    #: "cuda-python>=11.8.5,<12.0a0",
+    #: "cuda-python>=12.6.2,<13.0a0",
     "hip-python>=7.0",
     "hip-python-as-cuda>=7.0",
     "amd-cupy==13.*,>=13.0.0a0",
@@ -57,10 +57,9 @@ dependencies = [
     # "nvtx>=0.2.1", # FIXME(HIP/AMD): rocTX bindings?
     "packaging",
     "pandas>=2.0,<2.2.4dev0",
-    # "ptxcompiler",
     "pyarrow>=14.0.0,<20.0.0a0,!=17.0.0; platform_machine=='aarch64'",
-    "pyarrow>=14.0.0,<20.0.0a0; platform_machine=='x86_64'",
     "amd-pylibhipdf==2.*,>=2.0.0a0",
+    # "pynvjitlink>=0.0.0a0",
     "rich",
     "amd-hipmm==3.*,>=3.0.0a0",
     "typing_extensions>=4.0.0",
