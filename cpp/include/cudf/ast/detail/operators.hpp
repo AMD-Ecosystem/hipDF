@@ -296,32 +296,26 @@ template <>
 struct operator_functor<ast_operator::MOD, false> {
   static constexpr auto arity{2};
 
-  template <typename LHS,
-            typename RHS,
-            typename CommonType                               = std::common_type_t<LHS, RHS>,
-            std::enable_if_t<std::is_integral_v<CommonType>>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS lhs, RHS rhs)
+  template <typename LHS, typename RHS, typename CommonType = std::common_type_t<LHS, RHS>>
+  __device__ inline auto operator()(LHS lhs, RHS rhs)
     -> decltype(static_cast<CommonType>(lhs) % static_cast<CommonType>(rhs))
+    requires(std::is_integral_v<CommonType>)
   {
     return static_cast<CommonType>(lhs) % static_cast<CommonType>(rhs);
   }
 
-  template <typename LHS,
-            typename RHS,
-            typename CommonType                                  = std::common_type_t<LHS, RHS>,
-            std::enable_if_t<std::is_same_v<CommonType, float>>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS lhs, RHS rhs)
+  template <typename LHS, typename RHS, typename CommonType = std::common_type_t<LHS, RHS>>
+  __device__ inline auto operator()(LHS lhs, RHS rhs)
     -> decltype(fmodf(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs)))
+    requires(std::is_same_v<CommonType, float>)
   {
     return fmodf(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs));
   }
 
-  template <typename LHS,
-            typename RHS,
-            typename CommonType                                   = std::common_type_t<LHS, RHS>,
-            std::enable_if_t<std::is_same_v<CommonType, double>>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS lhs, RHS rhs)
+  template <typename LHS, typename RHS, typename CommonType = std::common_type_t<LHS, RHS>>
+  __device__ inline auto operator()(LHS lhs, RHS rhs)
     -> decltype(fmod(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs)))
+    requires(std::is_same_v<CommonType, double>)
   {
     return fmod(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs));
   }
@@ -331,42 +325,36 @@ template <>
 struct operator_functor<ast_operator::PYMOD, false> {
   static constexpr auto arity{2};
 
-  template <typename LHS,
-            typename RHS,
-            typename CommonType                               = std::common_type_t<LHS, RHS>,
-            std::enable_if_t<std::is_integral_v<CommonType>>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS lhs, RHS rhs)
+  template <typename LHS, typename RHS, typename CommonType = std::common_type_t<LHS, RHS>>
+  __device__ inline auto operator()(LHS lhs, RHS rhs)
     -> decltype(((static_cast<CommonType>(lhs) % static_cast<CommonType>(rhs)) +
                  static_cast<CommonType>(rhs)) %
                 static_cast<CommonType>(rhs))
+    requires(std::is_integral_v<CommonType>)
   {
     return ((static_cast<CommonType>(lhs) % static_cast<CommonType>(rhs)) +
             static_cast<CommonType>(rhs)) %
            static_cast<CommonType>(rhs);
   }
 
-  template <typename LHS,
-            typename RHS,
-            typename CommonType                                  = std::common_type_t<LHS, RHS>,
-            std::enable_if_t<std::is_same_v<CommonType, float>>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS lhs, RHS rhs)
+  template <typename LHS, typename RHS, typename CommonType = std::common_type_t<LHS, RHS>>
+  __device__ inline auto operator()(LHS lhs, RHS rhs)
     -> decltype(fmodf(fmodf(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs)) +
                         static_cast<CommonType>(rhs),
                       static_cast<CommonType>(rhs)))
+    requires(std::is_same_v<CommonType, float>)
   {
     return fmodf(fmodf(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs)) +
                    static_cast<CommonType>(rhs),
                  static_cast<CommonType>(rhs));
   }
 
-  template <typename LHS,
-            typename RHS,
-            typename CommonType                                   = std::common_type_t<LHS, RHS>,
-            std::enable_if_t<std::is_same_v<CommonType, double>>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS lhs, RHS rhs)
+  template <typename LHS, typename RHS, typename CommonType = std::common_type_t<LHS, RHS>>
+  __device__ inline auto operator()(LHS lhs, RHS rhs)
     -> decltype(fmod(fmod(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs)) +
                        static_cast<CommonType>(rhs),
                      static_cast<CommonType>(rhs)))
+    requires(std::is_same_v<CommonType, double>)
   {
     return fmod(fmod(static_cast<CommonType>(lhs), static_cast<CommonType>(rhs)) +
                   static_cast<CommonType>(rhs),
@@ -547,8 +535,9 @@ template <>
 struct operator_functor<ast_operator::SIN, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::sin(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::sin(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::sin(input);
   }
@@ -558,8 +547,9 @@ template <>
 struct operator_functor<ast_operator::COS, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::cos(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::cos(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::cos(input);
   }
@@ -569,8 +559,9 @@ template <>
 struct operator_functor<ast_operator::TAN, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::tan(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::tan(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::tan(input);
   }
@@ -580,8 +571,9 @@ template <>
 struct operator_functor<ast_operator::ARCSIN, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::asin(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::asin(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::asin(input);
   }
@@ -591,8 +583,9 @@ template <>
 struct operator_functor<ast_operator::ARCCOS, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::acos(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::acos(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::acos(input);
   }
@@ -602,8 +595,9 @@ template <>
 struct operator_functor<ast_operator::ARCTAN, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::atan(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::atan(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::atan(input);
   }
@@ -613,8 +607,9 @@ template <>
 struct operator_functor<ast_operator::SINH, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::sinh(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::sinh(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::sinh(input);
   }
@@ -624,8 +619,9 @@ template <>
 struct operator_functor<ast_operator::COSH, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::cosh(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::cosh(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::cosh(input);
   }
@@ -635,8 +631,9 @@ template <>
 struct operator_functor<ast_operator::TANH, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::tanh(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::tanh(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::tanh(input);
   }
@@ -646,8 +643,9 @@ template <>
 struct operator_functor<ast_operator::ARCSINH, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::asinh(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::asinh(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::asinh(input);
   }
@@ -657,8 +655,9 @@ template <>
 struct operator_functor<ast_operator::ARCCOSH, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::acosh(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::acosh(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::acosh(input);
   }
@@ -668,8 +667,9 @@ template <>
 struct operator_functor<ast_operator::ARCTANH, false> {
   static constexpr auto arity{1};
 
-  template <typename InputT, std::enable_if_t<std::is_floating_point_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::atanh(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::atanh(input))
+    requires(std::is_floating_point_v<InputT>)
   {
     return std::atanh(input);
   }
@@ -746,14 +746,16 @@ struct operator_functor<ast_operator::ABS, false> {
   static constexpr auto arity{1};
 
   // Only accept signed or unsigned types (both require is_arithmetic<T> to be true)
-  template <typename InputT, std::enable_if_t<std::is_signed_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(std::abs(input))
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(std::abs(input))
+    requires(std::is_signed_v<InputT>)
   {
     return std::abs(input);
   }
 
-  template <typename InputT, std::enable_if_t<std::is_unsigned_v<InputT>>* = nullptr>
-  __host__ __device__ inline auto operator()(InputT input) -> decltype(input)
+  template <typename InputT>
+  __device__ inline auto operator()(InputT input) -> decltype(input)
+    requires(std::is_unsigned_v<InputT>)
   {
     return input;
   }
@@ -795,8 +797,9 @@ struct operator_functor<ast_operator::NOT, false> {
 template <typename To>
 struct cast {
   static constexpr auto arity{1};
-  template <typename From, typename std::enable_if_t<is_fixed_point<From>()>* = nullptr>
+  template <typename From>
   __device__ inline auto operator()(From f) -> To
+    requires(is_fixed_point<From>())
   {
     if constexpr (cuda::std::is_floating_point_v<To>) {
       return convert_fixed_to_floating<To>(f);
@@ -805,8 +808,9 @@ struct cast {
     }
   }
 
-  template <typename From, typename cuda::std::enable_if_t<!is_fixed_point<From>()>* = nullptr>
+  template <typename From>
   __device__ inline auto operator()(From f) -> decltype(static_cast<To>(f))
+    requires(!is_fixed_point<From>())
   {
     return static_cast<To>(f);
   }
@@ -828,22 +832,19 @@ struct operator_functor<op, true> {
   using NonNullOperator       = operator_functor<op, false>;
   static constexpr auto arity = NonNullOperator::arity;
 
-  template <typename LHS,
-            typename RHS,
-            std::size_t arity_placeholder             = arity,
-            std::enable_if_t<arity_placeholder == 2>* = nullptr>
-  __host__ __device__ inline auto operator()(LHS const lhs, RHS const rhs)
+  template <typename LHS, typename RHS, std::size_t arity_placeholder = arity>
+  __device__ inline auto operator()(LHS const lhs, RHS const rhs)
     -> possibly_null_value_t<decltype(NonNullOperator{}(*lhs, *rhs)), true>
+    requires(arity_placeholder == 2)
   {
     using Out = possibly_null_value_t<decltype(NonNullOperator{}(*lhs, *rhs)), true>;
     return (lhs.has_value() && rhs.has_value()) ? Out{NonNullOperator{}(*lhs, *rhs)} : Out{};
   }
 
-  template <typename Input,
-            std::size_t arity_placeholder             = arity,
-            std::enable_if_t<arity_placeholder == 1>* = nullptr>
-  __host__ __device__ inline auto operator()(Input const input)
+  template <typename Input, std::size_t arity_placeholder = arity>
+  __device__ inline auto operator()(Input const input)
     -> possibly_null_value_t<decltype(NonNullOperator{}(*input)), true>
+    requires(arity_placeholder == 1)
   {
     using Out = possibly_null_value_t<decltype(NonNullOperator{}(*input)), true>;
     return input.has_value() ? Out{NonNullOperator{}(*input)} : Out{};
