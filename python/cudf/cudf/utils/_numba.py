@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import glob
 import os
-from importlib.util import find_spec
 
 import numba
 from numba import config as numba_config

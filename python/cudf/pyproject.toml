@@ -50,7 +50,7 @@ dependencies = [
     #: HIP/AMD: we build 'cupy' from source
     "fsspec>=0.6.0",
     "amd-libhipdf==2.*,>=2.0.0a0",
-    # "numba-cuda>=0.11.0,<0.12.0a0", # FIXME(HIP/AMD): use numba-hip?
+    # "numba-cuda>=0.14.0,<0.15.0a0", # FIXME(HIP/AMD): use numba-hip?
     "numba>=0.59.1,<0.62.0a0",
     "numba-hip",
     "numpy>=1.23,<3.0a0",
