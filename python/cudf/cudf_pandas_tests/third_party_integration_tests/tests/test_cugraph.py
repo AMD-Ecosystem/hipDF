@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024, NVIDIA CORPORATION.
+# Copyright (c) 2023-2025, NVIDIA CORPORATION.
 
 # MIT License
 #
@@ -73,12 +73,12 @@ def df():
 @pytest.fixture(scope="session")
 def adjacency_matrix():
     data = {
-        "A": [0, 1, 1, 0],
-        "B": [1, 0, 0, 1],
-        "C": [1, 0, 0, 1],
-        "D": [0, 1, 1, 0],
+        1: [0, 1, 1, 0],
+        2: [1, 0, 0, 1],
+        3: [1, 0, 0, 1],
+        4: [0, 1, 1, 0],
     }
-    df = pd.DataFrame(data, index=["A", "B", "C", "D"])
+    df = pd.DataFrame(data, index=[1, 2, 3, 4])
     return df
 
 
