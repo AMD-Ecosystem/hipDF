@@ -129,31 +129,6 @@ macro(set_cudf_target_properties)
                 "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
   )
 
-  if(CUDF_BUILD_STACKTRACE_DEBUG)
-    # Remove any optimization level to avoid nvcc warning "incompatible redefinition for option
-    # 'optimize'".
-    string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
-    string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_RELEASE "${CMAKE_CUDA_FLAGS_RELEASE}")
-    string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_MINSIZEREL
-                        "${CMAKE_CUDA_FLAGS_MINSIZEREL}"
-    )
-    string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_RELWITHDEBINFO
-                        "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO}"
-    )
-
-    add_library(cudf_backtrace INTERFACE)
-    target_compile_definitions(cudf_backtrace INTERFACE CUDF_BUILD_STACKTRACE_DEBUG)
-    target_compile_options(
-      cudf_backtrace INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:-Og>"
-                              "$<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Og>"
-    )
-    target_link_options(
-      cudf_backtrace INTERFACE "$<$<LINK_LANGUAGE:CXX>:-rdynamic>"
-      "$<$<LINK_LANGUAGE:CUDA>:-Xlinker=-rdynamic>"
-    )
-    target_link_libraries(cudf PRIVATE cudf_backtrace)
-  endif()
-
   target_compile_definitions(
     cudf PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
                  "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_DEFINITIONS}>>"

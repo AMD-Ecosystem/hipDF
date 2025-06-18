@@ -125,14 +125,6 @@ option(
          stream to external libraries."
   OFF
 )
-
-# Option to add all symbols to the dynamic symbol table in the library file, allowing to retrieve
-# human-readable stacktrace for debugging.
-option(
-  CUDF_BUILD_STACKTRACE_DEBUG
-  "Replace the current optimization flags by the options '-rdynamic -Og -NDEBUG', useful for debugging with stacktrace retrieval"
-  OFF
-)
 option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated declarations." OFF)
 # Option to enable line info in CUDA/HIP device compilation to allow introspection when profiling /
 # memchecking
@@ -209,10 +201,6 @@ message(VERBOSE "CUDF: Use a file cache for JIT compiled kernels: ${JITIFY_USE_C
 message(VERBOSE "CUDF: Build with per-thread default stream: ${CUDF_USE_PER_THREAD_DEFAULT_STREAM}")
 message(
   VERBOSE
-  "CUDF: Replace the current optimization flags by the options '-rdynamic -Og' (useful for debugging with stacktrace retrieval): ${CUDF_BUILD_STACKTRACE_DEBUG}"
-)
-message(
-  VERBOSE
   "CUDF: Disable warnings generated from deprecated declarations: ${DISABLE_DEPRECATION_WARNINGS}"
 )
 message(
@@ -237,10 +225,6 @@ if(BUILD_TESTS AND NOT CUDF_BUILD_TESTUTIL)
   )
 endif()
 
-if(CUDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
-  message(FATAL_ERROR "CUDF_BUILD_STACKTRACE_DEBUG is only supported with GCC compiler")
-endif()
-#
 set(CUDF_CXX_FLAGS "")
 set(CUDF_GPU_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
@@ -935,7 +919,6 @@ add_library(
   src/utilities/linked_column.cpp
   src/utilities/logger.cpp
   src/utilities/prefetch.cpp
-  src/utilities/stacktrace.cpp
   src/utilities/stream_pool.cpp
   src/utilities/traits.cpp
   src/utilities/type_checks.cpp
@@ -1664,9 +1647,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
   # depending via ctest and whether it has been updated to expose public stream APIs.
   foreach(_mode cudf testing)
     set(_tgt "cudf_identify_stream_usage_mode_${_mode}")
-    add_library(
-      ${_tgt} SHARED src/utilities/stacktrace.cpp tests/utilities/identify_stream_usage.cpp
-    )
+    add_library(${_tgt} SHARED tests/utilities/identify_stream_usage.cpp)
 
     if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
       target_compile_definitions(
@@ -1686,10 +1667,6 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
-
-    if(CUDF_BUILD_STACKTRACE_DEBUG)
-      target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
-    endif()
 
     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
     add_library(cudf::${_tgt} ALIAS ${_tgt})
