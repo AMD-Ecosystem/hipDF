@@ -41,6 +41,7 @@
 #include "io/utilities/block_utils.cuh"
 #include "parquet_gpu.hpp"
 #include <cudf/detail/utilities/cuda.cuh>
+#include <cudf/detail/utilities/integer_utils.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
 
