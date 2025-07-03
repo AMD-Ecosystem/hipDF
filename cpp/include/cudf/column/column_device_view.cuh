@@ -807,59 +807,6 @@ static_assert(
   "mutable_column_device_view and raw_mutable_column_device_view must be bitwise-compatible");
 
 namespace detail {
-#if defined(__CUDACC__) || defined(__HIPCC__)
-// because set_bit in bit.hpp is wrapped with __CUDACC__
-
-// TODO(HIP/AMD): reimplement this macro
-#define GENERATE_BITMASK(__TYPE__, __INPUT__) \
-    ((__TYPE__) (-((__INPUT__) != 0))) \
-    & (((__TYPE__) -1) >> ((sizeof(__TYPE__) * CHAR_BIT) - (__INPUT__)))
-
-// Rotate right a 64bit by n
-__device__ inline uint64_t rotater64 (const uint64_t a, const int n)
-{
-  return ((a >> n) | (a << (64 - n)));
-}
-// HIP funnelshift implementation using shift and rotate
-__device__ inline bitmask_type __m_funnelshift_r(bitmask_type lo, bitmask_type hi, unsigned int shift)
-{
-    shift = shift % warpSize;
-    bitmask_type _lo      = (bitmask_type)lo >> (bitmask_type)shift;
-    bitmask_type _hi      = hi & GENERATE_BITMASK(uint64_t, shift);
-    bitmask_type _r       = _lo | rotater64(_hi, shift);
-
-    return _r;
-}
-/**
- * @brief Convenience function to get offset word from a bitmask
- *
- * @see copy_offset_bitmask
- * @see offset_bitmask_binop
- */
-__device__ inline bitmask_type get_mask_offset_word(bitmask_type const* __restrict__ source,
-                                                    size_type destination_word_index,
-                                                    size_type source_begin_bit,
-                                                    size_type source_end_bit)
-{
-  size_type source_word_index = destination_word_index + word_index(source_begin_bit);
-  bitmask_type curr_word      = source[source_word_index];
-  bitmask_type next_word      = 0;
-  if (word_index(source_end_bit - 1) >
-      word_index(source_begin_bit +
-                 destination_word_index * detail::size_in_bits<bitmask_type>())) {
-    next_word = source[source_word_index + 1];
-  }
-
-#ifndef CUDF_USE_WARPSIZE_32
-  //TODO(HIP/AMD): optimize the funnelshift.
-  return __m_funnelshift_r(curr_word, next_word, source_begin_bit);
-#else 
-  return __funnelshift_r(curr_word, next_word, source_begin_bit);
-#endif
-}
-
-#endif
-
 /**
  * @brief value accessor of column without null bitmask
  *
