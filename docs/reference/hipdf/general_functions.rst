@@ -60,6 +60,7 @@ Top-level dealing with datetimelike data
 
    to_datetime
    date_range
+   DateOffset
 
 Top-level dealing with Interval data
 ------------------------------------
