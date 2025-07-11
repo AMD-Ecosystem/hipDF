@@ -1486,6 +1486,7 @@ def test_holidays_within_dates(holiday, start, expected):
     ) == [utc.localize(dt) for dt in expected]
 
 
+@pytest.mark.serial
 @pytest.mark.parametrize(
     "env_value",
     ["", "cuda", "pool", "async", "managed", "managed_pool", "abc"],
@@ -1757,6 +1758,9 @@ def test_numpy_ndarray_numba_ufunc(array):
     assert_eq(add_one_ufunc(arr1), add_one_ufunc(arr2))
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Grid size:numba.core.errors.NumbaPerformanceWarning"
+)
 def test_numpy_ndarray_numba_cuda_ufunc(array):
     arr1, arr2 = array
 
