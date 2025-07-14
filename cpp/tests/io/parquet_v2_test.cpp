@@ -718,7 +718,7 @@ TEST_P(ParquetV2Test, CheckColumnOffsetIndex)
   // fixed length strings
   auto str1_elements = cudf::detail::make_counting_transform_iterator(0, [](auto i) {
     std::array<char, 30> buf;
-    sprintf(buf.data(), "%012d", i);
+    snprintf(buf.data(), buf.size(), "%012d", i);
     return std::string(buf.data());
   });
   auto col0          = cudf::test::strings_column_wrapper(str1_elements, str1_elements + num_rows);
@@ -740,7 +740,7 @@ TEST_P(ParquetV2Test, CheckColumnOffsetIndex)
   // mixed length strings
   auto str2_elements = cudf::detail::make_counting_transform_iterator(0, [](auto i) {
     std::array<char, 30> buf;
-    sprintf(buf.data(), "%d", i);
+    snprintf(buf.data(), buf.size(), "%d", i);
     return std::string(buf.data());
   });
   auto col7          = cudf::test::strings_column_wrapper(str2_elements, str2_elements + num_rows);
@@ -812,7 +812,7 @@ TEST_P(ParquetV2Test, CheckColumnOffsetIndexNulls)
   // fixed length strings
   auto str1_elements = cudf::detail::make_counting_transform_iterator(0, [](auto i) {
     std::array<char, 30> buf;
-    sprintf(buf.data(), "%012d", i);
+    snprintf(buf.data(), buf.size(), "%012d", i);
     return std::string(buf.data());
   });
   auto col0          = cudf::test::strings_column_wrapper(str1_elements, str1_elements + num_rows);
@@ -844,7 +844,7 @@ TEST_P(ParquetV2Test, CheckColumnOffsetIndexNulls)
   // mixed length strings
   auto str2_elements = cudf::detail::make_counting_transform_iterator(0, [](auto i) {
     std::array<char, 30> buf;
-    sprintf(buf.data(), "%d", i);
+    snprintf(buf.data(), buf.size(), "%d", i);
     return std::string(buf.data());
   });
   auto col7 = cudf::test::strings_column_wrapper(str2_elements, str2_elements + num_rows, valids);
@@ -922,7 +922,7 @@ TEST_P(ParquetV2Test, CheckColumnOffsetIndexNullColumn)
   // fixed length strings
   auto str1_elements = cudf::detail::make_counting_transform_iterator(0, [](auto i) {
     std::array<char, 30> buf;
-    sprintf(buf.data(), "%012d", i);
+    snprintf(buf.data(), buf.size(), "%012d", i);
     return std::string(buf.data());
   });
   auto col0          = cudf::test::strings_column_wrapper(str1_elements, str1_elements + num_rows);
@@ -939,7 +939,7 @@ TEST_P(ParquetV2Test, CheckColumnOffsetIndexNullColumn)
   // mixed length strings
   auto str2_elements = cudf::detail::make_counting_transform_iterator(0, [](auto i) {
     std::array<char, 30> buf;
-    sprintf(buf.data(), "%d", i);
+    snprintf(buf.data(), buf.size(), "%d", i);
     return std::string(buf.data());
   });
   auto col3          = cudf::test::strings_column_wrapper(str2_elements, str2_elements + num_rows);
