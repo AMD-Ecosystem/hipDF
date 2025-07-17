@@ -661,7 +661,7 @@ dependencies:
           - typing_extensions>=4.0.0
       - output_types: [conda]
         packages:
-          - *numba-cuda-dep
+          - &numba-cuda-dep numba-cuda>=0.15.2,<0.16.0a0
       - output_types: requirements
         packages:
           # pip recognizes the index as a global option for the requirements.txt file
@@ -683,7 +683,7 @@ dependencies:
         matrices:
           - matrix: {cuda: "12.*"}
             packages:
-              - &numba-cuda-cu12-dep numba-cuda[cu12]>=0.14.0,<0.15.0a0
+              - &numba-cuda-cu12-dep numba-cuda[cu12]>=0.15.2,<0.16.0a0
           - matrix: # Fallback for no matrix
             packages:
               - *numba-cuda-cu12-dep
@@ -784,7 +784,7 @@ dependencies:
           - matrix: {dependencies: "oldest"}
             packages:
               - numba==0.59.1
-              - numba-cuda==0.14.0
+              - numba-cuda==0.15.2
               - pandas==2.0.*
           - matrix: {dependencies: "latest"}
             packages:
