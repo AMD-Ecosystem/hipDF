@@ -862,6 +862,7 @@ add_library(
   src/strings/slice.cu # fatal error: 'cooperative_groups/reduce.h' file not found
   src/strings/split/partition.cu
   src/strings/split/split.cu
+  src/strings/split/split_part.cu
   src/strings/split/split_re.cu
   src/strings/split/split_record.cu
   src/strings/strings_column_factories.cu
