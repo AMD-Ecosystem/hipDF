@@ -50,7 +50,7 @@ dependencies = [
     #: HIP/AMD: we build 'cupy' from source
     "fsspec>=0.6.0",
     "amd-libhipdf==2.*,>=2.0.0a0",
-    # "numba-cuda[cu12]>=0.14.0,<0.15.0a0", # FIXME(HIP/AMD): use numba-hip?
+    # "numba-cuda[cu12]>=0.16.0,<0.17.0a0", # FIXME(HIP/AMD): use numba-hip?
     "numba>=0.59.1,<0.62.0a0",
     "numba-hip",
     "numpy>=1.23,<3.0a0",
@@ -60,7 +60,6 @@ dependencies = [
     "pyarrow>=14.0.0,<20.0.0a0,!=17.0.0; platform_machine=='aarch64'",
     "pyarrow>=14.0.0,<20.0.0a0; platform_machine=='x86_64'",
     "amd-pylibhipdf==2.*,>=2.0.0a0",
-    # "pynvjitlink>=0.0.0a0",
     "rich",
     "amd-hipmm==3.*,>=3.0.0a0",
     "typing_extensions>=4.0.0",
@@ -152,7 +151,7 @@ dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true"
 requires = [
     "cmake>=3.30.4",
-    "cython>=3.0.3,<3.1.0a0",
+    "cython>=3.0.3",
     "amd-libhipdf==2.*,>=2.0.0a0",
     "amd-libhipmm==3.*,>=3.0.0a0",
     "ninja",
