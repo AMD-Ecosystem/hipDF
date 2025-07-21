@@ -419,6 +419,7 @@ ConfigureNVBench(
   string/factory.cpp
   string/filter.cpp
   string/find.cpp
+  string/find_instance.cpp
   string/find_multiple.cpp
   string/join_strings.cpp
   string/lengths.cpp

@@ -858,6 +858,7 @@ add_library(
   src/strings/search/contains_multiple.cu
   src/strings/search/findall.cu
   src/strings/search/find.cu
+  src/strings/search/find_instance.cu
   src/strings/search/find_multiple.cu
   src/strings/slice.cu # fatal error: 'cooperative_groups/reduce.h' file not found
   src/strings/split/partition.cu
