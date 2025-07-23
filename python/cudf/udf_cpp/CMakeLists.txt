@@ -54,12 +54,29 @@ rapids_find_package(
 )
 endif()
 
-include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
-rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+# The below is inspired by legate dataframe
+execute_process(
+  COMMAND "python" -c
+          "from numba.cuda.memory_management.nrt import get_include; print(get_include())"
+  OUTPUT_VARIABLE NRT_INCLUDE_DIR
+  ERROR_VARIABLE NRT_ERROR
+  RESULT_VARIABLE NRT_RESULT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(${NRT_RESULT})
+  message(
+    FATAL_ERROR "Error while trying to obtain numba cuda runtime include directory:\n${NRT_ERROR}"
+  )
+endif()
+
+include(${rapids-cmake-dir}/cpm/cccl.cmake)
+rapids_cpm_cccl(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+
 add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
 
 target_include_directories(
   cudf_strings_udf PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
+                          "${NRT_INCLUDE_DIR}"
 )
 
 set_target_properties(
@@ -120,9 +137,8 @@ list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
 set(tgt "shim_") # NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
 add_library(${tgt} OBJECT shim.cu)
 target_include_directories(
-  ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")
-target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_HIP_FLAGS}>")
-target_link_libraries(${tgt} PUBLIC cudf::cudf)
+  shim PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>" "${NRT_INCLUDE_DIR}"
+)
 
 copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)
 install(
