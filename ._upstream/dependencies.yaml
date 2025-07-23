@@ -661,7 +661,7 @@ dependencies:
           - typing_extensions>=4.0.0
       - output_types: [conda]
         packages:
-          - &numba-cuda-dep numba-cuda>=0.14.0,<0.15.0a0
+          - *numba-cuda-dep
       - output_types: requirements
         packages:
           # pip recognizes the index as a global option for the requirements.txt file
