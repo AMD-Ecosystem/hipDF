@@ -31,10 +31,9 @@
 #include <cudf/utilities/memory_resource.hpp>
 #include <cudf/utilities/span.hpp>
 
-#include <rmm/aligned.hpp>
 #include <rmm/mr/device/aligned_resource_adaptor.hpp>
 
-auto constexpr bloom_filter_alignment = rmm::CUDA_ALLOCATION_ALIGNMENT;
+auto constexpr bloom_filter_alignment = 32;
 
 namespace {
 
