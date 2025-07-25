@@ -97,6 +97,19 @@ if(DEFINED ENV{RAPIDS_CMAKE_BRANCH})
   set(rapids-cmake-branch $ENV{RAPIDS_CMAKE_BRANCH})
 endif()
 
-# TODO(HIP/AMD): Ship RAPIDS.cmake with hipDF?
+
 set(rapids-cmake-version "${RAPIDS_VERSION_MAJOR_MINOR}")
 include("${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake")
+# TODO(HIP/AMD): Ship RAPIDS.cmake with hipDF?
+# # Use STRINGS to trim whitespace/newlines
+# file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH" _rapids_branch)
+# if(NOT _rapids_branch)
+#   message(
+#     FATAL_ERROR
+#       "Could not determine branch name to use for checking out rapids-cmake. The file \"${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH\" is missing."
+#   )
+# endif()
+
+# set(rapids-cmake-version "${RAPIDS_VERSION_MAJOR_MINOR}")
+# set(rapids-cmake-branch "${_rapids_branch}")
+# include("${CMAKE_CURRENT_LIST_DIR}/RAPIDS.cmake")
