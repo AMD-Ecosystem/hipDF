@@ -1,4 +1,4 @@
-# Copyright (c) 2024, NVIDIA CORPORATION.
+# Copyright (c) 2024-2025, NVIDIA CORPORATION.
 
 from cython.operator import dereference
 
@@ -156,3 +156,5 @@ def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype):
         )
 
     return Column.from_libcudf(move(c_result))
+    
+BinaryOperator.__str__ = BinaryOperator.__repr__
