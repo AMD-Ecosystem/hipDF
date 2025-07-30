@@ -681,8 +681,9 @@ std::optional<std::string> is_decompression_disabled_impl(compression_type compr
             params.lib_major_version, params.lib_minor_version, params.lib_patch_version)) {
         return "nvCOMP 2.5 or newer is required for Deflate decompression";
       }
+    case compression_type::GZIP: {
       if (not params.are_all_integrations_enabled) {
-        return "DEFLATE decompression is experimental, you can enable it through "
+        return "GZIP decompression is experimental, you can enable it through "
                "`LIBCUDF_NVCOMP_POLICY` environment variable.";
       }
       return std::nullopt;
