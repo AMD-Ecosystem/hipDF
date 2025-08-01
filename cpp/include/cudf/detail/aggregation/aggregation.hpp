@@ -39,6 +39,7 @@
 
 #include <cudf/aggregation.hpp>
 #include <cudf/detail/utilities/assert.cuh>
+#include <cudf/structs/struct_view.hpp>
 #include <cudf/types.hpp>
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/span.hpp>
@@ -60,6 +61,8 @@ class simple_aggregations_collector {  // Declares the interface for the simple 
                                                           aggregation const& agg);
   virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
                                                           class sum_aggregation const& agg);
+  virtual std::vector<std::unique_ptr<aggregation>> visit(
+    data_type col_type, class sum_with_overflow_aggregation const& agg);
   virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
                                                           class product_aggregation const& agg);
   virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
@@ -137,6 +140,7 @@ class aggregation_finalizer {  // Declares the interface for the finalizer
   // Declare overloads for each kind of a agg to dispatch
   virtual void visit(aggregation const& agg);
   virtual void visit(class sum_aggregation const& agg);
+  virtual void visit(class sum_with_overflow_aggregation const& agg);
   virtual void visit(class product_aggregation const& agg);
   virtual void visit(class min_aggregation const& agg);
   virtual void visit(class max_aggregation const& agg);
@@ -189,6 +193,26 @@ class sum_aggregation final : public rolling_aggregation,
   [[nodiscard]] std::unique_ptr<aggregation> clone() const override
   {
     return std::make_unique<sum_aggregation>(*this);
+  }
+  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
+    data_type col_type, simple_aggregations_collector& collector) const override
+  {
+    return collector.visit(col_type, *this);
+  }
+  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
+};
+
+/**
+ * @brief Derived class for specifying a sum_with_overflow aggregation
+ */
+class sum_with_overflow_aggregation final : public groupby_aggregation,
+                                            public groupby_scan_aggregation {
+ public:
+  sum_with_overflow_aggregation() : aggregation(SUM_WITH_OVERFLOW) {}
+
+  [[nodiscard]] std::unique_ptr<aggregation> clone() const override
+  {
+    return std::make_unique<sum_with_overflow_aggregation>(*this);
   }
   std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
     data_type col_type, simple_aggregations_collector& collector) const override
@@ -1373,11 +1397,12 @@ constexpr bool is_sum_product_agg(aggregation::Kind k)
          (k == aggregation::SUM_OF_SQUARES);
 }
 
-// Summing/Multiplying integers of any type, always use int64_t accumulator
+// Summing/Multiplying integers of any type, always use int64_t accumulator (except
+// SUM_WITH_OVERFLOW which has its own template)
 template <typename Source, aggregation::Kind k>
-struct target_type_impl<Source,
-                        k,
-                        std::enable_if_t<std::is_integral_v<Source> && is_sum_product_agg(k)>> {
+  requires(std::is_integral_v<Source> && is_sum_product_agg(k) &&
+           k != aggregation::SUM_WITH_OVERFLOW)
+struct target_type_impl<Source, k> {
   using type = int64_t;
 };
 
@@ -1390,12 +1415,12 @@ struct target_type_impl<
   using type = Source;
 };
 
-// Summing/Multiplying float/doubles, use same type accumulator
+// Summing/Multiplying float/doubles, use same type accumulator (except SUM_WITH_OVERFLOW which has
+// its own template)
 template <typename Source, aggregation::Kind k>
-struct target_type_impl<
-  Source,
-  k,
-  std::enable_if_t<std::is_floating_point_v<Source> && is_sum_product_agg(k)>> {
+  requires(std::is_floating_point_v<Source> && is_sum_product_agg(k) &&
+           k != aggregation::SUM_WITH_OVERFLOW)
+struct target_type_impl<Source, k> {
   using type = Source;
 };
 
@@ -1405,6 +1430,12 @@ struct target_type_impl<Source,
                         k,
                         std::enable_if_t<is_duration<Source>() && (k == aggregation::SUM)>> {
   using type = Source;
+};
+
+// SUM_WITH_OVERFLOW always outputs a struct {sum: int64_t, overflow: bool} regardless of input type
+template <typename Source>
+struct target_type_impl<Source, aggregation::SUM_WITH_OVERFLOW> {
+  using type = struct_view;  // SUM_WITH_OVERFLOW outputs a struct with sum and overflow fields
 };
 
 // Always use `double` for M2
@@ -1620,6 +1651,8 @@ CUDF_HOST_DEVICE inline decltype(auto) aggregation_dispatcher(aggregation::Kind 
   switch (k) {
     case aggregation::SUM:
       return f.template operator()<aggregation::SUM>(std::forward<Ts>(args)...);
+    case aggregation::SUM_WITH_OVERFLOW:
+      return f.template operator()<aggregation::SUM_WITH_OVERFLOW>(std::forward<Ts>(args)...);
     case aggregation::PRODUCT:
       return f.template operator()<aggregation::PRODUCT>(std::forward<Ts>(args)...);
     case aggregation::MIN:
