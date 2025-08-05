@@ -127,7 +127,7 @@ endfunction()
 # Create the shim library for each architecture.
 set(SHIM_HIP_FLAGS -fgpu-rdc -S -emit-llvm)
 
-# always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
+# always build a default architecture in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
 # safely queried through a context
 # TODO(HIP/AMD): Using RAPIDS_NO_INITIALIZE is currently not supported/used in hipDF
 
