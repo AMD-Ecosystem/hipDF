@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import itertools
-from contextlib import ExitStack as does_not_raise
+from contextlib import nullcontext as does_not_raise
 
 import cupy
 import numpy as np
