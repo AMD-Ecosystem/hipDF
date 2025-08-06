@@ -48,7 +48,7 @@ repos:
   #           ^python/cudf/cudf/tests/data/vocab.txt
   #         )
   # - repo: https://github.com/MarcoGorelli/cython-lint
-  #   rev: v0.16.6
+  #   rev: v0.16.7
   #   hooks:
   #     - id: cython-lint
   # - repo: https://github.com/pre-commit/mirrors-mypy
@@ -77,7 +77,7 @@ repos:
   #           ^cpp/include/cudf_test/cxxopts.hpp
   #         )
   # - repo: https://github.com/sirosen/texthooks
-  #   rev: 0.6.7
+  #   rev: 0.6.8
   #   hooks:
   #     - id: fix-smartquotes
   #       exclude: |
@@ -85,7 +85,7 @@ repos:
   #           ^cpp/src/io/parquet/ipc/Schema_generated.h|
   #           ^cpp/src/io/parquet/ipc/Message_generated.h|
   #           ^cpp/include/cudf_test/cxxopts.hpp|
-  #           ^python/cudf/cudf/tests/data/vocab.txt|
+  #           ^python/cudf/cudf/tests/data/text/vocab.txt|
   #           ^python/cudf/cudf/tests/text/test_text_methods.py
   #         )
   - repo: local
