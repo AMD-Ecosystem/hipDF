@@ -35,12 +35,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "rolling/detail/rolling_jit.hpp"
-#include "rolling/jit/operation.hpp"
-
 #include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/types.hpp>
 #include <cudf/utilities/bit.hpp>
+
+#include <rolling/detail/rolling_jit.hpp>
+#include <rolling/jit/operation.hpp>
 
 namespace cudf {
 namespace rolling {
