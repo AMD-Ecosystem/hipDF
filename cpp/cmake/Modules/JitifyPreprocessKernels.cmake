@@ -78,7 +78,7 @@ function(jit_preprocess_files)
         -D__HIPCC_RTC__ -DCUDF_RUNTIME_JIT  ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS}
         -I${CUDF_SOURCE_DIR}/include -I${CUDF_SOURCE_DIR}/src ${includes}
         -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
-        --no-preinclude-workarounds --no-replace-pragma-once
+        --no-preinclude-workarounds --no-replace-pragma-once --diag-suppress=47
       COMMENT "Custom command to JIT-compile files."
     )
   endforeach()
