@@ -297,9 +297,6 @@ fi
 if hasArg --disable_nvtx; then
     BUILD_NVTX="OFF"
 fi
-if hasArg --opensource_nvcomp; then
-    USE_PROPRIETARY_NVCOMP="OFF"
-fi
 if hasArg --show_depr_warn; then
     BUILD_DISABLE_DEPRECATION_WARNINGS=OFF
 fi
@@ -374,7 +371,6 @@ if buildAll || hasArg libcudf; then
           -DCMAKE_C_COMPILER="${CC}" \
           -DCMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES}" \
           -DUSE_NVTX=${BUILD_NVTX} \
-          -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \
           -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
           -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
