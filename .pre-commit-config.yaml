@@ -101,8 +101,8 @@ repos:
             entry: bash -c "(! type license_verificator >/dev/null 2>&1) || license_verificator --pre-commit"
             language: system
             pass_filenames: false
-  #       - id: no-deprecationwarning
-  #         name: no-deprecationwarning
+  #     - id: no-deprecationwarning
+  #       name: no-deprecationwarning
   #       description: 'Enforce that DeprecationWarning is not introduced (use FutureWarning instead)'
   #       entry: '(category=|\s)DeprecationWarning[,)]'
   #       language: pygrep
@@ -191,10 +191,10 @@ repos:
   #     - id: verify-codeowners
   #       args: [--fix, --project-prefix=cudf]
   # - repo: https://github.com/rapidsai/dependency-file-generator
-  #   rev: v1.19.1
+  #   rev: v1.20.0
   #   hooks:
   #     - id: rapids-dependency-file-generator
-  #       args: ["--clean"]
+  #       args: ["--clean", "--warn-all", "--strict"]
   # - repo: https://github.com/shellcheck-py/shellcheck-py
   #   rev: v0.10.0.1
   #   hooks:
