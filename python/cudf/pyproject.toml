@@ -50,7 +50,7 @@ dependencies = [
     "fsspec>=0.6.0",
     "amd-libhipdf==2.*,>=2.0.0a0",
     # "numba-cuda[cu12]>=0.19.1,<0.20.0a0", # FIXME(HIP/AMD): use numba-hip?
-    "numba>=0.61.0,<0.62.0a0",
+    "numba>=0.60.0,<0.62.0a0",
     "numba-hip",
     "numpy>=1.23,<3.0a0",
     # "nvtx>=0.2.1", # FIXME(HIP/AMD): rocTX bindings?
