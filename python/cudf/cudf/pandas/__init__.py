@@ -51,19 +51,6 @@ __all__ = [
 
 LOADED = False
 
-_SUPPORTED_PREFETCHES = {
-    "column_view::get_data",
-    "mutable_column_view::get_data",
-    "gather",
-    "hash_join",
-}
-
-
-def _enable_managed_prefetching(rmm_mode, managed_memory_is_supported):
-    if managed_memory_is_supported and "managed" in rmm_mode:
-        for key in _SUPPORTED_PREFETCHES:
-            pylibcudf.experimental.enable_prefetching(key)
-
 
 def install():
     """Enable Pandas Accelerator Mode."""
@@ -166,7 +153,7 @@ def install():
     rmm.mr.set_current_device_resource(new_mr)
 
     if use_prefetch_adaptor:
-        _enable_managed_prefetching(rmm_mode, managed_memory_is_supported)
+        pylibcudf.prefetch.enable()
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
