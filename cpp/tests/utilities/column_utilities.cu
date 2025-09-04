@@ -46,10 +46,10 @@
 #include <cudf/detail/copy.hpp>
 #include <cudf/detail/get_value.cuh>
 #include <cudf/detail/iterator.cuh>
+#include <cudf/detail/row_operator/row_operators.cuh>
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/lists/list_view.hpp>
 #include <cudf/structs/struct_view.hpp>
-#include <cudf/table/experimental/row_operators.cuh>
 #include <cudf/table/table_device_view.cuh>
 #include <cudf/utilities/default_stream.hpp>
 #include <cudf/utilities/type_checks.hpp>
@@ -386,8 +386,8 @@ class corresponding_rows_unequal {
 
   __host__ __device__ bool operator()(size_type index)
   {
-    using cudf::experimental::row::lhs_index_type;
-    using cudf::experimental::row::rhs_index_type;
+    using cudf::detail::row::lhs_index_type;
+    using cudf::detail::row::rhs_index_type;
 
     return !comp(lhs_index_type{lhs_row_indices.element<size_type>(index)},
                  rhs_index_type{rhs_row_indices.element<size_type>(index)});
@@ -465,8 +465,8 @@ class corresponding_rows_not_equivalent {
 
   __host__ __device__ bool operator()(size_type index)
   {
-    using cudf::experimental::row::lhs_index_type;
-    using cudf::experimental::row::rhs_index_type;
+    using cudf::detail::row::lhs_index_type;
+    using cudf::detail::row::rhs_index_type;
 
     auto const lhs_index = lhs_row_indices.element<size_type>(index);
     auto const rhs_index = rhs_row_indices.element<size_type>(index);
@@ -546,7 +546,7 @@ struct column_comparator_impl {
     auto lhs_tview = table_view{{lhs}};
     auto rhs_tview = table_view{{rhs}};
 
-    auto const comparator = cudf::experimental::row::equality::two_table_comparator{
+    auto const comparator = cudf::detail::row::equality::two_table_comparator{
       lhs_tview, rhs_tview, cudf::test::get_default_stream()};
     auto const has_nulls = cudf::has_nulls(lhs_tview) or cudf::has_nulls(rhs_tview);
 
