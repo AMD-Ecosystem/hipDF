@@ -132,7 +132,6 @@ Function application, GroupBy & window
    DataFrame.apply
    DataFrame.applymap
    DataFrame.apply_chunks
-   DataFrame.apply_rows
    DataFrame.groupby
    DataFrame.map
    DataFrame.pipe
