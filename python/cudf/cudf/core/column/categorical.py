@@ -29,8 +29,11 @@ from cudf.utils.utils import _is_null_host_scalar
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableSequence, Sequence
 
-    from pylibcudf import Scalar as plc_Scalar
-
+# <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
+#     from pylibcudf import Scalar as plc_Scalar
+#
+# =======
+# >>>>>>> END NEW CODE (d53ccf2bb0)
     from cudf._typing import (
         ColumnBinaryOperand,
         ColumnLike,
