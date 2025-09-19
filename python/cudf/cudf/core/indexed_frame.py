@@ -401,13 +401,19 @@ class IndexedFrame(Frame):
         Akin to cudf.DataFrame(...).loc[:, labels]
         """
         return self._from_data(
-# <<<<<<< OLD CODE from a63150f8d7 (8ce6cc0d12) - COMMENTED OUT
-#             self._data.select_by_label(labels),
-#             index=self.index,
-#             attrs=self.attrs,
+# <<<<<<< OLD CODE from b8250c6b12 (293c12e818) - COMMENTED OUT
+# # <<<<<<< OLD CODE from a63150f8d7 (8ce6cc0d12) - COMMENTED OUT
+# #             self._data.select_by_label(labels),
+# #             index=self.index,
+# #             attrs=self.attrs,
+# # =======
+#             self._data.select_by_label(labels), index=self.index
+# # >>>>>>> END NEW CODE (8ce6cc0d12)
 # =======
-            self._data.select_by_label(labels), index=self.index
-# >>>>>>> END NEW CODE (8ce6cc0d12)
+            self._data.select_by_label(labels),
+            index=self.index,
+            attrs=self.attrs,
+# >>>>>>> END NEW CODE (293c12e818)
         )
 
     @_performance_tracking
