@@ -1545,8 +1545,11 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
     "tests/base/test_value_counts.py::test_value_counts_bins[index]",
     "tests/base/test_value_counts.py::test_value_counts_bins[series]",
-    "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
-    "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
+# <<<<<<< OLD CODE from cf1a356509 (9bfb9d4bb0) - COMMENTED OUT
+#     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
+#     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
+# =======
+# >>>>>>> END NEW CODE (9bfb9d4bb0)
     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ms]",
     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ns]",
     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-s]",
