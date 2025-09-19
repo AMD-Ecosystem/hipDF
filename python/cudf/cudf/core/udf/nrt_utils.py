@@ -74,11 +74,14 @@ def nrt_enabled():
 
     NOTE(HIP/AMD): This is a no-op on HIP since NRT is not available.
     """
-    if not _USE_NRT:
-        # NRT not available, just yield without enabling
-        yield
-        return
-
+# <<<<<<< OLD CODE from d583d3590f (b3bef1d43d) - COMMENTED OUT
+#     if not _USE_NRT:
+#         # NRT not available, just yield without enabling
+#         yield
+#         return
+#
+# =======
+# >>>>>>> END NEW CODE (b3bef1d43d)
     original_value = getattr(numba_config, "CUDA_ENABLE_NRT", False)
     numba_config.CUDA_ENABLE_NRT = True
     try:
