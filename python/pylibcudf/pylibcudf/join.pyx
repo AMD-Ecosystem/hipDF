@@ -290,9 +290,13 @@ cpdef Table cross_join(
     mr = _get_memory_resource(mr)
 
     with nogil:
-        result = cpp_join.cross_join(
-            left.view(), right.view(), stream.view(), mr.get_mr()
-        )
+# <<<<<<< OLD CODE from 4a6f2b5688 (87b9c41539) - COMMENTED OUT
+#         result = cpp_join.cross_join(
+#             left.view(), right.view(), stream.view(), mr.get_mr()
+#         )
+# =======
+        result = cpp_join.cross_join(left.view(), right.view(), stream.view())
+# >>>>>>> END NEW CODE (87b9c41539)
     return Table.from_libcudf(move(result), stream, mr)
 
 
