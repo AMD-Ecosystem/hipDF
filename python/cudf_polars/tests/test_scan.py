@@ -423,19 +423,22 @@ def test_scan_parquet_chunked(
     )
 
 
-# <<<<<<< OLD CODE from 28f4383922 (cf899c4e69) - COMMENTED OUT
+# <<<<<<< OLD CODE from 7cacfdc66b (63ce95f195) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 28f4383922 (cf899c4e69) - COMMENTED OUT
+# # =======
+# @pytest.mark.xfail(
+#     raises=pl.exceptions.ComputeError,
+#     reason="Rate limited by Hugging Face",
+#     strict=False,
+# )
+# def test_scan_hf_url_raises():
+#     q = pl.scan_csv("hf://datasets/scikit-learn/iris/Iris.csv")
+#     assert_ir_translation_raises(q, NotImplementedError)
+#
+#
+# # >>>>>>> END NEW CODE (cf899c4e69)
 # =======
-@pytest.mark.xfail(
-    raises=pl.exceptions.ComputeError,
-    reason="Rate limited by Hugging Face",
-    strict=False,
-)
-def test_scan_hf_url_raises():
-    q = pl.scan_csv("hf://datasets/scikit-learn/iris/Iris.csv")
-    assert_ir_translation_raises(q, NotImplementedError)
-
-
-# >>>>>>> END NEW CODE (cf899c4e69)
+# >>>>>>> END NEW CODE (63ce95f195)
 def test_select_arbitrary_order_with_row_index_column(tmp_path):
     df = pl.DataFrame({"a": [1, 2, 3]})
     df.write_parquet(tmp_path / "df.parquet")
