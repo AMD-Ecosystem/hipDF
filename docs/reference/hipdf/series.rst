@@ -259,6 +259,13 @@ Time Series-related
    Series.shift
    Series.resample
 
+Metadata
+~~~~~~~~
+.. autosummary::
+   :toctree: api/
+
+   Series.attrs
+
 Accessors
 ---------
 
