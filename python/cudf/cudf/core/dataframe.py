@@ -24,7 +24,6 @@
 
 from __future__ import annotations
 
-import copy
 import functools
 import inspect
 import itertools
@@ -45,6 +44,7 @@ from collections.abc import (
     MutableMapping,
     Sequence,
 )
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Literal
 
 import cupy
@@ -1031,6 +1031,7 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
         second_columns = None
         attrs = None
         if isinstance(data, (DataFrame, pd.DataFrame)):
+            attrs = deepcopy(data.attrs)
             if isinstance(data, pd.DataFrame):
                 cols = {
                     i: as_column(col_value.array, nan_as_null=nan_as_null)
@@ -1044,7 +1045,6 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
             col_accessor = data._data
             index, second_index = data.index, index
             second_columns = columns
-            attrs = data.attrs
         elif isinstance(data, (Series, pd.Series)):
             if isinstance(data, pd.Series):
                 data = Series(data, nan_as_null=nan_as_null)
@@ -5699,7 +5699,7 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
 
         out_df = pd.DataFrame(out_data, index=out_index)
         out_df.columns = self._data.to_pandas_index
-        out_df.attrs = self.attrs
+        out_df.attrs = deepcopy(self.attrs)
 
         return out_df
 
@@ -5753,7 +5753,7 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
             df = cls._from_data(data, index)
             # Checks duplicate columns and sets column metadata
             df.columns = dataframe.columns
-            df._attrs = copy.deepcopy(dataframe.attrs)
+            df._attrs = deepcopy(dataframe.attrs)
             return df
         else:
             raise TypeError(
