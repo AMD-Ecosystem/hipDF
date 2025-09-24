@@ -45,14 +45,23 @@
 #include <cudf/logger.hpp>
 #include <cudf/utilities/error.hpp>
 
-#include <cudf/nvcomp.h>
-#include <cudf/nvcomp/snappy.h>
+// <<<<<<< OLD CODE from 703b9f1c8a (1b5367c037) - COMMENTED OUT
+// #include <cudf/nvcomp.h>
+// #include <cudf/nvcomp/snappy.h>
+// #include <io/utilities/hostdevice_vector.hpp>
+// // #include <nvcomp/deflate.h>
+// // #include <nvcomp/gzip.h>
+// // #include <nvcomp/lz4.h>
+// // #include <nvcomp/snappy.h>
+// // #include <nvcomp/zstd.h>
+// =======
 #include <io/utilities/hostdevice_vector.hpp>
-// #include <nvcomp/deflate.h>
-// #include <nvcomp/gzip.h>
-// #include <nvcomp/lz4.h>
-// #include <nvcomp/snappy.h>
-// #include <nvcomp/zstd.h>
+#include <nvcomp/deflate.h>
+#include <nvcomp/gzip.h>
+#include <nvcomp/lz4.h>
+#include <nvcomp/snappy.h>
+#include <nvcomp/zstd.h>
+// >>>>>>> END NEW CODE (1b5367c037)
 
 #include <mutex>
 
