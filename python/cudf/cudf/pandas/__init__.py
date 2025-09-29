@@ -163,11 +163,32 @@ def install():
             initial_pool_size=free_memory,
         )
     elif rmm_mode == "async":
-        new_mr = rmm.mr.CudaAsyncMemoryResource(initial_pool_size=free_memory)
-    elif rmm_mode == "managed":
-        managed_mr = rmm.mr.ManagedMemoryResource()
-        if use_prefetch_adaptor:
-            new_mr = rmm.mr.PrefetchResourceAdaptor(managed_mr)
+# <<<<<<< OLD CODE from 7bbc557c2c (2254349f6b) - COMMENTED OUT
+#         new_mr = rmm.mr.CudaAsyncMemoryResource(initial_pool_size=free_memory)
+#     elif rmm_mode == "managed":
+#         managed_mr = rmm.mr.ManagedMemoryResource()
+#         if use_prefetch_adaptor:
+#             new_mr = rmm.mr.PrefetchResourceAdaptor(managed_mr)
+# =======
+        new_mr = rmm.mr.CudaAsyncMemoryResource()
+    elif "managed" in rmm_mode:
+        if not managed_memory_is_supported:
+            raise ValueError(
+                "Managed memory is not supported on this system, so the "
+                f"requested {rmm_mode=} is invalid."
+            )
+        if rmm_mode == "managed":
+            new_mr = rmm.mr.PrefetchResourceAdaptor(
+                rmm.mr.ManagedMemoryResource()
+            )
+        elif rmm_mode == "managed_pool":
+            new_mr = rmm.mr.PrefetchResourceAdaptor(
+                rmm.mr.PoolMemoryResource(
+                    rmm.mr.ManagedMemoryResource(),
+                    initial_pool_size=free_memory,
+                )
+            )
+# >>>>>>> END NEW CODE (2254349f6b)
         else:
             new_mr = managed_mr
     elif rmm_mode == "managed_pool":
