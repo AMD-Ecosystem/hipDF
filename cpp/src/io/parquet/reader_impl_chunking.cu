@@ -44,6 +44,7 @@
 #include "reader_impl_chunking_utils.cuh"
 
 #include <cudf/detail/iterator.cuh>
+#include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/utilities/memory_resource.hpp>
 
 #include <rmm/exec_policy.hpp>
@@ -659,6 +660,8 @@ void reader_impl::compute_input_passes(read_mode mode)
 
 void reader_impl::compute_output_chunks_for_subpass()
 {
+  CUDF_FUNC_RANGE();
+
   auto& pass    = *_pass_itm_data;
   auto& subpass = *pass.subpass;
 
