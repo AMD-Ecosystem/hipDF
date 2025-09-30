@@ -2425,7 +2425,7 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
 /* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         OrcDecompressionTest,
-                        ::testing::Combine(::testing::Values("HOST"),
+                        ::testing::Combine(::testing::Values("HOST", "HYBRID", "AUTO"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY)));
 
