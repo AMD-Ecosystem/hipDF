@@ -71,6 +71,7 @@ from . import (
     types,
     unary,
     utilities,
+    utils,
 )
 from ._version import __git_commit__, __version__
 from .column import Column
@@ -125,4 +126,5 @@ __all__ = [
     "types",
     "unary",
     "utilities",
+    "utils",
 ]
