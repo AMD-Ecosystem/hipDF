@@ -29,13 +29,11 @@ import hashlib
 import math
 import os
 import pathlib
-import random
 import string
 from contextlib import contextmanager
 from io import BytesIO
 from string import ascii_letters
 
-import cupy
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -430,6 +428,7 @@ def test_parquet_read_metadata(tmp_path, pdf):
 def test_parquet_read_filtered(set_decomp_env_vars, tmp_path):
     # Generate data
     fname = tmp_path / "filtered.parquet"
+    rng = np.random.default_rng(0)
     dg.generate(
         fname,
         dg.Parameters(
@@ -439,11 +438,7 @@ def test_parquet_read_filtered(set_decomp_env_vars, tmp_path):
                     cardinality=40,
                     null_frequency=0.05,
                     generator=lambda: [
-                        "".join(
-                            random.sample(
-                                string.ascii_letters, random.randint(4, 8)
-                            )
-                        )
+                        "".join(rng.choice(list(string.ascii_letters), 5))
                         for _ in range(10)
                     ],
                     is_sorted=False,
@@ -451,9 +446,7 @@ def test_parquet_read_filtered(set_decomp_env_vars, tmp_path):
                 dg.ColumnParameters(
                     40,
                     0.2,
-                    lambda: np.random.default_rng(seed=0).integers(
-                        0, 100, size=10
-                    ),
+                    lambda: rng.integers(0, 100, size=10),
                     True,
                 ),
             ],
@@ -1008,13 +1001,13 @@ def test_parquet_reader_list_large_multi_rowgroup(tmp_path):
     num_categories = 100
     row_group_size = 100
 
-    cupy.random.seed(0)
+    rng = np.random.default_rng(0)
 
     # generate a random pairing of doc: category
     documents = cudf.DataFrame(
         {
-            "document_id": cupy.random.randint(num_docs, size=num_rows),
-            "category_id": cupy.random.randint(num_categories, size=num_rows),
+            "document_id": rng.integers(num_docs, size=num_rows),
+            "category_id": rng.integers(num_categories, size=num_rows),
         }
     )
 
@@ -2800,8 +2793,9 @@ def test_parquet_writer_nulls_pandas_read(tmp_path, pdf):
     num_rows = len(gdf)
 
     if num_rows > 0:
-        for col in gdf.columns:
-            gdf[col][random.randint(0, num_rows - 1)] = None
+        rng = np.random.default_rng(0)
+        mask = rng.choice([True, False], size=num_rows)
+        gdf.loc[mask, :] = None
 
     fname = tmp_path / "test_parquet_writer_nulls_pandas_read.parquet"
     gdf.to_parquet(fname)
@@ -3330,23 +3324,24 @@ def test_parquet_writer_time_delta_physical_type(store_schema):
 
 @pytest.mark.parametrize("store_schema", [True, False])
 def test_parquet_roundtrip_time_delta(store_schema):
-    num_rows = 12345
+    num_rows = 123
+    rng = np.random.default_rng(0)
     df = cudf.DataFrame(
         {
             "s": cudf.Series(
-                random.sample(range(0, 200000), num_rows),
+                rng.integers(0, 200000, size=num_rows),
                 dtype="timedelta64[s]",
             ),
             "ms": cudf.Series(
-                random.sample(range(0, 200000), num_rows),
+                rng.integers(0, 200000, size=num_rows),
                 dtype="timedelta64[ms]",
             ),
             "us": cudf.Series(
-                random.sample(range(0, 200000), num_rows),
+                rng.integers(0, 200000, size=num_rows),
                 dtype="timedelta64[us]",
             ),
             "ns": cudf.Series(
-                random.sample(range(0, 200000), num_rows),
+                rng.integers(0, 200000, size=num_rows),
                 dtype="timedelta64[ns]",
             ),
         }
