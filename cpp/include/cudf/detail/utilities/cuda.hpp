@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, NVIDIA CORPORATION.
+ * Copyright (c) 2024-2025, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,15 +53,21 @@ namespace detail {
 cudf::size_type num_multiprocessors();
 
 /**
- * @brief Get the maximum number of available shared memory per multiprocessor
- * on the device in bytes.
+// <<<<<<< OLD CODE from 6ed051a5d2 (49e37def79) - COMMENTED OUT
+//  * @brief Get the maximum number of available shared memory per multiprocessor
+//  * on the device in bytes.
+//  */
+// cudf::size_type max_shared_mem_per_multiprocessor();
+//
+// /**
+//  * @brief Get the maximum number of threads per multiprocessor.
+//  */
+// cudf::size_type max_threads_per_multiprocessor();
+// =======
+ * @brief Check if the current device has integrated memory.
  */
-cudf::size_type max_shared_mem_per_multiprocessor();
-
-/**
- * @brief Get the maximum number of threads per multiprocessor.
- */
-cudf::size_type max_threads_per_multiprocessor();
+[[nodiscard]] bool has_integrated_memory();
+// >>>>>>> END NEW CODE (49e37def79)
 
 /**
  * @brief Get the number of elements that can be processed per thread.
