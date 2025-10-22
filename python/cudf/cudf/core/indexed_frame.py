@@ -1923,7 +1923,7 @@ class IndexedFrame(Frame):
         )
 
     @_performance_tracking
-    def nans_to_nulls(self):
+    def nans_to_nulls(self) -> Self:
         """
         Convert nans (if any) to nulls
 
