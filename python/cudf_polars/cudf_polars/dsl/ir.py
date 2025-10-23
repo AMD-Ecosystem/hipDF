@@ -17,6 +17,7 @@ import itertools
 import json
 import random
 import time
+from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, overload
@@ -72,6 +73,7 @@ __all__ = [
     "GroupBy",
     "HConcat",
     "HStack",
+    "IRExecutionContext",
     "Join",
     "MapFunction",
     "MergeSorted",
@@ -86,6 +88,16 @@ __all__ = [
     "Sort",
     "Union",
 ]
+
+
+@dataclass(frozen=True)
+class IRExecutionContext:
+    """
+    Runtime context for IR node execution.
+
+    This dataclass holds runtime information and configuration needed
+    during the evaluation of IR nodes.
+    """
 
 
 _BINOPS = {
@@ -158,7 +170,9 @@ class IR(Node["IR"]):
         translation phase should fail earlier.
     """
 
-    def evaluate(self, *, cache: CSECache, timer: Timer | None) -> DataFrame:
+    def evaluate(
+        self, *, cache: CSECache, timer: Timer | None, context: IRExecutionContext
+    ) -> DataFrame:
         """
         Evaluate the node (recursively) and return a dataframe.
 
@@ -170,6 +184,8 @@ class IR(Node["IR"]):
         timer
             If not None, a Timer object to record timings for the
             evaluation of the node.
+        context
+            The execution context for the node.
 
         Notes
         -----
@@ -188,16 +204,19 @@ class IR(Node["IR"]):
             If evaluation fails. Ideally this should not occur, since the
             translation phase should fail earlier.
         """
-        children = [child.evaluate(cache=cache, timer=timer) for child in self.children]
+        children = [
+            child.evaluate(cache=cache, timer=timer, context=context)
+            for child in self.children
+        ]
         if timer is not None:
             start = time.monotonic_ns()
-            result = self.do_evaluate(*self._non_child_args, *children)
+            result = self.do_evaluate(*self._non_child_args, *children, context=context)
             end = time.monotonic_ns()
             # TODO: Set better names on each class object.
             timer.store(start, end, type(self).__name__)
             return result
         else:
-            return self.do_evaluate(*self._non_child_args, *children)
+            return self.do_evaluate(*self._non_child_args, *children, context=context)
 
 
 class ErrorNode(IR):
@@ -597,6 +616,8 @@ class Scan(IR):
         include_file_paths: str | None,
         predicate: expr.NamedExpr | None,
         parquet_options: ParquetOptions,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         stream = get_cuda_stream()
@@ -1121,6 +1142,8 @@ class Sink(IR):
         parquet_options: ParquetOptions,
         options: dict[str, Any],
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Write the dataframe to a file."""
         target = plc.io.SinkInfo([path])
@@ -1174,14 +1197,21 @@ class Cache(IR):
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="Cache")
     def do_evaluate(
-        cls, key: int, refcount: int | None, df: DataFrame
+        cls,
+        key: int,
+        refcount: int | None,
+        df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:  # pragma: no cover; basic evaluation never calls this
         """Evaluate and return a dataframe."""
         # Our value has already been computed for us, so let's just
         # return it.
         return df
 
-    def evaluate(self, *, cache: CSECache, timer: Timer | None) -> DataFrame:
+    def evaluate(
+        self, *, cache: CSECache, timer: Timer | None, context: IRExecutionContext
+    ) -> DataFrame:
         """Evaluate and return a dataframe."""
         # We must override the recursion scheme because we don't want
         # to recurse if we're in the cache.
@@ -1189,7 +1219,7 @@ class Cache(IR):
             (result, hits) = cache[self.key]
         except KeyError:
             (value,) = self.children
-            result = value.evaluate(cache=cache, timer=timer)
+            result = value.evaluate(cache=cache, timer=timer, context=context)
             cache[self.key] = (result, 0)
             return result
         else:
@@ -1259,6 +1289,8 @@ class DataFrameScan(IR):
         schema: Schema,
         df: Any,
         projection: tuple[str, ...] | None,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         if projection is not None:
@@ -1319,6 +1351,8 @@ class Select(IR):
         exprs: tuple[expr.NamedExpr, ...],
         should_broadcast: bool,  # noqa: FBT001
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         # Handle any broadcasting
@@ -1327,7 +1361,9 @@ class Select(IR):
             columns = broadcast(*columns)
         return DataFrame(columns, stream=df.stream)
 
-    def evaluate(self, *, cache: CSECache, timer: Timer | None) -> DataFrame:
+    def evaluate(
+        self, *, cache: CSECache, timer: Timer | None, context: IRExecutionContext
+    ) -> DataFrame:
         """
         Evaluate the Select node with special handling for fast count queries.
 
@@ -1339,6 +1375,8 @@ class Select(IR):
         timer
             If not None, a Timer object to record timings for the
             evaluation of the node.
+        context
+            The execution context for the node.
 
         Returns
         -------
@@ -1374,7 +1412,7 @@ class Select(IR):
             )
             return DataFrame([col], stream=stream)
 
-        return super().evaluate(cache=cache, timer=timer)
+        return super().evaluate(cache=cache, timer=timer, context=context)
 
 
 class Reduce(IR):
@@ -1404,6 +1442,8 @@ class Reduce(IR):
         cls,
         exprs: tuple[expr.NamedExpr, ...],
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:  # pragma: no cover; not exposed by polars yet
         """Evaluate and return a dataframe."""
         columns = broadcast(*(e.evaluate(df) for e in exprs))
@@ -1507,6 +1547,8 @@ class Rolling(IR):
         aggs: Sequence[expr.NamedExpr],
         zlice: Zlice | None,
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         keys = broadcast(*(k.evaluate(df) for k in keys_in), target_length=df.num_rows)
@@ -1637,6 +1679,8 @@ class GroupBy(IR):
         maintain_order: bool,  # noqa: FBT001
         zlice: Zlice | None,
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         keys = broadcast(*(k.evaluate(df) for k in keys_in), target_length=df.num_rows)
@@ -1914,6 +1958,8 @@ class ConditionalJoin(IR):
         options: tuple,
         left: DataFrame,
         right: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         stream = get_joined_cuda_stream(upstreams=(left.stream, right.stream))
@@ -2197,6 +2243,8 @@ class Join(IR):
         ],
         left: DataFrame,
         right: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         stream = get_joined_cuda_stream(upstreams=(left.stream, right.stream))
@@ -2368,6 +2416,8 @@ class HStack(IR):
         exprs: Sequence[expr.NamedExpr],
         should_broadcast: bool,  # noqa: FBT001
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         columns = [c.evaluate(df) for c in exprs]
@@ -2436,6 +2486,8 @@ class Distinct(IR):
         zlice: Zlice | None,
         stable: bool,  # noqa: FBT001
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         if subset is None:
@@ -2529,6 +2581,8 @@ class Sort(IR):
         stable: bool,  # noqa: FBT001
         zlice: Zlice | None,
         df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         sort_keys = broadcast(*(k.evaluate(df) for k in by), target_length=df.num_rows)
@@ -2575,7 +2629,9 @@ class Slice(IR):
     @classmethod
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="Slice")
-    def do_evaluate(cls, offset: int, length: int, df: DataFrame) -> DataFrame:
+    def do_evaluate(
+        cls, offset: int, length: int, df: DataFrame, *, context: IRExecutionContext
+    ) -> DataFrame:
         """Evaluate and return a dataframe."""
         return df.slice((offset, length))
 
@@ -2597,7 +2653,9 @@ class Filter(IR):
     @classmethod
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="Filter")
-    def do_evaluate(cls, mask_expr: expr.NamedExpr, df: DataFrame) -> DataFrame:
+    def do_evaluate(
+        cls, mask_expr: expr.NamedExpr, df: DataFrame, *, context: IRExecutionContext
+    ) -> DataFrame:
         """Evaluate and return a dataframe."""
         (mask,) = broadcast(mask_expr.evaluate(df), target_length=df.num_rows)
         return df.filter(mask)
@@ -2617,7 +2675,9 @@ class Projection(IR):
     @classmethod
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="Projection")
-    def do_evaluate(cls, schema: Schema, df: DataFrame) -> DataFrame:
+    def do_evaluate(
+        cls, schema: Schema, df: DataFrame, *, context: IRExecutionContext
+    ) -> DataFrame:
         """Evaluate and return a dataframe."""
         # This can reorder things.
         columns = broadcast(
@@ -2651,7 +2711,9 @@ class MergeSorted(IR):
     @classmethod
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="MergeSorted")
-    def do_evaluate(cls, key: str, *dfs: DataFrame) -> DataFrame:
+    def do_evaluate(
+        cls, key: str, *dfs: DataFrame, context: IRExecutionContext
+    ) -> DataFrame:
         """Evaluate and return a dataframe."""
         stream = get_joined_cuda_stream(upstreams=(df.stream for df in dfs))
         left, right = dfs
@@ -2776,7 +2838,13 @@ class MapFunction(IR):
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="MapFunction")
     def do_evaluate(
-        cls, schema: Schema, name: str, options: Any, df: DataFrame
+        cls,
+        schema: Schema,
+        name: str,
+        options: Any,
+        df: DataFrame,
+        *,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         if name == "rechunk":
@@ -2882,7 +2950,9 @@ class Union(IR):
     @classmethod
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="Union")
-    def do_evaluate(cls, zlice: Zlice | None, *dfs: DataFrame) -> DataFrame:
+    def do_evaluate(
+        cls, zlice: Zlice | None, *dfs: DataFrame, context: IRExecutionContext
+    ) -> DataFrame:
         """Evaluate and return a dataframe."""
         stream = get_joined_cuda_stream(upstreams=(df.stream for df in dfs))
 
@@ -2952,6 +3022,7 @@ class HConcat(IR):
         cls,
         should_broadcast: bool,  # noqa: FBT001
         *dfs: DataFrame,
+        context: IRExecutionContext,
     ) -> DataFrame:
         """Evaluate and return a dataframe."""
         stream = get_joined_cuda_stream(upstreams=(df.stream for df in dfs))
@@ -3001,7 +3072,9 @@ class Empty(IR):
     @classmethod
     @log_do_evaluate
     @nvtx_annotate_cudf_polars(message="Empty")
-    def do_evaluate(cls, schema: Schema) -> DataFrame:  # pragma: no cover
+    def do_evaluate(
+        cls, schema: Schema, *, context: IRExecutionContext
+    ) -> DataFrame:  # pragma: no cover
         """Evaluate and return a dataframe."""
         stream = get_cuda_stream()
         return DataFrame(
