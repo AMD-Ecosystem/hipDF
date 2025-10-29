@@ -117,11 +117,17 @@ namespace {
     case nvcompStatus_t::nvcompErrorInternal: return "nvcompErrorInternal";
     case nvcompStatus_t::nvcompErrorCannotCompress: return "nvcompErrorCannotCompress";
     case nvcompStatus_t::nvcompErrorWrongInputLength: return "nvcompErrorWrongInputLength";
-// <<<<<<< OLD CODE from b638a2cc08 (d6c147a175) - COMMENTED OUT
-// #endif
-//     default: break;
+// <<<<<<< OLD CODE from ab0effd74c (369f7a2f96) - COMMENTED OUT
+// // <<<<<<< OLD CODE from b638a2cc08 (d6c147a175) - COMMENTED OUT
+// // #endif
+// //     default: break;
+// // =======
+// // >>>>>>> END NEW CODE (d6c147a175)
 // =======
-// >>>>>>> END NEW CODE (d6c147a175)
+#if NVCOMP_VER_MAJOR >= 5 and NVCOMP_VER_MINOR >= 1
+    case nvcompStatus_t::nvcompErrorBatchSizeTooLarge: return "nvcompErrorBatchSizeTooLarge";
+#endif
+// >>>>>>> END NEW CODE (369f7a2f96)
   }
   return "nvcompStatus_t(" + std::to_string(static_cast<int>(status)) + ")";
 }
