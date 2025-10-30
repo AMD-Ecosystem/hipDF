@@ -148,10 +148,10 @@ struct base_fn {
   char* d_chars{};
   cudf::detail::input_offsetalator d_offsets;
 
-  base_fn(column_device_view const& d_column)
-    : d_flags(get_character_flags_table()),
-      d_case_table(get_character_cases_table()),
-      d_special_case_mapping(get_special_case_mapping_table()),
+  base_fn(column_device_view const& d_column, rmm::cuda_stream_view stream)
+    : d_flags(get_character_flags_table(stream)),
+      d_case_table(get_character_cases_table(stream)),
+      d_special_case_mapping(get_special_case_mapping_table(stream)),
       d_column(d_column)
   {
   }
@@ -254,8 +254,10 @@ struct base_fn {
 struct capitalize_fn : base_fn<capitalize_fn> {
   string_view const d_delimiters;
 
-  capitalize_fn(column_device_view const& d_column, string_view const& d_delimiters)
-    : base_fn(d_column), d_delimiters(d_delimiters)
+  capitalize_fn(column_device_view const& d_column,
+                string_view const& d_delimiters,
+                rmm::cuda_stream_view stream)
+    : base_fn(d_column, stream), d_delimiters(d_delimiters)
   {
   }
 
@@ -276,8 +278,10 @@ struct capitalize_fn : base_fn<capitalize_fn> {
 struct title_fn : base_fn<title_fn> {
   string_character_types sequence_type;
 
-  title_fn(column_device_view const& d_column, string_character_types sequence_type)
-    : base_fn(d_column), sequence_type(sequence_type)
+  title_fn(column_device_view const& d_column,
+           string_character_types sequence_type,
+           rmm::cuda_stream_view stream)
+    : base_fn(d_column, stream), sequence_type(sequence_type)
   {
   }
 
@@ -352,7 +356,7 @@ std::unique_ptr<column> capitalize(strings_column_view const& input,
   if (input.is_empty()) return make_empty_column(type_id::STRING);
   auto const d_column     = column_device_view::create(input.parent(), stream);
   auto const d_delimiters = delimiters.value(stream);
-  return capitalizer(capitalize_fn{*d_column, d_delimiters}, input, stream, mr);
+  return capitalizer(capitalize_fn{*d_column, d_delimiters, stream}, input, stream, mr);
 }
 
 std::unique_ptr<column> title(strings_column_view const& input,
@@ -362,7 +366,7 @@ std::unique_ptr<column> title(strings_column_view const& input,
 {
   if (input.is_empty()) return make_empty_column(type_id::STRING);
   auto d_column = column_device_view::create(input.parent(), stream);
-  return capitalizer(title_fn{*d_column, sequence_type}, input, stream, mr);
+  return capitalizer(title_fn{*d_column, sequence_type, stream}, input, stream, mr);
 }
 
 std::unique_ptr<column> is_title(strings_column_view const& input,
@@ -381,7 +385,7 @@ std::unique_ptr<column> is_title(strings_column_view const& input,
                     thrust::make_counting_iterator<size_type>(0),
                     thrust::make_counting_iterator<size_type>(input.size()),
                     results->mutable_view().data<bool>(),
-                    is_title_fn{get_character_flags_table(), *d_column});
+                    is_title_fn{get_character_flags_table(stream), *d_column});
   results->set_null_count(input.null_count());
   return results;
 }
