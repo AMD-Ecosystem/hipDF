@@ -1391,9 +1391,9 @@ class IndexedFrame(Frame):
     def sum(
         self,
         axis=no_default,
-        skipna=True,
-        numeric_only=False,
-        min_count=0,
+        skipna: bool = True,
+        numeric_only: bool = False,
+        min_count: int = 0,
         **kwargs,
     ):
         """
@@ -1498,7 +1498,13 @@ class IndexedFrame(Frame):
     prod = product
 
     @_performance_tracking
-    def mean(self, axis=0, skipna=True, numeric_only=False, **kwargs):
+    def mean(
+        self,
+        axis: Axis = 0,
+        skipna: bool = True,
+        numeric_only: bool = False,
+        **kwargs,
+    ):
         """
         Return the mean of the values for the requested axis.
 
@@ -1537,7 +1543,11 @@ class IndexedFrame(Frame):
         )
 
     def median(
-        self, axis=no_default, skipna=True, numeric_only=None, **kwargs
+        self,
+        axis=no_default,
+        skipna: bool = True,
+        numeric_only: bool = False,
+        **kwargs,
     ):
         """
         Return the median of the values for the requested axis.
@@ -1585,9 +1595,9 @@ class IndexedFrame(Frame):
     def std(
         self,
         axis=no_default,
-        skipna=True,
-        ddof=1,
-        numeric_only=False,
+        skipna: bool = True,
+        ddof: int = 1,
+        numeric_only: bool = False,
         **kwargs,
     ):
         """
@@ -1638,9 +1648,9 @@ class IndexedFrame(Frame):
     def var(
         self,
         axis=no_default,
-        skipna=True,
-        ddof=1,
-        numeric_only=False,
+        skipna: bool = True,
+        ddof: int = 1,
+        numeric_only: bool = False,
         **kwargs,
     ):
         """
@@ -1687,7 +1697,13 @@ class IndexedFrame(Frame):
         )
 
     @_performance_tracking
-    def kurtosis(self, axis=0, skipna=True, numeric_only=False, **kwargs):
+    def kurtosis(
+        self,
+        axis: Axis = 0,
+        skipna: bool = True,
+        numeric_only: bool = False,
+        **kwargs,
+    ):
         """
         Return Fisher's unbiased kurtosis of a sample.
 
@@ -1742,7 +1758,13 @@ class IndexedFrame(Frame):
     kurt = kurtosis
 
     @_performance_tracking
-    def skew(self, axis=0, skipna=True, numeric_only=False, **kwargs):
+    def skew(
+        self,
+        axis: Axis = 0,
+        skipna: bool = True,
+        numeric_only: bool = False,
+        **kwargs,
+    ):
         """
         Return unbiased Fisher-Pearson skew of a sample.
 
