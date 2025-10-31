@@ -50,12 +50,19 @@ project(
   LANGUAGES C CXX HIP
 )
 
-# NOTE(HIP/AMD): required for rocThrust
-if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*clang\\+\\+")
-   OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+")
-)
+# <<<<<<< OLD CODE from 6ef54fbfb1 (ed6d472027) - COMMENTED OUT
+# # NOTE(HIP/AMD): required for rocThrust
+# if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*clang\\+\\+")
+#    OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+")
+# )
+#   message(
+#     FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers."
+# =======
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.2)
   message(
-    FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers."
+    FATAL_ERROR
+      "libcudf requires CUDA Toolkit 12.2+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
+# >>>>>>> END NEW CODE (ed6d472027)
   )
 endif()
 
