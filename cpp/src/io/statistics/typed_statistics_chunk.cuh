@@ -37,10 +37,10 @@
 #include "statistics_type_identification.cuh"
 #include "temp_storage_wrapper.cuh"
 
-#include <cudf/detail/utilities/functional.hpp>
 #include <cudf/fixed_point/fixed_point.hpp>
 #include <cudf/wrappers/timestamps.hpp>
 
+#include <cuda/functional>
 #include <cuda/std/functional>
 #include <cuda/std/limits>
 #include <hip/hip_math_constants.h>
@@ -218,11 +218,11 @@ __inline__ __device__ typed_statistics_chunk<T, include_aggregate> block_reduce(
   using extrema_reduce = hipcub::BlockReduce<E, block_size>;
   using count_reduce   = hipcub::BlockReduce<uint32_t, block_size>;
 
-  output_chunk.minimum_value = extrema_reduce(storage.template get<E>())
-                                 .Reduce(output_chunk.minimum_value, cudf::detail::minimum{});
+  output_chunk.minimum_value =
+    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.minimum_value, cuda::minimum{});
   __syncthreads();
-  output_chunk.maximum_value = extrema_reduce(storage.template get<E>())
-                                 .Reduce(output_chunk.maximum_value, cudf::detail::maximum{});
+  output_chunk.maximum_value =
+    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.maximum_value, cuda::maximum{});
   __syncthreads();
   output_chunk.non_nulls =
     count_reduce(storage.template get<uint32_t>()).Sum(output_chunk.non_nulls);

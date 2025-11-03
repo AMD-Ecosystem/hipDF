@@ -32,7 +32,6 @@
 #include <cudf_test/type_lists.hpp>
 
 #include <cudf/detail/iterator.cuh>
-#include <cudf/detail/utilities/functional.hpp>
 #include <cudf/detail/utilities/transform_unary_functions.cuh>  // for meanvar
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/utilities/default_stream.hpp>
@@ -77,7 +76,7 @@ struct IteratorTest : public cudf::test::BaseFixture {
                               d_in,
                               dev_result.begin(),
                               num_items,
-                              cudf::detail::minimum{},
+                              cuda::minimum{},
                               init,
                               cudf::get_default_stream().value());
 
@@ -90,7 +89,7 @@ struct IteratorTest : public cudf::test::BaseFixture {
                               d_in,
                               dev_result.begin(),
                               num_items,
-                              cudf::detail::minimum{},
+                              cuda::minimum{},
                               init,
                               cudf::get_default_stream().value());
 

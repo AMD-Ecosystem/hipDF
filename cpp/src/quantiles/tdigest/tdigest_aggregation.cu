@@ -38,7 +38,6 @@
 #include <cudf/detail/sorting.hpp>
 #include <cudf/detail/tdigest/tdigest.hpp>
 #include <cudf/detail/utilities/cuda.cuh>
-#include <cudf/detail/utilities/functional.hpp>
 #include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/fixed_point/conv.hpp>
 #include <cudf/lists/lists_column_view.hpp>
@@ -1461,8 +1460,13 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         min_iter,
                         thrust::make_discard_iterator(),
                         merged_min_col->mutable_view().begin<double>(),
-                        CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
-                        cudf::detail::minimum{});
+// <<<<<<< OLD CODE from 43bd0b08d3 (17533d4db9) - COMMENTED OUT
+//                         CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
+//                         cudf::detail::minimum{});
+// =======
+                        cuda::std::equal_to{},  // key equality check
+                        cuda::minimum{});
+// >>>>>>> END NEW CODE (17533d4db9)
 
   auto merged_max_col = cudf::make_numeric_column(
     data_type{type_id::FLOAT64}, num_groups, mask_state::UNALLOCATED, stream, mr);
@@ -1476,8 +1480,13 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         max_iter,
                         thrust::make_discard_iterator(),
                         merged_max_col->mutable_view().begin<double>(),
-                        CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
-                        cudf::detail::maximum{});
+// <<<<<<< OLD CODE from 43bd0b08d3 (17533d4db9) - COMMENTED OUT
+//                         CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
+//                         cudf::detail::maximum{});
+// =======
+                        cuda::std::equal_to{},  // key equality check
+                        cuda::maximum{});
+// >>>>>>> END NEW CODE (17533d4db9)
 
   auto tdigest_offsets = tdv.centroids().offsets();
 

@@ -53,6 +53,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <cuda/functional>
 #include <thrust/gather.h>
 #include <thrust/host_vector.h>
 #include <thrust/iterator/counting_iterator.h>
