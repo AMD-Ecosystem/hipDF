@@ -25,7 +25,6 @@
 // SOFTWARE.
 
 #include "io/utilities/parsing_utils.cuh"
-#include "io/utilities/string_parsing.hpp"
 #include "nested_json.hpp"
 
 #include <cudf/detail/cuco_helpers.hpp>
