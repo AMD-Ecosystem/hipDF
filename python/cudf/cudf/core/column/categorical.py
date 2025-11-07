@@ -12,6 +12,8 @@ import pandas as pd
 import pyarrow as pa
 from typing_extensions import Self
 
+import pylibcudf as plc
+
 import cudf
 from cudf.api.types import is_scalar
 from cudf.core.column import column
@@ -30,20 +32,24 @@ from cudf.utils.utils import _is_null_host_scalar
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableSequence, Sequence
 
-# <<<<<<< OLD CODE from dea936b63a (8008d10bed) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# #     from pylibcudf import Scalar as plc_Scalar
-# #
+# <<<<<<< OLD CODE from d4c72b4b6b (0739891cfe) - COMMENTED OUT
+# # <<<<<<< OLD CODE from dea936b63a (8008d10bed) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
+# # #     from pylibcudf import Scalar as plc_Scalar
+# # #
+# # # =======
+# # # >>>>>>> END NEW CODE (d53ccf2bb0)
 # # =======
-# # >>>>>>> END NEW CODE (d53ccf2bb0)
+#     from pylibcudf import Scalar as plc_Scalar
+#
+# # >>>>>>> END NEW CODE (8008d10bed)
 # =======
-    from pylibcudf import Scalar as plc_Scalar
-
-# >>>>>>> END NEW CODE (8008d10bed)
+# >>>>>>> END NEW CODE (0739891cfe)
     from cudf._typing import (
         ColumnBinaryOperand,
         ColumnLike,
         Dtype,
+        DtypeObj,
         ScalarLike,
     )
     from cudf.core.buffer import Buffer
@@ -59,18 +65,6 @@ if TYPE_CHECKING:
 # Using np.int8(-1) to allow silent wrap-around when casting to uint
 # it may make sense to make this dtype specific or a function.
 _DEFAULT_CATEGORICAL_VALUE = np.int8(-1)
-
-
-def validate_categorical_children(children) -> None:
-    if not (
-        len(children) == 1
-        and isinstance(children[0], cudf.core.column.numerical.NumericalColumn)
-        and children[0].dtype.kind in "iu"
-    ):
-        # TODO: Enforce unsigned integer?
-        raise ValueError(
-            "Must specify exactly one child NumericalColumn of integers for representing the codes."
-        )
 
 
 class CategoricalColumn(column.ColumnBase):
@@ -103,34 +97,59 @@ class CategoricalColumn(column.ColumnBase):
         "__gt__",
         "__ge__",
     }
+    # TODO: See if we can narrow these integer types
+    _VALID_PLC_TYPES = {
+        plc.TypeId.INT8,
+        plc.TypeId.INT16,
+        plc.TypeId.INT32,
+        plc.TypeId.INT64,
+        plc.TypeId.UINT8,
+        plc.TypeId.UINT16,
+        plc.TypeId.UINT32,
+        plc.TypeId.UINT64,
+    }
 
     def __init__(
         self,
-        data: None,
+        plc_column: plc.Column,
         size: int,
         dtype: CategoricalDtype,
-        mask: Buffer | None,
         offset: int,
         null_count: int,
-        children: tuple[NumericalColumn],
-    ):
-        if data is not None:
-            raise ValueError(f"{data=} must be None")
-        validate_categorical_children(children)
+        exposed: bool,
+    ) -> None:
         if not isinstance(dtype, CategoricalDtype):
             raise ValueError(
                 f"{dtype=} must be cudf.CategoricalDtype instance."
             )
         super().__init__(
-            data=data,
+            plc_column=plc_column,
             size=size,
             dtype=dtype,
-            mask=mask,
             offset=offset,
             null_count=null_count,
-            children=children,
+            exposed=exposed,
         )
         self._codes = self.children[0].set_mask(self.mask)
+
+    @classmethod
+    def _get_data_buffer_from_pylibcudf_column(
+        cls, plc_column: plc.Column, exposed: bool
+    ) -> None:
+        """
+        This column considers the plc_column (i.e. codes) as children
+        """
+        return None
+
+    def _get_children_from_pylibcudf_column(
+        self, plc_column: plc.Column, dtype: DtypeObj, exposed: bool
+    ) -> tuple[ColumnBase]:
+        """
+        This column considers the plc_column (i.e. codes) as children
+        """
+        return (
+            type(self).from_pylibcudf(plc_column, data_ptr_exposed=exposed),
+        )
 
     @property
     def base_size(self) -> int:
@@ -145,15 +164,6 @@ class CategoricalColumn(column.ColumnBase):
             return False
         return self._encode(item) in self.codes
 
-    def set_base_data(self, value):
-        if value is not None:
-            raise RuntimeError(
-                "CategoricalColumns do not use data attribute of Column, use "
-                "`set_base_children` instead"
-            )
-        else:
-            super().set_base_data(value)
-
     def _process_values_for_isin(
         self, values: Sequence
     ) -> tuple[ColumnBase, ColumnBase]:
@@ -166,7 +176,6 @@ class CategoricalColumn(column.ColumnBase):
 
     def set_base_children(self, value: tuple[NumericalColumn]) -> None:  # type: ignore[override]
         super().set_base_children(value)
-        validate_categorical_children(value)
         self._codes = value[0].set_mask(self.mask)
 
     @property
@@ -225,7 +234,7 @@ class CategoricalColumn(column.ColumnBase):
 
     def _fill(
         self,
-        fill_value: plc_Scalar,
+        fill_value: plc.Scalar,
         begin: int,
         end: int,
         inplace: bool = False,
@@ -382,7 +391,7 @@ class CategoricalColumn(column.ColumnBase):
 
     def _cast_self_and_other_for_where(
         self, other: ScalarLike | ColumnBase, inplace: bool
-    ) -> tuple[ColumnBase, plc_Scalar | ColumnBase]:
+    ) -> tuple[ColumnBase, plc.Scalar | ColumnBase]:
         if is_scalar(other):
             try:
                 other = self._encode(other)
@@ -577,7 +586,7 @@ class CategoricalColumn(column.ColumnBase):
 
     def _validate_fillna_value(
         self, fill_value: ScalarLike | ColumnLike
-    ) -> plc_Scalar | ColumnBase:
+    ) -> plc.Scalar | ColumnBase:
         """Align fill_value for .fillna based on column type."""
         if is_scalar(fill_value):
             if fill_value != _DEFAULT_CATEGORICAL_VALUE:
@@ -719,13 +728,12 @@ class CategoricalColumn(column.ColumnBase):
     def _with_type_metadata(self: Self, dtype: Dtype) -> Self:
         if isinstance(dtype, CategoricalDtype):
             return type(self)(
-                data=self.data,  # type: ignore[arg-type]
+                plc_column=self.plc_column,
                 size=self.size,
                 dtype=dtype,
-                mask=self.base_mask,
                 offset=self.offset,
                 null_count=self.null_count,
-                children=self.base_children,  # type: ignore[arg-type]
+                exposed=False,
             )
 
         return self
