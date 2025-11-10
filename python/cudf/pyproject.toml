@@ -97,11 +97,11 @@ test = [
     "fastavro>=0.22.9",
     "hypothesis>=6.131.7",
     "msgpack",
-    "pytest",
     "pytest-benchmark",
     "pytest-cases>=3.8.2",
     "pytest-cov",
     "pytest-xdist",
+    "pytest<9",
     "s3fs>=2022.3.0",
     "scipy",
     "tzdata",
@@ -168,15 +168,19 @@ dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true"
 requires = [
     "cmake>=3.30.4",
-    "cython>=3.0.3",
-# <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
-#     "amd-libhipdf==3.*,>=3.0.00",
-#     "amd-libhipmm==4.*,>=4.0.0a0",
-#     "ninja",
-#     # "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
-#     "amd-pylibhipdf==3.*,>=3.0.00",
-#     "amd-hipmm==3.*,>=3.0.0a0"
+# <<<<<<< OLD CODE from 1282d4cd47 (1bb674c580) - COMMENTED OUT
+#     "cython>=3.0.3",
+# # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
+# #     "amd-libhipdf==3.*,>=3.0.00",
+# #     "amd-libhipmm==4.*,>=4.0.0a0",
+# #     "ninja",
+# #     # "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
+# #     "amd-pylibhipdf==3.*,>=3.0.00",
+# #     "amd-hipmm==3.*,>=3.0.0a0"
+# # =======
 # =======
+    "cython>=3.0.0,<3.2.0",
+# >>>>>>> END NEW CODE (1bb674c580)
     "libcudf==25.12.*,>=0.0.0a0",
     "librmm==25.12.*,>=0.0.0a0",
     "ninja",
