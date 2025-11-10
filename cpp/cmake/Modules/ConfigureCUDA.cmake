@@ -89,6 +89,7 @@ macro(set_cudf_target_properties)
               CUDA_VISIBILITY_PRESET hidden
               POSITION_INDEPENDENT_CODE ON
               INTERFACE_POSITION_INDEPENDENT_CODE ON
+              LINK_FLAGS "-Wl,--exclude-libs,libzstd.a"
   )
 
   # Note: This must come before the target_compile_options below so that the function can modify the
@@ -107,7 +108,7 @@ macro(set_cudf_target_properties)
   endif()
   target_compile_options(
     cudf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-                "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_FLAGS}>"
+                "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
   )
 
   if(CUDF_BUILD_STACKTRACE_DEBUG)
