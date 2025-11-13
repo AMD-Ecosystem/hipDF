@@ -32,7 +32,7 @@
 #include <cudf/utilities/memory_resource.hpp>
 #include <cudf/cuda_runtime.h>
 
-#include <rmm/mr/device/device_memory_resource.hpp>
+#include <rmm/mr/device_memory_resource.hpp>
 
 #include <iostream>
 
