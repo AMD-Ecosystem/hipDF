@@ -31,9 +31,15 @@ function(find_and_configure_cudf VERSION)
     cudf ${VERSION}
     BUILD_EXPORT_SET cudf_kafka-exports
     INSTALL_EXPORT_SET cudf_kafka-exports
-    CPM_ARGS # : GIT_REPOSITORY https://github.com/rapidsai/cudf.git : GIT_TAG branch-${major_minor}
-    GIT_REPOSITORY https://github.com/ROCm/hipdf.git
-    GIT_TAG dev
+# <<<<<<< OLD CODE from d26f0baa9a (7cd540eb83) - COMMENTED OUT
+#     CPM_ARGS # : GIT_REPOSITORY https://github.com/rapidsai/cudf.git : GIT_TAG branch-${major_minor}
+#     GIT_REPOSITORY https://github.com/ROCm/hipdf.git
+#     GIT_TAG dev
+# =======
+    CPM_ARGS
+    GIT_REPOSITORY https://github.com/rapidsai/cudf.git
+    GIT_TAG main
+# >>>>>>> END NEW CODE (7cd540eb83)
     GIT_SHALLOW TRUE SOURCE_SUBDIR cpp
     OPTIONS "BUILD_TESTS OFF" "BUILD_BENCHMARKS OFF"
   )
