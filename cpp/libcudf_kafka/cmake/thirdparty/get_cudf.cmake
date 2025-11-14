@@ -38,8 +38,12 @@ function(find_and_configure_cudf VERSION)
 # =======
     CPM_ARGS
     GIT_REPOSITORY https://github.com/rapidsai/cudf.git
-    GIT_TAG main
-# >>>>>>> END NEW CODE (7cd540eb83)
+# <<<<<<< OLD CODE from 58083a4ae1 (24679d11e8) - COMMENTED OUT
+#     GIT_TAG main
+# # >>>>>>> END NEW CODE (7cd540eb83)
+# =======
+    GIT_TAG release/25.12
+# >>>>>>> END NEW CODE (24679d11e8)
     GIT_SHALLOW TRUE SOURCE_SUBDIR cpp
     OPTIONS "BUILD_TESTS OFF" "BUILD_BENCHMARKS OFF"
   )
