@@ -178,7 +178,7 @@ cdef class ChunkedPack:
     def create(
         Table input,
         size_t user_buffer_size,
-        Stream stream,
+        Stream stream=None,
         DeviceMemoryResource temp_mr=None,
     ):
         """
@@ -199,6 +199,7 @@ cdef class ChunkedPack:
         -------
         New ChunkedPack object.
         """
+        stream = _get_stream(stream)
         temp_mr = _get_memory_resource(temp_mr)
         cdef unique_ptr[chunked_pack] obj = chunked_pack.create(
             input.view(), user_buffer_size, stream.view(), temp_mr.get_mr()
