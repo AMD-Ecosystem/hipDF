@@ -40,15 +40,14 @@ ARGS=$*
 # script, and that this script resides in the repo dir!
 REPODIR=$(cd "$(dirname "$0")"; pwd)
 
-VALIDARGS="clean libcudf pylibcudf cudf cudf_polars cudfjar dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n --pydevelop -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats --disable_large_strings"
-HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf] [benchmarks] [tests] [libcudf_kafka] [cudf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
+VALIDARGS="clean libcudf pylibcudf cudf cudf_polars dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n --pydevelop -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats --disable_large_strings"
+HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [dask_cudf] [benchmarks] [tests] [libcudf_kafka] [cudf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
    libcudf                       - build the cudf C++ code only
    pylibcudf                     - build the pylibcudf Python package
    cudf                          - build the cudf Python package
    cudf_polars                   - build the cudf_polars Python package
-   cudfjar                       - build cudf JAR with static libcudf using devtoolset toolchain
    dask_cudf                     - build the dask_cudf Python package
    benchmarks                    - build benchmarks
    tests                         - build tests
@@ -158,110 +157,113 @@ function buildAll {
     (( NUMARGS == 0 )) || ! (echo " ${ARGS} " | grep -q " [^-]\+ ")
 }
 
-# Usage: ROCM_VERSION=$(get_rocm_version_short)
-function get_rocm_version_short() {
-    local rocm_version_h
-    rocm_version_h=$(find "$(hipconfig --path)" -name "rocm_version.h")
-    local major
-    major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" "${rocm_version_h}" | grep -o "[0-9]\+")
-    local minor
-    minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" "${rocm_version_h}" | grep -o "[0-9]\+")
-    local patch
-    patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" "${rocm_version_h}" | grep -o "[0-9]\+")
-
-    if [[ "${patch}" == "0" ]];
-    then
-        printf "${major}.${minor}"
-    else
-    printf "${major}.${minor}.${patch}"
-    fi
-}
-
-# NOTE(HIP/AMD): We need to set DCUDF_JNI_ENABLE_PROFILING=NO because of NVTX missing.
-# TODO(HIP/AMD): We need to set USE_GDS to OFF because we do not support GPU Direct Storage currently.
-# TODO(HIP/AMD): Unlike CUDA, we need to set LD_LIBRARY_PATH explicitly otherwise we run into "NoClassDefFound" error for java tests. Internal issue #177.
-function buildLibCudfJniInDocker {
-    local LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"$CUDF_JAR_JAVA_BUILD_DIR/cmake-build:$CUDF_JAR_JAVA_BUILD_DIR/cmake-build/lib:$CUDF_JAR_JAVA_BUILD_DIR/libcudf-install/lib"}
-    local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
-    local ROCM_VERSION=${ROCM_VERSION:-"6.2"}
-    local imageName="cudf-build:${ROCM_VERSION}-devel-ubuntu"
-    local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
-    local workspaceDir="/rapids"
-    local localMavenRepo=${LOCAL_MAVEN_REPO:-"$HOME/.m2/repository"}
-    local workspaceRepoDir="$workspaceDir/cudf"
-    local workspaceMavenRepoDir="$workspaceDir/.m2/repository"
-    local workspaceCcacheDir="$workspaceDir/.ccache"
-    mkdir -p "$CUDF_JAR_JAVA_BUILD_DIR/libcudf-cmake-build"
-    mkdir -p "$HOME/.ccache" "$HOME/.m2"
-    docker build \
-        -f java/ci/Dockerfile.ubuntu \
-        --build-arg ROCM_VERSION=${ROCM_VERSION} \
-        -t $imageName .
-    docker run $DOCKER_GPU_OPTS -it -u "$(id -u):$(id -g)" --rm \
-        -e PARALLEL_LEVEL \
-        -e CCACHE_DISABLE \
-        -e CCACHE_DIR="$workspaceCcacheDir" \
-        -e CMAKE_PREFIX_PATH="/opt/rocm/lib/cmake" \
-        -e LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
-        -v "/etc/group:/etc/group:ro" \
-        -v "/etc/passwd:/etc/passwd:ro" \
-        -v "/etc/shadow:/etc/shadow:ro" \
-        -v "/etc/sudoers.d:/etc/sudoers.d:ro" \
-        -v "$HOME/.ccache:$workspaceCcacheDir:rw" \
-        -v "$REPODIR:$workspaceRepoDir:rw" \
-        -v "$localMavenRepo:$workspaceMavenRepoDir:rw" \
-        -v "$HOME:$HOME" \
-        --workdir "$workspaceRepoDir/java/target/libcudf-cmake-build" \
-        ${imageName} \
-        /bin/bash -c \
-            "cmake $workspaceRepoDir/cpp \
-                -G${CMAKE_GENERATOR} \
-                -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-                -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-                -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
-                -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
-                -DCMAKE_C_COMPILER=hipcc \
-                -DCMAKE_CXX_COMPILER=hipcc \
-                -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-                -DCUDA_STATIC_RUNTIME=ON \
-                -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
-                -DCMAKE_INSTALL_PREFIX=/usr/local/rapids \
-                -DUSE_NVTX=OFF \
-                -DCUDF_USE_PROPRIETARY_NVCOMP=OFF \
-                -DCUDF_USE_ARROW_STATIC=ON \
-                -DCUDF_ENABLE_ARROW_S3=OFF \
-                -DBUILD_TESTS=OFF \
-                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
-                -DCUDF_LARGE_STRINGS_DISABLED=ON \
-                -DRMM_LOGGING_LEVEL=OFF \
-                -DBUILD_SHARED_LIBS=OFF \
-                -DCUDF_EXPORT_NVCOMP=ON && \
-             cmake --build . --parallel ${PARALLEL_LEVEL} && \
-             cd $workspaceRepoDir/java && \
-             CUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
-             mvn ${MVN_PHASES:-"package"} \
-                -DLD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
-                -Dmaven.repo.local=$workspaceMavenRepoDir \
-                -DskipTests=${SKIP_TESTS:-false} \
-                -Dparallel.level=${PARALLEL_LEVEL} \
-                -Dcmake.ccache.opts='-DCMAKE_C_COMPILER_LAUNCHER=ccache \
-                                     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-                                     -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
-                                     -DCMAKE_CXX_LINKER_LAUNCHER=ccache' \
-                                     -DCMAKE_C_COMPILER=hipcc \
-                                     -DCMAKE_CXX_COMPILER=hipcc' \
-                -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
-                -DCUDF_JNI_ENABLE_PROFILING=NO \
-                -Dio.netty.tryReflectionSetAccessible=true \
-                -DCUDA_STATIC_RUNTIME=ON \
-                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
-                -DUSE_GDS=OFF \
-                -DCMAKE_CUDA_ARCHITECTURES=${CUDF_CMAKE_CUDA_ARCHITECTURES} \
-                -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
-                -DCUDF_JNI_LIBCUDF_STATIC=ON \
-                -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
-}
-
+# <<<<<<< OLD CODE from 220bc58580 (926be66332) - COMMENTED OUT
+# # Usage: ROCM_VERSION=$(get_rocm_version_short)
+# function get_rocm_version_short() {
+#     local rocm_version_h
+#     rocm_version_h=$(find "$(hipconfig --path)" -name "rocm_version.h")
+#     local major
+#     major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" "${rocm_version_h}" | grep -o "[0-9]\+")
+#     local minor
+#     minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" "${rocm_version_h}" | grep -o "[0-9]\+")
+#     local patch
+#     patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" "${rocm_version_h}" | grep -o "[0-9]\+")
+#
+#     if [[ "${patch}" == "0" ]];
+#     then
+#         printf "${major}.${minor}"
+#     else
+#     printf "${major}.${minor}.${patch}"
+#     fi
+# }
+#
+# # NOTE(HIP/AMD): We need to set DCUDF_JNI_ENABLE_PROFILING=NO because of NVTX missing.
+# # TODO(HIP/AMD): We need to set USE_GDS to OFF because we do not support GPU Direct Storage currently.
+# # TODO(HIP/AMD): Unlike CUDA, we need to set LD_LIBRARY_PATH explicitly otherwise we run into "NoClassDefFound" error for java tests. Internal issue #177.
+# function buildLibCudfJniInDocker {
+#     local LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"$CUDF_JAR_JAVA_BUILD_DIR/cmake-build:$CUDF_JAR_JAVA_BUILD_DIR/cmake-build/lib:$CUDF_JAR_JAVA_BUILD_DIR/libcudf-install/lib"}
+#     local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
+#     local ROCM_VERSION=${ROCM_VERSION:-"6.2"}
+#     local imageName="cudf-build:${ROCM_VERSION}-devel-ubuntu"
+#     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
+#     local workspaceDir="/rapids"
+#     local localMavenRepo=${LOCAL_MAVEN_REPO:-"$HOME/.m2/repository"}
+#     local workspaceRepoDir="$workspaceDir/cudf"
+#     local workspaceMavenRepoDir="$workspaceDir/.m2/repository"
+#     local workspaceCcacheDir="$workspaceDir/.ccache"
+#     mkdir -p "$CUDF_JAR_JAVA_BUILD_DIR/libcudf-cmake-build"
+#     mkdir -p "$HOME/.ccache" "$HOME/.m2"
+#     docker build \
+#         -f java/ci/Dockerfile.ubuntu \
+#         --build-arg ROCM_VERSION=${ROCM_VERSION} \
+#         -t $imageName .
+#     docker run $DOCKER_GPU_OPTS -it -u "$(id -u):$(id -g)" --rm \
+#         -e PARALLEL_LEVEL \
+#         -e CCACHE_DISABLE \
+#         -e CCACHE_DIR="$workspaceCcacheDir" \
+#         -e CMAKE_PREFIX_PATH="/opt/rocm/lib/cmake" \
+#         -e LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
+#         -v "/etc/group:/etc/group:ro" \
+#         -v "/etc/passwd:/etc/passwd:ro" \
+#         -v "/etc/shadow:/etc/shadow:ro" \
+#         -v "/etc/sudoers.d:/etc/sudoers.d:ro" \
+#         -v "$HOME/.ccache:$workspaceCcacheDir:rw" \
+#         -v "$REPODIR:$workspaceRepoDir:rw" \
+#         -v "$localMavenRepo:$workspaceMavenRepoDir:rw" \
+#         -v "$HOME:$HOME" \
+#         --workdir "$workspaceRepoDir/java/target/libcudf-cmake-build" \
+#         ${imageName} \
+#         /bin/bash -c \
+#             "cmake $workspaceRepoDir/cpp \
+#                 -G${CMAKE_GENERATOR} \
+#                 -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+#                 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+#                 -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
+#                 -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
+#                 -DCMAKE_C_COMPILER=hipcc \
+#                 -DCMAKE_CXX_COMPILER=hipcc \
+#                 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+#                 -DCUDA_STATIC_RUNTIME=ON \
+#                 -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
+#                 -DCMAKE_INSTALL_PREFIX=/usr/local/rapids \
+#                 -DUSE_NVTX=OFF \
+#                 -DCUDF_USE_PROPRIETARY_NVCOMP=OFF \
+#                 -DCUDF_USE_ARROW_STATIC=ON \
+#                 -DCUDF_ENABLE_ARROW_S3=OFF \
+#                 -DBUILD_TESTS=OFF \
+#                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
+#                 -DCUDF_LARGE_STRINGS_DISABLED=ON \
+#                 -DRMM_LOGGING_LEVEL=OFF \
+#                 -DBUILD_SHARED_LIBS=OFF \
+#                 -DCUDF_EXPORT_NVCOMP=ON && \
+#              cmake --build . --parallel ${PARALLEL_LEVEL} && \
+#              cd $workspaceRepoDir/java && \
+#              CUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
+#              mvn ${MVN_PHASES:-"package"} \
+#                 -DLD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
+#                 -Dmaven.repo.local=$workspaceMavenRepoDir \
+#                 -DskipTests=${SKIP_TESTS:-false} \
+#                 -Dparallel.level=${PARALLEL_LEVEL} \
+#                 -Dcmake.ccache.opts='-DCMAKE_C_COMPILER_LAUNCHER=ccache \
+#                                      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+#                                      -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
+#                                      -DCMAKE_CXX_LINKER_LAUNCHER=ccache' \
+#                                      -DCMAKE_C_COMPILER=hipcc \
+#                                      -DCMAKE_CXX_COMPILER=hipcc' \
+#                 -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
+#                 -DCUDF_JNI_ENABLE_PROFILING=NO \
+#                 -Dio.netty.tryReflectionSetAccessible=true \
+#                 -DCUDA_STATIC_RUNTIME=ON \
+#                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
+#                 -DUSE_GDS=OFF \
+#                 -DCMAKE_CUDA_ARCHITECTURES=${CUDF_CMAKE_CUDA_ARCHITECTURES} \
+#                 -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
+#                 -DCUDF_JNI_LIBCUDF_STATIC=ON \
+#                 -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
+# }
+#
+# =======
+# >>>>>>> END NEW CODE (926be66332)
 if hasArg -h || hasArg --h || hasArg --help; then
     echo "${HELP}"
     exit 0
@@ -348,10 +350,17 @@ fi
 ################################################################################
 # Configure, build, and install libcudf
 
-if buildAll || hasArg libcudf || hasArg pylibcudf || hasArg cudf || hasArg cudfjar; then
-    if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
-        CUDF_CMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}"
-        if [[ "$CUDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
+# <<<<<<< OLD CODE from 220bc58580 (926be66332) - COMMENTED OUT
+# if buildAll || hasArg libcudf || hasArg pylibcudf || hasArg cudf || hasArg cudfjar; then
+#     if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
+#         CUDF_CMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}"
+#         if [[ "$CUDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
+# =======
+if buildAll || hasArg libcudf || hasArg pylibcudf || hasArg cudf ; then
+    if (( BUILD_ALL_GPU_ARCH == 0 )); then
+        CUDF_CMAKE_CUDA_ARCHITECTURES="${CUDF_CMAKE_CUDA_ARCHITECTURES:-NATIVE}"
+        if [[ "$CUDF_CMAKE_CUDA_ARCHITECTURES" == "NATIVE" ]]; then
+# >>>>>>> END NEW CODE (926be66332)
             echo "Building for the architecture of the GPU in the system..."
         else
             echo "Building for the GPU architecture(s) $CUDF_CMAKE_HIP_ARCHITECTURES ..."
@@ -457,10 +466,6 @@ if buildAll || hasArg dask_cudf; then
 
     cd "${REPODIR}/python/dask_cudf"
     python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
-fi
-
-if hasArg cudfjar; then
-    buildLibCudfJniInDocker
 fi
 
 # Build libcudf_kafka library
