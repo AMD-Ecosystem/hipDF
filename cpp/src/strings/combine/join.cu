@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2024, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -47,6 +47,7 @@
 
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
+#include <thrust/pair.h>
 
 namespace cudf {
 namespace strings {

@@ -50,6 +50,7 @@
 #include <cuda/std/iterator>
 #include <thrust/copy.h>
 #include <thrust/functional.h>
+#include <thrust/pair.h>
 #include <thrust/transform_reduce.h>
 
 #include <memory>
