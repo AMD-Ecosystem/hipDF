@@ -48,9 +48,9 @@
 #include <hipcub/hipcub.hpp>
 #include <cuda/functional>
 #include <cuda/std/iterator>
+#include <cuda/std/utility>
 #include <thrust/copy.h>
 #include <thrust/functional.h>
-#include <thrust/pair.h>
 #include <thrust/transform_reduce.h>
 
 #include <memory>
@@ -805,11 +805,11 @@ template <typename SymbolT>
 struct to_string_view_pair {
   SymbolT const* data;
   to_string_view_pair(SymbolT const* _data) : data(_data) {}
-  __device__ thrust::pair<char const*, std::size_t> operator()(
-    thrust::tuple<size_type, size_type> ip)
+  __device__ cuda::std::pair<char const*, std::size_t> operator()(
+    cuda::std::tuple<size_type, size_type> ip)
   {
-    return thrust::pair<char const*, std::size_t>{data + thrust::get<0>(ip),
-                                                  static_cast<std::size_t>(thrust::get<1>(ip))};
+    return cuda::std::pair<char const*, std::size_t>{
+      data + cuda::std::get<0>(ip), static_cast<std::size_t>(cuda::std::get<1>(ip))};
   }
 };
 
@@ -935,7 +935,7 @@ static std::unique_ptr<column> parse_string(string_view_pair_it str_tuples,
 
 std::unique_ptr<column> parse_data(
   char const* data,
-  thrust::zip_iterator<thrust::tuple<size_type const*, size_type const*>> offset_length_begin,
+  thrust::zip_iterator<cuda::std::tuple<size_type const*, size_type const*>> offset_length_begin,
   size_type col_size,
   data_type col_type,
   rmm::device_buffer&& null_mask,

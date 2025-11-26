@@ -52,25 +52,28 @@
 #include <hipcub/block/block_reduce.hpp>
 #include <hipcub/device/device_segmented_reduce.hpp>
 #include <cuda/functional>
-
-// NOTE(HIP/AMD): /opt/rocm hipcub has own rocprim backend which defines ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
-//                If this macro is not undefined by hipcub's rocprim, this might cause a "define previously defined macro"
-//                issue with local rocThrust versions that have been installed via RAPIDS-CMake.
-//                A file-by-file comparison between the locally installed rocThrust version and
-//                the one coming with ROCm has not shown any differences between the file that made an issue
-//                (cpp/src/reductions/segmented/counts.cu).
-//                The inspection of the compile commands have not shown any differences aside the addition
-//                of the rocthrust-build and rocthrust-src include folders.
-#ifdef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
-#  undef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
-#endif
-
+// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+//
+// // NOTE(HIP/AMD): /opt/rocm hipcub has own rocprim backend which defines ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+// //                If this macro is not undefined by hipcub's rocprim, this might cause a "define previously defined macro"
+// //                issue with local rocThrust versions that have been installed via RAPIDS-CMake.
+// //                A file-by-file comparison between the locally installed rocThrust version and
+// //                the one coming with ROCm has not shown any differences between the file that made an issue
+// //                (cpp/src/reductions/segmented/counts.cu).
+// //                The inspection of the compile commands have not shown any differences aside the addition
+// //                of the rocthrust-build and rocthrust-src include folders.
+// #ifdef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+// #  undef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+// #endif
+//
+// =======
+#include <cuda/std/tuple>
+// >>>>>>> END NEW CODE (261b12adc2)
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
-#include <thrust/tuple.h>
 
 #include <algorithm>
 #include <cuda/std/bit>
@@ -655,8 +658,8 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
       thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
     auto segment_length_iterator = thrust::transform_iterator(
       segments_begin, cuda::proclaim_return_type<size_type>([] __device__(auto const& segment) {
-        auto const begin = thrust::get<0>(segment);
-        auto const end   = thrust::get<1>(segment);
+        auto const begin = cuda::std::get<0>(segment);
+        auto const end   = cuda::std::get<1>(segment);
         return end - begin;
       }));
     thrust::transform(rmm::exec_policy(stream),
@@ -872,8 +875,8 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
     thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
   auto const segment_length_iterator = thrust::make_transform_iterator(
     segments_begin, cuda::proclaim_return_type<size_type>([] __device__(auto const& segment) {
-      auto const begin = thrust::get<0>(segment);
-      auto const end   = thrust::get<1>(segment);
+      auto const begin = cuda::std::get<0>(segment);
+      auto const end   = cuda::std::get<1>(segment);
       return end - begin;
     }));
 
@@ -905,8 +908,8 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
     length_and_valid_count,
     length_and_valid_count + num_segments,
     [null_handling, valid_initial_value] __device__(auto const& length_and_valid_count) {
-      auto const length      = thrust::get<0>(length_and_valid_count);
-      auto const valid_count = thrust::get<1>(length_and_valid_count);
+      auto const length      = cuda::std::get<0>(length_and_valid_count);
+      auto const valid_count = cuda::std::get<1>(length_and_valid_count);
       return (null_handling == null_policy::EXCLUDE)
                ? (valid_initial_value.value_or(false) || valid_count > 0)
                : (valid_initial_value.value_or(length > 0) && valid_count == length);

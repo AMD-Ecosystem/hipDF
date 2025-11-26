@@ -32,9 +32,14 @@
 #include <cudf/lists/lists_column_device_view.cuh>
 #include <cudf/types.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
+// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+// =======
+
+#include <cuda/std/utility>
+#include <cuda_runtime.h>
+// >>>>>>> END NEW CODE (261b12adc2)
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
-#include <thrust/pair.h>
 
 namespace CUDF_EXPORT cudf {
 
@@ -178,7 +183,7 @@ class list_device_view {
   /**
    * @brief Fetcher for a pair iterator to the first element in the list_device_view.
    *
-   * Dereferencing the returned iterator yields a `thrust::pair<T, bool>`.
+   * Dereferencing the returned iterator yields a `cuda::std::pair<T, bool>`.
    *
    * If the element at index `i` is valid, then for `p = iter[i]`,
    *   1. `p.first` is the value of the element at `i`
@@ -214,7 +219,7 @@ class list_device_view {
   /**
    * @brief Fetcher for a pair iterator to the first element in the list_device_view.
    *
-   * Dereferencing the returned iterator yields a `thrust::pair<rep_type, bool>`,
+   * Dereferencing the returned iterator yields a `cuda::std::pair<rep_type, bool>`,
    * where `rep_type` is `device_storage_type_t<T>`, the type used to store the value
    * on the device.
    *
@@ -285,7 +290,11 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-    __host__ __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
+// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+//     __host__ __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
+// =======
+    __device__ inline cuda::std::pair<T, bool> operator()(cudf::size_type i) const
+// >>>>>>> END NEW CODE (261b12adc2)
     {
       return {list.element<T>(i), !list.is_null(i)};
     }
@@ -324,7 +333,11 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-    __host__ __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
+// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+//     __host__ __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
+// =======
+    __device__ inline cuda::std::pair<rep_type, bool> operator()(cudf::size_type i) const
+// >>>>>>> END NEW CODE (261b12adc2)
     {
       return {get_rep<T>(i), !list.is_null(i)};
     }

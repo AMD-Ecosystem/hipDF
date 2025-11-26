@@ -37,8 +37,8 @@
 #include <cudf/strings/detail/gather.cuh>
 
 #include <cuda/functional>
+#include <cuda/std/utility>
 #include <thrust/logical.h>
-#include <thrust/pair.h>
 #include <thrust/transform_scan.h>
 
 #include <bitset>
@@ -82,7 +82,7 @@ constexpr int preproc_buf_size         = LEVEL_DECODE_BUF_SIZE;
  * @tparam rle_buf_size Size of the buffer used when decoding repetition and definition levels
  */
 template <typename level_t, int rle_buf_size>
-__device__ thrust::pair<int, int> page_bounds(
+__device__ cuda::std::pair<int, int> page_bounds(
   page_state_s* const s,
   size_t min_row,
   size_t num_rows,
@@ -515,10 +515,10 @@ __device__ size_t totalPlainEntriesSize(uint8_t const* data,
  * @return A pair of `size_t` values representing the total string size and temp buffer size
  * required for decoding
  */
-__device__ thrust::pair<size_t, size_t> totalDeltaByteArraySize(uint8_t const* data,
-                                                                uint8_t const* end,
-                                                                int start_value,
-                                                                int end_value)
+__device__ cuda::std::pair<size_t, size_t> totalDeltaByteArraySize(uint8_t const* data,
+                                                                   uint8_t const* end,
+                                                                   int start_value,
+                                                                   int end_value)
 {
   using cudf::detail::warp_size;
   using WarpReduce = hipcub::WarpReduce<uleb128_t>;

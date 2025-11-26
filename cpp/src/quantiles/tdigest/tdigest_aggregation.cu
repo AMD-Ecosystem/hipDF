@@ -51,6 +51,7 @@
 #include <cuda/functional>
 #include <cuda/std/iterator>
 #include <cuda/std/span>
+#include <cuda/std/tuple>
 #include <thrust/binary_search.h>
 #include <thrust/execution_policy.h>
 #include <thrust/functional.h>
@@ -60,13 +61,11 @@
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/merge.h>
-#include <thrust/pair.h>
 #include <thrust/reduce.h>
 #include <thrust/remove.h>
 #include <thrust/replace.h>
 #include <thrust/scan.h>
 #include <thrust/transform.h>
-#include <thrust/tuple.h>
 
 namespace cudf {
 namespace tdigest {
@@ -1055,7 +1054,7 @@ std::unique_ptr<column> compute_tdigests(int delta,
   cudf::mutable_column_view weight_col(*centroid_weights);
 
   // reduce the centroids into the clusters
-  auto output = thrust::make_zip_iterator(thrust::make_tuple(
+  auto output = thrust::make_zip_iterator(cuda::std::make_tuple(
     mean_col.begin<double>(), weight_col.begin<double>(), thrust::make_discard_iterator()));
 
   auto const num_values = std::distance(centroids_begin, centroids_end);
