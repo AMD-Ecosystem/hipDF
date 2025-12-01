@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2024, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -26,7 +26,7 @@
 // SOFTWARE.
 
 #include <benchmarks/common/generate_input.hpp>
-#include <benchmarks/fixture/benchmark_fixture.hpp>
+#include <benchmarks/common/memory_stats.hpp>
 #include <benchmarks/io/cuio_common.hpp>
 #include <benchmarks/io/nvbench_helpers.hpp>
 
