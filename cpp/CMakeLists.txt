@@ -1625,8 +1625,13 @@ endif()
 target_link_libraries(
   cudf
   PUBLIC CCCL::CCCL rapids_logger::rapids_logger rmm::rmm $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
-  PRIVATE $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
-          $<TARGET_NAME_IF_EXISTS:kvikio::kvikio> nanoarrow zstd
+# <<<<<<< OLD CODE from 0a4f390a35 (17c9f8b781) - COMMENTED OUT
+#   PRIVATE $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
+#           $<TARGET_NAME_IF_EXISTS:kvikio::kvikio> nanoarrow zstd
+# =======
+  PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
+          kvikio::kvikio nanoarrow::nanoarrow zstd
+# >>>>>>> END NEW CODE (17c9f8b781)
 )
 
 # Add Conda library, and include paths if specified
