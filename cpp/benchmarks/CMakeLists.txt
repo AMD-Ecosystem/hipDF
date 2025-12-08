@@ -182,7 +182,7 @@ ConfigureNVBench(
 # * join benchmark --------------------------------------------------------------------------------
 ConfigureNVBench(
   JOIN_NVBENCH join/left_join.cu join/conditional_join.cu join/join.cu join/mixed_join.cu
-  join/distinct_join.cu join/multiplicity_join.cu
+  join/distinct_join.cu join/filter_join_indices.cu join/multiplicity_join.cu
 )
 
 # ##################################################################################################
