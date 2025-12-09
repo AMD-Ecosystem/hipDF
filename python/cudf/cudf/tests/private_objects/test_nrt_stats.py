@@ -28,16 +28,20 @@
 # SPDX-License-Identifier: Apache-2.0
 # >>>>>>> END NEW CODE (cf41006673)
 import pytest
-
-import cudf
-
-if getattr(cudf, "__is_hip_amd_port__", False):
-    pytest.skip(
-        "This test is not supported on HIP/AMD platform (missing NRT implementation).",
-        allow_module_level=True,
-    )
-
-from numba import config
+# <<<<<<< OLD CODE from b11e3e61a0 (29d080d4c1) - COMMENTED OUT
+#
+# import cudf
+#
+# if getattr(cudf, "__is_hip_amd_port__", False):
+#     pytest.skip(
+#         "This test is not supported on HIP/AMD platform (missing NRT implementation).",
+#         allow_module_level=True,
+#     )
+#
+# from numba import config
+# =======
+from numba.cuda import config
+# >>>>>>> END NEW CODE (29d080d4c1)
 from numba.cuda.memory_management.nrt import rtsys
 
 from cudf._lib import strings_udf

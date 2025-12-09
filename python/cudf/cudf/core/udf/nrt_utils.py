@@ -26,7 +26,7 @@
 import contextvars
 from contextlib import contextmanager
 
-from numba import config as numba_config
+from numba.cuda import config as numba_config
 
 # NOTE(HIP/AMD): Detect if we're running on HIP/AMD - numba-hip lacks NRT support
 try:

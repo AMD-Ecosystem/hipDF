@@ -33,7 +33,7 @@ import glob
 import os
 
 import numba
-from numba import config as numba_config
+from numba.cuda import config as numba_config
 from packaging import version
 
 # HIP implementation
