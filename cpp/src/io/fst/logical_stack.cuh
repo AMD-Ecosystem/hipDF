@@ -57,8 +57,6 @@
 #include <thrust/iterator/transform_output_iterator.h>
 #include <thrust/scatter.h>
 
-#include <hipcub/hipcub.hpp>
-
 #include <algorithm>
 #include <cstdint>
 #include <type_traits>
