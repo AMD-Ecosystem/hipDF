@@ -1088,10 +1088,6 @@ feature_status_parameters::feature_status_parameters()
     are_all_integrations_enabled{nvcomp_integration::is_all_enabled()},
     are_stable_integrations_enabled{nvcomp_integration::is_stable_enabled()}
 {
-  int device;
-  CUDF_CUDA_TRY(cudaGetDevice(&device));
-  CUDF_CUDA_TRY(
-    cudaDeviceGetAttribute(&compute_capability_major, cudaDevAttrComputeCapabilityMajor, device));
 }
 
 // Represents all parameters required to determine status of a compression/decompression feature
