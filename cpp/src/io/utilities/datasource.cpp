@@ -130,22 +130,15 @@ class kvikio_source : public datasource {
   [[nodiscard]] bool supports_device_read() const override
   {
 #ifdef CUDF_HAS_KVIKIO
-    return !_kvikio_file.closed() ||  _cufile_in != nullptr;
+    return true;
 #else
-    return _cufile_in != nullptr;
-#endif 
+    return false;
+#endif
   }
 
   [[nodiscard]] bool is_device_read_preferred(size_t size) const override
   {
-    if (!supports_device_read()) { return false; }
-
-#ifdef CUDF_HAS_KVIKIO
-    // Always prefer device reads if kvikio is enabled
-    if (!_kvikio_file.closed()) { return true; }
-#endif
-
-    return size >= _gds_read_preferred_threshold;
+    return supports_device_read();
   }
 
   std::future<size_t> device_read_async(size_t offset,
