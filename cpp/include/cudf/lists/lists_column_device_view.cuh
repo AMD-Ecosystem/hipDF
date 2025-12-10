@@ -43,8 +43,6 @@
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/types.hpp>
 
-#include <cudf/cuda_runtime.h>
-
 namespace cudf::detail {
 
 /**
