@@ -132,7 +132,6 @@ struct string_to_decimal_check_fn {
     if (iter < iter_end) {
       auto exp_result = parse_exponent<true>(iter, iter_end);
       if (!exp_result) { return false; }
-      //TODO(HIP/AMD): thrust::optional::value requires a patched version of rocthrust
       exp_ten = exp_result.value();
     }
     exp_ten += exp_offset;
