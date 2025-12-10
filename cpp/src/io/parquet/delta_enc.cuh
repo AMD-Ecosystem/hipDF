@@ -280,8 +280,6 @@ class delta_binary_packer {
     // for the bitpacking of this warp.
     U const warp_max = warp_reduce(_warp_tmp[warp_id]).Reduce(norm_delta, cudf::detail::maximum{});
     __syncwarp();
-
-    // NOTE(HIP/AMD): Need to use __clzll here to make sure that the formula works correctly (input warp_max must be interpreted as 64bit value)
     if (lane_id == 0) { _mb_bits[warp_id] = sizeof(long long) * 8 - __clzll(warp_max); }
     __syncthreads();
 
