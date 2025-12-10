@@ -457,7 +457,7 @@ add_library(
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
   src/ast/operators.cpp
-  src/binaryop/binaryop.cpp # need jit preprocessed files -> jitify upgrade
+  src/binaryop/binaryop.cpp
   src/binaryop/compiled/ATan2.cu
   src/binaryop/compiled/Add.cu
   src/binaryop/compiled/BitwiseAnd.cu
@@ -621,7 +621,7 @@ add_library(
   src/io/json/column_tree_construction.cu
   src/io/json/json_normalization.cu
   src/io/json/json_tree.cu
-  src/io/json/nested_json_gpu.cu #  error: no member named 'compacted_symbols' in 'cudf::io::fst::detail::WriteCoalescingCallbackWrapper
+  src/io/json/nested_json_gpu.cu
   src/io/json/read_json.cu
   src/io/json/parser_features.cpp
   src/io/json/process_tokens.cu
@@ -883,7 +883,7 @@ add_library(
   src/strings/search/find.cu
   src/strings/search/find_instance.cu
   src/strings/search/find_multiple.cu
-  src/strings/slice.cu # fatal error: 'cooperative_groups/reduce.h' file not found
+  src/strings/slice.cu
   src/strings/split/partition.cu
   src/strings/split/split.cu
   src/strings/split/split_part.cu
@@ -932,7 +932,7 @@ add_library(
   src/transform/nans_to_nulls.cu
   src/transform/one_hot_encode.cu
   src/transform/row_bit_count.cu
-  src/transform/transform.cpp #fatal error: 'jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp' file not found -> jitify upgrade
+  src/transform/transform.cpp
   src/transpose/transpose.cu
   src/unary/cast_ops.cu
   src/unary/math_ops.cu
