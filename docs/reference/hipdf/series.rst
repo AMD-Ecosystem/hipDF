@@ -358,13 +358,13 @@ Timedelta properties
 
 String handling
 ~~~~~~~~~~~~~~~
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 .. autosummary::
    :toctree: api/
 
    Series.str
 
-.. currentmodule:: cudf.core.accessors.string.StringMethods
+.. currentmodule:: hipdf.core.accessors.string.StringMethods
 .. autosummary::
    :toctree: api/
 
@@ -490,13 +490,13 @@ the ``Series.cat`` accessor.
 
 List handling
 ~~~~~~~~~~~~~
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 .. autosummary::
    :toctree: api/
 
    Series.list
 
-.. currentmodule:: cudf.core.accessors.lists.ListMethods
+.. currentmodule:: hipdf.core.accessors.lists.ListMethods
 .. autosummary::
    :toctree: api/
 
@@ -516,13 +516,13 @@ List handling
 
 Struct handling
 ~~~~~~~~~~~~~~~
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 .. autosummary::
    :toctree: api/
 
    Series.struct
 
-.. currentmodule:: cudf.core.accessors.struct.StructMethods
+.. currentmodule:: hipdf.core.accessors.struct.StructMethods
 .. autosummary::
    :toctree: api/
 
