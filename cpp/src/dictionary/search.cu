@@ -147,8 +147,7 @@ struct find_insert_index_fn {
     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
     auto keys_view   = column_device_view::create(input.keys(), stream);
     auto iter        = thrust::lower_bound(
-      rmm::exec_policy(stream), 
-      keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
+      rmm::exec_policy(stream), keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
     return type_dispatcher(input.indices().type(),
                            dispatch_scalar_index{},
                            cuda::std::distance(keys_view->begin<Element>(), iter),
