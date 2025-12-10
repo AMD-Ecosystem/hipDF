@@ -392,7 +392,7 @@ __device__ __inline__ bool less_equal_than(char const* data, char const (&golden
  * @return Pointer to appropriate counter that belong to
  * the interpreted data type
  */
-__device__ cudf::size_type* infer_integral_field_counter(char const* data_begin,
+__device__ __inline__ cudf::size_type* infer_integral_field_counter(char const* data_begin,
                                                                     char const* data_end,
                                                                     bool is_negative,
                                                                     column_type_histogram& stats)
