@@ -45,7 +45,6 @@
 #include <string>
 #include <type_traits>
 
-#include <hip/hip_cooperative_groups.h>
 namespace CUDF_EXPORT cudf {
 /**
  * @addtogroup utility_error
