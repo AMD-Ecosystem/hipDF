@@ -344,9 +344,6 @@ class fixed_point {
     // Cast to the larger of the two types (of U and Rep) before converting to Rep because in
     // certain cases casting to U before shifting will result in integer overflow (i.e. if U =
     // int32_t, Rep = int64_t and _value > 2 billion)
-    // FIXME(HIP/AMD): Using cuda::std here to work around error message
-    // "/tmp/comgr-62b797/include/cudf/fixed_point/fixed_point.hpp:12:3326: error: no template named 'common_type_t'
-    //  in namespace 'std'; did you mean 'cuda::std::common_type_t'?"
     auto const value = cuda::std::common_type_t<U, Rep>(_value);
     return static_cast<U>(detail::shift<Rep, Rad>(value, scale_type{-_scale}));
   }
