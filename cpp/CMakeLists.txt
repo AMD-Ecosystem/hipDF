@@ -1542,7 +1542,7 @@ endif()
 target_link_libraries(
   cudf
   PUBLIC CCCL::CCCL rapids_logger::rapids_logger rmm::rmm $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
-  PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
+  PRIVATE $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
           $<TARGET_NAME_IF_EXISTS:kvikio::kvikio> nanoarrow zstd
 )
 
