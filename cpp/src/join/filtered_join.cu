@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "join_common_utils.cuh"
 
 #include <cudf/detail/cuco_helpers.hpp>
@@ -103,7 +125,9 @@ auto filtered_join::compute_bucket_storage_size(cudf::table_view tbl, double loa
 template <int32_t CGSize, typename Ref>
 void filtered_join::insert_build_table(Ref const& insert_ref, rmm::cuda_stream_view stream)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_filtered_join::insert_build_table"};
+#endif
   auto insert = [&]<typename Iterator>(Iterator build_iter) {
     // Build hash table by inserting all rows from build table
     auto const grid_size = cuco::detail::grid_size(_build.num_rows(), CGSize);
@@ -159,7 +183,9 @@ std::unique_ptr<rmm::device_uvector<cudf::size_type>> distinct_filtered_join::qu
   rmm::cuda_stream_view stream,
   rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_filtered_join::query_build_table"};
+#endif
   auto const probe_has_nulls = has_nested_nulls(probe);
 
   auto query_set = [this,
@@ -237,7 +263,9 @@ distinct_filtered_join::distinct_filtered_join(cudf::table_view const& build,
                                                rmm::cuda_stream_view stream)
   : filtered_join(build, compare_nulls, load_factor, stream)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_filtered_join::distinct_filtered_join"};
+#endif
   // Any mismatch in nullate between probe and build row operators results in UB. Ideally, nullate
   // should be determined by the logical OR of probe nulls and build nulls. However, since we do not
   // know if the probe has nulls apriori, we set nullate::DYNAMIC{true} (in the case of primitive
@@ -288,10 +316,14 @@ std::unique_ptr<rmm::device_uvector<cudf::size_type>> distinct_filtered_join::se
   rmm::cuda_stream_view stream,
   rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_filtered_join::semi_anti_join"};
+#endif
 
   auto const preprocessed_probe = [&probe, stream] {
+    #ifndef NVTX_DISABLE
     cudf::scoped_range range{"distinct_filtered_join::semi_anti_join::preprocessed_probe"};
+    #endif
     return cudf::detail::row::equality::preprocessed_table::create(probe, stream);
   }();
 

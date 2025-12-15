@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/copying.hpp>
@@ -255,7 +277,7 @@ merge<LargerIterator, SmallerIterator>::operator()(rmm::cuda_stream_view stream,
                   thrust::counting_iterator(0) + larger_numrows,
                   match_counts->begin(),
                   nonzero_matches.begin(),
-                  cuda::std::identity{});
+                  thrust::identity{});
 
   thrust::exclusive_scan(rmm::exec_policy_nosync(stream),
                          match_counts->begin(),
@@ -340,7 +362,7 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
         thrust::reverse_iterator(offsets_subset.end()),
         thrust::reverse_iterator(child_positions.end()));
       auto subset_size   = cuda::std::distance(thrust::reverse_iterator(offsets_subset.end()),
-                                             cuda::std::get<0>(unique_end));
+                                             unique_end.first);
       auto subset_offset = offsets.size() - subset_size;
 
       auto [reduced_validity_mask, num_nulls] =
@@ -405,7 +427,9 @@ sort_merge_join::sort_merge_join(table_view const& right,
                                  null_equality compare_nulls,
                                  rmm::cuda_stream_view stream)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"sort_merge_join::sort_merge_join"};
+#endif
   // Sanity checks
   CUDF_EXPECTS(right.num_columns() != 0,
                "Number of columns the keys table must be non-zero for a join",
@@ -526,7 +550,9 @@ sort_merge_join::inner_join(table_view const& left,
                             rmm::cuda_stream_view stream,
                             rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"sort_merge_join::inner_join"};
+#endif
   // Sanity checks
   CUDF_EXPECTS(left.num_columns() != 0,
                "Number of columns in left keys must be non-zero for a join",
@@ -567,7 +593,9 @@ cudf::join_match_context sort_merge_join::inner_join_match_context(
   rmm::cuda_stream_view stream,
   rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"sort_merge_join::inner_join_match_context"};
+#endif
   // Sanity checks
   CUDF_EXPECTS(left.num_columns() != 0,
                "Number of columns in left keys must be non-zero for a join",
@@ -626,7 +654,9 @@ sort_merge_join::partitioned_inner_join(cudf::join_partition_context const& cont
                                         rmm::cuda_stream_view stream,
                                         rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"sort_merge_join::partitioned_inner_join"};
+#endif
   auto const left_partition_start_idx = context.left_start_idx;
   auto const left_partition_end_idx   = context.left_end_idx;
   auto null_processed_table_start_idx = left_partition_start_idx;
@@ -676,7 +706,9 @@ sort_merge_inner_join(cudf::table_view const& left_keys,
                       rmm::cuda_stream_view stream,
                       rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"sort_merge_inner_join"};
+#endif
   cudf::sort_merge_join obj(right_keys, sorted::NO, compare_nulls, stream);
   return obj.inner_join(left_keys, sorted::NO, stream, mr);
 }
@@ -689,7 +721,9 @@ merge_inner_join(cudf::table_view const& left_keys,
                  rmm::cuda_stream_view stream,
                  rmm::device_async_resource_ref mr)
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"merge_inner_join"};
+#endif
   cudf::sort_merge_join obj(right_keys, sorted::YES, compare_nulls, stream);
   return obj.inner_join(left_keys, sorted::YES, stream, mr);
 }
