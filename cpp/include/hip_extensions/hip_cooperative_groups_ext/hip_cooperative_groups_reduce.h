@@ -25,9 +25,23 @@
 #include <hip/hip_cooperative_groups.h>
 #include <hip/amd_detail/amd_warp_sync_functions.h>
 
+namespace cooperative_groups {
+namespace internal {
+ 
+    template <unsigned TILE_SIZE, typename ParentCGTy>
+    __device__ unsigned long long get_mask(const cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile) {
+      unsigned long long mask = ~0ull >> (64 - TILE_SIZE);
+      return mask << (((threadIdx.x % warpSize) / TILE_SIZE) * TILE_SIZE);
+    }
+
+} // namespace internal
+} // namespace cooperative_groups
+
+
 //NOTE(HIP/AMD): This is a temporary workaround for
 // the missing cg::reduce APIs in HIP's cooperative groups.
 namespace cooperative_groups {
+
   template<typename TArg>
   struct plus {
     __device__ __attribute__((always_inline)) TArg operator()(const TArg& lhs, const TArg& rhs) const
@@ -36,15 +50,17 @@ namespace cooperative_groups {
     }
   };
 
-  template<typename TGroup, typename TArg>
-  __device__ __attribute__((always_inline)) auto reduce(TGroup g, TArg count, plus<TArg>& op) {
-    auto member_mask = g.ballot(1);
+  template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
+  __device__ __attribute__((always_inline))
+  TArg reduce(const cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile, TArg count, plus<TArg>& op) {
+    auto member_mask = internal::get_mask(tile);
     return __reduce_add_sync(member_mask, count);
   }
 
-  template<typename TGroup, typename TArg>
-  __device__ __attribute__((always_inline)) auto reduce(TGroup g, TArg count, plus<TArg>&& op) {
-    auto member_mask = g.ballot(1);
+  template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
+  __device__ __attribute__((always_inline))
+  TArg reduce(const cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile, TArg count, plus<TArg>&& op) {
+    auto member_mask = internal::get_mask(tile);
     return __reduce_add_sync(member_mask, count);
   }
 }
