@@ -103,8 +103,11 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   make_pair_function pair_func{hash_probe, empty_key_sentinel};
 
   if (outer_row_index < outer_num_rows) {
-    // Figure out the number of elements for this key.
-    cg::thread_block_tile<1> this_thread = cg::this_thread();
+    // For HIP: create a thread_block_tile<1> from the thread block
+    // HIP's cg::this_thread() returns a thread_group, but cuco needs thread_block_tile<1>
+    auto thread_block = cg::this_thread_block();
+    cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(thread_block);
+
     // Figure out the number of elements for this key.
     auto query_pair = pair_func(outer_row_index);
     auto equality   = pair_expression_equality<has_nulls>{

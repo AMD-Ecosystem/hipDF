@@ -102,8 +102,10 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   auto const empty_key_sentinel = hash_table_view.get_empty_key_sentinel();
   make_pair_function pair_func{hash_probe, empty_key_sentinel};
 
-  // Figure out the number of elements for this key.
-  cg::thread_block_tile<1> this_thread = cg::this_thread();
+  // For HIP: create a thread_block_tile<1> from the thread block
+  // HIP's cg::this_thread() returns a thread_group, but cuco needs thread_block_tile<1>
+  auto thread_block = cg::this_thread_block();
+  cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(thread_block);
   // TODO: Address asymmetry in operator.
   auto count_equality = pair_expression_equality<has_nulls>{
     evaluator, thread_intermediate_storage, swap_tables, equality_probe};
