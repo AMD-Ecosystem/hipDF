@@ -28,7 +28,11 @@
 
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/device/device_radix_sort.hpp>
+#else
 #include <cub/device/device_radix_sort.cuh>
+#endif
 #include <thrust/binary_search.h>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/discard_iterator.h>

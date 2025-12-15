@@ -52,6 +52,7 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
+#include <hipcub/hipcub.hpp>
 #else
 #include <cooperative_groups.h>
 #include <cub/cub.cuh>

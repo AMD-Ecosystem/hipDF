@@ -77,6 +77,8 @@ Mark Adler    madler@alumni.caltech.edu
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <hipcub/hipcub.hpp>
+
 #include <thrust/gather.h>
 #include <thrust/sequence.h>
 #include <thrust/sort.h>
