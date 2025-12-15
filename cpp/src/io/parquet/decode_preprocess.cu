@@ -46,7 +46,11 @@
 
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+#else
 #include <cooperative_groups.h>
+#endif
 #include <cuda/std/iterator>
 #include <thrust/reduce.h>
 

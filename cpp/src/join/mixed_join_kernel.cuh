@@ -50,8 +50,12 @@
 #include <cudf/utilities/export.hpp>
 #include <cudf/utilities/span.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+#else
 #include <cooperative_groups.h>
 #include <cub/cub.cuh>
+#endif
 #include <thrust/iterator/discard_iterator.h>
 
 namespace cudf {

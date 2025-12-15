@@ -52,8 +52,13 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+#else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
+#endif
+
 #include <hipcub/block/block_reduce.hpp>
 #include <hipcub/device/device_segmented_reduce.hpp>
 #include <cuda/functional>
