@@ -194,7 +194,9 @@ CUDF_KERNEL void set_null_masks_kernel(cudf::device_span<bitmask_type*> destinat
                                        cudf::device_span<bool const> valids,
                                        cudf::device_span<size_type const> numbers_of_mask_words)
 {
-  auto const bitmask_idx = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  auto const bitmask_idx = blockIdx.x;
   // Return early if nothing to do
   if (begin_bits[bitmask_idx] == end_bits[bitmask_idx]) { return; }
   set_null_mask_impl<cg::thread_block, MODE>(destinations[bitmask_idx],

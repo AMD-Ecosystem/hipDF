@@ -1067,7 +1067,9 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size_t, 8)
   auto const block      = cg::this_thread_block();
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
-  int const page_idx    = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  int const page_idx    = blockIdx.x;
   int const t           = block.thread_rank();
   PageInfo* pp          = &pages[page_idx];
 

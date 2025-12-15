@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "hybrid_scan_helpers.hpp"
 #include "hybrid_scan_impl.hpp"
 #include "io/parquet/parquet_gpu.hpp"
@@ -343,7 +365,9 @@ CUDF_KERNEL void query_dictionaries(cudf::device_span<T> decoded_data,
   auto const group = cg::this_thread_block();
 
   // Scalar to evaluate
-  auto const scalar_idx = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  auto const scalar_idx = blockIdx.x;
   auto const scalar     = scalars[scalar_idx];
 
   // Result vector for this scalar
@@ -750,7 +774,9 @@ CUDF_KERNEL void __launch_bounds__(DECODE_BLOCK_SIZE)
   auto const group = cg::this_thread_block();
 
   // Index of the current column chunk of the column
-  auto const row_group_idx = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  auto const row_group_idx = blockIdx.x;
 
   // Global index of the current column chunk (dictionary page)
   auto const chunk_idx = dictionary_col_idx + (row_group_idx * num_dictionary_columns);
@@ -943,7 +969,9 @@ CUDF_KERNEL void __launch_bounds__(DECODE_BLOCK_SIZE)
   auto const group = cg::this_thread_block();
 
   // Index of the current column chunk of the column
-  auto const row_group_idx = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  auto const row_group_idx = blockIdx.x;
 
   // Global index of the current column chunk (dictionary page)
   auto const chunk_idx = dictionary_col_idx + (row_group_idx * num_dictionary_columns);
