@@ -55,6 +55,7 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
+#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
