@@ -43,6 +43,7 @@
 #include "in_reg_array.cuh"
 
 #include <hipcub/hipcub.hpp>
+#include <cuda/cmath>
 #include <cuda/functional>
 #include <cuda/std/array>
 #include <cuda/std/type_traits>

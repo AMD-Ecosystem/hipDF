@@ -45,6 +45,7 @@
 
 #include <hipcub/hipcub.hpp>
 #include <cuda/functional>
+#include <cuda/cmath>
 
 #include <cstdint>
 

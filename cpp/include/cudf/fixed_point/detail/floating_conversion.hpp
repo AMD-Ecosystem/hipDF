@@ -25,6 +25,10 @@
 #include <cuda/std/type_traits>
 #include <cuda/std/utility>
 
+#ifndef __HIPCC_RTC__
+#include <cmath>
+#endif
+
 #include <cstring>
 
 namespace CUDF_EXPORT numeric {

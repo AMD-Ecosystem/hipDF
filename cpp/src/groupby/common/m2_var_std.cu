@@ -16,6 +16,8 @@
 
 #include "m2_var_std.hpp"
 
+#include <cuda/std/cmath>
+
 #include <cudf/column/column_factories.hpp>
 #include <cudf/column/column_view.hpp>
 #include <cudf/detail/aggregation/aggregation.hpp>
