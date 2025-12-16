@@ -197,7 +197,7 @@ constexpr CUDF_HOST_DEVICE inline bitmask_type set_most_significant_bits(size_ty
 constexpr CUDF_HOST_DEVICE inline uint32_t set_most_significant_bits_32(size_type n)
 {
   constexpr size_type word_size{detail::size_in_bits<uint32_t>()};
-  constexpr_assert(0 <= n && n < word_size);
+  assert(0 <= n && n < word_size);
   // TODO(HIP/AMD): warning: shift count >= width of type
   // To fix the issue, we should check if the returned value does not exceed UINT32_MAX.
   // NOTE(HIP/AMD): treat UB arising for n=0 separately here (issue 175).
