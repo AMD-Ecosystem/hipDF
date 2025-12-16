@@ -85,7 +85,7 @@ MurmurHash3_x64_128<bool>::result_type __device__ constexpr inline MurmurHash3_x
 
 template <>
 MurmurHash3_x64_128<float>::result_type __device__ constexpr inline MurmurHash3_x64_128<float>::operator()(
-  float const& key) const
+  float const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
 {
   return this->compute(normalize_nans(key));
 }
@@ -99,8 +99,8 @@ MurmurHash3_x64_128<double>::result_type __device__ constexpr inline MurmurHash3
 
 template <>
 MurmurHash3_x64_128<cudf::string_view>::result_type
-  __device__ inline MurmurHash3_x64_128<cudf::string_view>::
-  operator()(cudf::string_view const& key) const
+  __device__ constexpr inline MurmurHash3_x64_128<cudf::string_view>::
+  operator()(cudf::string_view const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
 {
   return this->compute_bytes(reinterpret_cast<cuda::std::byte const*>(key.data()),
                              key.size_bytes());
@@ -108,24 +108,24 @@ MurmurHash3_x64_128<cudf::string_view>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal32>::result_type
-  __device__ inline MurmurHash3_x64_128<numeric::decimal32>::
-  operator()(numeric::decimal32 const& key) const
+  __device__ constexpr inline MurmurHash3_x64_128<numeric::decimal32>::
+  operator()(numeric::decimal32 const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
 {
   return this->compute(key.value());
 }
 
 template <>
 MurmurHash3_x64_128<numeric::decimal64>::result_type
-  __device__ inline MurmurHash3_x64_128<numeric::decimal64>::
-  operator()(numeric::decimal64 const& key) const
+  __device__ constexpr inline MurmurHash3_x64_128<numeric::decimal64>::
+  operator()(numeric::decimal64 const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
 {
   return this->compute(key.value());
 }
 
 template <>
 MurmurHash3_x64_128<numeric::decimal128>::result_type
-  __device__ inline MurmurHash3_x64_128<numeric::decimal128>::
-  operator()(numeric::decimal128 const& key) const
+  __device__ constexpr inline MurmurHash3_x64_128<numeric::decimal128>::
+  operator()(numeric::decimal128 const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
 {
   return this->compute(key.value());
 }
