@@ -52,11 +52,14 @@
 #endif
 
 #include <rmm/device_buffer.hpp>
+#include <rmm/cuda_stream_view.hpp>
+#include <rmm/exec_policy.hpp>
 
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include <future>
 #include <regex>
 #include <vector>
 
@@ -70,6 +73,7 @@ namespace cudf {
 namespace io {
 namespace {
 
+#ifdef CUDF_HAS_KVIKIO
 /**
  * @brief Base class for kvikIO-based data sources.
  */
@@ -77,11 +81,7 @@ template <typename HandleT>
 class kvikio_source : public datasource {
   class kvikio_initializer {
    public:
-    kvikio_initializer() { 
-#ifdef CUDF_HAS_KVIKIO
-      kvikio_integration::set_up_kvikio(); 
-#endif
-    }
+    kvikio_initializer() { kvikio_integration::set_up_kvikio(); }
   };
 
   std::pair<std::vector<uint8_t>, std::future<size_t>> clamped_read_to_vector(size_t offset,
@@ -127,14 +127,7 @@ class kvikio_source : public datasource {
 
   ~kvikio_source() override = default;
 
-  [[nodiscard]] bool supports_device_read() const override
-  {
-#ifdef CUDF_HAS_KVIKIO
-    return true;
-#else
-    return false;
-#endif
-  }
+  [[nodiscard]] bool supports_device_read() const override { return true; }
 
   [[nodiscard]] bool is_device_read_preferred(size_t size) const override
   {
@@ -148,13 +141,9 @@ class kvikio_source : public datasource {
   {
     CUDF_EXPECTS(supports_device_read(), "Device reads are not supported for this file.");
 
-#ifdef CUDF_HAS_KVIKIO
     auto const read_size = std::min(size, this->size() - offset);
     stream.synchronize();
     return _kvikio_handle.pread(dst, read_size, offset);
-#else
-    return std::future<size_t>{};
-#endif
   }
 
   size_t device_read(size_t offset,
@@ -181,9 +170,7 @@ class kvikio_source : public datasource {
   kvikio_initializer _;
 
  protected:
-#ifdef CUDF_HAS_KVIKIO
   HandleT _kvikio_handle;
-#endif
 };
 
 /**
@@ -196,12 +183,10 @@ class file_source : public kvikio_source<kvikio::FileHandle> {
  public:
   explicit file_source(char const* filepath) : kvikio_source{kvikio::FileHandle(filepath, "r")}
   {
-#ifdef CUDF_HAS_KVIKIO
     CUDF_EXPECTS(!_kvikio_handle.closed(), "KvikIO did not open the file successfully.");
     CUDF_LOG_INFO(
       "Reading a file using kvikIO, with compatibility mode %s.",
       _kvikio_handle.get_compat_mode_manager().is_compat_mode_preferred() ? "on" : "off");
-#endif
   }
 
   std::future<size_t> device_read_async(size_t offset,
@@ -244,7 +229,62 @@ class memory_mapped_source : public kvikio_source<kvikio::MmapHandle> {
     }
   }
 };
+#else
+// When KvikIO is not available, provide stub sources that fail fast.
+class file_source : public datasource {
+ public:
+  explicit file_source(char const*) { CUDF_FAIL("KvikIO is not available."); }
 
+  size_t host_read(size_t, size_t, uint8_t*) override { CUDF_FAIL("KvikIO is not available."); }
+  std::unique_ptr<buffer> host_read(size_t, size_t) override
+  {
+    CUDF_FAIL("KvikIO is not available.");
+  }
+
+  std::future<std::unique_ptr<datasource::buffer>> host_read_async(size_t offset,
+                                                                   size_t size) override
+  {
+    CUDF_FAIL("KvikIO is not available.");
+  }
+  std::future<size_t> host_read_async(size_t offset, size_t size, uint8_t* dst) override
+  {
+    CUDF_FAIL("KvikIO is not available.");
+  }
+
+  [[nodiscard]] bool supports_device_read() const override { return false; }
+  [[nodiscard]] bool is_device_read_preferred(size_t) const override { return false; }
+
+  size_t device_read(size_t, size_t, uint8_t*, rmm::cuda_stream_view) override
+  {
+    CUDF_FAIL("KvikIO is not available.");
+  }
+  std::unique_ptr<buffer> device_read(size_t, size_t, rmm::cuda_stream_view) override
+  {
+    CUDF_FAIL("KvikIO is not available.");
+  }
+
+  std::future<size_t> device_read_async(size_t offset,
+                                        size_t size,
+                                        uint8_t* dst,
+                                        rmm::cuda_stream_view) override
+  {
+    CUDF_FAIL("KvikIO is not available.");
+  }
+
+  [[nodiscard]] size_t size() const override { return 0; }
+  [[nodiscard]] bool is_empty() const override { return true; }
+};
+
+class memory_mapped_source : public file_source {
+ public:
+  explicit memory_mapped_source(char const* filepath,
+                                size_t,
+                                [[maybe_unused]] size_t max_size_estimate)
+    : file_source(filepath)
+  {
+  }
+};
+#endif
 /**
  * @brief Implementation class for reading from a device buffer source
  */

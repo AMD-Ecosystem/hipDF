@@ -61,8 +61,7 @@ class file_sink : public data_sink {
     CUDF_LOG_INFO("Writing a file using kvikIO, with compatibility mode %s.",
     _kvikio_file.get_compat_mode_manager().is_compat_mode_preferred() ? "on" : "off");
 #else
-    //TODO(HIP/AMD): Improve error handling
-    throw std::runtime_error("Kvikio is not available\n");
+    CUDF_FAIL("KvikIO support is not available with HIP yet.");
 #endif
   }
 
@@ -71,8 +70,12 @@ class file_sink : public data_sink {
 
   void host_write(void const* data, size_t size) override
   {
+#ifdef CUDF_HAS_KVIKIO
     _kvikio_file.pwrite(data, size, _bytes_written).get();
     _bytes_written += size;
+#else
+    CUDF_FAIL("KvikIO support is not available with HIP yet.");
+#endif
   }
 
   void flush() override
@@ -96,7 +99,6 @@ class file_sink : public data_sink {
   [[nodiscard]] bool is_device_write_preferred(size_t size) const override
   {
     return supports_device_write();
-  }
   }
 
   std::future<void> device_write_async(void const* gpu_data,
