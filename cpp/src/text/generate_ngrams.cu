@@ -63,7 +63,7 @@
 #include <hip/hip_cooperative_groups.h>
 //TODO(HIP/AMD): This is a temporary workaround for 
 // the missing cg::reduce APIs in HIP's cooperative groups.
-#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #include <cuda/functional>
 #include <cuda/std/iterator>
 #include <thrust/copy.h>
@@ -227,7 +227,11 @@ CUDF_KERNEL void count_char_ngrams_kernel(cudf::column_device_view const d_strin
     return;
   }
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg    = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg    = cooperative_groups;
+#endif
   auto const warp = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
 
   auto const end = d_str.data() + d_str.size_bytes();
@@ -359,7 +363,11 @@ CUDF_KERNEL void character_ngram_hash_kernel(cudf::column_device_view const d_st
   auto const end        = d_str.data() + d_str.size_bytes();
   auto const warp_count = (d_str.size_bytes() / cudf::detail::warp_size) + 1;
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg        = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg        = cooperative_groups;
+#endif
   auto const warp     = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
   auto const lane_idx = warp.thread_rank();
 

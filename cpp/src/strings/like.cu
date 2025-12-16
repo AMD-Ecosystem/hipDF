@@ -57,7 +57,7 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
-#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
@@ -230,7 +230,11 @@ CUDF_KERNEL void like_kernel(column_device_view d_strings,
   if (str_idx >= d_strings.size()) { return; }
   if (d_strings.is_null(str_idx)) { return; }
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg    = hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg    = cooperative_groups;
+#endif
   auto const warp = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
 
   auto const d_str      = d_strings.element<string_view>(str_idx);

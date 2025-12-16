@@ -54,7 +54,7 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
-#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
@@ -246,7 +246,12 @@ CUDF_KERNEL void segmented_offset_bitmask_binop(Binop op,
                                                 size_type const* const segment_offsets,
                                                 size_type* const null_counts)
 {
+  // NOTE(HIP/AMD): Use HIP extension reduce helpers on AMD platforms to keep call sites unchanged.
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg = hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg = cooperative_groups;
+#endif
 
   // Create block level group
   auto const block = cg::this_thread_block();

@@ -63,6 +63,10 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#endif
+ 
 #include <cuco/static_map.cuh>
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
@@ -75,6 +79,12 @@
 namespace nvtext {
 namespace detail {
 namespace {
+
+#ifdef __HIP_PLATFORM_AMD__
+namespace cg = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
+namespace cg = cooperative_groups;
+#endif
 
 using string_hasher_type = cudf::hashing::detail::MurmurHash3_x86_32<cudf::string_view>;
 using hash_value_type    = string_hasher_type::result_type;

@@ -60,11 +60,13 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cooperative_groups.h>
-#include <cooperative_groups/scan.h>
 #ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #include <hipcub/hipcub.hpp>
 #else
+#include <cooperative_groups.h>
+#include <cooperative_groups/scan.h>
 #include <cub/cub.cuh>
 #endif
 #include <cuco/static_map.cuh>
@@ -642,7 +644,11 @@ CUDF_KERNEL void find_words_kernel(cudf::column_device_view const d_strings,
   // compiler is not able to find this for some reason so defining it here as well
   constexpr auto no_word = cuda::std::numeric_limits<cudf::size_type>::max();
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg     = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg     = cooperative_groups;
+#endif
   auto const block = cg::this_thread_block();
   auto const tile  = cg::tiled_partition<tile_size>(block);
 

@@ -58,7 +58,14 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#else
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+#endif
+
 //#include <hip/hip_cooperative_groups/reduce.h>
 #include <cuda/atomic>
 #include <cuda/functional>
@@ -309,7 +316,11 @@ CUDF_KERNEL void count_bytes_kernel(convert_char_fn converter,
                                     column_device_view d_strings,
                                     size_type* d_sizes)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg = hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg        = cooperative_groups;
+#endif
   auto const warp     = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
   auto const lane_idx = warp.thread_rank();
 

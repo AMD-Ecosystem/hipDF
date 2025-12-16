@@ -61,7 +61,7 @@
 //#include <cooperative_groups/reduce.h>
 //TODO(HIP/AMD): This is a temporary workaround for 
 // the missing cg::reduce APIs in HIP's cooperative groups.
-#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #include <hip/amd_detail/amd_warp_sync_functions.h>
 
 #include <cuda/std/utility>
@@ -118,7 +118,11 @@ CUDF_KERNEL void substring_from_kernel(column_device_view const d_strings,
   auto const str_idx = idx / cudf::detail::warp_size;
   if (str_idx >= d_strings.size()) { return; }
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg    = hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg    = cooperative_groups;
+#endif
   auto const warp = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
 
   if (d_strings.is_null(str_idx)) {

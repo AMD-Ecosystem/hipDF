@@ -51,7 +51,11 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
   auto const str_idx = tid / cudf::detail::warp_size;
   if (str_idx >= d_strings.size() or d_strings.is_null(str_idx)) { return; }
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg        = hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg        = cooperative_groups;
+#endif
   auto const warp     = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
   auto const lane_idx = warp.thread_rank();
 
