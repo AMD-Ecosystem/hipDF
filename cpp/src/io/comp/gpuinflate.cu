@@ -71,6 +71,7 @@ Mark Adler    madler@alumni.caltech.edu
 #include "io/utilities/block_utils.cuh"
 
 #include <cudf/detail/nvtx/ranges.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/detail/utilities/vector_factories.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
