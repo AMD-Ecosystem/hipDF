@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/io/experimental/deletion_vectors.hpp>
 #include <cudf/stream_compaction.hpp>
@@ -101,11 +123,21 @@ std::unique_ptr<cudf::column> compute_row_index_column(
                   out_iter);
 
   // Fill in the the rest of the row group span indices
+  // NOTE(HIP/AMD): libhipcxx 2.7.0 does not have cuda::maximum yet.
+  // Use thrust::maximum as a workaround for affected versions.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+  thrust::inclusive_scan(rmm::exec_policy_nosync(stream),
+                         row_group_keys.begin(),
+                         row_group_keys.end(),
+                         row_group_keys.begin(),
+                         thrust::maximum<cudf::size_type>());
+#else
   thrust::inclusive_scan(rmm::exec_policy_nosync(stream),
                          row_group_keys.begin(),
                          row_group_keys.end(),
                          row_group_keys.begin(),
                          cuda::maximum<cudf::size_type>());
+#endif
 
   // Segmented inclusive scan to compute the rest of the row indices
   thrust::inclusive_scan_by_key(rmm::exec_policy_nosync(stream),
