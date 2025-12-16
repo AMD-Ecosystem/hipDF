@@ -573,12 +573,24 @@ struct column_comparator_impl {
       ComparatorType(
         *d_lhs_row_indices, *d_rhs_row_indices, fp_ulps, device_comparator, *d_lhs, *d_rhs));
 
+    // NOTE(HIP/AMD): libhipcxx 2.7.0 has a const-correctness issue where cuda::std::identity
+    // drops const qualifier when used with transform_iterator<bool*> in rocPRIM's select.
+    // This causes compilation errors. We conditionally use a workaround for affected versions.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+    auto diff_iter = thrust::copy_if(rmm::exec_policy(cudf::test::get_default_stream()),
+                                     input_iter,
+                                     input_iter + lhs_row_indices.size(),
+                                     diff_map.begin(),
+                                     differences.begin(),
+                                     thrust::identity{});
+#else
     auto diff_iter = thrust::copy_if(rmm::exec_policy(cudf::test::get_default_stream()),
                                      input_iter,
                                      input_iter + lhs_row_indices.size(),
                                      diff_map.begin(),
                                      differences.begin(),
                                      cuda::std::identity{});
+#endif
 
     differences.resize(cuda::std::distance(differences.begin(), diff_iter),
                        cudf::test::get_default_stream());  // shrink back down

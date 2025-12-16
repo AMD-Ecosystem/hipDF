@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "common_utils.cuh"
 #include "stream_compaction/stream_compaction_common.cuh"
 
@@ -160,12 +182,25 @@ sort_groupby_helper::index_vector const& sort_groupby_helper::group_offsets(
     auto const ufn    = cudf::detail::unique_copy_fn<decltype(itr), decltype(row_eq)>{
       itr, duplicate_keep_option::KEEP_FIRST, row_eq, size - 1};
     thrust::transform(rmm::exec_policy(stream), itr, itr + size, result.begin(), ufn);
+    
+    // NOTE(HIP/AMD): libhipcxx 2.7.0 has a const-correctness issue where cuda::std::identity
+    // drops const qualifier when used with transform_iterator<bool*> in rocPRIM's select.
+    // This causes compilation errors. We conditionally use a workaround for affected versions.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+    result_end = thrust::copy_if(rmm::exec_policy(stream),
+                                itr,
+                                itr + size,
+                                result.begin(),
+                                group_offsets->begin(),
+                                thrust::identity{});
+#else
     result_end = thrust::copy_if(rmm::exec_policy(stream),
                                  itr,
                                  itr + size,
                                  result.begin(),
                                  group_offsets->begin(),
                                  cuda::std::identity{});
+#endif
   } else {
     auto const d_key_equal = comparator.equal_to<false>(
       cudf::nullate::DYNAMIC{cudf::has_nested_nulls(_keys)}, null_equality::EQUAL);

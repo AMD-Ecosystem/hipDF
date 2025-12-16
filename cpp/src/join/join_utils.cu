@@ -163,6 +163,19 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
     size_type end_counter   = static_cast<size_type>(right_table_row_count);
 
     // Create list of indices that have been marked as invalid
+    // NOTE(HIP/AMD): libhipcxx 2.7.0 has a const-correctness issue where cuda::std::identity
+    // drops const qualifier when used with transform_iterator<bool*> in rocPRIM's select.
+    // This causes compilation errors. We conditionally use a workaround for affected versions.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+    size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
+                                              thrust::make_counting_iterator(begin_counter),
+                                              thrust::make_counting_iterator(end_counter),
+                                              invalid_index_map->begin(),
+                                              right_indices_complement->begin(),
+                                              thrust::identity<size_type>()) -
+                              right_indices_complement->begin();
+    right_indices_complement->resize(indices_count, stream);
+#else
     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
                                               thrust::make_counting_iterator(begin_counter),
                                               thrust::make_counting_iterator(end_counter),
@@ -171,6 +184,7 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
                                               cuda::std::identity{}) -
                               right_indices_complement->begin();
     right_indices_complement->resize(indices_count, stream);
+#endif
   }
 
   auto left_invalid_indices =
