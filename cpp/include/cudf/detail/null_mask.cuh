@@ -84,6 +84,7 @@
 #include <thrust/tuple.h>
 
 #include <algorithm>
+#include <cuda/std/bit>
 #include <iterator>
 #include <optional>
 #include <vector>
