@@ -42,6 +42,16 @@
  * @file
  */
 
+// NOTE(HIP/AMD): All device operator functors in this file require trailing `const` qualifiers
+// on their operator() methods. Without these qualifiers, hipcc/clang fails template matching
+// when these operators are wrapped in utilities like cast_functor_fn or passed to rocprim/hipcub
+// primitives (thread_scan_inclusive, block_scan, device_reduce, etc.).
+//
+// The compilation failure occurs because rocprim/hipcub passes functors as const objects to
+// template instantiations. Without the const qualifier, the compiler generates errors like:
+// "candidate function template not viable: 'this' argument has type 'const DeviceXXX',
+// but method is not marked const"
+
 #include <cudf/fixed_point/fixed_point.hpp>
 #include <cudf/fixed_point/temporary.hpp>
 #include <cudf/strings/string_view.cuh>
@@ -94,7 +104,7 @@ CUDF_HOST_DEVICE thrust::pair<T, bool> operator+(thrust::pair<T, bool> const& lh
  */
 struct DeviceSum {
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) -> decltype(lhs + rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const -> decltype(lhs + rhs)
     requires(!cudf::is_timestamp<T>())
   {
     return lhs + rhs;
@@ -132,14 +142,14 @@ struct DeviceSum {
  */
 struct DeviceCount {
   template <typename T>
-  CUDF_HOST_DEVICE inline T operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline T operator()(T const& lhs, T const& rhs) const
     requires(cudf::is_timestamp<T>())
   {
     return T{DeviceCount{}(lhs.time_since_epoch(), rhs.time_since_epoch())};
   }
 
   template <typename T>
-  CUDF_HOST_DEVICE inline T operator()(T const&, T const& rhs)
+  CUDF_HOST_DEVICE inline T operator()(T const&, T const& rhs) const
     requires(!cudf::is_timestamp<T>())
   {
     return rhs + T{1};
@@ -255,7 +265,7 @@ struct DeviceMax {
  */
 struct DeviceProduct {
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) -> decltype(lhs * rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const -> decltype(lhs * rhs)
     requires(!cudf::is_timestamp<T>())
   {
     return lhs * rhs;
