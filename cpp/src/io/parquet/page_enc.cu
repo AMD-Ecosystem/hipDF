@@ -48,6 +48,7 @@
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/detail/utilities/integer_utils.hpp>
+#include <cudf/detail/null_mask.cuh>
 #include <cudf/detail/utilities/stream_pool.hpp>
 #include <cudf/detail/utilities/vector_factories.hpp>
 
@@ -565,6 +566,7 @@ __device__ encode_kernel_mask data_encoding_for_col(EncColumnChunk const* chunk,
       case Type::INT32:
       case Type::INT64: return encode_kernel_mask::DELTA_BINARY;
       case Type::BYTE_ARRAY: return encode_kernel_mask::DELTA_LENGTH_BA;
+      default: break;
     }
   }
 
