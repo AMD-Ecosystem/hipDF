@@ -691,27 +691,27 @@ struct dispatch_map_type {
     std::size_t const num_levels = num_partitions + 1;
     size_type const lower_level  = 0;
     size_type const upper_level  = num_partitions;
-    (void)hipcub::DeviceHistogram::HistogramEven(nullptr,
-                                        temp_storage_bytes,
-                                        partition_map.begin<MapType>(),
-                                        histogram.data(),
-                                        num_levels,
-                                        lower_level,
-                                        upper_level,
-                                        partition_map.size(),
-                                        stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceHistogram::HistogramEven(nullptr,
+                      temp_storage_bytes,
+                      partition_map.begin<MapType>(),
+                      histogram.data(),
+                      num_levels,
+                      lower_level,
+                      upper_level,
+                      partition_map.size(),
+                      stream.value()));
 
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
 
-    (void)hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
-                                        temp_storage_bytes,
-                                        partition_map.begin<MapType>(),
-                                        histogram.data(),
-                                        num_levels,
-                                        lower_level,
-                                        upper_level,
-                                        partition_map.size(),
-                                        stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
+                      temp_storage_bytes,
+                      partition_map.begin<MapType>(),
+                      histogram.data(),
+                      num_levels,
+                      lower_level,
+                      upper_level,
+                      partition_map.size(),
+                      stream.value()));
 
     // `histogram` was created with an extra entry at the end such that an
     // exclusive scan will put the total number of rows at the end

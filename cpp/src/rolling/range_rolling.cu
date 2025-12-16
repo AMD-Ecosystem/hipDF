@@ -86,23 +86,23 @@ rmm::device_uvector<cudf::size_type> nulls_per_group(column_view const& orderby,
         return static_cast<size_type>(orderby.is_null_nocheck(i));
       }));
   rmm::device_uvector<cudf::size_type> null_counts{num_groups, stream};
-  cub::DeviceSegmentedReduce::Sum(nullptr,
-                                  bytes,
-                                  is_null_it,
-                                  null_counts.begin(),
-                                  num_groups,
-                                  offsets.begin(),
-                                  offsets.begin() + 1,
-                                  stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
+                                        bytes,
+                                        is_null_it,
+                                        null_counts.begin(),
+                                        num_groups,
+                                        offsets.begin(),
+                                        offsets.begin() + 1,
+                                        stream.value()));
   auto tmp = rmm::device_buffer(bytes, stream);
-  cub::DeviceSegmentedReduce::Sum(tmp.data(),
-                                  bytes,
-                                  is_null_it,
-                                  null_counts.begin(),
-                                  num_groups,
-                                  offsets.begin(),
-                                  offsets.begin() + 1,
-                                  stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(tmp.data(),
+                                        bytes,
+                                        is_null_it,
+                                        null_counts.begin(),
+                                        num_groups,
+                                        offsets.begin(),
+                                        offsets.begin() + 1,
+                                        stream.value()));
   return null_counts;
 }
 

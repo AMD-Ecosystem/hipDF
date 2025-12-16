@@ -115,17 +115,17 @@ struct sorted_order_radix_fn {
     // cub radix sort implementation is always stable
     std::size_t tmp_bytes = 0;
     if (ascending) {
-      cub::DeviceRadixSort::SortPairs(
-        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(
+        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortPairs(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv));
     } else {
-      cub::DeviceRadixSort::SortPairsDescending(
-        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairsDescending(
+        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortPairsDescending(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairsDescending(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, 0, end_bit, sv));
     }
   }
 
@@ -156,17 +156,17 @@ struct sorted_order_radix_fn {
     // cub radix sort implementation is always stable
     std::size_t tmp_bytes = 0;
     if (ascending) {
-      cub::DeviceRadixSort::SortPairs(
-        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(
+        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortPairs(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv));
     } else {
-      cub::DeviceRadixSort::SortPairsDescending(
-        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairsDescending(
+        nullptr, tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortPairsDescending(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairsDescending(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, dv_in, dv_out, n, decomposer, 0, end_bit, sv));
     }
   }
 

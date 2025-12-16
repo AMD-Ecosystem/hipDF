@@ -417,7 +417,7 @@ CUDF_KERNEL void data_normalizer_kernel(char const* d_chars,
 
   // employ an optimized coalesced writer to output replacement as a block of transposed data
   using block_store =
-    cub::BlockStore<uint32_t, 256, MAX_NEW_CHARS, cub::BLOCK_STORE_WARP_TRANSPOSE>;
+    hipcub::BlockStore<uint32_t, 256, MAX_NEW_CHARS, hipcub::BLOCK_STORE_WARP_TRANSPOSE>;
   __shared__ typename block_store::TempStorage bs_stg;
   auto block_base = d_output + blockIdx.x * blockDim.x * MAX_NEW_CHARS;
   block_store(bs_stg).Store(block_base, replacement);
@@ -465,21 +465,21 @@ rmm::device_uvector<cudf::size_type> compute_sizes(cudf::device_span<uint32_t co
   auto d_out = output_sizes.begin();
   auto temp  = std::size_t{0};
   if (offset == 0) {
-    cub::DeviceSegmentedReduce::Sum(
-      nullptr, temp, d_in, d_out, size, offsets, offsets + 1, stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(
+      nullptr, temp, d_in, d_out, size, offsets, offsets + 1, stream.value()));
     auto d_temp = rmm::device_buffer{temp, stream};
-    cub::DeviceSegmentedReduce::Sum(
-      d_temp.data(), temp, d_in, d_out, size, offsets, offsets + 1, stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(
+      d_temp.data(), temp, d_in, d_out, size, offsets, offsets + 1, stream.value()));
   } else {
     // offsets need to be normalized for segmented-reduce to work efficiently
     auto offsets_itr = thrust::transform_iterator(
       offsets,
       cuda::proclaim_return_type<int64_t>([offset] __device__(auto o) { return o - offset; }));
-    cub::DeviceSegmentedReduce::Sum(
-      nullptr, temp, d_in, d_out, size, offsets_itr, offsets_itr + 1, stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(
+      nullptr, temp, d_in, d_out, size, offsets_itr, offsets_itr + 1, stream.value()));
     auto d_temp = rmm::device_buffer{temp, stream};
-    cub::DeviceSegmentedReduce::Sum(
-      d_temp.data(), temp, d_in, d_out, size, offsets_itr, offsets_itr + 1, stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(
+      d_temp.data(), temp, d_in, d_out, size, offsets_itr, offsets_itr + 1, stream.value()));
   }
 
   return output_sizes;

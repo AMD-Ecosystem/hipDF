@@ -102,14 +102,14 @@ struct sort_radix_fn {
     // cub radix sort implementation is always stable
     std::size_t tmp_bytes = 0;
     if (ascending) {
-      cub::DeviceRadixSort::SortKeys(nullptr, tmp_bytes, d_in, d_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeys(nullptr, tmp_bytes, d_in, d_out, n, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortKeys(tmp_stg.data(), tmp_bytes, d_in, d_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeys(tmp_stg.data(), tmp_bytes, d_in, d_out, n, 0, end_bit, sv));
     } else {
-      cub::DeviceRadixSort::SortKeysDescending(nullptr, tmp_bytes, d_in, d_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeysDescending(nullptr, tmp_bytes, d_in, d_out, n, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortKeysDescending(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, n, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeysDescending(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, n, 0, end_bit, sv));
     }
   }
 
@@ -135,17 +135,17 @@ struct sort_radix_fn {
     // cub radix sort implementation is always stable
     std::size_t tmp_bytes = 0;
     if (ascending) {
-      cub::DeviceRadixSort::SortKeys(
-        nullptr, tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeys(
+        nullptr, tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortKeys(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeys(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv));
     } else {
-      cub::DeviceRadixSort::SortKeysDescending(
-        nullptr, tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeysDescending(
+        nullptr, tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv));
       auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-      cub::DeviceRadixSort::SortKeysDescending(
-        tmp_stg.data(), tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv);
+      CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortKeysDescending(
+        tmp_stg.data(), tmp_bytes, d_in, d_out, n, decomposer, 0, end_bit, sv));
     }
     thrust::transform(rmm::exec_policy_nosync(stream),
                       d_out,

@@ -189,11 +189,11 @@ std::unique_ptr<rmm::device_uvector<cudf::size_type>> build_suffix_array_fn(
   auto const cmp_op = sort_comparator_fn{chars_span};
   auto const seq    = thrust::make_counting_iterator<cudf::size_type>(0);
   auto tmp_bytes    = std::size_t{0};
-  cub::DeviceMergeSort::SortKeysCopy(
-    nullptr, tmp_bytes, seq, indices.begin(), indices.size(), cmp_op, stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortKeysCopy(
+    nullptr, tmp_bytes, seq, indices.begin(), indices.size(), cmp_op, stream.value()));
   auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-  cub::DeviceMergeSort::SortKeysCopy(
-    tmp_stg.data(), tmp_bytes, seq, indices.begin(), indices.size(), cmp_op, stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortKeysCopy(
+    tmp_stg.data(), tmp_bytes, seq, indices.begin(), indices.size(), cmp_op, stream.value()));
 
   return std::make_unique<rmm::device_uvector<cudf::size_type>>(std::move(indices));
 }

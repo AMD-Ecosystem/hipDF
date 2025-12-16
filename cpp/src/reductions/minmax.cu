@@ -107,19 +107,19 @@ auto reduce_device(InputIterator d_in,
 
   // Allocate temporary storage
   size_t storage_bytes = 0;
-  (void)hipcub::DeviceReduce::Reduce(
-    nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(
+    nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value()));
   auto temp_storage = rmm::device_buffer{storage_bytes, stream};
 
   // Run reduction
-  (void)hipcub::DeviceReduce::Reduce(temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(temp_storage.data(),
                             storage_bytes,
                             d_in,
                             result.data(),
                             num_items,
                             binary_op,
                             identity,
-                            stream.value());
+                            stream.value()));
 
   return result;
 }

@@ -516,11 +516,11 @@ rmm::device_uvector<cudf::size_type> count_tokens(cudf::size_type const* d_token
 
   auto temp  = std::size_t{0};
   auto d_out = d_counts.data();
-  cub::DeviceSegmentedReduce::Sum(
-    nullptr, temp, d_in, d_out, size, d_offsets, d_offsets + 1, stream.value());
+  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(
+    nullptr, temp, d_in, d_out, size, d_offsets, d_offsets + 1, stream.value()));
   auto d_temp = rmm::device_buffer{temp, stream};
-  cub::DeviceSegmentedReduce::Sum(
-    d_temp.data(), temp, d_in, d_out, size, d_offsets, d_offsets + 1, stream.value());
+  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(
+    d_temp.data(), temp, d_in, d_out, size, d_offsets, d_offsets + 1, stream.value()));
 
   return d_counts;
 }

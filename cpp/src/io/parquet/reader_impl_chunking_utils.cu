@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/comp/decompression.hpp"
 #include "io/comp/gpuinflate.hpp"
 #include "io/utilities/time_utils.cuh"
@@ -290,27 +312,27 @@ adjust_cumulative_sizes(device_span<cumulative_page_info const> c_info,
                       [] __device__(auto const& c) { return c.end_row_index; });
 
     auto tmp_bytes = std::size_t{0};
-    cub::DeviceRadixSort::SortPairs(nullptr,
-                                    tmp_bytes,
-                                    end_row_indices.begin(),         // keys in
-                                    sorted_end_row_indices.begin(),  // sorted keys out
-                                    indices.begin(),                 // values in
-                                    sort_order.begin(),              // sorted values out
-                                    c_info.size(),
-                                    0,
-                                    sizeof(size_t) * 8,
-                                    stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(nullptr,
+                             tmp_bytes,
+                             end_row_indices.begin(),         // keys in
+                             sorted_end_row_indices.begin(),  // sorted keys out
+                             indices.begin(),                 // values in
+                             sort_order.begin(),              // sorted values out
+                             c_info.size(),
+                             0,
+                             sizeof(size_t) * 8,
+                             stream.value()));
     auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-    cub::DeviceRadixSort::SortPairs(tmp_stg.data(),
-                                    tmp_bytes,
-                                    end_row_indices.begin(),         // keys in
-                                    sorted_end_row_indices.begin(),  // sorted keys out
-                                    indices.begin(),                 // values in
-                                    sort_order.begin(),              // sorted values out
-                                    c_info.size(),
-                                    0,
-                                    sizeof(size_t) * 8,
-                                    stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(tmp_stg.data(),
+                             tmp_bytes,
+                             end_row_indices.begin(),         // keys in
+                             sorted_end_row_indices.begin(),  // sorted keys out
+                             indices.begin(),                 // values in
+                             sort_order.begin(),              // sorted values out
+                             c_info.size(),
+                             0,
+                             sizeof(size_t) * 8,
+                             stream.value()));
 
     thrust::transform(rmm::exec_policy_nosync(stream),
                       sort_order.begin(),
