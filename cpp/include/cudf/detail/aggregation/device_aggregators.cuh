@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/aggregation.hpp>
@@ -173,9 +196,15 @@ struct update_target_element<Source, aggregation::SUM_WITH_OVERFLOW> {
       cudf::detail::atomic_add(&sum_column.element<int64_t>(target_index), source_value);
 
     // Early exit if overflow is already set to avoid unnecessary overflow checking
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+    // NOTE(HIP/AMD): Workaround: libhipcxx 2.7.0 does not yet support cuda::atomic_ref on bool type.
+    // Use __hip_atomic_load directly for atomic read on HIP platform.
+    if (__hip_atomic_load(overflow_column.data<bool>() + target_index, __ATOMIC_RELAXED, __HIP_MEMORY_SCOPE_AGENT)) { return; }
+#else
     auto bool_ref = cuda::atomic_ref<bool, cuda::thread_scope_device>{
       *(overflow_column.data<bool>() + target_index)};
     if (bool_ref.load(cuda::memory_order_relaxed)) { return; }
+#endif
 
     // Check for overflow before performing the addition to avoid UB
     // For positive overflow: old_sum > 0, source_value > 0, and old_sum > max - source_value
