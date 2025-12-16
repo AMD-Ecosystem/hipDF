@@ -235,7 +235,7 @@ static __device__ uint32_t byte_rle(
           if (repeat_run + literal_run_ofs == cudf::detail::warp_size) {
             while (next == LANE_MASK_ALL) {
               uint32_t next_idx = ((literal_run + repeat_run) >> LOG2_WARPSIZE) + 1;
-              next              = (next_idx < 512 / cudf::detail::warp_size) ? s->u.byterle.rpt_map[next_idx] : 0;
+              next              = (next_idx < 512 / cudf::detail::warp_size) ? s->u.byte_rle.rpt_map[next_idx] : 0;
               repeat_run += cudf::detail::warp_size;
             }
             repeat_run += __FFS(~next) - 1;
