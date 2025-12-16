@@ -1608,7 +1608,7 @@ __device__ void zero_fill_null_positions_shared(
     int const dst_pos_first_bit       = block_idx * bits_per_mask - valid_map_offset;
 
     while (null_positions != 0) {
-      int const bit_pos = __ffs(null_positions) - 1;
+      int const bit_pos = __FFS(null_positions) - 1;
       int const dst_pos = dst_pos_first_bit + bit_pos;
 
       void* const dst = data_out + (static_cast<size_t>(dst_pos) * dtype_len);
