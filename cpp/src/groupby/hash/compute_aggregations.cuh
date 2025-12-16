@@ -89,8 +89,7 @@ rmm::device_uvector<cudf::size_type> compute_aggregations(
     agg_kinds, stream, rmm::mr::get_current_device_resource());
 
   auto const grid_size = [&] {
-    auto const max_blocks_mapping =
-      max_active_blocks_mapping_kernel<typename SetType::ref_type<cuco::insert_and_find_tag>>();
+    auto const max_blocks_mapping = max_active_blocks_mapping_kernel<typename SetType::template ref_type<cuco::insert_and_find_tag>>();
     auto const max_blocks_aggs = max_active_blocks_shmem_aggs_kernel();
     // We launch the same grid size for both kernels, thus we need to take the minimum of the two.
     auto const max_blocks    = std::min(max_blocks_mapping, max_blocks_aggs);
