@@ -57,7 +57,7 @@
 #include <cub/device/device_memcpy.cuh>
 #endif
 #include <cuda/functional>
-#include <cuda_runtime.h>
+#include <cudf/cuda_runtime.h>
 #include <thrust/device_vector.h>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -85,7 +85,17 @@ void table_to_array_impl(table_view const& input,
 
   auto* base_ptr = output.data();
 
-  auto h_srcs = make_host_vector<T const*>(num_columns, stream);
+  // NOTE(HIP/AMD): rocPRIM's batch_memcpy has a const-correctness issue where it attempts to
+  // reinterpret_cast const T* to unsigned char* (casts away qualifiers), which violates C++
+  // const-correctness rules. The issue occurs in rocprim::detail::batch_memcpy::read_item<>()
+  // at line 121 of device_batch_memcpy.hpp:
+  //   return *(reinterpret_cast<Alias*>(buffer_src) + offset);
+  // This fails to compile when buffer_src is const because Alias is unsigned char*.
+  // Workaround: Declare source pointers as non-const T* instead of T const*, then apply
+  // const_cast in the lambda when extracting column data. Since we only read from the source,
+  // this is semantically safe despite rocPRIM's internal reinterpret_cast.
+  //   auto h_srcs = make_host_vector<T const*>(num_columns, stream);
+  auto h_srcs = make_host_vector<T*>(num_columns, stream);
   auto h_dsts = make_host_vector<T*>(num_columns, stream);
 
   std::transform(input.begin(), input.end(), h_srcs.begin(), [](auto& col) {
