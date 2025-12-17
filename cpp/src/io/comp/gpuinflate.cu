@@ -70,6 +70,8 @@ Mark Adler    madler@alumni.caltech.edu
 #include "gpuinflate.hpp"
 #include "io/utilities/block_utils.cuh"
 
+#include <cuda/std/cmath>
+
 #include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/detail/utilities/vector_factories.hpp>

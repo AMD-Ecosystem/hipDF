@@ -50,6 +50,8 @@
 
 #include <rmm/exec_policy.hpp>
 
+#include <cuda/std/cmath>
+
 #ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/device/device_radix_sort.hpp>
 #else
