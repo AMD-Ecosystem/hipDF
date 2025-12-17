@@ -190,13 +190,15 @@ std::unique_ptr<column> compute_variance(column_view const& m2,
 {
   check_input_types(m2, count);
 
+  // NOTE(HIP/AMD): thrust::zip_iterator presently requires thrust::tuple, not cuda::std::tuple.
+  // Thrust is not interoperable with libhipcxx's cuda::std types at the moment.
   auto const transform_func =
     [m2 = m2.begin<M2Type>(), count = count.begin<CountType>(), ddof] __device__(
-      size_type const idx) -> cuda::std::pair<VarianceType, bool> {
+      size_type const idx) {
     auto const group_count = count[idx];
     auto const df          = group_count - ddof;
-    if (group_count == 0 || df <= 0) { return {VarianceType{}, false}; }
-    return {m2[idx] / df, true};
+      if (group_count == 0 || df <= 0) { return CUDF_MAKE_TUPLE(VarianceType{}, false); }
+      return CUDF_MAKE_TUPLE(m2[idx] / df, true);
   };
   return compute_variance_std<VarianceType>(transform_func, m2.size(), stream, mr);
 }
@@ -209,13 +211,15 @@ std::unique_ptr<column> compute_std(column_view const& m2,
 {
   check_input_types(m2, count);
 
+  // NOTE(HIP/AMD): thrust::zip_iterator presently requires thrust::tuple, not cuda::std::tuple.
+  // Thrust is not interoperable with libhipcxx's cuda::std types at the moment.
   auto const transform_func =
     [m2 = m2.begin<M2Type>(), count = count.begin<CountType>(), ddof] __device__(
-      size_type const idx) -> cuda::std::pair<StdType, bool> {
+      size_type const idx) {
     auto const group_count = count[idx];
     auto const df          = group_count - ddof;
-    if (group_count == 0 || df <= 0) { return {StdType{}, false}; }
-    return {cuda::std::sqrt(m2[idx] / df), true};
+      if (group_count == 0 || df <= 0) { return CUDF_MAKE_TUPLE(StdType{}, false); }
+        return CUDF_MAKE_TUPLE(cuda::std::sqrt(m2[idx] / df), true);
   };
   return compute_variance_std<StdType>(transform_func, m2.size(), stream, mr);
 }

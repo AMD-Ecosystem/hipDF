@@ -78,7 +78,7 @@ struct float_decomposer {
     return rocprim::tuple<size_type&, F&>{key.s, key.f};
   }
 #else
-  __device__ cuda::std::tuple<size_type&, F&> operator()(float_pair<F>& key) const
+  __device__ CUDF_TUPLE_TYPE<size_type&, F&> operator()(float_pair<F>& key) const
   {
     return {key.s, key.f};
   }
@@ -88,7 +88,8 @@ struct float_decomposer {
 template <typename F>
 struct float_to_pair_and_seq {
   F const* fs;
-  __device__ cuda::std::pair<float_pair<F>, size_type> operator()(cudf::size_type idx) const
+  // NOTE(HIP/AMD): thrust::pair is used as libhipcxx 2.7.0 types are not compatible with Thrust operations.
+  __device__ CUDF_PAIR_TYPE<float_pair<F>, size_type> operator()(cudf::size_type idx) const
   {
     auto const f = fs[idx];
     auto const s = (isnan(f) * (idx + 1));  // multiplier helps keep the sort stable for NaNs
