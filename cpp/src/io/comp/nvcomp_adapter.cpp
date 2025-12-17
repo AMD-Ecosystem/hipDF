@@ -864,8 +864,12 @@ size_t batched_decompress_temp_size(compression_type compression,
   nvcompStatus_t const nvcomp_status = batched_decompress_get_temp_size_async(
     compression, num_chunks, max_uncomp_chunk_size, &temp_size, max_total_uncomp_size);
 #else
-  nvcompStatus_t const nvcomp_status = batched_decompress_get_temp_size_ex(
+  std::optional<nvcompStatus_t> const nvcomp_status_opt = batched_decompress_get_temp_size_ex(
     compression, num_chunks, max_uncomp_chunk_size, &temp_size, max_total_uncomp_size);
+
+  nvcompStatus_t const nvcomp_status = nvcomp_status_opt.has_value() 
+    ? nvcomp_status_opt.value() 
+    : nvcompStatus_t::nvcompErrorInternal;
 #endif
   CHECK_NVCOMP_STATUS(nvcomp_status);
   return temp_size;
