@@ -50,6 +50,7 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/device/device_radix_sort.hpp>
+#include <rocprim/types/tuple.hpp>
 #else
 #include <cub/device/device_radix_sort.cuh>
 #endif
@@ -69,10 +70,19 @@ struct float_pair {
 
 template <typename F>
 struct float_decomposer {
+  // NOTE(HIP/AMD): rocPRIM/hipCUB requires rocprim::tuple<T&, U&> for radix sort decomposers.
+  // Other tuple types cause SFINAE failures in radix_key_codec's is_tuple_of_references check.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+  __device__ rocprim::tuple<size_type&, F&> operator()(float_pair<F>& key) const
+  {
+    return rocprim::tuple<size_type&, F&>{key.s, key.f};
+  }
+#else
   __device__ cuda::std::tuple<size_type&, F&> operator()(float_pair<F>& key) const
   {
     return {key.s, key.f};
   }
+#endif
 };
 
 template <typename F>
