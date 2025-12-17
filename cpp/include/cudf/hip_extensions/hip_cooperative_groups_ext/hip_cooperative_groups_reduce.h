@@ -50,6 +50,22 @@ struct plus {
   }
 };
 
+template <typename TArg>
+struct less {
+  __device__ __attribute__((always_inline)) TArg operator()(const TArg& lhs, const TArg& rhs) const
+  {
+    return lhs < rhs ? lhs : rhs;
+  }
+};
+
+template <typename TArg>
+struct greater {
+  __device__ __attribute__((always_inline)) TArg operator()(const TArg& lhs, const TArg& rhs) const
+  {
+    return lhs > rhs ? lhs : rhs;
+  }
+};
+
 template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
 __device__ __attribute__((always_inline)) TArg reduce(
   const ::cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile,
@@ -66,6 +82,42 @@ __device__ __attribute__((always_inline)) TArg reduce(
   plus<TArg>&& op) {
   auto member_mask = internal::get_mask(tile);
   return __reduce_add_sync(member_mask, count);
+}
+
+template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
+__device__ __attribute__((always_inline)) TArg reduce(
+  const ::cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile,
+  TArg value,
+  less<TArg>& op) {
+  auto member_mask = internal::get_mask(tile);
+  return __reduce_min_sync(member_mask, value);
+}
+
+template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
+__device__ __attribute__((always_inline)) TArg reduce(
+  const ::cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile,
+  TArg value,
+  less<TArg>&& op) {
+  auto member_mask = internal::get_mask(tile);
+  return __reduce_min_sync(member_mask, value);
+}
+
+template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
+__device__ __attribute__((always_inline)) TArg reduce(
+  const ::cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile,
+  TArg value,
+  greater<TArg>& op) {
+  auto member_mask = internal::get_mask(tile);
+  return __reduce_max_sync(member_mask, value);
+}
+
+template <unsigned TILE_SIZE, typename ParentCGTy, typename TArg>
+__device__ __attribute__((always_inline)) TArg reduce(
+  const ::cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile,
+  TArg value,
+  greater<TArg>&& op) {
+  auto member_mask = internal::get_mask(tile);
+  return __reduce_max_sync(member_mask, value);
 }
 
 // Passthroughs for commonly used cooperative_groups types/functions so callers
