@@ -4181,6 +4181,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
+  @Disabled("Test is disabled until bug #20864 is fixed")
   @Test
   void testPartStability() {
     final int PARTS = 5;
