@@ -69,6 +69,7 @@
 //#include <hip/hip_cooperative_groups/reduce.h>
 #include <cuda/atomic>
 #include <cuda/functional>
+#include <cuda/std/array>
 #include <thrust/binary_search.h>
 #include <thrust/for_each.h>
 #include <thrust/merge.h>
