@@ -356,18 +356,6 @@ auto batched_decompress_async(compression_type compression, Args&&... args)
 }
 #endif
 
-[[maybe_unused]] std::string compression_type_name(compression_type compression)
-{
-  switch (compression) {
-    case compression_type::SNAPPY: return "Snappy";
-    case compression_type::ZSTD: return "Zstandard";
-    case compression_type::DEFLATE: return "Deflate";
-    case compression_type::LZ4: return "LZ4";
-    case compression_type::GZIP: return "GZIP";
-  }
-  return "compression_type(" + std::to_string(static_cast<int>(compression)) + ")";
-}
-
 #if NVCOMP_HAS_COMP_TEMPSIZE_EX(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
 // Wrapper for nvcompBatched<format>CompressGetTempSizeEx
 auto batched_compress_get_temp_size_ex(compression_type compression,
@@ -689,6 +677,7 @@ std::optional<std::string> is_decompression_disabled_impl(compression_type compr
             params.lib_major_version, params.lib_minor_version, params.lib_patch_version)) {
         return "nvCOMP 2.5 or newer is required for Deflate decompression";
       }
+    }
     case compression_type::GZIP: {
       if (not params.are_all_integrations_enabled) {
         return "GZIP decompression is experimental, you can enable it through "
