@@ -437,10 +437,10 @@ __device__ T decode_fixed_width_value(PageInfo const& page,
   auto const& page_data = page.page_data;
 
   // Calculate the timestamp scale if this chunk has a timestamp logical type
+  // NOTE(HIP/AMD): Dereference chunk.logical_type.* directly instead of using .value() to avoid calling __throw_bad_optional_access()
+  // which is __host__ only and cannot be called from __device__ code.
   auto const timestamp_scale =
-    chunk.logical_type.has_value()
-      ? calc_timestamp_scale(chunk.logical_type.value(), chunk.ts_clock_rate)
-      : int32_t{0};
+    chunk.logical_type.has_value() ? calc_timestamp_scale(*chunk.logical_type, chunk.ts_clock_rate) : int32_t{0};
 
   // FLBA length (0 if not FLBA type)
   auto const flba_length = chunk.type_length;
@@ -449,8 +449,7 @@ __device__ T decode_fixed_width_value(PageInfo const& page,
   auto decoded_value = T{};
 
   // Check for decimal types
-  auto const is_decimal =
-    chunk.logical_type.has_value() and chunk.logical_type.value().type == LogicalType::DECIMAL;
+  auto const is_decimal = chunk.logical_type.has_value() && chunk.logical_type->type == LogicalType::DECIMAL;
   if (is_decimal and not cudf::is_fixed_point<T>()) {
     set_error(error, decode_error::INVALID_DATA_TYPE);
     return {};
@@ -513,11 +512,11 @@ __device__ T decode_fixed_width_value(PageInfo const& page,
       }
 
       // Calculate the bitwidth of the int32 encoded value
-      auto const int32_type_len = chunk.logical_type.has_value()
-                                    ? get_int32_type_len(chunk.logical_type.value())
-                                    : sizeof(uint32_t);
+      auto const int32_type_len = chunk.logical_type.has_value() 
+                                    ? get_int32_type_len(*chunk.logical_type)
+                         : sizeof(uint32_t);
       // Check if we are reading INT32 TIME_MILLIS into 64-bit DURATION_MILLISECONDS
-      if (int32_type_len == sizeof(int64_t) and not cudf::is_duration<T>) {
+      if (int32_type_len == sizeof(int64_t) and not cudf::is_duration<T>()) {
         set_error(error, decode_error::INVALID_DATA_TYPE);
         return {};
       }
