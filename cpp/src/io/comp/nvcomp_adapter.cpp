@@ -100,6 +100,7 @@ namespace {
     case nvcompStatus_t::nvcompErrorInvalidValue: return "nvcompErrorInvalidValue";
     case nvcompStatus_t::nvcompErrorNotSupported: return "nvcompErrorNotSupported";
     case nvcompStatus_t::nvcompErrorCannotDecompress: return "nvcompErrorCannotDecompress";
+#if NVCOMP_VER_MAJOR >= 5
     case nvcompStatus_t::nvcompErrorBadChecksum: return "nvcompErrorBadChecksum";
     case nvcompStatus_t::nvcompErrorCannotVerifyChecksums:
       return "nvcompErrorCannotVerifyChecksums";
@@ -107,6 +108,7 @@ namespace {
     case nvcompStatus_t::nvcompErrorWrongHeaderLength: return "nvcompErrorWrongHeaderLength";
     case nvcompStatus_t::nvcompErrorAlignment: return "nvcompErrorAlignment";
     case nvcompStatus_t::nvcompErrorChunkSizeTooLarge: return "nvcompErrorChunkSizeTooLarge";
+#endif
     case nvcompStatus_t::nvcompErrorCudaError: return "nvcompErrorCudaError";
     case nvcompStatus_t::nvcompErrorInternal: return "nvcompErrorInternal";
 #if NVCOMP_VER_MAJOR >= 5
