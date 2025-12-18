@@ -27,16 +27,25 @@
 # This function finds hipcomp and sets any additional necessary environment variables.
 function(find_and_configure_hipcomp)
 
-  include(${rapids-cmake-dir}/cpm/hipcomp.cmake)
-  set(export_args)
-  if(CUDF_EXPORT_NVCOMP)
-    set(export_args BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
-  endif()
-  # FIXME(HIP/AMD): Ensure CUDF_USE_PROPRIETARY_NVCOMP has a value to prevent argument shift
-  if(NOT DEFINED CUDF_USE_PROPRIETARY_NVCOMP)
-    set(CUDF_USE_PROPRIETARY_NVCOMP OFF)
-  endif()
-  rapids_cpm_hipcomp(${export_args} USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_NVCOMP} BUILD_STATIC OFF)
+# <<<<<<< OLD CODE from ead9ec6eb8 (745233f175) - COMMENTED OUT
+#   include(${rapids-cmake-dir}/cpm/hipcomp.cmake)
+#   set(export_args)
+#   if(CUDF_EXPORT_NVCOMP)
+#     set(export_args BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+#   endif()
+#   # FIXME(HIP/AMD): Ensure CUDF_USE_PROPRIETARY_NVCOMP has a value to prevent argument shift
+#   if(NOT DEFINED CUDF_USE_PROPRIETARY_NVCOMP)
+#     set(CUDF_USE_PROPRIETARY_NVCOMP OFF)
+#   endif()
+#   rapids_cpm_hipcomp(${export_args} USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_NVCOMP} BUILD_STATIC OFF)
+# =======
+  include(${rapids-cmake-dir}/cpm/nvcomp.cmake)
+  rapids_cpm_nvcomp(
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+    USE_PROPRIETARY_BINARY ON
+  )
+# >>>>>>> END NEW CODE (745233f175)
 
   # Per-thread default stream
   if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)

@@ -132,9 +132,12 @@ option(CUDF_USE_WARPSIZE_32
 mark_as_advanced(CUDF_USE_WARPSIZE_32)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
-option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" OFF)
-handle_unsupported_cmake_option("CUDF_USE_PROPRIETARY_NVCOMP" TRUE)
-option(CUDF_EXPORT_NVCOMP "Export NVCOMP as a dependency" ON)
+# <<<<<<< OLD CODE from ead9ec6eb8 (745233f175) - COMMENTED OUT
+# option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" OFF)
+# handle_unsupported_cmake_option("CUDF_USE_PROPRIETARY_NVCOMP" TRUE)
+# option(CUDF_EXPORT_NVCOMP "Export NVCOMP as a dependency" ON)
+# =======
+# >>>>>>> END NEW CODE (745233f175)
 option(CUDF_LARGE_STRINGS_DISABLED "Build with large string support disabled" OFF)
 mark_as_advanced(CUDF_LARGE_STRINGS_DISABLED)
 option(
