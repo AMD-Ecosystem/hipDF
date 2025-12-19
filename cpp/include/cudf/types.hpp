@@ -75,10 +75,10 @@ using uint64_t = __hip_internal::uint64_t;
 
 #include <cudf/utilities/export.hpp>
 
+#include <cstddef>
 // NOTE(AMD/HIP): Redefinition error (issue 304).
 #ifndef __HIPCC_RTC__
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #else

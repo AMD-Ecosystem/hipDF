@@ -76,6 +76,7 @@ function(jit_preprocess_files)
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o ${ARG_OUTPUT_DIR} -i -std=c++20
         -D_FILE_OFFSET_BITS=64 # NOTE(HIP/AMD): -remove-unused-globals?
         -D__HIPCC_RTC__ -DCUDF_RUNTIME_JIT  ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS}
+        -I${CUDF_SOURCE_DIR}/include/hiprtc_war #NOTE(HIP/AMD): Exclude <new>/<cuda_wrapper/new> headers completely from JIT compilation as they do not work with hipRTC's nostdinc++ option (set in jitify)
         -I${CUDF_SOURCE_DIR}/include -I${CUDF_SOURCE_DIR}/src ${includes}
         -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
         --no-preinclude-workarounds --no-replace-pragma-once #--diag-suppress=47 --device-int128
