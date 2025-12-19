@@ -34,6 +34,20 @@
 namespace CUDF_EXPORT numeric {
 namespace detail {
 
+// NOTE(HIP/AMD): HIPRTC workaround: cuda::std::floor may be unavailable under __HIPCC_RTC__.
+// Use HIPRTC global device overload when compiling for RTC.
+// TODO(HIP/AMD): This workaround may no longer be necessary with upcoming libhipcxx versions that
+// provide improved cuda::std support in HIPRTC compilation contexts.
+template <typename T>
+CUDF_HOST_DEVICE inline auto rtc_floor_war(T x) noexcept -> decltype(::floor(x))
+{
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+  return ::floor(x);
+#else
+  return cuda::std::floor(x);
+#endif
+}
+
 /**
  * @brief Determine the number of significant bits in an integer
  *
@@ -675,7 +689,7 @@ add_half_if_truncates(FloatingType floating,
 
   // However, don't add a half-bit if the input is a whole number!
   // This is only for errors introduced by rounding decimal fractions!
-  bool const is_whole_number = (cuda::std::floor(floating) == floating);
+  bool const is_whole_number = (rtc_floor_war(floating) == floating);
   bool const add_half_bit    = conversion_truncates && !is_whole_number;
 
   // Add half a bit on truncation (shift to make room and update pow2)

@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/ast/ast_operator.hpp>
@@ -26,6 +49,43 @@
 
 namespace CUDF_EXPORT cudf {
 namespace ast::detail {
+
+// NOTE(HIP/AMD): HIPRTC workaround: cuda::std math (cbrt, floor, rint) is not available
+// under __HIPCC_RTC__. Provide wrappers that use cuda::std when available,
+// otherwise call HIPRTC-provided global device overloads.
+// TODO(HIP/AMD): This workaround may no longer be necessary with upcoming libhipcxx versions that
+// provide improved cuda::std support in HIPRTC compilation contexts.
+namespace rtc_math_workaround {
+template <typename T>
+__device__ inline auto floor(T x) noexcept -> decltype(::floor(x))
+{
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+  return ::floor(x);
+#else
+  return cuda::std::floor(x);
+#endif
+}
+
+template <typename T>
+__device__ inline auto cbrt(T x) noexcept -> decltype(::cbrt(x))
+{
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+  return ::cbrt(x);
+#else
+  return cuda::std::cbrt(x);
+#endif
+}
+
+template <typename T>
+__device__ inline auto rint(T x) noexcept -> decltype(::rint(x))
+{
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+  return ::rint(x);
+#else
+  return cuda::std::rint(x);
+#endif
+}
+}  // namespace rtc_math_workaround
 
 /**
  * @brief Operator functor.
@@ -537,9 +597,9 @@ struct operator_functor<ast_operator::CBRT, false> {
   static constexpr auto arity{1};
 
   template <typename InputT>
-  __device__ inline auto operator()(InputT input) const noexcept -> decltype(cuda::std::cbrt(input))
+  __device__ inline auto operator()(InputT input) const noexcept -> decltype(rtc_math_workaround::cbrt(input))
   {
-    return cuda::std::cbrt(input);
+    return rtc_math_workaround::cbrt(input);
   }
 };
 
@@ -559,10 +619,9 @@ struct operator_functor<ast_operator::FLOOR, false> {
   static constexpr auto arity{1};
 
   template <typename InputT>
-  __device__ inline auto operator()(InputT input) const noexcept
-    -> decltype(cuda::std::floor(input))
+  __device__ inline auto operator()(InputT input) const noexcept -> decltype(rtc_math_workaround::floor(input))
   {
-    return cuda::std::floor(input);
+    return rtc_math_workaround::floor(input);
   }
 };
 
@@ -591,9 +650,9 @@ struct operator_functor<ast_operator::RINT, false> {
   static constexpr auto arity{1};
 
   template <typename InputT>
-  __device__ inline auto operator()(InputT input) const noexcept -> decltype(cuda::std::rint(input))
+  __device__ inline auto operator()(InputT input) const noexcept -> decltype(rtc_math_workaround::rint(input))
   {
-    return cuda::std::rint(input);
+    return rtc_math_workaround::rint(input);
   }
 };
 
