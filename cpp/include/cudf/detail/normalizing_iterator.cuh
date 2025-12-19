@@ -46,6 +46,7 @@
 
 #include <cudf/utilities/traits.hpp>
 
+#include <iterator>
 #include <type_traits>
 
 namespace cudf {
