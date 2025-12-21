@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/types.hpp>
@@ -52,21 +75,21 @@ struct device_span {
    *
    * @return A pointer to the first element of the span
    */
-  CUDF_HOST_DEVICE [[nodiscard]] constexpr element_type* data() const { return _data; }
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr element_type* data() const { return _data; }
 
   /**
    * @brief Returns the number of elements in the span.
    *
    * @return The number of elements in the span
    */
-  CUDF_HOST_DEVICE [[nodiscard]] constexpr size_t size() const { return _size; }
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr size_t size() const { return _size; }
 
   /**
    * @brief Checks if the span is empty.
    *
    * @return True if the span is empty, false otherwise
    */
-  CUDF_HOST_DEVICE [[nodiscard]] constexpr bool empty() const { return _size == 0; }
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr bool empty() const { return _size == 0; }
 
   /**
    * @brief Returns a reference to the idx-th element of the sequence.
@@ -86,7 +109,7 @@ struct device_span {
    *
    * @return An iterator to the first element of the span
    */
-  CUDF_HOST_DEVICE [[nodiscard]] constexpr element_type* begin() const { return _data; }
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr element_type* begin() const { return _data; }
 
   /**
    * @brief Returns an iterator to the element following the last element of the span.
@@ -95,9 +118,9 @@ struct device_span {
    *
    * @return An iterator to the element following the last element of the span
    */
-  CUDF_HOST_DEVICE [[nodiscard]] constexpr element_type* end() const { return _data + _size; }
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr element_type* end() const { return _data + _size; }
 
-  CUDF_HOST_DEVICE [[nodiscard]] constexpr device_span<T const> as_const() const
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr device_span<T const> as_const() const
   {
     return device_span<T const>{_data, _size};
   }
