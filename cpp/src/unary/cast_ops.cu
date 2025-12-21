@@ -86,7 +86,8 @@ struct unary_cast {
 
   template <typename SourceT, typename TargetT = _TargetT>
   __device__ inline TargetT operator()(SourceT const element)
-    requires(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>())
+    requires(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>() &&
+             !((cuda::std::is_same_v<SourceT, float> || cuda::std::is_same_v<SourceT, double>) && cuda::std::is_same_v<TargetT, long>)) 
   {
     return static_cast<TargetT>(element);
   }
