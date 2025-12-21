@@ -149,7 +149,10 @@ void launch_column_output_kernel(jitify2::ConfiguredKernel& kernel,
 
   std::array<void*, 3> args{&outputs_ptr, &inputs_ptr, &p_user_data};
 
-  kernel->launch_raw(args.data());
+  // NOTE(HIP/AMD): Using launch() instead of launch_raw() for compatibility with
+  // the current jitify-hip on HIP/ROCm.
+  // TODO(HIP/AMD): Switch back to launch_raw() when supported again.
+  kernel->launch(args.data());
 }
 
 template <typename T>
@@ -176,7 +179,10 @@ void launch_span_kernel(jitify2::ConfiguredKernel& kernel,
 
   std::array<void*, 3> args{&outputs_ptr, &inputs_ptr, &p_user_data};
 
-  kernel->launch_raw(args.data());
+  // NOTE(HIP/AMD): Using launch() instead of launch_raw() for compatibility with
+  // the current jitify-hip on HIP/ROCm.
+  // TODO(HIP/AMD): Switch back to launch_raw() when supported again.
+  kernel->launch(args.data());
 }
 
 std::tuple<rmm::device_buffer, size_type> make_transform_null_mask(
