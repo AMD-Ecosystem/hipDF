@@ -180,7 +180,7 @@ void binary_operation(mutable_column_view& out,
     parsed_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_llvm_ir);
   }
   else {
-    cuda_source =  cudf::jit::parse_single_function_ptx(ptx,
+    cuda_source =  cudf::jit::parse_single_function_ptx(udf,
                                          "GENERIC_BINARY_OP",
                                          {
                                            {0, output_type_name + " *"},
