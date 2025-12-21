@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/null_mask.hpp>
@@ -30,15 +52,21 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
 #include <cooperative_groups/scan.h>
+#endif
 
 namespace cudf {
 namespace strings {
 namespace detail {
 namespace {
 
+#ifndef __HIP_PLATFORM_AMD__  // Scan operations not yet supported on HIP
 /**
  * @brief String per warp function for find_instance
  */
@@ -51,11 +79,7 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
   auto const str_idx = tid / cudf::detail::warp_size;
   if (str_idx >= d_strings.size() or d_strings.is_null(str_idx)) { return; }
 
-#ifdef __HIP_PLATFORM_AMD__
-  namespace cg        = hip_extensions::hip_cooperative_groups_ext;
-#else
   namespace cg        = cooperative_groups;
-#endif
   auto const warp     = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
   auto const lane_idx = warp.thread_rank();
 
@@ -93,6 +117,7 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
   // output the position if an instance match has been found
   if (lane_idx == 0) { d_results[str_idx] = char_pos == max_pos ? -1 : char_pos + char_count; }
 }
+#endif  // __HIP_PLATFORM_AMD__
 
 }  // namespace
 
@@ -102,6 +127,9 @@ std::unique_ptr<column> find_instance(strings_column_view const& input,
                                       rmm::cuda_stream_view stream,
                                       rmm::device_async_resource_ref mr)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  CUDF_FAIL("find_instance is not yet supported on HIP platform (requires cooperative group scan operations)");
+#else
   CUDF_EXPECTS(
     instance >= 0, "Parameter instance must be positive integer or zero.", std::invalid_argument);
   CUDF_EXPECTS(target.is_valid(stream), "Parameter target must be valid.", std::invalid_argument);
@@ -130,6 +158,7 @@ std::unique_ptr<column> find_instance(strings_column_view const& input,
                                    stream.value()>>>(*d_strings, d_target, instance, d_results);
 
   return results;
+#endif
 }
 
 }  // namespace detail
