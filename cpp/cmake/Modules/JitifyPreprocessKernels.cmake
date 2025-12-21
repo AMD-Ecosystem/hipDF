@@ -60,7 +60,10 @@ function(jit_preprocess_files)
       set(CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS "-DCUDF_USE_WARPSIZE_32")
     endif()
 
-    get_filename_component(ARG_OUTPUT_DIR "${ARG_OUTPUT}" DIRECTORY)
+    # TODO(HIP/AMD): Use base output directory without the file's directory structure to avoid duplication in the folder structur with jitify-hip
+    # The below might have to be re-enabled for upcoming jitify-hip version.
+    # get_filename_component(ARG_OUTPUT_DIR "${ARG_OUTPUT}" DIRECTORY)
+    set(ARG_OUTPUT_DIR ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files)
     
     # FIXME(HIP/AMD): Workaround for libhipcxx to ensure build with nostdinc++
     # Note: need to pass _FILE_OFFSET_BITS=64 in COMMAND due to a limitation in how conda builds
