@@ -51,6 +51,7 @@
 #include <nvtext/tokenize.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
+#include <rmm/mr/polymorphic_allocator.hpp>
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
