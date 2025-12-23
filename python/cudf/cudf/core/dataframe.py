@@ -4347,9 +4347,7 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
             raise ValueError("Columns must all have the same dtype")
 
         result_table = plc.transpose.transpose(
-            plc.table.Table(
-                [col.to_pylibcudf(mode="read") for col in source_columns]
-            )
+            plc.table.Table([col.plc_column for col in source_columns])
         )
         result_columns = (
             ColumnBase.from_pylibcudf(
