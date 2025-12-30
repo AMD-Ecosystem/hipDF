@@ -139,7 +139,6 @@ Conversion
    Index.to_dlpack
    Index.to_pylibcudf
    Index.from_pylibcudf
-   Index.from_pandas
    Index.from_arrow
 
 Sorting
