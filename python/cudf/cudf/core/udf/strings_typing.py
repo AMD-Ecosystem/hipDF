@@ -36,10 +36,13 @@ from numba.cuda.cudadecl import registry as cuda_decl_registry
 # FIXME(HIP/AMD): missing numba-hip mapping?
 from numba.cuda.descriptor import hip_target as cuda_target
 
-import rmm
-
-from cudf.core.udf.nrt_utils import _USE_NRT
-
+# <<<<<<< OLD CODE from b039385e36 (bc14bcaf10) - COMMENTED OUT
+# import rmm
+#
+# from cudf.core.udf.nrt_utils import _USE_NRT
+#
+# =======
+# >>>>>>> END NEW CODE (bc14bcaf10)
 # libcudf size_type
 size_type = types.int32
 
@@ -162,9 +165,7 @@ class StrViewArgHandler:
         if isinstance(ty, types.CPointer) and isinstance(
             ty.dtype, (StringView, UDFString, ManagedUDFString)
         ):
-            return types.uint64, val.ptr if isinstance(
-                val, rmm.pylibrmm.device_buffer.DeviceBuffer
-            ) else val.get_ptr(mode="read")
+            return types.uint64, val.ptr
         else:
             return ty, val
 
