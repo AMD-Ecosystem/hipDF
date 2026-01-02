@@ -48,8 +48,8 @@ cugraph_algos = [
     "betweenness_centrality",
     "degree_centrality",
     "katz_centrality",
-    "sorensen_coefficient",
-    "jaccard_coefficient",
+    "sorensen",
+    "jaccard",
 ]
 
 nx_algos = [
@@ -70,7 +70,13 @@ def assert_cugraph_equal(expect, got):
         assert expect == got
 
 
-pytestmark = pytest.mark.assert_eq(fn=assert_cugraph_equal)
+pytestmark = [
+    pytest.mark.assert_eq(fn=assert_cugraph_equal),
+    # We can't pass a valid value here to avoid the warning, so we ignore it.
+    pytest.mark.filterwarnings(
+        "ignore:This parameter is deprecated:PendingDeprecationWarning"
+    ),
+]
 
 
 @pytest.fixture(scope="session")
@@ -94,6 +100,7 @@ def adjacency_matrix():
 def test_cugraph_from_pandas_edgelist(df, algo):
     G = cugraph.Graph()
     G.from_pandas_edgelist(df)
+    G.store_transposed = algo == "katz_centrality"
     return getattr(cugraph, algo)(G).to_pandas().values
 
 
@@ -101,6 +108,7 @@ def test_cugraph_from_pandas_edgelist(df, algo):
 def test_cugraph_from_pandas_adjacency(adjacency_matrix, algo):
     G = cugraph.Graph()
     G.from_pandas_adjacency(adjacency_matrix)
+    G.store_transposed = algo == "katz_centrality"
     res = getattr(cugraph, algo)(G).to_pandas()
     return res.sort_values(list(res.columns)).values
 
@@ -109,6 +117,7 @@ def test_cugraph_from_pandas_adjacency(adjacency_matrix, algo):
 def test_cugraph_from_numpy_array(df, algo):
     G = cugraph.Graph()
     G.from_numpy_array(df.values)
+    G.store_transposed = algo == "katz_centrality"
     return getattr(cugraph, algo)(G).to_pandas().values
 
 
