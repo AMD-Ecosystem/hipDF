@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2024-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -26,13 +26,12 @@
 // SOFTWARE.
 #pragma once
 
-#include "join_common_utils.cuh"
-#include "join_common_utils.hpp"
 #include "mixed_join_common_utils.cuh"
 
 #include <cudf/ast/detail/expression_evaluator.cuh>
 #include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/table/table_device_view.cuh>
+#include <cudf/types.hpp>
 #include <cudf/utilities/export.hpp>
 #include <cudf/utilities/span.hpp>
 
@@ -45,6 +44,9 @@
 // #include <thrust/iterator/discard_iterator.h>
 // =======
 // >>>>>>> END NEW CODE (ede7e3524b)
+
+#include <cuco/pair.cuh>
+#include <cuda/std/utility>
 
 namespace CUDF_EXPORT cudf {
 namespace detail {

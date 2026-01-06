@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2022-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -32,22 +32,28 @@
 
 #include <cudf/ast/detail/expression_evaluator.cuh>
 #include <cudf/detail/utilities/cuda.cuh>
-#include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/table/table_device_view.cuh>
+#include <cudf/types.hpp>
 #include <cudf/utilities/span.hpp>
 
-// <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-// #ifdef __HIP_PLATFORM_AMD__
-// #include <hip/hip_cooperative_groups.h>
-// #include <hipcub/hipcub.hpp>
-// #else
-// #include <cooperative_groups.h>
-// #include <cub/cub.cuh>
-// #endif
-// #include <thrust/iterator/discard_iterator.h>
-//
+// <<<<<<< OLD CODE from 135852b730 (e3fe491da6) - COMMENTED OUT
+// // <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
+// // #ifdef __HIP_PLATFORM_AMD__
+// // #include <hip/hip_cooperative_groups.h>
+// // #include <hipcub/hipcub.hpp>
+// // #else
+// // #include <cooperative_groups.h>
+// // #include <cub/cub.cuh>
+// // #endif
+// // #include <thrust/iterator/discard_iterator.h>
+// //
+// // =======
+// // >>>>>>> END NEW CODE (ede7e3524b)
 // =======
-// >>>>>>> END NEW CODE (ede7e3524b)
+#include <cuco/pair.cuh>
+#include <cuda/std/utility>
+
+// >>>>>>> END NEW CODE (e3fe491da6)
 namespace cudf {
 namespace detail {
 

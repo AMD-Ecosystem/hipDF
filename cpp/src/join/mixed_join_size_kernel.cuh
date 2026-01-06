@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2022-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -28,43 +28,49 @@
 
 #include "join_common_utils.hpp"
 #include "mixed_join_common_utils.cuh"
+#include "mixed_join_size_kernel.hpp"
 
 #include <cudf/ast/detail/expression_evaluator.cuh>
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/table/table_device_view.cuh>
+#include <cudf/types.hpp>
 #include <cudf/utilities/span.hpp>
 
-// <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-// #ifdef __HIP_PLATFORM_AMD__
-// #include <hip/hip_cooperative_groups.h>
-// #include <hipcub/hipcub.hpp>
-// #else
-// #include <cooperative_groups.h>
-// #include <cub/cub.cuh>
-// #endif
-//
-// #include <thrust/iterator/discard_iterator.h>
-//
-// namespace cudf {
-// namespace detail {
-// namespace cg = cooperative_groups;
-//
-// template <int block_size, bool has_nulls>
-// CUDF_KERNEL void __launch_bounds__(block_size)
-//   compute_mixed_join_output_size(table_device_view left_table,
-//                                  table_device_view right_table,
-//                                  table_device_view probe,
-//                                  table_device_view build,
-//                                  row_hash const hash_probe,
-//                                  row_equality const equality_probe,
-//                                  join_kind const join_type,
-//                                  cudf::detail::mixed_multimap_type::device_view hash_table_view,
-//                                  ast::detail::expression_device_view device_expression_data,
-//                                  bool const swap_tables,
-//                                  std::size_t* output_size,
-//                                  cudf::device_span<cudf::size_type> matches_per_row)
+// <<<<<<< OLD CODE from 135852b730 (e3fe491da6) - COMMENTED OUT
+// // <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
+// // #ifdef __HIP_PLATFORM_AMD__
+// // #include <hip/hip_cooperative_groups.h>
+// // #include <hipcub/hipcub.hpp>
+// // #else
+// // #include <cooperative_groups.h>
+// // #include <cub/cub.cuh>
+// // #endif
+// //
+// // #include <thrust/iterator/discard_iterator.h>
+// //
+// // namespace cudf {
+// // namespace detail {
+// // namespace cg = cooperative_groups;
+// //
+// // template <int block_size, bool has_nulls>
+// // CUDF_KERNEL void __launch_bounds__(block_size)
+// //   compute_mixed_join_output_size(table_device_view left_table,
+// //                                  table_device_view right_table,
+// //                                  table_device_view probe,
+// //                                  table_device_view build,
+// //                                  row_hash const hash_probe,
+// //                                  row_equality const equality_probe,
+// //                                  join_kind const join_type,
+// //                                  cudf::detail::mixed_multimap_type::device_view hash_table_view,
+// //                                  ast::detail::expression_device_view device_expression_data,
+// //                                  bool const swap_tables,
+// //                                  std::size_t* output_size,
+// //                                  cudf::device_span<cudf::size_type> matches_per_row)
+// // =======
 // =======
+#include <cuco/pair.cuh>
+// >>>>>>> END NEW CODE (e3fe491da6)
 #include <cuda/std/utility>
 
 namespace cudf::detail {
