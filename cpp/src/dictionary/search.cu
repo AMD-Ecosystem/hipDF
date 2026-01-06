@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2020-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -93,8 +93,10 @@ struct find_index_fn {
     using ScalarType = cudf::scalar_type_t<Element>;
     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
     auto keys_view   = column_device_view::create(input.keys(), stream);
-    auto iter        = thrust::equal_range(
-      rmm::exec_policy(stream), keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
+    auto iter        = thrust::equal_range(rmm::exec_policy_nosync(stream),
+                                    keys_view->begin<Element>(),
+                                    keys_view->end<Element>(),
+                                    find_key);
     return type_dispatcher(input.indices().type(),
                            dispatch_scalar_index{},
                            cuda::std::distance(keys_view->begin<Element>(), iter.first),
@@ -135,9 +137,16 @@ struct find_insert_index_fn {
     using ScalarType = cudf::scalar_type_t<Element>;
     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
     auto keys_view   = column_device_view::create(input.keys(), stream);
-    auto iter        = thrust::lower_bound(
-      rmm::exec_policy(stream),
-      keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
+// <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
+//     auto iter        = thrust::lower_bound(
+//       rmm::exec_policy(stream),
+//       keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
+// =======
+    auto iter        = thrust::lower_bound(rmm::exec_policy_nosync(stream),
+                                    keys_view->begin<Element>(),
+                                    keys_view->end<Element>(),
+                                    find_key);
+// >>>>>>> END NEW CODE (820f9f7c3f)
     return type_dispatcher(input.indices().type(),
                            dispatch_scalar_index{},
                            cuda::std::distance(keys_view->begin<Element>(), iter),
