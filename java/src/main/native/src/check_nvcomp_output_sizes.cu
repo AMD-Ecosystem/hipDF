@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2021-2024, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2021-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -57,8 +57,12 @@ bool check_nvcomp_output_sizes(std::size_t const* dev_uncompressed_sizes,
 {
 #ifndef NVTX_DISABLE
   NVTX3_FUNC_RANGE_IN(java_domain);
-#endif
-  return thrust::equal(rmm::exec_policy(stream),
+// <<<<<<< OLD CODE from 8ecada029b (e11a5eb8b9) - COMMENTED OUT
+// #endif
+//   return thrust::equal(rmm::exec_policy(stream),
+// =======
+  return thrust::equal(rmm::exec_policy_nosync(stream),
+// >>>>>>> END NEW CODE (e11a5eb8b9)
                        dev_uncompressed_sizes,
                        dev_uncompressed_sizes + num_chunks,
                        dev_actual_uncompressed_sizes);
