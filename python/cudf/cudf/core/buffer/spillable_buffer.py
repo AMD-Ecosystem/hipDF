@@ -240,7 +240,7 @@ class SpillableBufferOwner(BufferOwner):
         self._manager.add(self)
 
     @classmethod
-    def from_device_memory(cls, data: Any, exposed: bool) -> Self:
+    def from_device_memory(cls, data: Any) -> Self:
         """Create a spillabe buffer from device memory.
 
         No data is being copied.
@@ -249,15 +249,13 @@ class SpillableBufferOwner(BufferOwner):
         ----------
         data : device-buffer-like
             An object implementing the CUDA Array Interface.
-        exposed : bool
-            Mark the buffer as permanently exposed (unspillable).
 
         Returns
         -------
         SpillableBufferOwner
             Buffer representing the same device memory as `data`
         """
-        ret = super().from_device_memory(data, exposed=exposed)
+        ret = super().from_device_memory(data)
         ret._finalize_init(ptr_desc={"type": "gpu"})
         return ret
 
@@ -291,7 +289,7 @@ class SpillableBufferOwner(BufferOwner):
         data = data.cast("B")  # Make sure itemsize==1
 
         # Create an already spilled buffer
-        ret = cls(ptr=0, size=data.nbytes, owner=None, exposed=False)
+        ret = cls(ptr=0, size=data.nbytes, owner=None)
         ret._finalize_init(ptr_desc={"type": "cpu", "memoryview": data})
         return ret
 
@@ -598,7 +596,6 @@ class SpillableBuffer(Buffer):
                     Buffer(
                         owner=BufferOwner.from_device_memory(
                             SpillableBufferCAIWrapper(self),
-                            exposed=False,
                         )
                     )
                 ]
