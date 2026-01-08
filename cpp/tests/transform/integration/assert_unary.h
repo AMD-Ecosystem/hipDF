@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf_test/column_utilities.hpp>
@@ -24,6 +46,14 @@
 #include <thrust/iterator/zip_iterator.h>
 
 #include <algorithm>
+
+// NOTE(HIP/AMD): cuda::std::tuple from libhipcxx 2.7.0 doesn't provide iterator traits required by thrust::zip_iterator
+// in ROCm/HIP, causing compilation errors. Use thrust::make_tuple for compatibility.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#define MAKE_TUPLE thrust::make_tuple
+#else
+#define MAKE_TUPLE cuda::std::make_tuple
+#endif
 
 namespace transformation {
 template <typename TypeOut, typename TypeIn, typename TypeOpe>
@@ -36,8 +66,8 @@ void ASSERT_UNARY(cudf::column_view const& out, cudf::column_view const& in, Typ
 
   ASSERT_TRUE(out_data.size() == in_data.size());
 
-  auto begin = thrust::make_zip_iterator(cuda::std::make_tuple(in_data.begin(), out_data.begin()));
-  auto end   = thrust::make_zip_iterator(cuda::std::make_tuple(in_data.end(), out_data.end()));
+  auto begin = thrust::make_zip_iterator(MAKE_TUPLE(in_data.begin(), out_data.begin()));
+  auto end   = thrust::make_zip_iterator(MAKE_TUPLE(in_data.end(), out_data.end()));
 
   std::for_each(begin, end, [ope](auto const& zipped) {
     auto [in_val, out_val] = zipped;
@@ -50,9 +80,9 @@ void ASSERT_UNARY(cudf::column_view const& out, cudf::column_view const& in, Typ
   ASSERT_TRUE(out_valid.size() == in_valid.size());
 
   auto valid_begin =
-    thrust::make_zip_iterator(cuda::std::make_tuple(in_valid.begin(), out_valid.begin()));
+    thrust::make_zip_iterator(MAKE_TUPLE(in_valid.begin(), out_valid.begin()));
   auto valid_end =
-    thrust::make_zip_iterator(cuda::std::make_tuple(in_valid.end(), out_valid.end()));
+    thrust::make_zip_iterator(MAKE_TUPLE(in_valid.end(), out_valid.end()));
 
   std::for_each(valid_begin, valid_end, [](auto const& zipped) {
     auto [in_flag, out_flag] = zipped;

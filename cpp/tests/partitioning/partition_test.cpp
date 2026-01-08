@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
@@ -27,6 +50,14 @@
 
 #include <cuda/std/tuple>
 #include <thrust/iterator/zip_iterator.h>
+
+// NOTE(HIP/AMD): cuda::std::tuple from libhipcxx 2.7.0 doesn't provide iterator traits required by thrust::zip_iterator
+// in ROCm/HIP, causing compilation errors. Use thrust::make_tuple for compatibility.
+#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#define MAKE_TUPLE thrust::make_tuple
+#else
+#define MAKE_TUPLE cuda::std::make_tuple
+#endif
 
 #include <algorithm>
 
@@ -107,9 +138,9 @@ void expect_equal_partitions(cudf::table_view expected,
   auto expected_split = cudf::split(expected, split_points);
 
   auto begin =
-    thrust::make_zip_iterator(cuda::std::make_tuple(expected_split.begin(), actual_split.begin()));
+    thrust::make_zip_iterator(MAKE_TUPLE(expected_split.begin(), actual_split.begin()));
   auto end =
-    thrust::make_zip_iterator(cuda::std::make_tuple(expected_split.end(), actual_split.end()));
+    thrust::make_zip_iterator(MAKE_TUPLE(expected_split.end(), actual_split.end()));
 
   std::for_each(begin, end, [](auto const& zipped) {
     auto [expected, actual] = zipped;
