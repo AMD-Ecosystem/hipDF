@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -78,7 +78,7 @@ namespace rolling {
  */
 template <typename T>
 struct less {
-  __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
+  __host__ __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
   {
     if constexpr (cuda::std::is_floating_point_v<T>) {
       if (cuda::std::isnan(x)) { return false; }
@@ -91,7 +91,7 @@ struct less {
 
 template <typename T>
 struct less_equal {
-  __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
+  __host__ __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
   {
     if constexpr (cuda::std::is_floating_point_v<T>) {
       if (cuda::std::isnan(x)) { return cuda::std::isnan(y); }
@@ -103,7 +103,7 @@ struct less_equal {
 };
 template <typename T>
 struct greater {
-  __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
+  __host__ __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
   {
     if constexpr (cuda::std::is_floating_point_v<T>) {
       if (cuda::std::isnan(x)) { return !cuda::std::isnan(y); }
@@ -116,7 +116,7 @@ struct greater {
 
 template <typename T>
 struct greater_equal {
-  __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
+  __host__ __device__ constexpr bool operator()(T const& x, T const& y) const noexcept
   {
     if constexpr (cuda::std::is_floating_point_v<T>) {
       if (cuda::std::isnan(x)) { return true; }
