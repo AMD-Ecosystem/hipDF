@@ -15,7 +15,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,11 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <hipcub/device/device_reduce.cuh>
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/device/device_reduce.hpp>
+#else
+#include <cub/device/device_reduce.cuh>
+#endif
 #include <cuda/functional>
 #include <cuda/std/iterator>
 #include <thrust/equal.h>
