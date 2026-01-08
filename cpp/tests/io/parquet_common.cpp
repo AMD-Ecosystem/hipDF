@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "parquet_common.hpp"
 
 #include <cudf/io/parquet.hpp>
@@ -232,14 +254,14 @@ void read_footer(std::unique_ptr<cudf::io::datasource> const& source,
 
   // checks for valid header, footer, and file length
   ASSERT_GT(len, header_len + ender_len);
-  ASSERT_TRUE(header->magic == detail::parquet_magic && ender->magic == detail::parquet_magic);
+  ASSERT_TRUE(header->magic == cudf::io::parquet::detail::parquet_magic && ender->magic == cudf::io::parquet::detail::parquet_magic);
   ASSERT_TRUE(ender->footer_len != 0 && ender->footer_len <= (len - header_len - ender_len));
 
   // parquet files end with 4-byte footer_length and 4-byte magic == "PAR1"
   // seek backwards from the end of the file (footer_length + 8 bytes of ender)
   auto const footer_buffer =
     source->host_read(len - ender->footer_len - ender_len, ender->footer_len);
-  detail::CompactProtocolReader cp(footer_buffer->data(), ender->footer_len);
+  cudf::io::parquet::detail::CompactProtocolReader cp(footer_buffer->data(), ender->footer_len);
 
   cp.read(file_meta_data);
 }
@@ -256,7 +278,7 @@ int read_dict_bits(std::unique_ptr<cudf::io::datasource> const& source,
 
   PageHeader page_hdr;
   auto const page_buf = source->host_read(page_loc.offset, page_loc.compressed_page_size);
-  detail::CompactProtocolReader cp(page_buf->data(), page_buf->size());
+  cudf::io::parquet::detail::CompactProtocolReader cp(page_buf->data(), page_buf->size());
   cp.read(&page_hdr);
 
   // cp should be pointing at the start of page data now. the first byte
