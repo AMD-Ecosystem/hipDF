@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -157,7 +157,7 @@ struct device_optional_span : device_span<T> {
   /// @copydoc column_device_view::nullable
   [[nodiscard]] CUDF_HOST_DEVICE bool nullable() const { return _null_mask != nullptr; }
 
-#ifdef __CUDACC__
+#if defined(__CUDACC__) || defined(__HIPCC__) || defined(__HIPCC_RTC__)
 
   /// @copydoc column_device_view::is_valid_nocheck
   [[nodiscard]] __device__ bool is_valid_nocheck(size_t element_index) const
