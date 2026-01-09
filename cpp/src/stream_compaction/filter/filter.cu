@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,7 @@
 #include <cudf/reshape.hpp>
 #include <cudf/stream_compaction.hpp>
 #include <cudf/table/table.hpp>
+#include <cudf/utilities/jit_amd_utilities.hpp>
 #include <cudf/utilities/span.hpp>
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
@@ -231,10 +232,23 @@ void perform_checks(column_view base_column,
   check_columns(filter_columns);
 }
 
-jitify2::Kernel get_kernel(std::string const& kernel_name, std::string const& cuda_source)
+jitify2::Kernel get_kernel(std::string const& kernel_name,
+                           std::string const& cuda_source,
+                           std::string const* llvm_ir = nullptr)
 {
-  return cudf::jit::get_program_cache(*stream_compaction_filter_jit_kernel_cu_jit)
-    .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {"-arch=sm_."});
+  const std::string arch_flag = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+  if (llvm_ir != nullptr && HIP_PLATFORM_AMD) {
+    return cudf::jit::get_program_cache(*stream_compaction_filter_jit_kernel_cu_jit)
+      .get_kernel(kernel_name,
+                  {},
+                  {{"cudf/detail/operation-udf.hpp", cuda_source}},
+                  {arch_flag},
+                  {},
+                  llvm_ir);
+  } else {
+    return cudf::jit::get_program_cache(*stream_compaction_filter_jit_kernel_cu_jit)
+      .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {arch_flag});
+  }
 }
 
 jitify2::ConfiguredKernel build_kernel(std::string const& kernel_name,
@@ -251,13 +265,42 @@ jitify2::ConfiguredKernel build_kernel(std::string const& kernel_name,
   CUDF_EXPECTS(!(is_null_aware == null_aware::YES && is_ptx),
                "Optional types are not supported in PTX UDFs",
                std::invalid_argument);
-  auto const cuda_source =
-    is_ptx ? cudf::jit::parse_single_function_ptx(
-               udf,
-               "GENERIC_FILTER_OP",
-               cudf::jit::build_ptx_params(
-                 span_outputs, cudf::jit::column_type_names(input_columns), has_user_data))
-           : cudf::jit::parse_single_function_cuda(udf, "GENERIC_FILTER_OP");
+  std::string cuda_source;
+  std::string parsed_udf_llvm_ir;
+
+  if (is_ptx && HIP_PLATFORM_AMD) {
+    // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+    // For AMD HIP, we need to handle LLVM IR instead of PTX
+    auto input_types = cudf::jit::column_type_names(input_columns);
+
+    cuda_source = "using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;";
+    cuda_source += "extern \"C\" __device__ void GENERIC_FILTER_OP(";
+
+    // Build function signature
+    for (size_t i = 0; i < span_outputs.size(); ++i) {
+      if (i > 0) cuda_source += ",";
+      cuda_source += span_outputs[i] + "*";
+    }
+    if (!input_types.empty()) cuda_source += ",";
+    for (size_t i = 0; i < input_types.size(); ++i) {
+      if (i > 0) cuda_source += ",";
+      cuda_source += input_types[i];
+    }
+    if (has_user_data) cuda_source += ",void*";
+    cuda_source += ");";
+
+    parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_FILTER_OP");
+    parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
+
+  } else {
+    cuda_source =
+      is_ptx ? cudf::jit::parse_single_function_ptx(
+                 udf,
+                 "GENERIC_FILTER_OP",
+                 cudf::jit::build_ptx_params(
+                   span_outputs, cudf::jit::column_type_names(input_columns), has_user_data))
+             : cudf::jit::parse_single_function_cuda(udf, "GENERIC_FILTER_OP");
+  }
 
   return get_kernel(jitify2::reflection::Template(kernel_name)
                       .instantiate(cudf::jit::build_jit_template_params(
@@ -266,7 +309,8 @@ jitify2::ConfiguredKernel build_kernel(std::string const& kernel_name,
                         span_outputs,
                         {},
                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
-                    cuda_source)
+                    cuda_source,
+                    (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value());
 }
 
