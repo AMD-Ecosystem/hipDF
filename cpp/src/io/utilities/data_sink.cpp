@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,8 @@
 #endif
 #include <rmm/cuda_stream_view.hpp>
 
+#include <fstream>
+
 namespace cudf {
 namespace io {
 
@@ -61,7 +63,11 @@ class file_sink : public data_sink {
     CUDF_LOG_INFO("Writing a file using kvikIO, with compatibility mode %s.",
     _kvikio_file.get_compat_mode_manager().is_compat_mode_preferred() ? "on" : "off");
 #else
-    CUDF_FAIL("KvikIO support is not available with HIP yet.");
+    // Fallback to standard file I/O when KvikIO is not available
+    _output_stream.open(filepath, std::ios::out | std::ios::binary | std::ios::trunc);
+    if (!_output_stream.is_open()) {
+      CUDF_FAIL("Cannot open file for writing: " + filepath);
+    }
 #endif
   }
 
@@ -74,15 +80,22 @@ class file_sink : public data_sink {
     _kvikio_file.pwrite(data, size, _bytes_written).get();
     _bytes_written += size;
 #else
-    CUDF_FAIL("KvikIO support is not available with HIP yet.");
+    // Fallback to standard file I/O
+    _output_stream.seekp(_bytes_written);
+    _output_stream.write(static_cast<char const*>(data), size);
+    _bytes_written += size;
 #endif
   }
 
   void flush() override
   {
+#ifdef CUDF_HAS_KVIKIO
     // kvikio::FileHandle::pwrite() makes system calls that reach the kernel buffer cache. This
     // process does not involve application buffer. Therefore calls to ::fflush() or
     // ofstream::flush() do not apply.
+#else
+    _output_stream.flush();
+#endif
   }
 
   size_t bytes_written() override { return _bytes_written; }
@@ -129,6 +142,8 @@ class file_sink : public data_sink {
   size_t _bytes_written = 0;
 #ifdef CUDF_HAS_KVIKIO
   kvikio::FileHandle _kvikio_file;
+#else
+  std::ofstream _output_stream;
 #endif
 };
 

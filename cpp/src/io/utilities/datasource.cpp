@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@
 
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include <future>
@@ -71,6 +72,41 @@
 
 namespace cudf {
 namespace io {
+
+namespace detail {
+/**
+ * @brief Class that provides RAII for file handling.
+ */
+class file_wrapper {
+  int fd       = -1;
+  size_t _size = 0;
+
+ public:
+  explicit file_wrapper(std::string const& filepath, int flags)
+  {
+    fd = open(filepath.c_str(), flags);
+    if (fd == -1) {
+      CUDF_FAIL("Cannot open file: " + filepath);
+    }
+    
+    struct stat st;
+    if (fstat(fd, &st) != 0) {
+      close(fd);
+      CUDF_FAIL("Cannot stat file: " + filepath);
+    }
+    _size = st.st_size;
+  }
+  
+  ~file_wrapper()
+  {
+    if (fd >= 0) { close(fd); }
+  }
+  
+  [[nodiscard]] auto size() const { return _size; }
+  [[nodiscard]] auto desc() const { return fd; }
+};
+}  // namespace detail
+
 namespace {
 
 #ifdef CUDF_HAS_KVIKIO
@@ -230,59 +266,174 @@ class memory_mapped_source : public kvikio_source<kvikio::MmapHandle> {
   }
 };
 #else
-// When KvikIO is not available, provide stub sources that fail fast.
+// When KvikIO is not available, use POSIX file I/O as fallback
 class file_source : public datasource {
  public:
-  explicit file_source(char const*) { CUDF_FAIL("KvikIO is not available."); }
-
-  size_t host_read(size_t, size_t, uint8_t*) override { CUDF_FAIL("KvikIO is not available."); }
-  std::unique_ptr<buffer> host_read(size_t, size_t) override
+  explicit file_source(char const* filepath) : _file(filepath, O_RDONLY)
   {
-    CUDF_FAIL("KvikIO is not available.");
+  }
+
+  ~file_source() override = default;
+
+  size_t host_read(size_t offset, size_t size, uint8_t* dst) override
+  {
+    lseek(_file.desc(), offset, SEEK_SET);
+
+    // Clamp length to available data
+    auto const read_size = std::min(size, _file.size() - offset);
+
+    CUDF_EXPECTS(read(_file.desc(), dst, read_size) == static_cast<ssize_t>(read_size),
+                 "read failed");
+    return read_size;
+  }
+
+  std::unique_ptr<buffer> host_read(size_t offset, size_t size) override
+  {
+    lseek(_file.desc(), offset, SEEK_SET);
+
+    // Clamp length to available data
+    ssize_t const read_size = std::min(size, _file.size() - offset);
+
+    std::vector<uint8_t> v(read_size);
+    CUDF_EXPECTS(read(_file.desc(), v.data(), read_size) == read_size, "read failed");
+    return buffer::create(std::move(v));
   }
 
   std::future<std::unique_ptr<datasource::buffer>> host_read_async(size_t offset,
                                                                    size_t size) override
   {
-    CUDF_FAIL("KvikIO is not available.");
+    // Implement async as sync wrapped in a future
+    return std::async(std::launch::deferred, [this, offset, size]() {
+      return this->host_read(offset, size);
+    });
   }
+
   std::future<size_t> host_read_async(size_t offset, size_t size, uint8_t* dst) override
   {
-    CUDF_FAIL("KvikIO is not available.");
+    // Implement async as sync wrapped in a future
+    return std::async(std::launch::deferred, [this, offset, size, dst]() {
+      return this->host_read(offset, size, dst);
+    });
   }
 
   [[nodiscard]] bool supports_device_read() const override { return false; }
   [[nodiscard]] bool is_device_read_preferred(size_t) const override { return false; }
 
-  size_t device_read(size_t, size_t, uint8_t*, rmm::cuda_stream_view) override
+  size_t device_read(size_t offset, size_t size, uint8_t* dst, rmm::cuda_stream_view stream) override
   {
-    CUDF_FAIL("KvikIO is not available.");
+    CUDF_FAIL("Device reads are not supported without KvikIO");
   }
-  std::unique_ptr<buffer> device_read(size_t, size_t, rmm::cuda_stream_view) override
+  
+  std::unique_ptr<buffer> device_read(size_t offset, size_t size, rmm::cuda_stream_view stream) override
   {
-    CUDF_FAIL("KvikIO is not available.");
+    CUDF_FAIL("Device reads are not supported without KvikIO");
   }
 
   std::future<size_t> device_read_async(size_t offset,
                                         size_t size,
                                         uint8_t* dst,
-                                        rmm::cuda_stream_view) override
+                                        rmm::cuda_stream_view stream) override
   {
-    CUDF_FAIL("KvikIO is not available.");
+    CUDF_FAIL("Device reads are not supported without KvikIO");
   }
 
-  [[nodiscard]] size_t size() const override { return 0; }
-  [[nodiscard]] bool is_empty() const override { return true; }
+  [[nodiscard]] size_t size() const override { return _file.size(); }
+
+ protected:
+  detail::file_wrapper _file;
 };
 
 class memory_mapped_source : public file_source {
  public:
-  explicit memory_mapped_source(char const* filepath,
-                                size_t,
-                                [[maybe_unused]] size_t max_size_estimate)
+  explicit memory_mapped_source(char const* filepath, size_t offset, size_t max_size_estimate)
     : file_source(filepath)
   {
+    if (_file.size() != 0) {
+      // Memory mapping is not exclusive, so we can include the whole region we expect to read
+      map(_file.desc(), offset, max_size_estimate);
+    }
   }
+
+  ~memory_mapped_source() override
+  {
+    if (_map_addr != nullptr) { unmap(); }
+  }
+
+  std::unique_ptr<buffer> host_read(size_t offset, size_t size) override
+  {
+    // Clamp length to available data
+    auto const read_size = std::min(size, _file.size() - offset);
+
+    // If the requested range is outside of the mapped region, read from the file
+    if (offset < _map_offset || offset + read_size > (_map_offset + _map_size)) {
+      return file_source::host_read(offset, read_size);
+    }
+
+    // If the requested range is only partially within the registered region, copy to a new
+    // host buffer to make the data safe to copy to the device
+    if (_reg_addr != nullptr &&
+        (offset < _reg_offset || offset + read_size > (_reg_offset + _reg_size))) {
+      auto const src = static_cast<uint8_t*>(_map_addr) + (offset - _map_offset);
+
+      return std::make_unique<owning_buffer<std::vector<uint8_t>>>(
+        std::vector<uint8_t>(src, src + read_size));
+    }
+
+    return std::make_unique<non_owning_buffer>(
+      static_cast<uint8_t*>(_map_addr) + offset - _map_offset, read_size);
+  }
+
+  size_t host_read(size_t offset, size_t size, uint8_t* dst) override
+  {
+    // Clamp length to available data
+    auto const read_size = std::min(size, _file.size() - offset);
+
+    // If the requested range is outside of the mapped region, read from the file
+    if (offset < _map_offset || offset + read_size > (_map_offset + _map_size)) {
+      return file_source::host_read(offset, read_size, dst);
+    }
+
+    auto const src = static_cast<uint8_t*>(_map_addr) + (offset - _map_offset);
+    std::memcpy(dst, src, read_size);
+    return read_size;
+  }
+
+ private:
+  void map(int fd, size_t offset, size_t size)
+  {
+    CUDF_EXPECTS(offset < _file.size(), "Offset is past end of file", std::overflow_error);
+
+    // Offset for `mmap()` must be page aligned
+    _map_offset = offset & ~(sysconf(_SC_PAGESIZE) - 1);
+
+    if (size == 0 || (offset + size) > _file.size()) { size = _file.size() - offset; }
+
+    // Size for `mmap()` needs to include the page padding
+    _map_size = size + (offset - _map_offset);
+    if (_map_size == 0) { return; }
+
+    // Check if accessing a region within already mapped area
+    _map_addr = mmap(nullptr, _map_size, PROT_READ, MAP_PRIVATE, fd, _map_offset);
+    CUDF_EXPECTS(_map_addr != MAP_FAILED, "Cannot create memory mapping");
+  }
+
+  void unmap()
+  {
+    if (_map_addr != nullptr) {
+      auto const result = munmap(_map_addr, _map_size);
+      if (result != 0) { CUDF_LOG_WARN("munmap failed with %d", result); }
+      _map_addr = nullptr;
+    }
+  }
+
+ private:
+  size_t _map_offset = 0;
+  size_t _map_size   = 0;
+  void* _map_addr    = nullptr;
+
+  size_t _reg_offset = 0;
+  size_t _reg_size   = 0;
+  void* _reg_addr    = nullptr;
 };
 #endif
 /**
