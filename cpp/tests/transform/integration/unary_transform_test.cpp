@@ -18,7 +18,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -160,12 +160,12 @@ __device__ inline void    fdsf   (
   // c = a*a*a*a
   std::string amd_llvm_ir = 
     R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1) #0 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, float noundef %1) #2 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca float, align 4, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
   %6 = addrspacecast ptr addrspace(5) %4 to ptr
-  store ptr %0, ptr %5, align 8, !tbaa !7
+  store ptr %0, ptr %5, align 8, !tbaa !6
   store float %1, ptr %6, align 4, !tbaa !11
   %7 = load float, ptr %6, align 4, !tbaa !11
   %8 = load float, ptr %6, align 4, !tbaa !11
@@ -174,25 +174,27 @@ define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, fl
   %11 = fmul contract float %9, %10
   %12 = load float, ptr %6, align 4, !tbaa !11
   %13 = fmul contract float %11, %12
-  %14 = load ptr, ptr %5, align 8, !tbaa !7
+  %14 = load ptr, ptr %5, align 8, !tbaa !6
   store float %13, ptr %14, align 4, !tbaa !11
   ret void
 }
 
 attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
 
-!llvm.module.flags = !{!0, !1, !2, !3, !4}
-!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
-!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
 
-!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
-!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
-!3 = !{i32 1, !"wchar_size", i32 4}
-!4 = !{i32 8, !"PIC Level", i32 2}
-!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
-!6 = !{i32 2, i32 0}
-!7 = !{!8, !8, i64 0}
+!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!2 = !{i32 1, !"wchar_size", i32 4}
+!3 = !{i32 8, !"PIC Level", i32 2}
+!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+!5 = !{i32 2, i32 0}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"p1 float", !8, i64 0}
 !8 = !{!"any pointer", !9, i64 0}
 !9 = !{!"omnipotent char", !10, i64 0}
 !10 = !{!"Simple C++ TBAA"}
@@ -259,37 +261,39 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
   // c = a * a - a
   std::string amd_llvm_ir = 
     R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i32 %1) #0 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i32 noundef %1) #2 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca i32, align 4, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
   %6 = addrspacecast ptr addrspace(5) %4 to ptr
-  store ptr %0, ptr %5, align 8, !tbaa !7
+  store ptr %0, ptr %5, align 8, !tbaa !6
   store i32 %1, ptr %6, align 4, !tbaa !11
   %7 = load i32, ptr %6, align 4, !tbaa !11
   %8 = load i32, ptr %6, align 4, !tbaa !11
   %9 = mul nsw i32 %7, %8
   %10 = load i32, ptr %6, align 4, !tbaa !11
   %11 = sub nsw i32 %9, %10
-  %12 = load ptr, ptr %5, align 8, !tbaa !7
+  %12 = load ptr, ptr %5, align 8, !tbaa !6
   store i32 %11, ptr %12, align 4, !tbaa !11
   ret void
 }
 
 attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
 
-!llvm.module.flags = !{!0, !1, !2, !3, !4}
-!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
-!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
 
-!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
-!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
-!3 = !{i32 1, !"wchar_size", i32 4}
-!4 = !{i32 8, !"PIC Level", i32 2}
-!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
-!6 = !{i32 2, i32 0}
-!7 = !{!8, !8, i64 0}
+!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!2 = !{i32 1, !"wchar_size", i32 4}
+!3 = !{i32 8, !"PIC Level", i32 2}
+!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+!5 = !{i32 2, i32 0}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"p1 int", !8, i64 0}
 !8 = !{!"any pointer", !9, i64 0}
 !9 = !{!"omnipotent char", !10, i64 0}
 !10 = !{!"Simple C++ TBAA"}
@@ -348,12 +352,12 @@ __device__ inline void f(
   // LLVM IR equivalent to cuda UDF
   std::string amd_llvm_ir = 
     R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i8 signext %1) #0 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i8 noundef signext %1) #2 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca i8, align 1, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
   %6 = addrspacecast ptr addrspace(5) %4 to ptr
-  store ptr %0, ptr %5, align 8, !tbaa !7
+  store ptr %0, ptr %5, align 8, !tbaa !6
   store i8 %1, ptr %6, align 1, !tbaa !11
   %7 = load i8, ptr %6, align 1, !tbaa !11
   %8 = sext i8 %7 to i32
@@ -371,13 +375,13 @@ define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i8
   %16 = sext i8 %15 to i32
   %17 = sub nsw i32 %16, 32
   %18 = trunc i32 %17 to i8
-  %19 = load ptr, ptr %5, align 8, !tbaa !7
+  %19 = load ptr, ptr %5, align 8, !tbaa !6
   store i8 %18, ptr %19, align 1, !tbaa !11
   br label %23
 
 20:                                               ; preds = %10, %2
   %21 = load i8, ptr %6, align 1, !tbaa !11
-  %22 = load ptr, ptr %5, align 8, !tbaa !7
+  %22 = load ptr, ptr %5, align 8, !tbaa !6
   store i8 %21, ptr %22, align 1, !tbaa !11
   br label %23
 
@@ -386,23 +390,25 @@ define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i8
 }
 
 attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
 
-!llvm.module.flags = !{!0, !1, !2, !3, !4}
-!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
-!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
 
-!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
-!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
-!3 = !{i32 1, !"wchar_size", i32 4}
-!4 = !{i32 8, !"PIC Level", i32 2}
-!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
-!6 = !{i32 2, i32 0}
-!7 = !{!8, !8, i64 0}
+!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!2 = !{i32 1, !"wchar_size", i32 4}
+!3 = !{i32 8, !"PIC Level", i32 2}
+!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+!5 = !{i32 2, i32 0}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"p1 omnipotent char", !8, i64 0}
 !8 = !{!"any pointer", !9, i64 0}
 !9 = !{!"omnipotent char", !10, i64 0}
 !10 = !{!"Simple C++ TBAA"}
-!11 = !{!9, !9, i64 0} 
+!11 = !{!9, !9, i64 0}
     )'''";
 
   std::string const ptx =
@@ -553,6 +559,54 @@ __device__ inline void transform(
 }
 )***";
 
+  std::string const amd_llvm_ir = 
+    R"***(
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, float noundef %1, float noundef %2, float noundef %3) #2 {
+  %5 = alloca ptr, align 8, addrspace(5)
+  %6 = alloca float, align 4, addrspace(5)
+  %7 = alloca float, align 4, addrspace(5)
+  %8 = alloca float, align 4, addrspace(5)
+  %9 = addrspacecast ptr addrspace(5) %5 to ptr
+  %10 = addrspacecast ptr addrspace(5) %6 to ptr
+  %11 = addrspacecast ptr addrspace(5) %7 to ptr
+  %12 = addrspacecast ptr addrspace(5) %8 to ptr
+  store ptr %0, ptr %9, align 8, !tbaa !6
+  store float %1, ptr %10, align 4, !tbaa !11
+  store float %2, ptr %11, align 4, !tbaa !11
+  store float %3, ptr %12, align 4, !tbaa !11
+  %13 = load float, ptr %10, align 4, !tbaa !11
+  %14 = load float, ptr %11, align 4, !tbaa !11
+  %15 = fadd contract float %13, %14
+  %16 = load float, ptr %12, align 4, !tbaa !11
+  %17 = fmul contract float %15, %16
+  %18 = load ptr, ptr %9, align 8, !tbaa !6
+  store float %17, ptr %18, align 4, !tbaa !11
+  ret void
+}
+
+attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+
+!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!2 = !{i32 1, !"wchar_size", i32 4}
+!3 = !{i32 8, !"PIC Level", i32 2}
+!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+!5 = !{i32 2, i32 0}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"p1 float", !8, i64 0}
+!8 = !{!"any pointer", !9, i64 0}
+!9 = !{!"omnipotent char", !10, i64 0}
+!10 = !{!"Simple C++ TBAA"}
+!11 = !{!12, !12, i64 0}
+!12 = !{!"float", !9, i64 0}
+)***";
+
   using T = float;
 
   constexpr T A   = 90;
@@ -576,7 +630,7 @@ __device__ inline void transform(
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*cuda_result, expected);
 
   std::unique_ptr<cudf::column> ptx_result =
-    cudf::transform({a, b, c}, ptx, cudf::data_type(cudf::type_to_id<T>()), true);
+    cudf::transform({a, b, c}, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir.c_str() : ptx, cudf::data_type(cudf::type_to_id<T>()), true);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*ptx_result, expected);
 }
@@ -859,6 +913,58 @@ ret;
 }
 )***";
 
+  std::string const amd_llvm_ir =  
+R"'''(
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, float noundef %1, float noundef %2, float noundef %3) #2 {
+  %5 = alloca ptr, align 8, addrspace(5)
+  %6 = alloca float, align 4, addrspace(5)
+  %7 = alloca float, align 4, addrspace(5)
+  %8 = alloca float, align 4, addrspace(5)
+  %9 = addrspacecast ptr addrspace(5) %5 to ptr
+  %10 = addrspacecast ptr addrspace(5) %6 to ptr
+  %11 = addrspacecast ptr addrspace(5) %7 to ptr
+  %12 = addrspacecast ptr addrspace(5) %8 to ptr
+  store ptr %0, ptr %9, align 8, !tbaa !6
+  store float %1, ptr %10, align 4, !tbaa !11
+  store float %2, ptr %11, align 4, !tbaa !11
+  store float %3, ptr %12, align 4, !tbaa !11
+  %13 = load float, ptr %10, align 4, !tbaa !11
+  %14 = load float, ptr %12, align 4, !tbaa !11
+  %15 = load float, ptr %10, align 4, !tbaa !11
+  %16 = fmul contract float %14, %15
+  %17 = fsub contract float %13, %16
+  %18 = load float, ptr %12, align 4, !tbaa !11
+  %19 = load float, ptr %11, align 4, !tbaa !11
+  %20 = fmul contract float %18, %19
+  %21 = fadd contract float %17, %20
+  %22 = load ptr, ptr %9, align 8, !tbaa !6
+  store float %21, ptr %22, align 4, !tbaa !11
+  ret void
+}
+
+attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+
+!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!2 = !{i32 1, !"wchar_size", i32 4}
+!3 = !{i32 8, !"PIC Level", i32 2}
+!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+!5 = !{i32 2, i32 0}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"p1 float", !8, i64 0}
+!8 = !{!"any pointer", !9, i64 0}
+!9 = !{!"omnipotent char", !10, i64 0}
+!10 = !{!"Simple C++ TBAA"}
+!11 = !{!12, !12, i64 0}
+!12 = !{!"float", !9, i64 0} 
+)'''";
+
   float const LOW         = 100.0F;
   float const HIGH        = 200.0F;
   float const T           = 0.25F;
@@ -905,7 +1011,7 @@ TEST_F(NullTest, ColumnNulls)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*cuda_result, *expected);
 
   auto ptx_result =
-    cudf::transform({*low, *high, *t}, ptx, cudf::data_type(cudf::type_id::FLOAT32), true);
+    cudf::transform({*low, *high, *t}, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir.c_str() : ptx, cudf::data_type(cudf::type_id::FLOAT32), true);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*ptx_result, *expected);
 }
@@ -935,7 +1041,7 @@ TEST_F(NullTest, ColumnNulls_And_Scalar)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*cuda_result, *expected);
 
   auto ptx_result =
-    cudf::transform({*low, *high, *t_scalar}, ptx, cudf::data_type(cudf::type_id::FLOAT32), true);
+    cudf::transform({*low, *high, *t_scalar}, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir.c_str() : ptx, cudf::data_type(cudf::type_id::FLOAT32), true);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*ptx_result, *expected);
 }
@@ -964,7 +1070,7 @@ TEST_F(NullTest, ColumnNulls_And_ScalarNull)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*cuda_result, *expected);
 
   auto ptx_result =
-    cudf::transform({*low, *high, *t_scalar}, ptx, cudf::data_type(cudf::type_id::FLOAT32), true);
+    cudf::transform({*low, *high, *t_scalar}, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir.c_str() : ptx, cudf::data_type(cudf::type_id::FLOAT32), true);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*ptx_result, *expected);
 }
