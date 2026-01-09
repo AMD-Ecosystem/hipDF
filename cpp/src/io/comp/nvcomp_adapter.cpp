@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -853,12 +853,15 @@ size_t batched_decompress_temp_size(compression_type compression,
   nvcompStatus_t const nvcomp_status = batched_decompress_get_temp_size_async(
     compression, num_chunks, max_uncomp_chunk_size, &temp_size, max_total_uncomp_size);
 #else
+  nvcompStatus_t nvcomp_status;
   std::optional<nvcompStatus_t> const nvcomp_status_opt = batched_decompress_get_temp_size_ex(
     compression, num_chunks, max_uncomp_chunk_size, &temp_size, max_total_uncomp_size);
 
-  nvcompStatus_t const nvcomp_status = nvcomp_status_opt.has_value() 
-    ? nvcomp_status_opt.value() 
-    : nvcompStatus_t::nvcompErrorInternal;
+  if (nvcomp_status_opt.value_or(nvcompStatus_t::nvcompErrorInternal) !=
+      nvcompStatus_t::nvcompSuccess) {
+    nvcomp_status =
+      batched_decompress_get_temp_size(compression, num_chunks, max_uncomp_chunk_size, &temp_size);
+  }
 #endif
   CHECK_NVCOMP_STATUS(nvcomp_status);
   return temp_size;
