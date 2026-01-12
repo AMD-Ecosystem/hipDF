@@ -1465,6 +1465,15 @@ set_property(
 set_cudf_target_properties()
 
 # Specify include paths for the current target and dependents
+# Detect GCC C++ headers in conda environment for C++20 features (std::format, std::span)
+if(DEFINED ENV{CONDA_PREFIX})
+  file(GLOB _GCC_CXX_INCLUDE_DIRS "$ENV{CONDA_PREFIX}/lib/gcc/*/include/c++")
+  if(_GCC_CXX_INCLUDE_DIRS)
+    list(GET _GCC_CXX_INCLUDE_DIRS 0 _GCC_CXX_INCLUDE_DIR)
+    message(STATUS "Found GCC C++ headers in conda: ${_GCC_CXX_INCLUDE_DIR}")
+  endif()
+endif()
+
 target_include_directories(
   cudf
   PUBLIC "$<BUILD_INTERFACE:${DLPACK_INCLUDE_DIR}>"
@@ -1475,6 +1484,7 @@ target_include_directories(
           "$<BUILD_INTERFACE:${nanoarrow_SOURCE_DIR}/src>"
           "$<BUILD_INTERFACE:${FlatBuffers_SOURCE_DIR}/include>"
           "$<BUILD_INTERFACE:${ZSTD_INCLUDE_DIR}>"
+          "$<BUILD_INTERFACE:${_GCC_CXX_INCLUDE_DIR}>"
   INTERFACE "$<INSTALL_INTERFACE:include>"
 )
 
