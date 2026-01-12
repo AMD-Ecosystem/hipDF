@@ -74,7 +74,6 @@ from cudf.core._internals import copying, stream_compaction
 from cudf.core.column import (
     CategoricalColumn,
     ColumnBase,
-    NumericalColumn,
     access_columns,
     as_column,
     column_empty,
@@ -3096,7 +3095,7 @@ class IndexedFrame(Frame):
             return self._gather(
                 GatherMap.from_column_unchecked(
                     cast(
-                        NumericalColumn,
+                        cudf.core.column.numerical.NumericalColumn,
                         as_column(
                             range(start, stop, stride),
                             dtype=SIZE_TYPE_DTYPE,
@@ -3327,7 +3326,7 @@ class IndexedFrame(Frame):
         result = as_column(
             True, length=len(self), dtype=bool
         )._scatter_by_column(
-            distinct,  # type: ignore[arg-type]
+            cast(cudf.core.column.NumericalColumn, distinct),
             pa_scalar_to_plc_scalar(pa.scalar(False)),
             bounds_check=False,
         )
@@ -4964,7 +4963,7 @@ class IndexedFrame(Frame):
         try:
             gather_map = GatherMap.from_column_unchecked(
                 cast(
-                    NumericalColumn,
+                    cudf.core.column.numerical.NumericalColumn,
                     as_column(
                         random_state.choice(
                             len(self), size=n, replace=replace, p=weights
@@ -5499,7 +5498,12 @@ class IndexedFrame(Frame):
         # specified nested column. Other columns' corresponding rows are
         # duplicated. If ignore_index is set, the original index is not
         # exploded and will be replaced with a `RangeIndex`.
-        if not isinstance(self._data[explode_column].dtype, ListDtype):
+        dtype = self._data[explode_column].dtype
+        is_list_dtype = isinstance(dtype, ListDtype) or (
+            isinstance(dtype, pd.ArrowDtype)
+            and isinstance(dtype.pyarrow_dtype, pa.ListType)
+        )
+        if not is_list_dtype:
             result = self.copy()
             if ignore_index:
                 result.index = RangeIndex(len(result))
