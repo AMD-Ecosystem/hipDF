@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,7 @@
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
 #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <hipcub/hipcub.hpp>
 #else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
@@ -66,7 +67,6 @@ namespace strings {
 namespace detail {
 namespace {
 
-#ifndef __HIP_PLATFORM_AMD__  // Scan operations not yet supported on HIP
 /**
  * @brief String per warp function for find_instance
  */
@@ -79,7 +79,11 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
   auto const str_idx = tid / cudf::detail::warp_size;
   if (str_idx >= d_strings.size() or d_strings.is_null(str_idx)) { return; }
 
+#ifdef __HIP_PLATFORM_AMD__
+  namespace cg        = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
   namespace cg        = cooperative_groups;
+#endif
   auto const warp     = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
   auto const lane_idx = warp.thread_rank();
 
@@ -94,15 +98,35 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
   size_type byte_count = 0;
   size_type offset     = 0;
   auto itr             = begin + lane_idx;
+
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): Use hipcub::WarpScan since cooperative_groups scan is not available
+  using WarpScanT = hipcub::WarpScan<size_type>;
+  __shared__ typename WarpScanT::TempStorage temp_storage;
+#endif
+
   while (byte_count + d_target.size_bytes() <= d_str.size_bytes()) {
     size_type const is_char =
       (itr + d_target.size_bytes() <= end) && !is_utf8_continuation_char(*itr);
     size_type const found = is_char && (d_target.compare(itr, d_target.size_bytes()) == 0);
+    
     // count of threads that matched in this warp and produce an offset in each thread
     auto const found_count = cg::reduce(warp, found, cg::plus<size_type>());
-    auto const found_scan  = cg::inclusive_scan(warp, found);
-    // handy character counter for threads in this warp
-    auto const chars_scan = cg::exclusive_scan(warp, is_char);
+    
+    size_type found_scan;
+    size_type chars_scan;
+#ifdef __HIP_PLATFORM_AMD__
+    // NOTE(HIP/AMD): Use hipcub::WarpScan for inclusive and exclusive scans
+    WarpScanT(temp_storage).InclusiveSum(found, found_scan);
+    __syncwarp();
+    WarpScanT(temp_storage).ExclusiveSum(is_char, chars_scan);
+    __syncwarp();
+#else
+    // CUDA: Use cooperative_groups scan
+    found_scan = cg::inclusive_scan(warp, found);
+    chars_scan = cg::exclusive_scan(warp, is_char);
+#endif
+    
     // activate the thread where we hit the desired find instance
     auto const found_pos = (found_scan + offset) == (instance + 1) ? chars_scan : char_pos;
     // copy the position value for that thread into all warp threads
@@ -117,7 +141,6 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
   // output the position if an instance match has been found
   if (lane_idx == 0) { d_results[str_idx] = char_pos == max_pos ? -1 : char_pos + char_count; }
 }
-#endif  // __HIP_PLATFORM_AMD__
 
 }  // namespace
 
@@ -127,9 +150,6 @@ std::unique_ptr<column> find_instance(strings_column_view const& input,
                                       rmm::cuda_stream_view stream,
                                       rmm::device_async_resource_ref mr)
 {
-#ifdef __HIP_PLATFORM_AMD__
-  CUDF_FAIL("find_instance is not yet supported on HIP platform (requires cooperative group scan operations)");
-#else
   CUDF_EXPECTS(
     instance >= 0, "Parameter instance must be positive integer or zero.", std::invalid_argument);
   CUDF_EXPECTS(target.is_valid(stream), "Parameter target must be valid.", std::invalid_argument);
@@ -158,7 +178,6 @@ std::unique_ptr<column> find_instance(strings_column_view const& input,
                                    stream.value()>>>(*d_strings, d_target, instance, d_results);
 
   return results;
-#endif
 }
 
 }  // namespace detail
