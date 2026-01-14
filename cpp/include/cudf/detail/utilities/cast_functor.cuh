@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -64,7 +64,12 @@ struct cast_fn {
     return static_cast<T>(cuda::std::forward<U>(val));
   }
 
-  CUDF_HOST_DEVICE constexpr T&& operator()(T&& val) const noexcept
+  // NOTE(HIP/AMD) HOTFIX for ROCm/rocThrust compatibility:
+  // The original overload returned T&& which causes rocThrust's transform_iterator
+  // to deduce a reference type for super_t::reference, leading to dangling references.
+  // Changed to return T (by value) instead of T&& (rvalue reference).
+  // Internal issue SWDEV-575516
+  CUDF_HOST_DEVICE constexpr T operator()(T&& val) const noexcept
   {
     return cuda::std::forward<T>(val);
   }
