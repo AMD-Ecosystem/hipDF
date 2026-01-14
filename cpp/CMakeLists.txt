@@ -13,7 +13,7 @@
 # =============================================================================
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -1558,20 +1558,24 @@ endif()
 
 rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
-#TODO(HIP/AMD): do we need a linker script for HIP?
-if(FALSE)
-  file(
-    WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
-    [=[
-  SECTIONS
-  {
-    .nvFatBinSegment : { *(.nvFatBinSegment) }
-    .nv_fatbin : { *(.nv_fatbin) }
-  }
+# NOTE(HIP/AMD): Control section ordering to avoid relocation errors
+# Place hip_fatbin first, then text, then ltext sections
+file(
+  WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
+  [=[
+SECTIONS
+{
+  /* Place hip_fatbin first */
+  .hip_fatbin : { *(.hip_fatbin) }
+  /* Then .text section */
+  .text : { *(.text .text.*) }
+  /* Then .ltext sections */
+  .ltext : { *(.ltext .ltext.*) }
+}
+INSERT BEFORE .rodata;
   ]=]
-  )
-  target_link_options(cudf PRIVATE "$<HOST_LINK:${CUDF_BINARY_DIR}/fatbin.ld>")
-endif()
+)
+target_link_options(cudf PRIVATE "$<HOST_LINK:${CUDF_BINARY_DIR}/fatbin.ld>")
 
 add_library(cudf::cudf ALIAS cudf)
 
