@@ -338,11 +338,13 @@ TEST_P(BrotliDecompressTest, HelloWorld)
   EXPECT_EQ(output, input);
 }
 
+/* TODO(HIP/AMD): We do not support ZSTD currently. ZSTD tests disabled.
 INSTANTIATE_TEST_CASE_P(
   ZstdDecompressTest,
   ZstdDecompressTest,
   ::testing::Values(std::make_tuple(hw::CPU, cudf::io::compression_type::AUTO),
                     std::make_tuple(hw::CPU, cudf::io::compression_type::ZSTD)));
+*/
 
 TEST_P(ZstdDecompressTest, HelloWorld)
 {
@@ -477,19 +479,19 @@ void roundtrip_test(cudf::io::compression_type compression)
 
 TEST_P(HostCompressTest, HostCompression) { roundtrip_test(GetParam()); }
 
+/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(HostCompression,
                         HostCompressTest,
                         ::testing::Values(cudf::io::compression_type::GZIP,
-                                          cudf::io::compression_type::SNAPPY,
-                                          cudf::io::compression_type::ZSTD));
+                                          cudf::io::compression_type::SNAPPY));
 
 TEST_P(HostDecompressTest, HostDecompression) { roundtrip_test(GetParam()); }
 
+/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(HostDecompression,
                         HostDecompressTest,
                         ::testing::Values(cudf::io::compression_type::GZIP,
                                           cudf::io::compression_type::SNAPPY,
-                                          cudf::io::compression_type::ZLIB,
-                                          cudf::io::compression_type::ZSTD));
+                                          cudf::io::compression_type::ZLIB));
 
 CUDF_TEST_PROGRAM_MAIN()

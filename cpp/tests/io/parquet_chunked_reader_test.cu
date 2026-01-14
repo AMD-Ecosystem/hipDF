@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -2154,13 +2154,13 @@ TEST_P(ParquetChunkedDecompressionTest, RoundTripBasic)
   }
 }
 
+/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         ParquetChunkedDecompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4,
-                                                             cudf::io::compression_type::ZSTD)));
+                                                             cudf::io::compression_type::LZ4)));
 
 INSTANTIATE_TEST_CASE_P(DeviceInternal,
                         ParquetChunkedDecompressionTest,
@@ -2168,9 +2168,9 @@ INSTANTIATE_TEST_CASE_P(DeviceInternal,
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY)));
 
+/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         ParquetChunkedDecompressionTest,
                         ::testing::Combine(::testing::Values("HOST"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::ZSTD)));
+                                                             cudf::io::compression_type::SNAPPY)));

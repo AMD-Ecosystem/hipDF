@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -126,7 +126,8 @@ TEST_F(ParquetStringsTest, DISABLED_ChunkedReadLargeStrings)
 
   // Needed to get exactly 2 Parquet subpasses: first with large-strings and the second with
   // regualar ones. This may change in the future and lead to false failures.
-  out_opts.set_compression(cudf::io::compression_type::ZSTD);
+  /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead. */
+  out_opts.set_compression(cudf::io::compression_type::SNAPPY);
 
   // Write to Parquet
   cudf::io::write_parquet(out_opts);
