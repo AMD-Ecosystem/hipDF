@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/comp/compression.hpp"
 #include "io/comp/decompression.hpp"
 #include "io/comp/gpuinflate.hpp"
@@ -339,23 +361,23 @@ TEST_F(NvcompConfigTest, Compression)
   using nvcomp::compression_type;
   auto const& comp_disabled = nvcomp::is_compression_disabled;
 
-  EXPECT_FALSE(comp_disabled(compression_type::DEFLATE, {2, 5, 0, true, true, 0}));
+  EXPECT_FALSE(comp_disabled(compression_type::DEFLATE, {2, 5, 0, true, true}));
   // version 2.5 required
-  EXPECT_TRUE(comp_disabled(compression_type::DEFLATE, {2, 4, 0, true, true, 0}));
+  EXPECT_TRUE(comp_disabled(compression_type::DEFLATE, {2, 4, 0, true, true}));
   // all integrations enabled required
-  EXPECT_TRUE(comp_disabled(compression_type::DEFLATE, {2, 5, 0, false, true, 0}));
+  EXPECT_TRUE(comp_disabled(compression_type::DEFLATE, {2, 5, 0, false, true}));
 
-  EXPECT_FALSE(comp_disabled(compression_type::ZSTD, {2, 4, 0, true, true, 0}));
-  EXPECT_FALSE(comp_disabled(compression_type::ZSTD, {2, 4, 0, false, true, 0}));
+  EXPECT_FALSE(comp_disabled(compression_type::ZSTD, {2, 4, 0, true, true}));
+  EXPECT_FALSE(comp_disabled(compression_type::ZSTD, {2, 4, 0, false, true}));
   // 2.4 version required
-  EXPECT_TRUE(comp_disabled(compression_type::ZSTD, {2, 3, 1, false, true, 0}));
+  EXPECT_TRUE(comp_disabled(compression_type::ZSTD, {2, 3, 1, false, true}));
   // stable integrations enabled required
-  EXPECT_TRUE(comp_disabled(compression_type::ZSTD, {2, 4, 0, false, false, 0}));
+  EXPECT_TRUE(comp_disabled(compression_type::ZSTD, {2, 4, 0, false, false}));
 
-  EXPECT_FALSE(comp_disabled(compression_type::SNAPPY, {2, 5, 0, true, true, 0}));
-  EXPECT_FALSE(comp_disabled(compression_type::SNAPPY, {2, 4, 0, false, true, 0}));
+  EXPECT_FALSE(comp_disabled(compression_type::SNAPPY, {2, 5, 0, true, true}));
+  EXPECT_FALSE(comp_disabled(compression_type::SNAPPY, {2, 4, 0, false, true}));
   // stable integrations enabled required
-  EXPECT_TRUE(comp_disabled(compression_type::SNAPPY, {2, 3, 0, false, false, 0}));
+  EXPECT_TRUE(comp_disabled(compression_type::SNAPPY, {2, 3, 0, false, false}));
 }
 
 TEST_F(NvcompConfigTest, Decompression)
@@ -363,27 +385,27 @@ TEST_F(NvcompConfigTest, Decompression)
   using nvcomp::compression_type;
   auto const& decomp_disabled = nvcomp::is_decompression_disabled;
 
-  EXPECT_FALSE(decomp_disabled(compression_type::DEFLATE, {2, 5, 0, true, true, 7}));
+  EXPECT_FALSE(decomp_disabled(compression_type::DEFLATE, {2, 5, 0, true, true}));
   // version 2.5 required
-  EXPECT_TRUE(decomp_disabled(compression_type::DEFLATE, {2, 4, 0, true, true, 7}));
+  EXPECT_TRUE(decomp_disabled(compression_type::DEFLATE, {2, 4, 0, true, true}));
   // all integrations enabled required
-  EXPECT_TRUE(decomp_disabled(compression_type::DEFLATE, {2, 5, 0, false, true, 7}));
+  EXPECT_TRUE(decomp_disabled(compression_type::DEFLATE, {2, 5, 0, false, true}));
 
-  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 4, 0, true, true, 7}));
-  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 2, false, true, 6}));
-  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 0, true, true, 6}));
+  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 4, 0, true, true}));
+  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 2, false, true}));
+  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 0, true, true}));
   // 2.3.1 and earlier requires all integrations to be enabled
-  EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 3, 1, false, true, 7}));
+  EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 3, 1, false, true}));
   // 2.3 version required
-  EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 2, 0, true, true, 7}));
+  EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 2, 0, true, true}));
   // stable integrations enabled required
-  EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 4, 0, false, false, 7}));
+  EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 4, 0, false, false}));
 
-  EXPECT_FALSE(decomp_disabled(compression_type::SNAPPY, {2, 4, 0, true, true, 7}));
-  EXPECT_FALSE(decomp_disabled(compression_type::SNAPPY, {2, 3, 0, false, true, 7}));
-  EXPECT_FALSE(decomp_disabled(compression_type::SNAPPY, {2, 2, 0, false, true, 7}));
+  EXPECT_FALSE(decomp_disabled(compression_type::SNAPPY, {2, 4, 0, true, true}));
+  EXPECT_FALSE(decomp_disabled(compression_type::SNAPPY, {2, 3, 0, false, true}));
+  EXPECT_FALSE(decomp_disabled(compression_type::SNAPPY, {2, 2, 0, false, true}));
   // stable integrations enabled required
-  EXPECT_TRUE(decomp_disabled(compression_type::SNAPPY, {2, 2, 0, false, false, 7}));
+  EXPECT_TRUE(decomp_disabled(compression_type::SNAPPY, {2, 2, 0, false, false}));
 }
 
 void roundtrip_test(cudf::io::compression_type compression)
