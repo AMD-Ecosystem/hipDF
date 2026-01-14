@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -392,7 +392,8 @@ __device__ __inline__ bool less_equal_than(char const* data, char const (&golden
  * @return Pointer to appropriate counter that belong to
  * the interpreted data type
  */
-__device__ __inline__ cudf::size_type* infer_integral_field_counter(char const* data_begin,
+// TODO(HIP/AMD): Workaround for internal issue 275, required for ROCm 7.1.x
+__device__ __attribute__((optnone)) cudf::size_type* infer_integral_field_counter(char const* data_begin,
                                                                     char const* data_end,
                                                                     bool is_negative,
                                                                     column_type_histogram& stats)
