@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -946,6 +946,7 @@ struct dst_offset_output_iterator {
   using iterator_category = thrust::output_device_iterator_tag;
 
   __host__ __device__ dst_offset_output_iterator operator+(int i) { return {c + i}; }
+  __host__ __device__ dst_offset_output_iterator operator+(int i) const { return {c + i}; }
 
   __host__ __device__ dst_offset_output_iterator& operator++()
   {
