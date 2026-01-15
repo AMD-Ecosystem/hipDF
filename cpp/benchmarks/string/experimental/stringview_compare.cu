@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <benchmarks/common/generate_input.hpp>
 
 #include <cudf_test/column_wrapper.hpp>
@@ -29,7 +51,11 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/device/device_merge_sort.hpp>
+#else
 #include <cub/device/device_merge_sort.cuh>
+#endif
 #include <thrust/count.h>
 #include <thrust/for_each.h>
 #include <thrust/gather.h>
@@ -410,26 +436,26 @@ static void BM_sv_sort(nvbench::state& state)
     auto [d_items, data_buffer] = create_sv_array(col_view, stream);
     auto const d_chars          = reinterpret_cast<char const*>(data_buffer.data());
     auto comparator             = compare_arrow_sv{d_items.data(), d_chars};
-    cub::DeviceMergeSort::SortKeysCopy(
-      nullptr, tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortKeysCopy(
+      nullptr, tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value()));
     auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
     state.add_global_memory_reads(num_rows * sizeof(ArrowBinaryView) + data_buffer.size());
     state.exec(nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
-      cub::DeviceMergeSort::SortKeysCopy(
-        tmp_stg.data(), tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value());
+      CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortKeysCopy(
+        tmp_stg.data(), tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value()));
     });
   } else {
     auto d_strings = cudf::column_device_view::create(col_view, stream);
     auto col_size  = column->alloc_size();
     state.add_global_memory_reads(col_size);
     auto comparator = compare_sv{*d_strings};
-    cub::DeviceMergeSort::SortKeysCopy(
-      nullptr, tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortKeysCopy(
+      nullptr, tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value()));
     auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
     state.add_global_memory_reads(col_size);
     state.exec(nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
-      cub::DeviceMergeSort::SortKeysCopy(
-        tmp_stg.data(), tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value());
+      CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortKeysCopy(
+        tmp_stg.data(), tmp_bytes, in_keys, out_keys, num_rows, comparator, stream.value()));
     });
   }
 }
