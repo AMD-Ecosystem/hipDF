@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1415,7 +1415,13 @@ void gpuinflate(device_span<device_span<uint8_t const> const> inputs,
                 gzip_header_included parse_hdr,
                 rmm::cuda_stream_view stream)
 {
+#if ENABLE_PREFETCH
+  // NOTE(HIP/AMD): With prefetching enabled, we need 3 warps: decode (warp 0), process (warp 1), prefetch (warp 2)
+  // For warp_size=64, we need at least 192 threads; for warp_size=32, 128 threads suffice
+  constexpr int block_size = 3 * cudf::detail::warp_size;
+#else
   constexpr int block_size = 128;  // Threads per block
+#endif
   if (inputs.size() > 0) {
     inflate_kernel<block_size>
       <<<inputs.size(), block_size, 0, stream.value()>>>(inputs, outputs, results, parse_hdr);
