@@ -1562,14 +1562,13 @@ TEST_P(OrcChunkedDecompressionTest, RoundTripBasic)
   }
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
+/* TODO(HIP/AMD): We do not support ZSTD, ZLIB (compression) with hipComp currently. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         OrcChunkedDecompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4,
-                                                             cudf::io::compression_type::ZLIB)));
+                                                             cudf::io::compression_type::LZ4)));
 
 INSTANTIATE_TEST_CASE_P(DeviceInternal,
                         OrcChunkedDecompressionTest,

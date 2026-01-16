@@ -345,6 +345,7 @@ INSTANTIATE_TEST_CASE_P(
   ::testing::Values(std::make_tuple(hw::CPU, cudf::io::compression_type::AUTO),
                     std::make_tuple(hw::CPU, cudf::io::compression_type::ZSTD)));
 */
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ZstdDecompressTest); // TODO(HIP/AMD): Remove when ZSTD is available.
 
 TEST_P(ZstdDecompressTest, HelloWorld)
 {
@@ -412,6 +413,13 @@ TEST_F(NvcompConfigTest, Decompression)
 
 void roundtrip_test(cudf::io::compression_type compression)
 {
+  // TODO(HIP/AMD): Skip GZIP/ZLIB if using hipComp (they use DEFLATE compression)
+  if ((compression == cudf::io::compression_type::GZIP ||
+       compression == cudf::io::compression_type::ZLIB) &&
+      nvcomp::is_compression_disabled(nvcomp::compression_type::DEFLATE)) {
+    GTEST_SKIP() << "GZIP/ZLIB compression is not supported with hipComp.";
+  }
+  
   auto const stream = cudf::get_default_stream();
   auto const mr     = rmm::mr::get_current_device_resource();
   std::vector<uint8_t> expected;

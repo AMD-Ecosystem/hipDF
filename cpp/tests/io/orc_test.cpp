@@ -2383,14 +2383,13 @@ TEST_F(OrcReaderTest, DeviceWriteAsyncThrows)
   }
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
+/* TODO(HIP/AMD): We do not support ZSTD, ZLIB (compression) with hipcomp currently. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         OrcCompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4,
-                                                             cudf::io::compression_type::ZLIB)));
+                                                             cudf::io::compression_type::LZ4)));
 
 INSTANTIATE_TEST_CASE_P(DeviceInternal,
                         OrcCompressionTest,
@@ -2405,14 +2404,13 @@ INSTANTIATE_TEST_CASE_P(Host,
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY)));
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
+/* TODO(HIP/AMD): We do not support ZSTD, ZLIB (compression) with hipcomp currently. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         OrcDecompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4,
-                                                             cudf::io::compression_type::ZLIB)));
+                                                             cudf::io::compression_type::LZ4)));
 
 INSTANTIATE_TEST_CASE_P(DeviceInternal,
                         OrcDecompressionTest,
