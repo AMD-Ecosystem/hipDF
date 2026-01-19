@@ -13,12 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_view.hpp>
 #include <cudf/copying.hpp>
-#include <cudf/detail/nvtx/ranges.hpp>
+//#include <cudf/detail/nvtx/ranges.hpp> // TODO(HIP/AMD): Reenable once nvtx equivalent is available
 #include <cudf/io/csv.hpp>
 #include <cudf/io/datasource.hpp>
 #include <cudf/strings/strings_column_view.hpp>
@@ -145,22 +168,22 @@ int main(int argc, char const** argv)
     // warmup pass
     stream.synchronize();
     auto start_cold = std::chrono::steady_clock::now();
-    nvtxRangePush("transform cold");
+    //nvtxRangePush("transform cold"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
     auto [result_cold, input_indices_cold] = transform(table_view);
     stream.synchronize();
-    nvtxRangePop();
+    //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
     elapsed_cold = std::chrono::steady_clock::now() - start_cold;
   }
 
   stream.synchronize();
 
   auto start = std::chrono::steady_clock::now();
-  nvtxRangePush("transform warm");
+  //nvtxRangePush("transform warm"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
   auto [result, input_indices] = transform(table_view);
 
   // ensure transform operation completes and the wall-time is only for the transform computation
   stream.synchronize();
-  nvtxRangePop();
+  //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
 
   std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - start;
 
