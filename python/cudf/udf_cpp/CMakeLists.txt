@@ -11,9 +11,10 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 # =============================================================================
+
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -54,29 +55,15 @@ rapids_find_package(
 )
 endif()
 
-# The below is inspired by legate dataframe
-execute_process(
-  COMMAND "python" -c
-          "from numba.cuda.memory_management.nrt import get_include; print(get_include())"
-  OUTPUT_VARIABLE NRT_INCLUDE_DIR
-  ERROR_VARIABLE NRT_ERROR
-  RESULT_VARIABLE NRT_RESULT
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(${NRT_RESULT})
-  message(
-    FATAL_ERROR "Error while trying to obtain numba cuda runtime include directory:\n${NRT_ERROR}"
-  )
-endif()
-
-include(${rapids-cmake-dir}/cpm/cccl.cmake)
-rapids_cpm_cccl(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
-
+# TODO(HIP/AMD): Restore NRT (Numba Runtime) include directory once numba-hip supports it.
+# The NRT include directory provides headers for device-side memory management in UDFs.
+# This was removed because numba-hip currently lacks numba.hip.memory_management.nrt module. See internal issue #376
+include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
+rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
 add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
 
 target_include_directories(
   cudf_strings_udf PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
-                          "${NRT_INCLUDE_DIR}"
 )
 
 set_target_properties(
@@ -136,9 +123,11 @@ list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
 
 set(tgt "shim_") # NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
 add_library(${tgt} OBJECT shim.cu)
+set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
 target_include_directories(
-  shim PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>" "${NRT_INCLUDE_DIR}"
-)
+  ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")
+target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_HIP_FLAGS}>")
+target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
 copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)
 install(

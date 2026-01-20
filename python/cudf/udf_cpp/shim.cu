@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, NVIDIA CORPORATION.
+ * Copyright (c) 2022-2024, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -47,62 +47,15 @@
 #include <hip/hip_cooperative_groups.h>
 #include <cuda/atomic>
 
-#include <nrt.cuh>
+// TODO(HIP/AMD): Restore NRT (Numba Runtime) support for proper UDF string memory management.
+// NRT was removed to avoid dependency on numba.cuda.memory_management which is not available
+// in numba-hip. 
+// See internal issue 376
 
 #include <limits>
 #include <type_traits>
 
 using namespace cudf::strings::udf;
-
-/**
- * @brief Destructor for a udf_string object.
- *
- * NRT API compatible destructor for udf_string objects.
- *
- * @param udf_str Pointer to the udf_string object to be destructed.
- * @param size Size of the udf_string object (not used).
- * @param dtor_info Additional information for the destructor (not used).
- */
-__device__ void udf_str_dtor(void* udf_str, size_t size, void* dtor_info)
-{
-  auto ptr = reinterpret_cast<udf_string*>(udf_str);
-  ptr->~udf_string();
-}
-
-__device__ NRT_MemInfo* make_meminfo_for_new_udf_string(udf_string* udf_str)
-{
-  // only used in the context of this function
-  struct mi_str_allocation {
-    NRT_MemInfo mi;
-    udf_string st;
-  };
-
-  mi_str_allocation* mi_and_str = (mi_str_allocation*)NRT_Allocate(sizeof(mi_str_allocation));
-  if (mi_and_str != NULL) {
-    auto mi_ptr        = &(mi_and_str->mi);
-    udf_string* st_ptr = &(mi_and_str->st);
-
-    // udf_str_dtor can destruct the string without knowing the size
-    size_t size = 0;
-    NRT_MemInfo_init(mi_ptr, st_ptr, size, udf_str_dtor, NULL);
-
-    // copy the udf_string to the allocated heap space
-    udf_string* in_str_ptr = reinterpret_cast<udf_string*>(udf_str);
-    memcpy(st_ptr, in_str_ptr, sizeof(udf_string));
-    return mi_ptr;
-  } else {
-    __trap();
-    return nullptr;
-  }
-}
-
-// Special decref called only by python after transferring ownership of output strings
-// Must reset dtor with one that is part of the current module
-extern "C" __device__ void NRT_decref_managed_string(NRT_MemInfo* mi)
-{
-  mi->dtor = udf_str_dtor;
-  NRT_decref(mi);
-}
 
 extern "C" __device__ int len(int* nb_retval, void const* str)
 {
@@ -300,13 +253,14 @@ extern "C" __device__ int pycount(int* nb_retval, void const* str, void const* s
   return 0;
 }
 
-extern "C" __device__ int udf_string_from_string_view(void** out_meminfo,
+extern "C" __device__ int udf_string_from_string_view(int* nb_retbal,
                                                       void const* str,
                                                       void* udf_str)
 {
   auto str_view_ptr = reinterpret_cast<cudf::string_view const*>(str);
-  auto udf_str_ptr  = new (udf_str) udf_string(*str_view_ptr);
-  *out_meminfo      = make_meminfo_for_new_udf_string(udf_str_ptr);
+  auto udf_str_ptr  = new (udf_str) udf_string;
+  *udf_str_ptr      = udf_string(*str_view_ptr);
+
   return 0;
 }
 
@@ -315,56 +269,62 @@ extern "C" __device__ int string_view_from_udf_string(int* nb_retval,
                                                       void* str)
 {
   auto udf_str_ptr = reinterpret_cast<udf_string const*>(udf_str);
-  auto sv_ptr      = new (str) cudf::string_view(*udf_str_ptr);
+  auto sv_ptr      = new (str) cudf::string_view;
+  *sv_ptr          = cudf::string_view(*udf_str_ptr);
+
   return 0;
 }
 
-extern "C" __device__ int strip(void** out_meminfo,
+extern "C" __device__ int strip(int* nb_retval,
                                 void* udf_str,
                                 void* const* to_strip,
                                 void* const* strip_str)
 {
   auto to_strip_ptr  = reinterpret_cast<cudf::string_view const*>(to_strip);
   auto strip_str_ptr = reinterpret_cast<cudf::string_view const*>(strip_str);
-  auto udf_str_ptr   = new (udf_str) udf_string(strip(*to_strip_ptr, *strip_str_ptr));
-  *out_meminfo       = make_meminfo_for_new_udf_string(udf_str_ptr);
+  auto udf_str_ptr   = new (udf_str) udf_string;
+
+  *udf_str_ptr = strip(*to_strip_ptr, *strip_str_ptr);
+
   return 0;
 }
 
-extern "C" __device__ int lstrip(void** out_meminfo,
+extern "C" __device__ int lstrip(int* nb_retval,
                                  void* udf_str,
                                  void* const* to_strip,
                                  void* const* strip_str)
 {
   auto to_strip_ptr  = reinterpret_cast<cudf::string_view const*>(to_strip);
   auto strip_str_ptr = reinterpret_cast<cudf::string_view const*>(strip_str);
-  auto udf_str_ptr =
-    new (udf_str) udf_string(strip(*to_strip_ptr, *strip_str_ptr, cudf::strings::side_type::LEFT));
-  *out_meminfo = make_meminfo_for_new_udf_string(udf_str_ptr);
+  auto udf_str_ptr   = new (udf_str) udf_string;
+
+  *udf_str_ptr = strip(*to_strip_ptr, *strip_str_ptr, cudf::strings::side_type::LEFT);
+
   return 0;
 }
 
-extern "C" __device__ int rstrip(void** out_meminfo,
+extern "C" __device__ int rstrip(int* nb_retval,
                                  void* udf_str,
                                  void* const* to_strip,
                                  void* const* strip_str)
 {
   auto to_strip_ptr  = reinterpret_cast<cudf::string_view const*>(to_strip);
   auto strip_str_ptr = reinterpret_cast<cudf::string_view const*>(strip_str);
-  auto udf_str_ptr =
-    new (udf_str) udf_string(strip(*to_strip_ptr, *strip_str_ptr, cudf::strings::side_type::RIGHT));
-  *out_meminfo = make_meminfo_for_new_udf_string(udf_str_ptr);
+  auto udf_str_ptr   = new (udf_str) udf_string;
+
+  *udf_str_ptr = strip(*to_strip_ptr, *strip_str_ptr, cudf::strings::side_type::RIGHT);
+
   return 0;
 }
-
-extern "C" __device__ int upper(void** out_meminfo,
+extern "C" __device__ int upper(int* nb_retval,
                                 void* udf_str,
                                 void const* st,
                                 std::uintptr_t flags_table,
                                 std::uintptr_t cases_table,
                                 std::uintptr_t special_table)
 {
-  auto st_ptr = reinterpret_cast<cudf::string_view const*>(st);
+  auto udf_str_ptr = new (udf_str) udf_string;
+  auto st_ptr      = reinterpret_cast<cudf::string_view const*>(st);
 
   auto flags_table_ptr =
     reinterpret_cast<cudf::strings::detail::character_flags_table_type*>(flags_table);
@@ -375,19 +335,20 @@ extern "C" __device__ int upper(void** out_meminfo,
 
   cudf::strings::udf::chars_tables tables{flags_table_ptr, cases_table_ptr, special_table_ptr};
 
-  auto udf_str_ptr = new (udf_str) udf_string(to_upper(tables, *st_ptr));
-  *out_meminfo     = make_meminfo_for_new_udf_string(udf_str_ptr);
+  *udf_str_ptr = to_upper(tables, *st_ptr);
+
   return 0;
 }
 
-extern "C" __device__ int lower(void** out_meminfo,
+extern "C" __device__ int lower(int* nb_retval,
                                 void* udf_str,
                                 void const* st,
                                 std::uintptr_t flags_table,
                                 std::uintptr_t cases_table,
                                 std::uintptr_t special_table)
 {
-  auto st_ptr = reinterpret_cast<cudf::string_view const*>(st);
+  auto udf_str_ptr = new (udf_str) udf_string;
+  auto st_ptr      = reinterpret_cast<cudf::string_view const*>(st);
 
   auto flags_table_ptr =
     reinterpret_cast<cudf::strings::detail::character_flags_table_type*>(flags_table);
@@ -397,39 +358,33 @@ extern "C" __device__ int lower(void** out_meminfo,
     reinterpret_cast<cudf::strings::detail::special_case_mapping*>(special_table);
 
   cudf::strings::udf::chars_tables tables{flags_table_ptr, cases_table_ptr, special_table_ptr};
-
-  auto udf_str_ptr = new (udf_str) udf_string(to_lower(tables, *st_ptr));
-  *out_meminfo     = make_meminfo_for_new_udf_string(udf_str_ptr);
+  *udf_str_ptr = to_lower(tables, *st_ptr);
   return 0;
 }
 
-extern "C" __device__ int concat(void** out_meminfo,
-                                 void* udf_str,
-                                 void* const* lhs,
-                                 void* const* rhs)
+extern "C" __device__ int concat(int* nb_retval, void* udf_str, void* const* lhs, void* const* rhs)
 {
   auto lhs_ptr = reinterpret_cast<cudf::string_view const*>(lhs);
   auto rhs_ptr = reinterpret_cast<cudf::string_view const*>(rhs);
 
+  auto udf_str_ptr = new (udf_str) udf_string;
+
   udf_string result;
   result.append(*lhs_ptr).append(*rhs_ptr);
-  auto udf_str_ptr = new (udf_str) udf_string(std::move(result));
-  *out_meminfo     = make_meminfo_for_new_udf_string(udf_str_ptr);
+  *udf_str_ptr = result;
   return 0;
 }
 
-extern "C" __device__ int replace(void** out_meminfo,
-                                  void* udf_str,
-                                  void* const src,
-                                  void* const to_replace,
-                                  void* const replacement)
+extern "C" __device__ int replace(
+  int* nb_retval, void* udf_str, void* const src, void* const to_replace, void* const replacement)
 {
   auto src_ptr         = reinterpret_cast<cudf::string_view const*>(src);
   auto to_replace_ptr  = reinterpret_cast<cudf::string_view const*>(to_replace);
   auto replacement_ptr = reinterpret_cast<cudf::string_view const*>(replacement);
 
-  auto udf_str_ptr = new (udf_str) udf_string(replace(*src_ptr, *to_replace_ptr, *replacement_ptr));
-  *out_meminfo     = make_meminfo_for_new_udf_string(udf_str_ptr);
+  auto udf_str_ptr = new (udf_str) udf_string;
+  *udf_str_ptr     = replace(*src_ptr, *to_replace_ptr, *replacement_ptr);
+
   return 0;
 }
 
