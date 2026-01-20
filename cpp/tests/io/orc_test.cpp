@@ -2391,11 +2391,13 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
                                                              cudf::io::compression_type::SNAPPY,
                                                              cudf::io::compression_type::LZ4)));
 
-INSTANTIATE_TEST_CASE_P(DeviceInternal,
-                        OrcCompressionTest,
-                        ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
-                                           ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+// TODO(HIP/AMD): Disable DeviceInternal tests - hipDF does not support DEVICE_INTERNAL compression
+// mode due to missing gpu_snap functionality (internal GPU-based compression). hipcomp should be used instead.
+// INSTANTIATE_TEST_CASE_P(DeviceInternal,
+//                         OrcCompressionTest,
+//                         ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
+//                                            ::testing::Values(cudf::io::compression_type::AUTO,
+//                                                              cudf::io::compression_type::SNAPPY)));
 
 /* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
@@ -2412,11 +2414,13 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
                                                              cudf::io::compression_type::SNAPPY,
                                                              cudf::io::compression_type::LZ4)));
 
-INSTANTIATE_TEST_CASE_P(DeviceInternal,
-                        OrcDecompressionTest,
-                        ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
-                                           ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+// TODO(HIP/AMD): Disable DeviceInternal tests - hipDF does not support DEVICE_INTERNAL decompression
+// mode due to missing gpu_unsnap functionality (internal GPU-based decompression). hipcomp should be used instead.
+// INSTANTIATE_TEST_CASE_P(DeviceInternal,
+//                         OrcDecompressionTest,
+//                         ::testing::Combine(::testing::Values("DEVICE_INTERNAL"),
+//                                            ::testing::Values(cudf::io::compression_type::AUTO,
+//                                                              cudf::io::compression_type::SNAPPY)));
 
 /* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
