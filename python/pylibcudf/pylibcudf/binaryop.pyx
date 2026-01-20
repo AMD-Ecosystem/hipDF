@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -158,7 +158,7 @@ cpdef bool is_supported_operation(
 # NOTE(HIP/AMD): Thi method is removed from cudf-24.04. 
 # We have added it for additional testing puposes.
 @acquire_spill_lock()
-def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype):
+def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype, Stream stream=None):
     """
     Apply a user-defined binary operator (a UDF) defined in `udf_ptx` on
     the two input columns `lhs` and `rhs`. The output type of the UDF
@@ -183,10 +183,11 @@ def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype):
                 c_lhs,
                 c_rhs,
                 cpp_str,
-                c_dtype
+                c_dtype,
+                stream.view()
             )
         )
 
-    return Column.from_libcudf(move(c_result))
+    return Column.from_libcudf(move(c_result), stream)
     
 BinaryOperator.__str__ = BinaryOperator.__repr__
