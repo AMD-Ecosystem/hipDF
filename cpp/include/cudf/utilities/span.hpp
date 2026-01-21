@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2020-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,6 +34,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/device_vector.hpp>
 
+#include <cuda/std/span>
 #include <thrust/detail/raw_pointer_cast.h>
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
@@ -41,6 +42,7 @@
 
 #include <cstddef>
 #include <limits>
+#include <span>
 #include <type_traits>
 #include <utility>
 
@@ -316,6 +318,16 @@ struct host_span : public cudf::detail::span_base<T, Extent, host_span<T, Extent
     return host_span{this->data() + offset, count, _is_device_accessible};
   }
 
+  /**
+   * @brief Returns a standard span instance
+   *
+   * @return Standard span instance
+   */
+  [[nodiscard]] constexpr operator std::span<T>() const noexcept
+  {
+    return std::span<T>(this->data(), this->size());
+  }
+
  private:
   bool _is_device_accessible{false};
 };
@@ -438,6 +450,16 @@ struct device_span : public cudf::detail::span_base<T, Extent, device_span<T, Ex
     typename base::size_type offset, typename base::size_type count) const noexcept
   {
     return device_span{this->data() + offset, count};
+  }
+
+  /**
+   * @brief Returns a standard span instance
+   *
+   * @return Standard span instance
+   */
+  [[nodiscard]] CUDF_HOST_DEVICE constexpr operator cuda::std::span<T>() const noexcept
+  {
+    return cuda::std::span<T>(this->data(), this->size());
   }
 };
 /** @} */  // end of group
