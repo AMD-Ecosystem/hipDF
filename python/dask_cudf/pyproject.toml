@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ authors = [
 license = { text = "Apache 2.0 AND MIT" }
 requires-python = ">=3.10"
 dependencies = [
-    "amd-hipdf>=1.0,<2.0",
+    "amd-hipdf>=3.0,<4.0",
     # "cupy-cuda13x>=13.6.0", #: TODO(HIP/AMD): amd-cupy?
     "fsspec>=0.6.0",
     "numpy>=1.23,<3.0a0",

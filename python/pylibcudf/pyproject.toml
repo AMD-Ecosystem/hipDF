@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ requires-python = ">=3.10"
 dependencies = [
     "hip-python>=7.0",
     "hip-python-as-cuda>=7.0",
-    "amd-libhipdf==2.*,>=2.0.0a0",
+    "amd-libhipdf==3.*,>=3.0.00a0",
     # "nvtx>=0.2.1", # TODO(HIP/AMD): find replacement
     "packaging",
     "amd-hipmm==3.0.*,>=3.0.0a0",
