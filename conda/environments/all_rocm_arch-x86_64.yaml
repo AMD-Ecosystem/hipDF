@@ -36,6 +36,7 @@ dependencies:
 #: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
 # - c-compiler
+- cachetools
 - certifi
 - clang-tools==20.1.4
 - clang==20.1.4
