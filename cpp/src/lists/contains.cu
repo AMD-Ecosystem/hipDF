@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -168,7 +168,13 @@ struct search_list_fn {
 
     auto const [begin, end] = element_index_pair_iter<forward>(list.size());
     auto const found_iter =
-      thrust::find_if(thrust::seq, begin, end, [&list, this] __device__(auto const idx) {
+      thrust::find_if(thrust::seq, begin, end, [&list, this]
+// TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
+// compiler optimization misbehavior.
+#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS) && !defined(NDEBUG)
+      __attribute__((noinline))
+#endif
+      __device__(auto const idx) {
         return !list.is_null(idx) && d_comp(static_cast<lhs_index_type>(list.element_offset(idx)),
                                             static_cast<rhs_index_type>(list.row_index()));
       });

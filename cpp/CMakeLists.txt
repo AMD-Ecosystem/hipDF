@@ -137,6 +137,7 @@ option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilati
 option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
 option(BUILD_ASAN "Whether to build with address sanitization" OFF )
+option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS "Enable workarounds for potential compiler bugs in specific code places" ON)
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
@@ -1480,6 +1481,11 @@ target_include_directories(
 
 if(CUDF_USE_WARPSIZE_32)
 target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
+endif()
+
+# NOTE(HIP/AMD): Enable workarounds for potential HIP compiler bugs (mode-specific logic in code)
+if(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
+target_compile_definitions(cudf PUBLIC "CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS")
 endif()
 
 if(TARGET KvikIO)

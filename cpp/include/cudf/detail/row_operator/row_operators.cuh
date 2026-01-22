@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -433,6 +433,11 @@ class device_row_comparator {
      */
     template <typename Element,
               CUDF_ENABLE_IF(cudf::is_relationally_comparable<Element, Element>())>
+// TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
+// compiler optimization misbehavior.
+#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS) && !defined(NDEBUG)
+    __attribute__((noinline))
+#endif
     __device__ cuda::std::pair<cudf::detail::weak_ordering, int> operator()(
       size_type const lhs_element_index, size_type const rhs_element_index) const noexcept
     {
