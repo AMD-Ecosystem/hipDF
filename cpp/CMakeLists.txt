@@ -967,6 +967,11 @@ if((CMAKE_BUILD_TYPE MATCHES Debug) OR BUILD_ASAN)
   # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround (issue 66).
   set_source_files_properties(src/join/mixed_join_size_kernel.cu
                               src/join/mixed_join_size_kernel_nulls.cu
+                              src/join/mixed_join_kernel.cu
+                              src/join/mixed_join_kernel_nulls.cu
+                              src/join/conditional_join.cu
+                              src/transform/compute_column_kernel_null_complex.cu
+                              src/transform/compute_column_kernel_null_primitive.cu
                               PROPERTIES COMPILE_FLAGS "-DNDEBUG")
 endif()
 
