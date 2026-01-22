@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -130,8 +130,6 @@ del RMMNumbaManager
 from cuda import cuda as _cuda_python_cuda
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
 del _cuda_python_cuda
-del clear_cache
-del rmm
 
 __all__ = [
     "NA",
