@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -94,7 +94,7 @@ _udf_code_cache: cachetools.LRUCache = cachetools.LRUCache(maxsize=32)
 
 
 UDF_SHIM_FILE = os.path.join(
-    os.path.dirname(strings_udf.__file__), "..", "core", "udf", "shim.fatbin"
+    os.path.dirname(strings_udf.__file__), "..", "core", "udf", "shim_.ll"
 )
 
 
