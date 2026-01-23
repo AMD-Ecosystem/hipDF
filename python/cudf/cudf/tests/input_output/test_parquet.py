@@ -1,5 +1,27 @@
 # Copyright (c) 2023-2025, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import datetime
 import decimal
 import glob
@@ -2933,7 +2955,8 @@ def test_per_column_encoding_option(encoding):
     assert encoding_name in fmd.row_group(0).column(0).encodings
 
 
-@pytest.mark.parametrize("compression", ["SNAPPY", "ZSTD"])
+# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
+@pytest.mark.parametrize("compression", ["SNAPPY"])  # , "ZSTD"
 def test_per_column_compression_option(set_decomp_env_vars, compression):
     pdf = pd.DataFrame(
         {"ilist": [[1, 2, 3, 1, 2, 3]], "i1": [[1, 2, 3, 1, 2, 3]]}
@@ -3141,14 +3164,15 @@ def test_parquet_reader_decimal_columns():
     assert_eq(actual, expected)
 
 
-def test_parquet_reader_zstd_compression(datadir):
-    fname = datadir / "spark_zstd.parquet"
-    try:
-        df = cudf.read_parquet(fname)
-        pdf = pd.read_parquet(fname)
-        assert_eq(df, pdf)
-    except RuntimeError:
-        pytest.skip(reason="zstd support is not enabled")
+# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
+# def test_parquet_reader_zstd_compression(datadir):
+#     fname = datadir / "spark_zstd.parquet"
+#     try:
+#         df = cudf.read_parquet(fname)
+#         pdf = pd.read_parquet(fname)
+#         assert_eq(df, pdf)
+#     except RuntimeError:
+#         pytest.skip(reason="zstd support is not enabled")
 
 
 def test_read_parquet_multiple_files(tmp_path):
@@ -3223,25 +3247,26 @@ def test_parquet_nested_struct_list():
     assert_eq(actual.a.dtype, df.a.dtype)
 
 
-def test_parquet_writer_zstd():
-    size = 12345
-    rng = np.random.default_rng(seed=0)
-    expected = cudf.DataFrame(
-        {
-            "a": np.arange(0, stop=size, dtype="float64"),
-            "b": rng.choice(list("abcd"), size=size),
-            "c": rng.choice(np.arange(4), size=size),
-        }
-    )
-
-    buff = BytesIO()
-    try:
-        expected.to_parquet(buff, compression="ZSTD")
-    except RuntimeError:
-        pytest.mark.xfail(reason="Newer nvCOMP version is required")
-    else:
-        got = pd.read_parquet(buff)
-        assert_eq(expected, got)
+# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
+# def test_parquet_writer_zstd():
+#     size = 12345
+#     rng = np.random.default_rng(seed=0)
+#     expected = cudf.DataFrame(
+#         {
+#             "a": np.arange(0, stop=size, dtype="float64"),
+#             "b": rng.choice(list("abcd"), size=size),
+#             "c": rng.choice(np.arange(4), size=size),
+#         }
+#     )
+#
+#     buff = BytesIO()
+#     try:
+#         expected.to_parquet(buff, compression="ZSTD")
+#     except RuntimeError:
+#         pytest.mark.xfail(reason="Newer nvCOMP version is required")
+#     else:
+#         got = pd.read_parquet(buff)
+#         assert_eq(expected, got)
 
 
 @pytest.mark.parametrize("store_schema", [True, False])
@@ -3416,15 +3441,16 @@ def test_writer_lz4():
     assert_eq(gdf, got)
 
 
-def test_parquet_reader_zstd_huff_tables(datadir):
-    # Ensure that this zstd-compressed file does not overrun buffers. The
-    # problem was fixed in nvcomp 3.0.6.
-    # See https://github.com/rapidsai/cudf/issues/15096
-    fname = datadir / "zstd_huff_tables_bug.parquet"
-
-    expected = pa.parquet.read_table(fname).to_pandas()
-    actual = cudf.read_parquet(fname)
-    assert_eq(actual, expected)
+# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
+# def test_parquet_reader_zstd_huff_tables(datadir):
+#     # Ensure that this zstd-compressed file does not overrun buffers. The
+#     # problem was fixed in nvcomp 3.0.6.
+#     # See https://github.com/rapidsai/cudf/issues/15096
+#     fname = datadir / "zstd_huff_tables_bug.parquet"
+#
+#     expected = pa.parquet.read_table(fname).to_pandas()
+#     actual = cudf.read_parquet(fname)
+#     assert_eq(actual, expected)
 
 
 def test_parquet_reader_roundtrip_with_arrow_schema():
@@ -4556,7 +4582,8 @@ def test_parquet_reader_empty_compressed_page(datadir):
     assert_eq(cudf.read_parquet(fname), df)
 
 
-@pytest.mark.parametrize("compression", ["brotli", "gzip", "snappy", "zstd"])
+# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
+@pytest.mark.parametrize("compression", ["brotli", "gzip", "snappy"])  # , "zstd"
 def test_parquet_decompression(
     set_decomp_env_vars, pdf_day_timestamps, compression
 ):
