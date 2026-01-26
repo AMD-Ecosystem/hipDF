@@ -45,7 +45,7 @@ import rmm
 from cudf._lib import strings_udf
 from cudf.core.buffer import as_buffer
 from cudf.core.udf.masked_typing import MaskedType
-from cudf.core.udf.nrt_utils import nrt_enabled
+from cudf.core.udf.nrt_utils import _USE_NRT, nrt_enabled
 from cudf.core.udf.strings_typing import (
     NRT_decref,
     managed_udf_string,
@@ -292,6 +292,11 @@ def _return_arr_from_dtype(dtype, size):
 
 @functools.cache
 def _make_free_string_kernel():
+    # NOTE(HIP/AMD): NRT-based cleanup is not available on HIP
+    # Return None, callers should check before using
+    if not _USE_NRT:
+        return None
+        
     with nrt_enabled():
 
         @cuda.jit(

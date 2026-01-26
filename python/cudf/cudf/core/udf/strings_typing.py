@@ -36,6 +36,8 @@ from numba.cuda.descriptor import hip_target as cuda_target
 
 import rmm
 
+from cudf.core.udf.nrt_utils import _USE_NRT
+
 # libcudf size_type
 size_type = types.int32
 
@@ -122,9 +124,13 @@ class managed_udf_string_model(models.StructModel):
         super().__init__(dmm, fe_type, self._members)
 
     def has_nrt_meminfo(self):
-        return True
+        # NOTE(HIP/AMD): Return False when NRT is not available
+        return _USE_NRT
 
     def get_nrt_meminfo(self, builder, value):
+        if not _USE_NRT:
+            # NOTE(HIP/AMD): NRT not available, return None
+            return None
         udf_str_and_meminfo = cgutils.create_struct_proxy(managed_udf_string)(
             cuda_target.target_context, builder, value=value
         )

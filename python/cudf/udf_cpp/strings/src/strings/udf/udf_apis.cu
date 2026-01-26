@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -116,6 +116,24 @@ std::unique_ptr<cudf::column> column_from_managed_udf_string_array(
   return result;
 }
 
+/**
+ * @copydoc free_managed_udf_string_array
+ *
+ * @param stream CUDA stream used for launching kernels
+ */
+void free_managed_udf_string_array(managed_udf_string* managed_strings,
+                                   cudf::size_type size,
+                                   rmm::cuda_stream_view stream)
+{
+  thrust::for_each_n(rmm::exec_policy(stream),
+                     thrust::make_counting_iterator(0),
+                     size,
+                     [managed_strings] __device__(auto idx) { 
+                       managed_strings[idx].udf_str.clear(); 
+                     });
+  stream.synchronize();
+}
+
 }  // namespace detail
 
 // external APIs
@@ -132,6 +150,11 @@ std::unique_ptr<cudf::column> column_from_managed_udf_string_array(
 {
   return detail::column_from_managed_udf_string_array(
     managed_strings, size, cudf::get_default_stream());
+}
+
+void free_managed_udf_string_array(managed_udf_string* managed_strings, cudf::size_type size)
+{
+  detail::free_managed_udf_string_array(managed_strings, size, cudf::get_default_stream());
 }
 
 }  // namespace udf
