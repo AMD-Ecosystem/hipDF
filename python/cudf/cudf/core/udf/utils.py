@@ -185,7 +185,7 @@ def make_cache_key(udf, sig):
     return names, constants, codebytes, cvarbytes, sig
 
 
-def compile_udf(udf, type_signature):
+def compile_udf(udf, type_signature, **options):
     """Compile ``udf`` with `numba`
 
     Compile a python callable function ``udf`` with
@@ -206,6 +206,10 @@ def compile_udf(udf, type_signature):
       The types should be one in `numba.types` and could be converted from
       numpy types with `numba.numpy_support.from_dtype(...)`.
 
+    options:
+      Additional keyword arguments passed to
+      `numba.cuda.compile_ptx_for_current_device`.
+
     Returns
     -------
     ptx_code:
@@ -222,8 +226,10 @@ def compile_udf(udf, type_signature):
 
     # We haven't compiled a function like this before, so need to fall back to
     # compilation with Numba
+    # NOTE(HIP/AMD): We need to pass the desired name of the numba-generated UDF to numba-hip
+    # for compatibility with jitify when we link the UDF LLVM IR to the kernel.
     ptx_code, return_type = cuda.compile_ptx_for_current_device(
-        udf, type_signature, device=True
+        udf, type_signature, device=True, **options
     )
     if not isinstance(return_type, MaskedType):
         output_type = numpy_support.as_dtype(return_type).type
