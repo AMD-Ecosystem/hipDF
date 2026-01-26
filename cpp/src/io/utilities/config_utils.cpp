@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -84,7 +84,15 @@ enum class usage_policy : uint8_t { OFF, STABLE, ALWAYS };
 usage_policy get_env_policy()
 {
   auto const env_val = getenv_or<std::string>("LIBCUDF_NVCOMP_POLICY", "STABLE");
-  if (env_val == "OFF") return usage_policy::OFF;
+  if (env_val == "OFF") {
+#if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+    // NOTE(HIP/AMD): hipDF requires nvcomp for compression/decompression support.
+    // LIBCUDF_NVCOMP_POLICY=OFF is not supported on HIP/AMD platforms.
+    CUDF_FAIL("LIBCUDF_NVCOMP_POLICY=OFF is not supported on hipDF. "
+              "nvcomp is required for compression/decompression on HIP/AMD platforms.");
+#endif
+    return usage_policy::OFF;
+  }
   if (env_val == "STABLE") return usage_policy::STABLE;
   if (env_val == "ALWAYS") return usage_policy::ALWAYS;
   CUDF_FAIL("Invalid LIBCUDF_NVCOMP_POLICY value: " + env_val);
