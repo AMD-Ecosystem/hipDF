@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1452,7 +1452,15 @@ static __device__ debrotli_huff_tree_group_s* HuffmanTreeGroupInit(debrotli_stat
   return group;
 }
 
+// TODO(HIP/AMD): Unit test failures occur without this workaround (python test_parquet with brotli
+// decompression). Without the workaround, the pointer to the heap in shared memory does not have
+// the expected 0x1.... prefix, suggesting pointer truncation from 64-bit to 32-bit. We hypothesize
+// this is due to compiler optimization misbehavior.
+#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
+static __device__ __attribute__((optnone)) void HuffmanTreeGroupAlloc(debrotli_state_s* s, debrotli_huff_tree_group_s* group)
+#else
 static __device__ void HuffmanTreeGroupAlloc(debrotli_state_s* s, debrotli_huff_tree_group_s* group)
+#endif
 {
   if (!group->htrees[0]) {
     uint32_t alphabet_size  = group->alphabet_size;
