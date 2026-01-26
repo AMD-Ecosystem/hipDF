@@ -238,8 +238,15 @@ struct nearest_value_centroid_weights {
  * the cumulative weight for a given value index I is simply I+1.
  */
 struct cumulative_scalar_weight_grouped {
-  cudf::device_span<size_type const> group_offsets;
-  CUDF_HOST_DEVICE CUDF_TUPLE_TYPE<size_type, size_type, double> operator()(size_type value_index) const
+// <<<<<<< OLD CODE from 8e61113a93 (6cea1ee8b4) - COMMENTED OUT
+//   cudf::device_span<size_type const> group_offsets;
+//   CUDF_HOST_DEVICE CUDF_TUPLE_TYPE<size_type, size_type, double> operator()(size_type value_index) const
+// =======
+  // Host-device span, as the offsets may reside in either device memory or pinned host memory
+  cuda::std::span<size_type const> group_offsets;
+  cuda::std::tuple<size_type, size_type, double> operator()
+    CUDF_HOST_DEVICE(size_type value_index) const
+// >>>>>>> END NEW CODE (6cea1ee8b4)
   {
     auto const lb =
       thrust::lower_bound(thrust::seq, group_offsets.begin(), group_offsets.end(), value_index) -
@@ -1153,7 +1160,8 @@ struct typed_group_tdigest {
           num_groups,
           nearest_value_scalar_weights_grouped{p_group_offsets.begin()},
           scalar_group_info_grouped{p_group_valid_counts.begin(), p_group_offsets.begin()},
-          cumulative_scalar_weight_grouped{p_group_offsets},
+          cumulative_scalar_weight_grouped{
+            cuda::std::span<size_type const>{p_group_offsets.begin(), p_group_offsets.size()}},
           col.null_count() > 0,
           stream,
           mr);
@@ -1165,7 +1173,8 @@ struct typed_group_tdigest {
         num_groups,
         nearest_value_scalar_weights_grouped{group_offsets.begin()},
         scalar_group_info_grouped{group_valid_counts.begin(), group_offsets.begin()},
-        cumulative_scalar_weight_grouped{group_offsets},
+        cumulative_scalar_weight_grouped{
+          cuda::std::span<size_type const>{group_offsets.begin(), group_offsets.size()}},
         col.null_count() > 0,
         stream,
         mr);
@@ -1196,7 +1205,8 @@ struct typed_group_tdigest {
     return compute_tdigests(delta,
                             scalar_to_centroid,
                             scalar_to_centroid + col.size(),
-                            cumulative_scalar_weight_grouped{group_offsets},
+                            cumulative_scalar_weight_grouped{cuda::std::span<size_type const>{
+                              group_offsets.begin(), group_offsets.size()}},
                             std::move(min_col),
                             std::move(max_col),
                             cinfo,
