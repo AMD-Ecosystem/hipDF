@@ -42,137 +42,6 @@
 namespace CUDF_EXPORT cudf {
 namespace detail {
 
-// Visitor pattern
-class simple_aggregations_collector {  // Declares the interface for the simple aggregations
-                                       // collector
- public:
-  // Declare overloads for each kind of a agg to dispatch
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class sum_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(
-    data_type col_type, class sum_with_overflow_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class product_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class min_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class max_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class count_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class histogram_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class any_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class all_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(
-    data_type col_type, class sum_of_squares_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class mean_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class m2_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class var_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class std_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class median_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class quantile_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class argmax_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class argmin_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class nunique_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class nth_element_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class row_number_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class ewma_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class rank_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(
-    data_type col_type, class collect_list_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class collect_set_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class lead_lag_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class udf_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class host_udf_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class merge_lists_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class merge_sets_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class merge_m2_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(
-    data_type col_type, class merge_histogram_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class covariance_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class correlation_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class tdigest_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(
-    data_type col_type, class merge_tdigest_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class bitwise_aggregation const& agg);
-  virtual std::vector<std::unique_ptr<aggregation>> visit(data_type col_type,
-                                                          class top_k_aggregation const& agg);
-};
-
-class aggregation_finalizer {  // Declares the interface for the finalizer
- public:
-  virtual ~aggregation_finalizer() = default;
-
-  // Declare overloads for each kind of a agg to dispatch
-  virtual void visit(aggregation const& agg);
-  virtual void visit(class sum_aggregation const& agg);
-  virtual void visit(class sum_with_overflow_aggregation const& agg);
-  virtual void visit(class product_aggregation const& agg);
-  virtual void visit(class min_aggregation const& agg);
-  virtual void visit(class max_aggregation const& agg);
-  virtual void visit(class count_aggregation const& agg);
-  virtual void visit(class histogram_aggregation const& agg);
-  virtual void visit(class any_aggregation const& agg);
-  virtual void visit(class all_aggregation const& agg);
-  virtual void visit(class sum_of_squares_aggregation const& agg);
-  virtual void visit(class mean_aggregation const& agg);
-  virtual void visit(class m2_aggregation const& agg);
-  virtual void visit(class var_aggregation const& agg);
-  virtual void visit(class std_aggregation const& agg);
-  virtual void visit(class median_aggregation const& agg);
-  virtual void visit(class quantile_aggregation const& agg);
-  virtual void visit(class argmax_aggregation const& agg);
-  virtual void visit(class argmin_aggregation const& agg);
-  virtual void visit(class nunique_aggregation const& agg);
-  virtual void visit(class nth_element_aggregation const& agg);
-  virtual void visit(class row_number_aggregation const& agg);
-  virtual void visit(class rank_aggregation const& agg);
-  virtual void visit(class collect_list_aggregation const& agg);
-  virtual void visit(class collect_set_aggregation const& agg);
-  virtual void visit(class lead_lag_aggregation const& agg);
-  virtual void visit(class udf_aggregation const& agg);
-  virtual void visit(class host_udf_aggregation const& agg);
-  virtual void visit(class merge_lists_aggregation const& agg);
-  virtual void visit(class merge_sets_aggregation const& agg);
-  virtual void visit(class merge_m2_aggregation const& agg);
-  virtual void visit(class merge_histogram_aggregation const& agg);
-  virtual void visit(class covariance_aggregation const& agg);
-  virtual void visit(class correlation_aggregation const& agg);
-  virtual void visit(class tdigest_aggregation const& agg);
-  virtual void visit(class merge_tdigest_aggregation const& agg);
-  virtual void visit(class ewma_aggregation const& agg);
-  virtual void visit(class bitwise_aggregation const& agg);
-  virtual void visit(class top_k_aggregation const& agg);
-};
-
 /**
  * @brief CRTP (Curiously Recurring Template Pattern) helper to automatically implement clone() for
  * aggregation classes.
@@ -226,13 +95,6 @@ class sum_aggregation final
                                                    segmented_reduce_aggregation> {
  public:
   sum_aggregation() : aggregation(SUM) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -245,13 +107,6 @@ class sum_with_overflow_aggregation final
                                                                  segmented_reduce_aggregation> {
  public:
   sum_with_overflow_aggregation() : aggregation(SUM_WITH_OVERFLOW) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -265,13 +120,6 @@ class product_aggregation final
                                                        segmented_reduce_aggregation> {
  public:
   product_aggregation() : aggregation(PRODUCT) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -286,13 +134,6 @@ class min_aggregation final
                                                    segmented_reduce_aggregation> {
  public:
   min_aggregation() : aggregation(MIN) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -307,13 +148,6 @@ class max_aggregation final
                                                    segmented_reduce_aggregation> {
  public:
   max_aggregation() : aggregation(MAX) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -326,13 +160,6 @@ class count_aggregation final
                                                      reduce_aggregation> {
  public:
   count_aggregation(aggregation::Kind kind) : aggregation(kind) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -342,13 +169,6 @@ class histogram_aggregation final
   : public clonable<histogram_aggregation>::derived_from<groupby_aggregation, reduce_aggregation> {
  public:
   histogram_aggregation() : aggregation(HISTOGRAM) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -359,13 +179,6 @@ class any_aggregation final
                                                    segmented_reduce_aggregation> {
  public:
   any_aggregation() : aggregation(ANY) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -376,13 +189,6 @@ class all_aggregation final
                                                    segmented_reduce_aggregation> {
  public:
   all_aggregation() : aggregation(ALL) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -393,13 +199,6 @@ class sum_of_squares_aggregation final
       derived_from<groupby_aggregation, reduce_aggregation, segmented_reduce_aggregation> {
  public:
   sum_of_squares_aggregation() : aggregation(SUM_OF_SQUARES) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -412,13 +211,6 @@ class mean_aggregation final
                                                     segmented_reduce_aggregation> {
  public:
   mean_aggregation() : aggregation(MEAN) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -427,13 +219,6 @@ class mean_aggregation final
 class m2_aggregation : public clonable<m2_aggregation>::derived_from<groupby_aggregation> {
  public:
   m2_aggregation() : aggregation{M2} {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -480,13 +265,6 @@ class var_aggregation final : public std_var_aggregation<var_aggregation> {
     : aggregation{aggregation::VARIANCE}, std_var_aggregation{aggregation::VARIANCE, ddof}
   {
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -498,13 +276,6 @@ class std_aggregation final : public std_var_aggregation<std_aggregation> {
     : aggregation{aggregation::STD}, std_var_aggregation{aggregation::STD, ddof}
   {
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -514,13 +285,6 @@ class median_aggregation final
   : public clonable<median_aggregation>::derived_from<groupby_aggregation, reduce_aggregation> {
  public:
   median_aggregation() : aggregation(MEDIAN) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -551,13 +315,6 @@ class quantile_aggregation final
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
  private:
   [[nodiscard]] size_t hash_impl() const
   {
@@ -577,13 +334,6 @@ class argmax_aggregation final
       derived_from<rolling_aggregation, groupby_aggregation, reduce_aggregation> {
  public:
   argmax_aggregation() : aggregation(ARGMAX) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -594,13 +344,6 @@ class argmin_aggregation final
       derived_from<rolling_aggregation, groupby_aggregation, reduce_aggregation> {
  public:
   argmin_aggregation() : aggregation(ARGMIN) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -628,13 +371,6 @@ class nunique_aggregation final
   {
     return this->aggregation::do_hash() ^ hash_impl();
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 
  private:
   [[nodiscard]] size_t hash_impl() const
@@ -670,13 +406,6 @@ class nth_element_aggregation final
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
  private:
   [[nodiscard]] size_t hash_impl() const
   {
@@ -691,13 +420,6 @@ class row_number_aggregation final
   : public clonable<row_number_aggregation>::derived_from<rolling_aggregation> {
  public:
   row_number_aggregation() : aggregation(ROW_NUMBER) {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -713,20 +435,12 @@ class ewma_aggregation final : public clonable<ewma_aggregation>::derived_from<s
   {
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-
   [[nodiscard]] bool is_equal(aggregation const& _other) const override
   {
     if (!this->aggregation::is_equal(_other)) { return false; }
     auto const& other = dynamic_cast<ewma_aggregation const&>(_other);
     return this->center_of_mass == other.center_of_mass and this->history == other.history;
   }
-
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -769,13 +483,6 @@ class rank_aggregation final
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
  private:
   [[nodiscard]] size_t hash_impl() const
   {
@@ -812,13 +519,6 @@ class collect_list_aggregation final
   {
     return this->aggregation::do_hash() ^ hash_impl();
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 
  private:
   [[nodiscard]] size_t hash_impl() const
@@ -862,13 +562,6 @@ class collect_set_aggregation final
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
  protected:
   [[nodiscard]] size_t hash_impl() const
   {
@@ -899,13 +592,6 @@ class lead_lag_aggregation final
   {
     return this->aggregation::do_hash() ^ hash_impl();
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 
   size_type row_offset;
 
@@ -945,13 +631,6 @@ class udf_aggregation final : public clonable<udf_aggregation>::derived_from<rol
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
   std::string const _source;
   std::string const _operator_name;
   std::string const _function_name;
@@ -988,13 +667,6 @@ class host_udf_aggregation final : public groupby_aggregation,
   [[nodiscard]] size_t do_hash() const override;
 
   [[nodiscard]] std::unique_ptr<aggregation> clone() const override;
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -1005,13 +677,6 @@ class merge_lists_aggregation final
                                                            reduce_aggregation> {
  public:
   explicit merge_lists_aggregation() : aggregation{MERGE_LISTS} {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -1041,13 +706,6 @@ class merge_sets_aggregation final
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
  protected:
   [[nodiscard]] size_t hash_impl() const
   {
@@ -1062,13 +720,6 @@ class merge_m2_aggregation final
   : public clonable<merge_m2_aggregation>::derived_from<groupby_aggregation> {
  public:
   explicit merge_m2_aggregation() : aggregation{MERGE_M2} {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -1079,13 +730,6 @@ class merge_histogram_aggregation final
                                                                reduce_aggregation> {
  public:
   explicit merge_histogram_aggregation() : aggregation{MERGE_HISTOGRAM} {}
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -1105,13 +749,6 @@ class covariance_aggregation final
   {
     return this->aggregation::do_hash() ^ hash_impl();
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 
  protected:
   [[nodiscard]] size_t hash_impl() const
@@ -1145,13 +782,6 @@ class correlation_aggregation final
     return this->aggregation::do_hash() ^ hash_impl();
   }
 
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
-
  protected:
   [[nodiscard]] size_t hash_impl() const
   {
@@ -1171,13 +801,6 @@ class tdigest_aggregation final
   }
 
   int const max_centroids;
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -1193,13 +816,6 @@ class merge_tdigest_aggregation final
   }
 
   int const max_centroids;
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 /**
@@ -1223,14 +839,6 @@ class bitwise_aggregation final
   {
     return this->aggregation::do_hash() ^ static_cast<size_t>(bit_op);
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 };
 
 class top_k_aggregation final
@@ -1255,14 +863,6 @@ class top_k_aggregation final
   {
     return this->aggregation::do_hash() ^ hash_impl();
   }
-
-  std::vector<std::unique_ptr<aggregation>> get_simple_aggregations(
-    data_type col_type, simple_aggregations_collector& collector) const override
-  {
-    return collector.visit(col_type, *this);
-  }
-
-  void finalize(aggregation_finalizer& finalizer) const override { finalizer.visit(*this); }
 
  private:
   [[nodiscard]] std::size_t hash_impl() const
