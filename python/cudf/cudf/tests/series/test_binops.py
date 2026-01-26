@@ -1,30 +1,34 @@
-# <<<<<<< OLD CODE from 1ae25e5356 (cf41006673) - COMMENTED OUT
-# # Copyright (c) 2025, NVIDIA CORPORATION.
-#
-# # MIT License
+# <<<<<<< OLD CODE from 65cf42d517 (467dcc2f81) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 1ae25e5356 (cf41006673) - COMMENTED OUT
+# # # Copyright (c) 2025, NVIDIA CORPORATION.
 # #
-# # Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# # # MIT License
+# # #
+# # # Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# # #
+# # # Permission is hereby granted, free of charge, to any person obtaining a copy
+# # # of this software and associated documentation files (the "Software"), to deal
+# # # in the Software without restriction, including without limitation the rights
+# # # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# # # copies of the Software, and to permit persons to whom the Software is
+# # # furnished to do so, subject to the following conditions:
+# # #
+# # # The above copyright notice and this permission notice shall be included in all
+# # # copies or substantial portions of the Software.
+# # #
+# # # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# # # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# # # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# # # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# # # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# # # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# # # SOFTWARE.
 # #
-# # Permission is hereby granted, free of charge, to any person obtaining a copy
-# # of this software and associated documentation files (the "Software"), to deal
-# # in the Software without restriction, including without limitation the rights
-# # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# # copies of the Software, and to permit persons to whom the Software is
-# # furnished to do so, subject to the following conditions:
-# #
-# # The above copyright notice and this permission notice shall be included in all
-# # copies or substantial portions of the Software.
-# #
-# # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# # SOFTWARE.
-#
+# # =======
+# # SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION.
 # =======
-# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION.
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION.
+# >>>>>>> END NEW CODE (467dcc2f81)
 # SPDX-License-Identifier: Apache-2.0
 # >>>>>>> END NEW CODE (cf41006673)
 import datetime
@@ -32,6 +36,7 @@ import decimal
 import operator
 import re
 from concurrent.futures import ThreadPoolExecutor
+from decimal import Decimal
 
 import cupy as cp
 import numpy as np
@@ -3219,3 +3224,20 @@ def test_timedelta_arrow_backed_comparisions_pandas_compat():
         gs = cudf.from_pandas(s)
         assert_eq(s == s, gs == gs)
         assert_eq(s != s, gs != gs)
+
+
+def test_decimal_arrow_backed_comparisons_pandas_compat(comparison_op):
+    s = pd.Series(
+        pd.arrays.ArrowExtensionArray(
+            pa.array(
+                [Decimal("1.234"), Decimal("0.000"), None],
+                type=pa.decimal128(7, 3),
+            )
+        )
+    )
+
+    with cudf.option_context("mode.pandas_compatible", True):
+        gs = cudf.from_pandas(s)
+        expect = comparison_op(s, s)
+        got = comparison_op(gs, gs)
+        assert_eq(expect, got)
