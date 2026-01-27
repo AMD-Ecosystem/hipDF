@@ -559,7 +559,7 @@ std::unique_ptr<column> sha_hash(table_view const& input,
     [d_chars, device_input = *device_input]
 // TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
 // compiler optimization misbehavior.
-#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS) && defined(NDEBUG)
+#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
     __attribute__((noinline))
 #endif
     __device__(auto row_index) {
