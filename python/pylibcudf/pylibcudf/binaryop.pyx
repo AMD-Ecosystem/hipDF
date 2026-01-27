@@ -176,6 +176,8 @@ def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype, Stream stream=None):
     cdef string cpp_str = udf_ptx.encode("UTF-8")
 
     cdef unique_ptr[column] c_result
+    
+    stream = _get_stream(stream)
 
     with nogil:
         c_result = move(
