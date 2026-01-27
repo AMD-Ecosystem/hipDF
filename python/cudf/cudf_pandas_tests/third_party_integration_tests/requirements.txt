@@ -20,30 +20,61 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Base test dependencies
 pytest
 pytest-xdist
 
+# test_dask
 dask
-feature_engine
+
+# test_matplotlib
 matplotlib
+
+# test_numpy
 numpy
+
+# test_seaborn
+seaborn
+
+# test_scipy
+scipy
+
+# test_sklearn
+scikit-learn
+
+# test_stumpy
+stumpy
+
+# test_tensorflow (ROCm)
 --find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/
 tensorflow-rocm==2.18.1
+
+# test pytorch (ROCm)
 torch==2.8
 torchvision==0.24
 torchaudio==2.8
 
-seaborn
-scipy
-scikit-learn
-stumpy
-#
+# test_xgboost
+hypothesis>=6.131.7
+xgboost>=2.0.1
+
+# test_catboost
+catboost
+
+# test_ibis
+ibis-framework[duckdb]
+duckdb<1.4.0
+
+# test_hvplot
+hvplot
+
+# test_holoviews
+holoviews
+
+# test_plotly
+plotly
+
 # TODO(HIP/AMD): Support on ROCm
-# xgboost
 # cuml
 # cugraph
 
-ibis-framework[pandas]<10.0.0
-hvplot
-holoviews
-plotly
