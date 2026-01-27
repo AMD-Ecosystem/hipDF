@@ -168,6 +168,7 @@ __all__ = [
     "from_pandas",
     "get_dummies",
     "get_option",
+    "hip",
     "interval_range",
     "io",
     "melt",
