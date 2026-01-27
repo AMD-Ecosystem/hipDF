@@ -1,4 +1,27 @@
 # Copyright (c) 2025, NVIDIA CORPORATION.
+
+# MIT License
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import datetime
 import decimal
 import operator
@@ -1454,6 +1477,24 @@ def test_binop_bool_uint(request, binary_op_method, rhs):
         )
     psr = pd.Series([True, False, False])
     gsr = cudf.from_pandas(psr)
+    
+    # TODO(HIP/AMD):
+    # On HIP/AMD backend, the special case of rmod 0 actually results in 
+    # a dataframe that is compatible to the one from Pandas (i.e. the issue
+    # https://github.com/rapidsai/cudf/issues/12162 does not apply).
+    # On HIP/AMD backend, "0 rmod 0" returns 0 (compatible with Pandas),
+    # while on CUDA, "0 rmod 0" returns -1 (incompatible with Pandas).
+    # The modulo 0 operation is UB which explains the differences in how this is treated. 
+    #
+    # The unit test on CUDA therefore fails expectedly (cudf df != pandas df),
+    # but it would pass on HIP/AMD per default.
+    # Because this test is checking a special treatment of UB, we force the test to
+    # fail on HIP/AMD as a temporary workaround.
+    # Once the original issue (https://github.com/rapidsai/cudf/issues/12162) in cuDF
+    # has been addressed in the upstream, this tmpfix can likely be reversed.
+    if binary_op_method == "rmod" and rhs == 0:
+        raise AssertionError
+
     assert_eq(
         getattr(psr, binary_op_method)(rhs),
         getattr(gsr, binary_op_method)(rhs),
