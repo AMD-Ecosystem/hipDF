@@ -1,30 +1,34 @@
-# <<<<<<< OLD CODE from 1ae25e5356 (cf41006673) - COMMENTED OUT
-# # Copyright (c) 2020-2025, NVIDIA CORPORATION.
-#
-# # MIT License
+# <<<<<<< OLD CODE from 4ba5c9b26c (d728df239b) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 1ae25e5356 (cf41006673) - COMMENTED OUT
+# # # Copyright (c) 2020-2025, NVIDIA CORPORATION.
 # #
-# # Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# # # MIT License
+# # #
+# # # Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# # #
+# # # Permission is hereby granted, free of charge, to any person obtaining a copy
+# # # of this software and associated documentation files (the "Software"), to deal
+# # # in the Software without restriction, including without limitation the rights
+# # # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# # # copies of the Software, and to permit persons to whom the Software is
+# # # furnished to do so, subject to the following conditions:
+# # #
+# # # The above copyright notice and this permission notice shall be included in all
+# # # copies or substantial portions of the Software.
+# # #
+# # # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# # # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# # # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# # # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# # # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# # # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# # # SOFTWARE.
 # #
-# # Permission is hereby granted, free of charge, to any person obtaining a copy
-# # of this software and associated documentation files (the "Software"), to deal
-# # in the Software without restriction, including without limitation the rights
-# # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# # copies of the Software, and to permit persons to whom the Software is
-# # furnished to do so, subject to the following conditions:
-# #
-# # The above copyright notice and this permission notice shall be included in all
-# # copies or substantial portions of the Software.
-# #
-# # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# # SOFTWARE.
-#
+# # =======
+# # SPDX-FileCopyrightText: Copyright (c) 2020-2025, NVIDIA CORPORATION.
 # =======
-# SPDX-FileCopyrightText: Copyright (c) 2020-2025, NVIDIA CORPORATION.
+# SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
+# >>>>>>> END NEW CODE (d728df239b)
 # SPDX-License-Identifier: Apache-2.0
 # >>>>>>> END NEW CODE (cf41006673)
 from __future__ import annotations
@@ -42,8 +46,7 @@ from cudf.utils.dtypes import SUPPORTED_NUMPY_TO_PYLIBCUDF_TYPES
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from typing_extensions import Self
+    from typing import Self
 
 _agg_name_map = {
     "COUNT_VALID": "COUNT",

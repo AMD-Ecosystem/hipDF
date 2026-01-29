@@ -43,8 +43,12 @@ authors = [
 # license = { text = "Apache 2.0 AND MIT" }
 # =======
 license = "Apache-2.0"
-# >>>>>>> END NEW CODE (b01a8a475f)
-requires-python = ">=3.10"
+# <<<<<<< OLD CODE from 4ba5c9b26c (d728df239b) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (b01a8a475f)
+# requires-python = ">=3.10"
+# =======
+requires-python = ">=3.11"
+# >>>>>>> END NEW CODE (d728df239b)
 classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Database",

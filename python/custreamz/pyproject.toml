@@ -45,8 +45,12 @@ authors = [
 # =======
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-# >>>>>>> END NEW CODE (b01a8a475f)
-requires-python = ">=3.10"
+# <<<<<<< OLD CODE from 4ba5c9b26c (d728df239b) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (b01a8a475f)
+# requires-python = ">=3.10"
+# =======
+requires-python = ">=3.11"
+# >>>>>>> END NEW CODE (d728df239b)
 dependencies = [
 # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
 #     "confluent-kafka>=2.8.0,<2.9.0a0",
@@ -83,7 +87,6 @@ classifiers = [
 # =======
 # >>>>>>> END NEW CODE (b01a8a475f)
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",

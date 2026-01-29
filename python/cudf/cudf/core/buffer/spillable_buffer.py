@@ -29,12 +29,16 @@ import collections.abc
 import time
 import weakref
 from threading import RLock
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 import numpy
-
-#: import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
-from typing_extensions import Self
+# <<<<<<< OLD CODE from 4ba5c9b26c (d728df239b) - COMMENTED OUT
+#
+# #: import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
+# from typing_extensions import Self
+# =======
+import nvtx
+# >>>>>>> END NEW CODE (d728df239b)
 
 import rmm
 

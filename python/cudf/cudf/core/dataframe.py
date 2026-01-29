@@ -46,7 +46,7 @@ from collections.abc import (
     Sequence,
 )
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Self, assert_never
 
 import cupy
 import numba
@@ -57,7 +57,6 @@ import pyarrow as pa
 #: from nvtx import annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 from pandas.io.formats import console
 from pandas.io.formats.printing import pprint_thing
-from typing_extensions import Self, assert_never
 
 import pylibcudf as plc
 
