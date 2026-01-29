@@ -1135,27 +1135,30 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/base/test_value_counts.py::test_value_counts[tuples]",
     "tests/base/test_value_counts.py::test_value_counts_bins[index]",
     "tests/base/test_value_counts.py::test_value_counts_bins[series]",
-# <<<<<<< OLD CODE from 6e9e1971cd (d761d12c67) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from cf1a356509 (9bfb9d4bb0) - COMMENTED OUT
-# # #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
-# # #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
+# <<<<<<< OLD CODE from b7c81f630b (5c7977859b) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 6e9e1971cd (d761d12c67) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from cf1a356509 (9bfb9d4bb0) - COMMENTED OUT
+# # # #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
+# # # #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
+# # # # =======
+# # # # >>>>>>> END NEW CODE (9bfb9d4bb0)
 # # # =======
-# # # >>>>>>> END NEW CODE (9bfb9d4bb0)
+# #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
+# #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
+# # # >>>>>>> END NEW CODE (ee26842c72)
 # # =======
-#     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
-#     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
-# # >>>>>>> END NEW CODE (ee26842c72)
+# # >>>>>>> END NEW CODE (d761d12c67)
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ms]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ns]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-s]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-us]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-ms]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-ns]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-s]",
+#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-us]",
 # =======
-# >>>>>>> END NEW CODE (d761d12c67)
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ms]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ns]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-s]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-us]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-ms]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-ns]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-s]",
-    "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-us]",
+# >>>>>>> END NEW CODE (5c7977859b)
     "tests/computation/test_eval.py::TestAlignment::test_performance_warning_for_poor_alignment[numexpr-pandas]",
     "tests/computation/test_eval.py::TestAlignment::test_performance_warning_for_poor_alignment[numexpr-python]",
     "tests/computation/test_eval.py::TestEval::test_disallow_python_keywords",
@@ -1533,8 +1536,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/copy_view/test_setitem.py::test_setitem_series_no_copy_split_block",
     "tests/copy_view/test_util.py::test_get_array_masked",
     "tests/copy_view/test_util.py::test_get_array_numpy",
-    "tests/dtypes/cast/test_construct_from_scalar.py::test_cast_1d_array_like_from_timedelta",
-    "tests/dtypes/cast/test_construct_from_scalar.py::test_cast_1d_array_like_from_timestamp",
     "tests/dtypes/cast/test_find_common_type.py::test_interval_dtype[right0-left0]",
     "tests/dtypes/cast/test_find_common_type.py::test_interval_dtype[right1-left1]",
     "tests/dtypes/cast/test_find_common_type.py::test_interval_dtype[right2-left2]",
@@ -1611,8 +1612,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/extension/test_arrow.py::TestArrowArray::test_accumulate_series[bool-cummin-True]",
     "tests/extension/test_arrow.py::TestArrowArray::test_accumulate_series[bool-cumprod-False]",
     "tests/extension/test_arrow.py::TestArrowArray::test_accumulate_series[bool-cumprod-True]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_array_interface[duration[ns]]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_array_interface[timestamp[ns]]",
     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[decimal128(7, 3)-string[pyarrow]]",
     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[decimal128(7, 3)-string[python]]",
     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[ms]-string[pyarrow]]",
@@ -6757,14 +6756,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/reshape/test_pivot_multilevel.py::test_pivot_list_like_columns[input_index3-input_columns3-values-expected_values3-expected_columns3-expected_index3]",
     "tests/reshape/test_pivot_multilevel.py::test_pivot_list_like_columns[lev4-input_columns0-values-expected_values0-expected_columns0-expected_index0]",
     "tests/reshape/test_qcut.py::test_date_like_qcut_bins[arg1-expected_bins1]",
-    "tests/scalar/interval/test_arithmetic.py::TestIntervalArithmetic::test_timedelta_add_timestamp_interval[timedelta64]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodArithmetic::test_period_add_sub_td64_nat[m]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodArithmetic::test_period_add_sub_td64_nat[ms]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodArithmetic::test_period_add_sub_td64_nat[ns]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodArithmetic::test_period_add_sub_td64_nat[s]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodArithmetic::test_period_add_sub_td64_nat[us]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodComparisons::test_period_comparison_numpy_zerodim_arr[zerodim_arr0-False]",
-    "tests/scalar/period/test_arithmetic.py::TestPeriodComparisons::test_period_comparison_numpy_zerodim_arr[zerodim_arr1-True]",
     "tests/scalar/period/test_period.py::TestPeriodConstruction::test_construct_from_nat_string_and_freq[D]",
     "tests/scalar/period/test_period.py::TestPeriodConstruction::test_construct_from_nat_string_and_freq[M]",
     "tests/scalar/period/test_period.py::TestPeriodConstruction::test_construct_from_nat_string_and_freq[Y]",
@@ -6782,17 +6773,7 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/scalar/test_nat.py::test_identity[nat-Period]",
     "tests/scalar/test_nat.py::test_identity[value4-Period]",
     "tests/scalar/timedelta/methods/test_as_unit.py::TestAsUnit::test_as_unit",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaAdditionSubtraction::test_td_add_sub_dt64_ndarray",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaAdditionSubtraction::test_td_add_sub_ndarray_0d",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaAdditionSubtraction::test_td_add_sub_td64_ndarray",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaAdditionSubtraction::test_td_sub_timedelta64",
     "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaComparison::test_compare_pytimedelta_bounds",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaComparison::test_compare_td64_ndarray",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaMultiplicationDivision::test_td_div_td64_ndarray",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaMultiplicationDivision::test_td_mul_numeric_ndarray",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaMultiplicationDivision::test_td_rdiv_na_scalar",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaMultiplicationDivision::test_td_rdiv_ndarray",
-    "tests/scalar/timedelta/test_arithmetic.py::TestTimedeltaMultiplicationDivision::test_td_rdiv_ndarray_0d",
     "tests/scalar/timedelta/test_constructors.py::test_construction_out_of_bounds_td64s[106752000000000-D]",
     "tests/scalar/timedelta/test_constructors.py::test_construction_out_of_bounds_td64s[15251000000000-W]",
     "tests/scalar/timedelta/test_constructors.py::test_construction_out_of_bounds_td64s[153722868000000000-m]",
@@ -6805,17 +6786,7 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/scalar/timedelta/test_timedelta.py::TestNonNano::test_min[s]",
     "tests/scalar/timestamp/methods/test_as_unit.py::TestTimestampAsUnit::test_as_unit",
     "tests/scalar/timestamp/methods/test_replace.py::TestTimestampReplace::test_replace_out_of_pydatetime_bounds",
-    "tests/scalar/timestamp/test_arithmetic.py::TestTimestampArithmetic::test_addsub_m8ndarray[shape0]",
-    "tests/scalar/timestamp/test_arithmetic.py::TestTimestampArithmetic::test_addsub_m8ndarray[shape1]",
-    "tests/scalar/timestamp/test_arithmetic.py::TestTimestampArithmetic::test_addsub_m8ndarray_tzaware[shape0]",
-    "tests/scalar/timestamp/test_arithmetic.py::TestTimestampArithmetic::test_addsub_m8ndarray_tzaware[shape1]",
-    "tests/scalar/timestamp/test_arithmetic.py::TestTimestampArithmetic::test_rsub_dtscalars[None]",
-    "tests/scalar/timestamp/test_comparisons.py::TestTimestampComparison::test_compare_non_nano_dt64",
-    "tests/scalar/timestamp/test_comparisons.py::TestTimestampComparison::test_compare_zerodim_array",
-    "tests/scalar/timestamp/test_comparisons.py::TestTimestampComparison::test_comparison_dt64_ndarray",
     "tests/scalar/timestamp/test_constructors.py::test_timestamp_constructor_identity",
-    "tests/scalar/timestamp/test_timestamp.py::TestNonNano::test_addsub_timedeltalike_non_nano[ms-td2]",
-    "tests/scalar/timestamp/test_timestamp.py::TestNonNano::test_addsub_timedeltalike_non_nano[s-td2]",
     "tests/scalar/timestamp/test_timestamp.py::TestNonNano::test_max[ms]",
     "tests/scalar/timestamp/test_timestamp.py::TestNonNano::test_max[s]",
     "tests/scalar/timestamp/test_timestamp.py::TestNonNano::test_max[us]",
