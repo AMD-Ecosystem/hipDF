@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -89,6 +89,9 @@ struct level_ordering {
   device_span<TreeDepthT const> node_levels;
   device_span<NodeIndexT const> col_ids;
   device_span<NodeIndexT const> parent_node_ids;
+#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
+  __attribute__((noinline))
+#endif
   __device__ bool operator()(NodeIndexT lhs_node_id, NodeIndexT rhs_node_id) const
   {
     auto lhs_parent_col_id = parent_node_ids[lhs_node_id] == parent_node_sentinel
