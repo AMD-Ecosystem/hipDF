@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,12 @@
 # SOFTWARE.
 
 
-# Skip the entire file if running on the HIP AMD port with Python 3.11
+# Skip the entire file if running on the HIP AMD port with Python 3.11 or 3.13
 import cudf
 import sys
 import pytest
-if getattr(cudf, "__is_hip_amd_port__", False) and sys.version_info[:2] == (3, 11):
-  pytest.skip("TensorFlow is not available on ROCm/HIP for Python 3.11", 
+if getattr(cudf, "__is_hip_amd_port__", False) and sys.version_info[:2] in [(3, 11), (3, 13)]:
+  pytest.skip("TensorFlow is not available on ROCm/HIP for Python 3.11 and 3.13", 
               allow_module_level=True)
 
 import numpy as np

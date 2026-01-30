@@ -46,7 +46,7 @@ scikit-learn
 stumpy
 
 # test_tensorflow (ROCm) - not available for Python 3.11 and 3.13
-# --find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/
+--find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/
 # tensorflow-rocm==2.18.1
 
 # test pytorch (ROCm)
@@ -56,7 +56,8 @@ torchaudio==2.8
 
 # test_xgboost
 hypothesis>=6.131.7
-xgboost>=2.0.1
+# TODO(HIP/AMD): Integrate with xgboost ROCm
+# xgboost>=2.0.1
 
 # test_catboost
 catboost
