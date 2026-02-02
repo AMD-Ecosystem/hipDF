@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,9 @@
 
 def test_import_hipdf():
     import hipdf.utils.utils
-    import hipdf.utils.string
     import hipdf.utils.queryutils
     import hipdf.utils.performance_tracking
     import hipdf.utils.ioutils
-    import hipdf.utils.hiputils
     import hipdf.utils.gpu_utils
     import hipdf.utils.dtypes
     import hipdf.utils.docutils
@@ -72,7 +70,6 @@ def test_import_hipdf():
     import hipdf.core.tools
     import hipdf.core.single_column_frame
     import hipdf.core.series
-    import hipdf.core.scalar
     import hipdf.core.reshape
     import hipdf.core.resample
     import hipdf.core.multiindex
@@ -92,7 +89,6 @@ def test_import_hipdf():
     import hipdf.core.groupby
     import hipdf.core.frame
     import hipdf.core.dtypes
-    import hipdf.core.df_protocol
     import hipdf.core.dataframe
     import hipdf.core.cut
     import hipdf.core.copy_types
@@ -103,7 +99,6 @@ def test_import_hipdf():
     import hipdf.core.column.string
     import hipdf.core.column.numerical_base
     import hipdf.core.column.numerical
-    import hipdf.core.column.methods
     import hipdf.core.column.lists
     import hipdf.core.column.interval
     import hipdf.core.column.decimal
@@ -122,13 +117,11 @@ def test_import_hipdf():
     import hipdf.core._internals.timezones
     import hipdf.core._internals.stream_compaction
     import hipdf.core._internals.sorting
-    import hipdf.core._internals.search
     import hipdf.core._internals.copying
     import hipdf.core._internals.binaryop
     import hipdf.core._internals.aggregation
     import hipdf.core._internals
     import hipdf.core._compat
-    import hipdf.core._base_index
     import hipdf.core
     import hipdf.api.types
     import hipdf.api.extensions.accessor
@@ -136,7 +129,6 @@ def test_import_hipdf():
     import hipdf.api
     import hipdf._version
     import hipdf._lib.strings_udf
-    import hipdf._lib.column
     import hipdf._lib
     import hipdf
 
