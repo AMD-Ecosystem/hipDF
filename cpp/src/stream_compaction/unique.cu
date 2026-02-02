@@ -37,6 +37,7 @@
 #include <cudf/detail/row_operator/equality.cuh>
 #include <cudf/detail/sorting.hpp>
 #include <cudf/detail/stream_compaction.hpp>
+#include <cudf/detail/utilities/algorithm.cuh>
 #include <cudf/stream_compaction.hpp>
 #include <cudf/table/table.hpp>
 #include <cudf/table/table_view.hpp>
@@ -50,7 +51,6 @@
 
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
-#include <thrust/copy.h>
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
 
@@ -94,32 +94,41 @@ std::unique_ptr<table> unique(table_view const& input,
         itr + num_rows,
         d_results.begin(),
         unique_copy_fn<decltype(itr), decltype(row_equal)>{itr, keep, row_equal, num_rows - 1});
-// <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
-//       // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-//       // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-//       // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-//       // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-//       // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-//       // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-//     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-//       auto result_end = thrust::copy_if(rmm::exec_policy(stream),
+// <<<<<<< OLD CODE from 38596580c6 (a33439aa56) - COMMENTED OUT
+// // <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
+// //       // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
+// //       // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+// //       // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+// //       // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+// //       // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+// //       // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+// // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+// //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
+// //       auto result_end = thrust::copy_if(rmm::exec_policy(stream),
+// //                                         itr,
+// //                                         itr + num_rows,
+// //                                         d_results.begin(),
+// //                                         mutable_view->begin<size_type>(),
+// //                                         thrust::identity{});
+// // #else
+// //       auto result_end = thrust::copy_if(rmm::exec_policy(stream),
+// // =======
+//       auto result_end = thrust::copy_if(rmm::exec_policy_nosync(stream),
+// // >>>>>>> END NEW CODE (820f9f7c3f)
 //                                         itr,
 //                                         itr + num_rows,
 //                                         d_results.begin(),
 //                                         mutable_view->begin<size_type>(),
-//                                         thrust::identity{});
-// #else
-//       auto result_end = thrust::copy_if(rmm::exec_policy(stream),
+//                                         cuda::std::identity{});
+// #endif
 // =======
-      auto result_end = thrust::copy_if(rmm::exec_policy_nosync(stream),
-// >>>>>>> END NEW CODE (820f9f7c3f)
-                                        itr,
-                                        itr + num_rows,
-                                        d_results.begin(),
-                                        mutable_view->begin<size_type>(),
-                                        cuda::std::identity{});
-#endif
+      auto result_end = cudf::detail::copy_if(itr,
+                                              itr + num_rows,
+                                              d_results.begin(),
+                                              mutable_view->begin<size_type>(),
+                                              cuda::std::identity{},
+                                              stream);
+// >>>>>>> END NEW CODE (a33439aa56)
       return static_cast<size_type>(
         cuda::std::distance(mutable_view->begin<size_type>(), result_end));
     } else {

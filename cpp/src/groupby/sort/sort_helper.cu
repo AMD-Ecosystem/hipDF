@@ -40,6 +40,7 @@
 #include <cudf/detail/scatter.hpp>
 #include <cudf/detail/sequence.hpp>
 #include <cudf/detail/sorting.hpp>
+#include <cudf/detail/utilities/algorithm.cuh>
 #include <cudf/strings/string_view.hpp>
 #include <cudf/table/table_device_view.cuh>
 #include <cudf/utilities/memory_resource.hpp>
@@ -191,14 +192,19 @@ sort_groupby_helper::index_vector const& sort_groupby_helper::group_offsets(
 //     result_end = thrust::copy_if(rmm::exec_policy(stream),
 // =======
     thrust::transform(rmm::exec_policy_nosync(stream), itr, itr + size, result.begin(), ufn);
-    result_end = thrust::copy_if(rmm::exec_policy_nosync(stream),
-// >>>>>>> END NEW CODE (820f9f7c3f)
-                                 itr,
-                                 itr + size,
-                                 result.begin(),
-                                 group_offsets->begin(),
-                                 cuda::std::identity{});
-#endif
+// <<<<<<< OLD CODE from 38596580c6 (a33439aa56) - COMMENTED OUT
+//     result_end = thrust::copy_if(rmm::exec_policy_nosync(stream),
+// // >>>>>>> END NEW CODE (820f9f7c3f)
+//                                  itr,
+//                                  itr + size,
+//                                  result.begin(),
+//                                  group_offsets->begin(),
+//                                  cuda::std::identity{});
+// #endif
+// =======
+    result_end = cudf::detail::copy_if(
+      itr, itr + size, result.begin(), group_offsets->begin(), cuda::std::identity{}, stream);
+// >>>>>>> END NEW CODE (a33439aa56)
   } else {
     auto const d_key_equal = comparator.equal_to<false>(
       cudf::nullate::DYNAMIC{cudf::has_nested_nulls(_keys)}, null_equality::EQUAL);
