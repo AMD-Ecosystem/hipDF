@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright (c) 2022-2025, NVIDIA CORPORATION.
+# SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
 # MIT License
@@ -149,7 +149,7 @@ def jit_groupby_apply(offsets, grouped_values, function, *args):
     ngroups = len(offsets) - 1
 
     output = column_empty(ngroups, dtype=return_type)
-    output = output.set_mask(None)
+    output = output.set_mask(None, 0)
     launch_args = [
         offsets,
         output,
