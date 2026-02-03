@@ -42,6 +42,9 @@ scipy
 # test_sklearn
 scikit-learn
 
+# test_feature_engine
+feature_engine>=1.9.3
+
 # test_stumpy
 stumpy
 
