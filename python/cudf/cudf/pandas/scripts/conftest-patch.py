@@ -544,7 +544,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/arrays/floating/test_construction.py::test_floating_array_constructor_copy",
     "tests/arrays/floating/test_function.py::test_ufuncs_single[sign]",
     "tests/arrays/floating/test_function.py::test_value_counts_empty",
-    "tests/arrays/floating/test_repr.py::test_frame_repr[Float32Dtype]",
     "tests/arrays/floating/test_to_numpy.py::test_to_numpy_copy",
     "tests/arrays/integer/test_arithmetic.py::test_values_multiplying_large_series_by_NA",
     "tests/arrays/integer/test_comparison.py::TestComparisonOps::test_ufunc_with_out[Int16Dtype]",
@@ -1571,7 +1570,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_construction_from_string",
     "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_construction_generic[Interval]",
     "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_construction_generic[interval]",
-    "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_construction_not_supported[<U10]",
     "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_equality",
     "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_hash_vs_equality",
     "tests/dtypes/test_dtypes.py::TestIntervalDtype::test_name_repr_generic[Interval]",
@@ -5707,7 +5705,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/io/formats/style/test_style.py::test_copy[True-False-True]",
     "tests/io/formats/style/test_style.py::test_copy[True-True-False]",
     "tests/io/formats/style/test_style.py::test_copy[True-True-True]",
-    "tests/io/formats/test_eng_formatting.py::TestEngFormatter::test_nan",
     "tests/io/formats/test_format.py::TestDataFrameFormatting::test_info_repr",
     "tests/io/formats/test_format.py::TestDataFrameFormatting::test_info_repr_max_cols",
     "tests/io/formats/test_format.py::TestSeriesFormatting::test_east_asian_unicode_series",
@@ -7106,27 +7103,30 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint64]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint8]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-    "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-    "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
-# <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
-# # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
+#     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+#     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
+# # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
+# # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# # # # # =======
+# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
+# # # # # >>>>>>> END NEW CODE (ee26842c72)
 # # # # =======
-# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
-# # # # >>>>>>> END NEW CODE (ee26842c72)
+# # # # >>>>>>> END NEW CODE (d142e22536)
+# # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
+# # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
 # # # =======
-# # # >>>>>>> END NEW CODE (d142e22536)
-# #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
-# #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
+# # # >>>>>>> END NEW CODE (59b6dddcaf)
+# #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
+# #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
+# #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
+# #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
 # # =======
-# # >>>>>>> END NEW CODE (59b6dddcaf)
-#     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
-#     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
-#     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
-#     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
+# # >>>>>>> END NEW CODE (af4ffdd992)
 # =======
-# >>>>>>> END NEW CODE (af4ffdd992)
+# >>>>>>> END NEW CODE (2617fd93c4)
     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_other",
     "tests/series/methods/test_astype.py::TestAstypeString::test_astype_string_to_extension_dtype_roundtrip[string[pyarrow]-data1-category]",
     "tests/series/methods/test_astype.py::TestAstypeString::test_astype_string_to_extension_dtype_roundtrip[string[python]-data1-category]",
@@ -7602,7 +7602,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_numeric_column_with_na[0.5]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_numeric_column_with_na[0]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_string_dtype",
-    "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_string_dtype_list_to_replace",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_value_none_dtype_numeric[2.0]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_value_none_dtype_numeric[2]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_value_none_dtype_numeric[nan]",
@@ -7756,7 +7755,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/test_constructors.py::TestSeriesConstructors::test_series_string_inference",
     "tests/series/test_constructors.py::TestSeriesConstructors::test_series_string_inference_array_string_dtype",
     "tests/series/test_constructors.py::TestSeriesConstructors::test_series_string_inference_scalar",
-    "tests/series/test_constructors.py::TestSeriesConstructors::test_series_string_inference_storage_definition",
     "tests/series/test_constructors.py::TestSeriesConstructors::test_series_string_with_na_inference[None]",
     "tests/series/test_formats.py::TestCategoricalRepr::test_categorical_series_repr_datetime",
     "tests/series/test_formats.py::TestCategoricalRepr::test_categorical_series_repr_datetime_ordered",
