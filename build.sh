@@ -4,7 +4,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -424,7 +424,7 @@ export RAPIDS_CMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES}
 if buildAll || hasArg pylibcudf; then
 
     cd "${REPODIR}/python/pylibcudf"
-    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};-DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES};${EXTRA_CMAKE_ARGS[*]}" \
+    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
         python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
@@ -432,7 +432,7 @@ fi
 if buildAll || hasArg cudf; then
 
     cd "${REPODIR}/python/cudf"
-    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};-DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES};${EXTRA_CMAKE_ARGS[*]}" \
+    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
         python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
