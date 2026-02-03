@@ -1,6 +1,6 @@
 # =============================================================================
 # cmake-format: off
-# SPDX-FileCopyrightText: Copyright (c) 2018-2025, NVIDIA CORPORATION.
+# SPDX-FileCopyrightText: Copyright (c) 2018-2026, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 # cmake-format: on
 # =============================================================================
@@ -40,16 +40,26 @@ else()
   )
 endif()
 
-set(RAPIDS_CMAKE_MODULE_PATH
-    $ENV{RAPIDS_CMAKE_MODULE_PATH}
-    CACHE FILEPATH "Announce that ROCmDS-CMake is available via the provided module path."
-)
-if(NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
-  list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
-  # NOTE(HIP/AMD): Set rapids-cmake-dir variable
-  set(rapids-cmake-dir "${RAPIDS_CMAKE_MODULE_PATH}")
-  include(rapids-cmake)
-  return()
+# <<<<<<< OLD CODE from 27bf05e749 (2903d6b1dd) - COMMENTED OUT
+# set(RAPIDS_CMAKE_MODULE_PATH
+#     $ENV{RAPIDS_CMAKE_MODULE_PATH}
+#     CACHE FILEPATH "Announce that ROCmDS-CMake is available via the provided module path."
+# )
+# if(NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
+#   list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
+#   # NOTE(HIP/AMD): Set rapids-cmake-dir variable
+#   set(rapids-cmake-dir "${RAPIDS_CMAKE_MODULE_PATH}")
+#   include(rapids-cmake)
+#   return()
+# =======
+# Use STRINGS to trim whitespace/newlines
+file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH" RAPIDS_BRANCH)
+if(NOT RAPIDS_BRANCH)
+  message(
+    FATAL_ERROR
+      "Could not determine branch name to use for checking out rapids-cmake. The file \"${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH\" is missing."
+  )
+# >>>>>>> END NEW CODE (2903d6b1dd)
 endif()
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake")
@@ -84,9 +94,14 @@ if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MI
     )
   endif()
 endif()
-
-if(DEFINED ENV{RAPIDS_CMAKE_BRANCH})
-  set(rapids-cmake-branch $ENV{RAPIDS_CMAKE_BRANCH})
+# <<<<<<< OLD CODE from 27bf05e749 (2903d6b1dd) - COMMENTED OUT
+#
+# if(DEFINED ENV{RAPIDS_CMAKE_BRANCH})
+#   set(rapids-cmake-branch $ENV{RAPIDS_CMAKE_BRANCH})
+# =======
+if(NOT rapids-cmake-branch)
+  set(rapids-cmake-branch "${RAPIDS_BRANCH}")
+# >>>>>>> END NEW CODE (2903d6b1dd)
 endif()
 # <<<<<<< OLD CODE from fae383cb33 (4d4786eced) - COMMENTED OUT
 #
