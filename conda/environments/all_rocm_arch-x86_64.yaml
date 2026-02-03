@@ -97,7 +97,10 @@ dependencies:
 - pandoc
 - polars>=1.28,<1.33
 - pre-commit
-- pyarrow>=15.0.0
+#: NOTE(HIP/AMD): Use pip pyarrow instead of conda to avoid libprotobuf ABI conflicts with TensorFlow.
+#:                Conda pyarrow depends on shared libprotobuf 6.x, while TensorFlow bundles protobuf 3.x/4.x,
+#:                causing segfaults when both are loaded. Pip pyarrow wheels isolate dependencies.
+#: - pyarrow>=15.0.0
 - pydata-sphinx-theme>=0.15.4
 # - pynvjitlink
 # - pynvml>=12.0.0,<13.0.0a0
@@ -132,6 +135,8 @@ dependencies:
 - zlib>=1.2.13
 - zstandard
 - pip:
+  # NOTE(HIP/AMD): Install pyarrow via pip to avoid libprotobuf ABI conflicts with TensorFlow
+  - pyarrow>=15.0.0
   - git+https://github.com/python-streamz/streamz.git@master
   # TODO(HIP/AMD): Update and re-enable when dask-hip is available
   #-  git+https://github.com/rocm/dask-hip@branch-1.0.0-rocm-ds-25.03
