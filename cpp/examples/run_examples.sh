@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,6 @@
 cd basic/
 ./build/basic_example
 cd ..
-# Run interop example
-./interop/build/interop
 # Run nested_types example
 cd nested_types/
 ./build/deduplication
@@ -36,6 +34,16 @@ cd ..
 cd parquet_io/
 ./build/parquet_io example.parquet
 ./build/parquet_io_multithreaded example.parquet
+cd ..
+# Run string_transforms examples
+cd string_transforms/
+./build/localize_phone_jit info.csv localize_phone_jit.csv 100000
+./build/localize_phone_precompiled info.csv localize_phone_precompiled.csv 100000
+./build/compute_checksum_jit info.csv compute_checksum_jit.csv 100000
+./build/extract_email_jit info.csv extract_email_jit.csv 100000
+./build/extract_email_precompiled info.csv extract_email_precompiled.csv 100000
+./build/format_phone_jit info.csv format_phone_jit.csv 100000
+./build/format_phone_precompiled info.csv format_phone_precompiled.csv 100000
 cd ..
 # Run strings example
 ./strings/build/custom_optimized strings/names.csv
