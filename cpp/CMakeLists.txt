@@ -110,7 +110,7 @@ option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
-option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
+option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx11*/gfx12* architectures (RDNA 3/4)." OFF)
 mark_as_advanced(CUDF_USE_WARPSIZE_32)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
@@ -167,7 +167,8 @@ list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx942"
                         "gfx90a:xnack+" "gfx942:xnack+" "gfx950:xnack+"
                         "gfx90a:xnack-" "gfx942:xnack-" "gfx950:xnack-")
 
-list(APPEND WS_32_ARCHS "gfx1100")
+list(APPEND WS_32_ARCHS "gfx1100" "gfx1101" "gfx1102" "gfx1103" "gfx1150" "gfx1151"
+                        "gfx1200" "gfx1201")
 
 list(APPEND EXPERIMENTAL_WS_64_ARCHS "gfx950" "gfx950:sramecc+:xnack-"
                                      "gfx950:xnack+" "gfx950:xnack-")
@@ -977,7 +978,7 @@ endif()
 
 if(BUILD_ASAN)
   list(APPEND SUPPORTED_ASAN_ARCHS "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
-                                   "gfx942:xnack+")
+                                   "gfx942:xnack+" "gfx950:xnack+")
   foreach(arch ${CMAKE_HIP_ARCHITECTURES})
     if(NOT ${arch} IN_LIST SUPPORTED_ASAN_ARCHS)
       message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with ASAN.\n"
