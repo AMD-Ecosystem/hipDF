@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -86,7 +86,14 @@ std::unique_ptr<column> sorted_order(column_view const& input,
  */
 template <typename T>
 struct simple_comparator {
+  // TODO(HIP/AMD): Potential compiler optimization issue on RDNA architectures (gfx11*/gfx12*) causes
+  // incorrect sorting behavior. The noinline attribute works around this
+  // This workaround is only applied when CUDF_USE_WARPSIZE_32 is enabled.
+#if defined(CUDF_USE_WARPSIZE_32) && defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
+  __attribute__((noinline)) __device__ bool operator()(size_type lhs, size_type rhs)
+#else
   __device__ bool operator()(size_type lhs, size_type rhs)
+#endif
   {
     if (has_nulls) {
       bool lhs_null{d_column.is_null(lhs)};
