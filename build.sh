@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+# SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
 # MIT License
@@ -116,9 +116,17 @@ BUILD_PER_THREAD_DEFAULT_STREAM=OFF
 BUILD_REPORT_METRICS=OFF
 BUILD_REPORT_INCL_CACHE_STATS=OFF
 BUILD_DISABLE_LARGE_STRINGS=OFF
-USE_PROPRIETARY_NVCOMP=OFF
-PYTHON_ARGS_FOR_INSTALL=("-m" "pip" "install" "--no-build-isolation" "--no-deps" "--config-settings" "rapidsai.disable-cuda=true")
-USE_WARPSIZE_32=OFF
+# <<<<<<< OLD CODE from 3651dab842 (eb3376ab77) - COMMENTED OUT
+# USE_PROPRIETARY_NVCOMP=OFF
+# PYTHON_ARGS_FOR_INSTALL=("-m" "pip" "install" "--no-build-isolation" "--no-deps" "--config-settings" "rapidsai.disable-cuda=true")
+# USE_WARPSIZE_32=OFF
+# =======
+PYTHON_ARGS_FOR_INSTALL=(
+    --no-build-isolation
+    --no-deps
+    --config-settings="rapidsai.disable-cuda=true"
+)
+# >>>>>>> END NEW CODE (eb3376ab77)
 
 # Set defaults for vars that may not have been defined externally
 #  FIXME: if INSTALL_PREFIX is not set, check PREFIX, then check
@@ -438,12 +446,23 @@ export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}\
 ${INSTALL_PREFIX:+:${INSTALL_PREFIX}}\
 ${INSTALL_TARGET:-:${LIBCUDF_BUILD_DIR}}"
 
+# If `RAPIDS_PY_VERSION` is set, use that as the lower-bound for the stable ABI CPython version
+# This is only applied to pylibcudf, cudf, and cudf_kafka, not other Python packages
+PY_API_ARGS=()
+if [ -n "${RAPIDS_PY_VERSION:-}" ]; then
+    RAPIDS_PY_API="cp${RAPIDS_PY_VERSION//./}"
+    PY_API_ARGS+=("--config-settings" "skbuild.wheel.py-api=${RAPIDS_PY_API}")
+fi
+
 # Build and install the pylibcudf Python package
 if buildAll || hasArg pylibcudf; then
 
     cd "${REPODIR}/python/pylibcudf"
     SKBUILD_CMAKE_ARGS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
-        python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
+        python -m pip install \
+            "${PYTHON_ARGS_FOR_INSTALL[@]}" \
+            "${PY_API_ARGS[@]}" \
+            .
 fi
 
 # Build and install the cudf Python package
@@ -451,21 +470,24 @@ if buildAll || hasArg cudf; then
 
     cd "${REPODIR}/python/cudf"
     SKBUILD_CMAKE_ARGS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
-        python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
+        python -m pip install \
+            "${PYTHON_ARGS_FOR_INSTALL[@]}" \
+            "${PY_API_ARGS[@]}" \
+            .
 fi
 
 # Build and install the cudf_polars Python package
 if buildAll || hasArg cudf_polars; then
 
     cd "${REPODIR}/python/cudf_polars"
-    python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
+    python -m pip install "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
 # Build and install the dask_cudf Python package
 if buildAll || hasArg dask_cudf; then
 
     cd "${REPODIR}/python/dask_cudf"
-    python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
+    python -m pip install "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
 # Build libcudf_kafka library
@@ -499,11 +521,14 @@ if hasArg cudf_kafka; then
     cd "${REPODIR}/python/cudf_kafka"
     # shellcheck disable=2034
     SKBUILD_CMAKE_ARGS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}"
-        python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
+        python -m pip install \
+            "${PYTHON_ARGS_FOR_INSTALL[@]}" \
+            "${PY_API_ARGS[@]}" \
+            .
 fi
 
 # build custreamz Python package
 if hasArg custreamz; then
     cd "${REPODIR}/python/custreamz"
-    python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
+    python -m pip install "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
