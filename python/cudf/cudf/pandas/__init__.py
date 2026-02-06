@@ -4,7 +4,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -83,8 +83,20 @@ def install():
     prop = hip.hipDeviceProp_t()
     err = hip.hipGetDeviceProperties(prop, 0)
     arch_name = prop.name.decode('utf-8')
+    gcn_arch_name = prop.gcnArchName.decode('utf-8') if hasattr(prop, 'gcnArchName') else ""
+    
+    # Extract the base GCN architecture (e.g., "gfx1100")
+    import re
+    gfx_match = re.match(r'(gfx[0-9a-fA-F]+)', gcn_arch_name)
+    gfx_arch = gfx_match.group(1) if gfx_match else ""
+    
     if "300A" in arch_name:
         is_mi300a = True
+    
+    # According to LLVM AMDGPU documentation, gfx11xx (RDNA 3/3.5) and gfx1200/gfx1201 (RDNA 4)
+    # do not support XNACK (they are listed without xnack in the target features column)
+    # MI series architectures (gfx90a, gfx94x, gfx95x) do support XNACK
+    is_rdna_arch = gfx_arch.startswith("gfx11") or gfx_arch in ("gfx1200", "gfx1201")
     
     # Check HSA_XNACK setting for page migration support, do not use prefetching if not set
     hsa_xnack = os.getenv("HSA_XNACK", "0")
@@ -96,7 +108,15 @@ def install():
             raise ValueError(
                 f"Managed memory is not supported on this system, so the requested {rmm_mode=} is invalid."
             )
-        if hsa_xnack == "0" and not bypass_check and not is_mi300a:
+        # For RDNA architectures, bypass the XNACK check and warn about experimental status
+        if is_rdna_arch:
+            warnings.warn(
+                f"cudf.pandas on RDNA architecture ({gfx_arch}) is currently in experimental mode only "
+                "and is not recommended for production workloads. RDNA architectures do not support "
+                "XNACK, which may affect performance and stability.",
+                UserWarning
+            )
+        elif hsa_xnack == "0" and not bypass_check and not is_mi300a:
             raise RuntimeError(
                 "cudf.pandas requires HSA_XNACK=1 for managed memory operations. "
                 f"Current setting HSA_XNACK={hsa_xnack!r}. Please set HSA_XNACK=1 in your environment. "
