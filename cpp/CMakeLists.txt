@@ -987,7 +987,7 @@ if(BUILD_ASAN)
   endforeach()
 
   # FIXME(HIP/AMD): Not all source files can presently be compiled with ASAN and hipcc
-  set_source_files_properties(
+  set(ASAN_SOURCE_FILES
     src/aggregation/aggregation.cpp
     src/aggregation/aggregation.cu
     src/aggregation/result_cache.cpp
@@ -1443,8 +1443,17 @@ if(BUILD_ASAN)
     src/utilities/traits.cpp
     src/utilities/type_checks.cpp
     src/utilities/type_dispatcher.cpp
-    PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -shared-libsan"
   )
+
+  # Apply ASAN flags to each source file, appending to any existing flags
+  foreach(source_file ${ASAN_SOURCE_FILES})
+    get_source_file_property(existing_flags ${source_file} COMPILE_FLAGS)
+    if(existing_flags)
+      set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "${existing_flags} -g -fsanitize=address -shared-libsan")
+    else()
+      set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -shared-libsan")
+    endif()
+  endforeach()
 
   target_link_options(cudf PRIVATE "-g;-fsanitize=address;-shared-libsan")
 endif()
