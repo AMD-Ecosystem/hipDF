@@ -99,8 +99,9 @@ def install():
     is_rdna_arch = gfx_arch.startswith("gfx11") or gfx_arch in ("gfx1200", "gfx1201")
     
     # Check HSA_XNACK setting for page migration support, do not use prefetching if not set
+    # RDNA devices do not support page migration, so disable prefetch adaptor to avoid crashes
     hsa_xnack = os.getenv("HSA_XNACK", "0")
-    use_prefetch_adaptor = hsa_xnack != "0" and not is_mi300a
+    use_prefetch_adaptor = hsa_xnack != "0" and not is_mi300a and not is_rdna_arch
     bypass_check = os.getenv("CUDF_PANDAS_BYPASS_XNACK_CHECK", "0") == "1"
 
     if "managed" in rmm_mode:
