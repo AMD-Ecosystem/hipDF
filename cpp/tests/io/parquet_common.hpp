@@ -25,6 +25,10 @@
 #include <cudf/io/parquet_schema.hpp>
 #include <cudf/table/table.hpp>
 #include <cudf/table/table_view.hpp>
+#include <cudf/utilities/memory_resource.hpp>
+
+#include <rmm/cuda_device.hpp>
+#include <rmm/mr/device/cuda_memory_resource.hpp>
 
 #include <src/io/parquet/compact_protocol_reader.hpp>
 
@@ -77,7 +81,27 @@ using SupportedDeltaTestTypes =
 struct ParquetWriterTest : public cudf::test::BaseFixture {};
 
 // Base test fixture for tests
-struct ParquetReaderTest : public cudf::test::BaseFixture {};
+struct ParquetReaderTest : public cudf::test::BaseFixture {
+  rmm::mr::device_memory_resource* prev_mr_{nullptr};
+
+  void SetUp() override
+  {
+    cudf::test::BaseFixture::SetUp();
+    prev_mr_ = cudf::get_current_device_resource();
+    auto const [free, total] = rmm::available_device_memory();
+    constexpr std::size_t low_mem_threshold = 16ull * 1024 * 1024 * 1024;
+    if (free <= low_mem_threshold) {
+      static auto non_pool_mr = std::make_shared<rmm::mr::cuda_memory_resource>();
+      cudf::set_current_device_resource(non_pool_mr.get());
+    }
+  }
+
+  void TearDown() override
+  {
+    if (prev_mr_ != nullptr) { cudf::set_current_device_resource(prev_mr_); }
+    cudf::test::BaseFixture::TearDown();
+  }
+};
 
 ////////////////////////////////////////////////////////////////////
 

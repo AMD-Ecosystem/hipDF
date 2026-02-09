@@ -67,12 +67,14 @@
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
+#include <rmm/mr/device/cuda_memory_resource.hpp>
 
 #include <thrust/iterator/counting_iterator.h>
 
 #include <src/io/parquet/compact_protocol_reader.hpp>
 
 #include <fstream>
+#include <string>
 #include <type_traits>
 
 namespace {
