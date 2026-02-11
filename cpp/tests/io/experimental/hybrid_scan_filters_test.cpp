@@ -31,6 +31,7 @@
 
 #include <cudf/io/experimental/hybrid_scan.hpp>
 #include <cudf/io/parquet.hpp>
+#include <cudf/io/parquet_io_utils.hpp>
 #include <cudf/io/text/byte_range_info.hpp>
 #include <cudf/stream_compaction.hpp>
 #include <cudf/table/table_view.hpp>
@@ -49,14 +50,14 @@ namespace {
  * @brief Filter input row groups using column chunk dictionaries via the experimental parquet
  * reader for hybrid scan
  *
- * @param file_buffer_span Input file buffer span
+ * @param datasource Input datasource
  * @param filter_expression Filter expression
  * @param stream CUDA stream
  * @param mr Device memory resource
  *
  * @return Vector of dictionary-filtered row group indices
  */
-auto filter_row_groups_with_dictionaries(cudf::host_span<uint8_t const> file_buffer_span,
+auto filter_row_groups_with_dictionaries(cudf::io::datasource& datasource,
                                          cudf::ast::operation const& filter_expression,
                                          rmm::cuda_stream_view stream,
                                          rmm::device_async_resource_ref mr)
@@ -66,20 +67,24 @@ auto filter_row_groups_with_dictionaries(cudf::host_span<uint8_t const> file_buf
     cudf::io::parquet_reader_options::builder().filter(filter_expression);
 
   // Fetch footer and page index bytes from the buffer.
-  auto const footer_buffer = fetch_footer_bytes(file_buffer_span);
+  auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(datasource);
 
   // Create hybrid scan reader with footer bytes
-  auto const reader =
-    std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+  auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+    cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                   footer_buffer->size()},
+    options);
 
   // Get page index byte range from the reader
   auto const page_index_byte_range = reader->page_index_byte_range();
 
   // Fetch page index bytes from the input buffer
-  auto const page_index_buffer = fetch_page_index_bytes(file_buffer_span, page_index_byte_range);
+  auto const page_index_buffer =
+    cudf::io::parquet::fetch_page_index_to_host(datasource, page_index_byte_range);
 
   // Setup page index
-  reader->setup_page_index(page_index_buffer);
+  reader->setup_page_index(cudf::host_span<uint8_t const>{
+    static_cast<uint8_t const*>(page_index_buffer->data()), page_index_buffer->size()});
 
   // Get all row groups from the reader
   auto input_row_group_indices = reader->all_row_groups(options);
@@ -92,20 +97,21 @@ auto filter_row_groups_with_dictionaries(cudf::host_span<uint8_t const> file_buf
     std::get<1>(reader->secondary_filters_byte_ranges(current_row_group_indices, options));
 
   // If we have dictionary page byte ranges, filter row groups with dictionary pages
-  std::vector<cudf::size_type> dictionary_page_filtered_row_group_indices;
-  dictionary_page_filtered_row_group_indices.reserve(current_row_group_indices.size());
+  std::vector<cudf::size_type> dict_page_filtered_row_group_indices;
+  dict_page_filtered_row_group_indices.reserve(current_row_group_indices.size());
 
   CUDF_EXPECTS(dict_page_byte_ranges.size() > 0, "No dictionary page byte ranges found");
 
   // Fetch dictionary page buffers from the input file buffer
-  auto dictionary_page_buffers =
-    fetch_byte_ranges(file_buffer_span, dict_page_byte_ranges, stream, mr);
-  auto dictionary_page_data = make_device_spans<uint8_t>(dictionary_page_buffers);
+  auto [dict_page_buffers, dict_page_data, dict_page_tasks] =
+    cudf::io::parquet::fetch_byte_ranges_to_device_async(
+      datasource, dict_page_byte_ranges, stream, mr);
+  dict_page_tasks.get();
 
-  dictionary_page_filtered_row_group_indices = reader->filter_row_groups_with_dictionary_pages(
-    dictionary_page_data, current_row_group_indices, options, stream);
+  dict_page_filtered_row_group_indices = reader->filter_row_groups_with_dictionary_pages(
+    dict_page_data, current_row_group_indices, options, stream);
 
-  return dictionary_page_filtered_row_group_indices;
+  return dict_page_filtered_row_group_indices;
 }
 
 }  // namespace
@@ -134,15 +140,18 @@ TEST_F(HybridScanFiltersTest, TestMetadata)
     cudf::io::parquet_reader_options::builder().filter(filter_expression);
 
   // Input file buffer span
-  auto const file_buffer_span = cudf::host_span<uint8_t const>(
-    reinterpret_cast<uint8_t const*>(file_buffer.data()), file_buffer.size());
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(file_buffer.data()), file_buffer.size()));
+  auto datasource_ref   = std::ref(*datasource);
 
   // Fetch footer and page index bytes from the buffer.
-  auto const footer_buffer = fetch_footer_bytes(file_buffer_span);
+  auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(datasource_ref);
 
   // Create hybrid scan reader with footer bytes
-  auto const reader =
-    std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+  auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+    cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                   footer_buffer->size()},
+    options);
 
   // Get Parquet file metadata from the reader
   auto parquet_metadata = reader->parquet_metadata();
@@ -155,10 +164,12 @@ TEST_F(HybridScanFiltersTest, TestMetadata)
   auto const page_index_byte_range = reader->page_index_byte_range();
 
   // Fetch page index bytes from the input buffer
-  auto const page_index_buffer = fetch_page_index_bytes(file_buffer_span, page_index_byte_range);
+  auto const page_index_buffer =
+    cudf::io::parquet::fetch_page_index_to_host(datasource_ref, page_index_byte_range);
 
   // Setup page index
-  reader->setup_page_index(page_index_buffer);
+  reader->setup_page_index(cudf::host_span<uint8_t const>{
+    static_cast<uint8_t const*>(page_index_buffer->data()), page_index_buffer->size()});
 
   // Get Parquet file metadata from the reader again
   parquet_metadata = reader->parquet_metadata();
@@ -191,23 +202,28 @@ TEST_F(HybridScanFiltersTest, TestExternalMetadata)
     auto constexpr num_concat = 1;
     auto file_buffer = std::get<1>(create_parquet_with_stats<cudf::timestamp_ms, num_concat>());
     // Input file buffer span
-    auto const file_buffer_span = cudf::host_span<uint8_t const>(
-      reinterpret_cast<uint8_t const*>(file_buffer.data()), file_buffer.size());
+    auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+      reinterpret_cast<std::byte const*>(file_buffer.data()), file_buffer.size()));
+    auto datasource_ref   = std::ref(*datasource);
 
     // Fetch footer and page index bytes from the buffer.
-    auto const footer_buffer = fetch_footer_bytes(file_buffer_span);
+    auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(datasource_ref);
 
     auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
-      footer_buffer, cudf::io::parquet_reader_options::builder().build());
+      cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                     footer_buffer->size()},
+      cudf::io::parquet_reader_options::builder().build());
 
     // Get page index byte range from the reader
     auto const page_index_byte_range = reader->page_index_byte_range();
 
     // Fetch page index bytes from the input buffer
-    auto const page_index_buffer = fetch_page_index_bytes(file_buffer_span, page_index_byte_range);
+    auto const page_index_buffer =
+      cudf::io::parquet::fetch_page_index_to_host(datasource_ref, page_index_byte_range);
 
     // Setup page index
-    reader->setup_page_index(page_index_buffer);
+    reader->setup_page_index(cudf::host_span<uint8_t const>{
+      static_cast<uint8_t const*>(page_index_buffer->data()), page_index_buffer->size()});
 
     return reader->parquet_metadata();
   }();
@@ -263,16 +279,18 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithByteRanges)
   file.close();
 
   // Input file buffer span
-  auto const file_buffer_span = cudf::host_span<uint8_t const>(
-    reinterpret_cast<uint8_t const*>(file_buffer.data()), file_buffer.size());
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(file_buffer.data()), file_buffer.size()));
 
   // Fetch footer and page index bytes from the buffer.
-  auto const footer_buffer = fetch_footer_bytes(file_buffer_span);
+  auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(*datasource);
 
   // Create hybrid scan reader with footer bytes
-  auto options = cudf::io::parquet_reader_options::builder().build();
-  auto const reader =
-    std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+  auto options      = cudf::io::parquet_reader_options::builder().build();
+  auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+    cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                   footer_buffer->size()},
+    options);
 
   auto const input_row_group_indices = reader->all_row_groups(options);
 
@@ -353,16 +371,18 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithStats)
   cudf::io::parquet_reader_options options =
     cudf::io::parquet_reader_options::builder().filter(filter_expression);
 
-  // Input file buffer span
-  auto const file_buffer_span = cudf::host_span<uint8_t const>(
-    reinterpret_cast<uint8_t const*>(file_buffer.data()), file_buffer.size());
+  // Input datasource
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(file_buffer.data()), file_buffer.size()));
 
   // Fetch footer and page index bytes from the buffer.
-  auto const footer_buffer = fetch_footer_bytes(file_buffer_span);
+  auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(*datasource);
 
   // Create hybrid scan reader with footer bytes
-  auto const reader =
-    std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+  auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+    cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                   footer_buffer->size()},
+    options);
 
   // Get all row groups from the reader
   auto input_row_group_indices = reader->all_row_groups(options);
@@ -394,23 +414,30 @@ TEST_F(HybridScanFiltersTest, FilterColumnSelection)
   auto constexpr num_concat         = 1;
   auto [written_table, file_buffer] = create_parquet_with_stats<T, num_concat, false>();
 
+  // Create datasource
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(file_buffer.data()), file_buffer.size()));
+
   // Fetch footer and page index bytes from the buffer.
-  auto const footer_buffer = fetch_footer_bytes(cudf::host_span<uint8_t const>{
-    reinterpret_cast<uint8_t const*>(file_buffer.data()), file_buffer.size()});
+  auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(*datasource);
 
   // Get input row group indices
   auto const input_row_group_indices = [&]() {
     auto const options = cudf::io::parquet_reader_options::builder().build();
-    auto const reader =
-      std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+    auto const reader  = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+      cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                      footer_buffer->size()},
+      options);
     return reader->all_row_groups(options);
   }();
   EXPECT_EQ(input_row_group_indices.size(), 4);
 
   // Helper to test filter column selection
   auto const test_filter_column_selection = [&](cudf::io::parquet_reader_options const& options) {
-    auto const reader =
-      std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+    auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+      cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                     footer_buffer->size()},
+      options);
     auto stats_filtered_row_groups = reader->filter_row_groups_with_stats(
       input_row_group_indices, options, cudf::get_default_stream());
     // Expect 1 remaining row group after filtering
@@ -572,17 +599,19 @@ TYPED_TEST(PageFilteringWithPageIndexStats, FilterPagesWithPageIndexStats)
   auto constexpr num_concat = 2;
   auto const file_buffer    = std::get<1>(create_parquet_with_stats<T, num_concat, false>());
 
-  // Input file buffer span
-  auto const file_buffer_span = cudf::host_span<uint8_t const>(
-    reinterpret_cast<uint8_t const*>(file_buffer.data()), file_buffer.size());
+  // Input datasource
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(file_buffer.data()), file_buffer.size()));
 
   // Fetch footer and page index bytes from the buffer.
-  auto const footer_buffer = fetch_footer_bytes(file_buffer_span);
+  auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(*datasource);
 
   // Create hybrid scan reader with footer bytes
-  auto options = cudf::io::parquet_reader_options::builder().build();
-  auto const reader =
-    std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(footer_buffer, options);
+  auto options      = cudf::io::parquet_reader_options::builder().build();
+  auto const reader = std::make_unique<cudf::io::parquet::experimental::hybrid_scan_reader>(
+    cudf::host_span<uint8_t const>{static_cast<uint8_t const*>(footer_buffer->data()),
+                                   footer_buffer->size()},
+    options);
 
   // Get all row groups from the reader
   auto input_row_group_indices = reader->all_row_groups(options);
@@ -629,8 +658,10 @@ TYPED_TEST(PageFilteringWithPageIndexStats, FilterPagesWithPageIndexStats)
 
   // Set up the page index
   auto const page_index_byte_range = reader->page_index_byte_range();
-  auto const page_index_buffer = fetch_page_index_bytes(file_buffer_span, page_index_byte_range);
-  reader->setup_page_index(page_index_buffer);
+  auto const page_index_buffer =
+    cudf::io::parquet::fetch_page_index_to_host(*datasource, page_index_byte_range);
+  reader->setup_page_index(cudf::host_span<uint8_t const>{
+    static_cast<uint8_t const*>(page_index_buffer->data()), page_index_buffer->size()});
 
   // Filtering AST - table[0] < 100
   {
@@ -715,9 +746,10 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
   auto stream               = cudf::get_default_stream();
   auto mr                   = cudf::get_current_device_resource_ref();
 
-  // Input file buffer span
-  auto const file_buffer_span =
-    cudf::host_span<uint8_t const>(reinterpret_cast<uint8_t const*>(buffer.data()), buffer.size());
+  // Input datasource
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(buffer.data()), buffer.size()));
+  auto datasource_ref   = std::ref(*datasource);
 
   {
     // Filtering - table[0] != 1000
@@ -728,7 +760,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
       cudf::ast::operation(cudf::ast::ast_operator::NOT_EQUAL, uint_col_ref, uint_literal);
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -741,7 +773,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
       cudf::ast::operation(cudf::ast::ast_operator::EQUAL, uint_col_ref, uint_literal);
     constexpr size_t expected_row_groups = 0;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -755,7 +787,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 0;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -769,7 +801,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -791,7 +823,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -811,7 +843,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -831,7 +863,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 1;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -851,7 +883,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -873,7 +905,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -895,7 +927,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 0;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -921,7 +953,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 3;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -947,7 +979,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 4;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 
@@ -973,7 +1005,7 @@ TEST_F(HybridScanFiltersTest, FilterRowGroupsWithDictBasic)
 
     constexpr size_t expected_row_groups = 0;
     EXPECT_EQ(
-      filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr).size(),
+      filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr).size(),
       expected_row_groups);
   }
 }
@@ -1033,9 +1065,10 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterFewLiteralsTyped)
   auto stream = cudf::get_default_stream();
   auto mr     = cudf::get_current_device_resource_ref();
 
-  // Input file buffer span
-  auto const file_buffer_span =
-    cudf::host_span<uint8_t const>(reinterpret_cast<uint8_t const*>(buffer.data()), buffer.size());
+  // Input datasource
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(buffer.data()), buffer.size()));
+  auto datasource_ref   = std::ref(*datasource);
 
   // Filtering AST
   auto literal_value = []() {
@@ -1075,7 +1108,7 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterFewLiteralsTyped)
       cudf::ast::operation(cudf::ast::ast_operator::EQUAL, col_ref, literal);
 
     // Check the results
-    EXPECT_EQ(filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr),
+    EXPECT_EQ(filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr),
               expected_row_groups);
   }
 
@@ -1096,7 +1129,7 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterFewLiteralsTyped)
       cudf::ast::operation(cudf::ast::ast_operator::NOT_EQUAL, col_name, literal);
 
     // Check the results
-    EXPECT_EQ(filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr),
+    EXPECT_EQ(filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr),
               expected_row_groups);
   }
 }
@@ -1142,9 +1175,10 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterManyLiteralsTyped)
   auto stream = cudf::get_default_stream();
   auto mr     = cudf::get_current_device_resource_ref();
 
-  // Input file buffer span
-  auto const file_buffer_span =
-    cudf::host_span<uint8_t const>(reinterpret_cast<uint8_t const*>(buffer.data()), buffer.size());
+  // Input datasource
+  auto const datasource = cudf::io::datasource::create(cudf::host_span<std::byte const>(
+    reinterpret_cast<std::byte const*>(buffer.data()), buffer.size()));
+  auto datasource_ref   = std::ref(*datasource);
 
   // First literal value
   auto literal_value1 = []() {
@@ -1233,7 +1267,7 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterManyLiteralsTyped)
       cudf::ast::ast_operator::LOGICAL_OR, filter_expression12, filter_expression3);
 
     // Check the results
-    EXPECT_EQ(filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr),
+    EXPECT_EQ(filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr),
               expected_row_groups);
   }
 
@@ -1265,7 +1299,7 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterManyLiteralsTyped)
       cudf::ast::ast_operator::LOGICAL_AND, filter_expression12, filter_expression3);
 
     // Check the results
-    EXPECT_EQ(filter_row_groups_with_dictionaries(file_buffer_span, filter_expression, stream, mr),
+    EXPECT_EQ(filter_row_groups_with_dictionaries(datasource_ref, filter_expression, stream, mr),
               expected_row_groups);
   }
 }

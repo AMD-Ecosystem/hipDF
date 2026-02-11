@@ -60,8 +60,6 @@
 
 #include <thrust/iterator/counting_iterator.h>
 
-#include <src/io/parquet/compact_protocol_reader.hpp>
-
 #include <fstream>
 #include <string>
 #include <type_traits>
