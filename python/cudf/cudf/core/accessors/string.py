@@ -4085,7 +4085,7 @@ class StringMethods(BaseAccessor):
         1   -1
         2    0
         3    2
-        dtype: int32
+        dtype: int64
 
         Parameters such as `start` and `end` can also be used.
 
@@ -4094,7 +4094,7 @@ class StringMethods(BaseAccessor):
         1   -1
         2   -1
         3    2
-        dtype: int32
+        dtype: int64
         """
         return self._find(plc.strings.find.find, sub, start, end)
 
@@ -4135,7 +4135,7 @@ class StringMethods(BaseAccessor):
         0    0
         1   -1
         2    7
-        dtype: int32
+        dtype: int64
 
         Using `start` and `end` parameters.
 
@@ -4143,7 +4143,7 @@ class StringMethods(BaseAccessor):
         0   -1
         1   -1
         2   -1
-        dtype: int32
+        dtype: int64
         """
         return self._find(plc.strings.find.rfind, sub, start, end)
 
