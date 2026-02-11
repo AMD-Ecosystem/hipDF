@@ -3,31 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// <<<<<<< OLD CODE from 8c7f97db05 (686a482582) - COMMENTED OUT
-// // MIT License
-// //
-// // Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
-// //
-// // Permission is hereby granted, free of charge, to any person obtaining a copy
-// // of this software and associated documentation files (the "Software"), to deal
-// // in the Software without restriction, including without limitation the rights
-// // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// // copies of the Software, and to permit persons to whom the Software is
-// // furnished to do so, subject to the following conditions:
-// //
-// // The above copyright notice and this permission notice shall be included in all
-// // copies or substantial portions of the Software.
-// //
-// // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// // SOFTWARE.
+// <<<<<<< OLD CODE from 085f572bf1 (97de6b4a21) - COMMENTED OUT
+// // <<<<<<< OLD CODE from 8c7f97db05 (686a482582) - COMMENTED OUT
+// // // MIT License
+// // //
+// // // Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
+// // //
+// // // Permission is hereby granted, free of charge, to any person obtaining a copy
+// // // of this software and associated documentation files (the "Software"), to deal
+// // // in the Software without restriction, including without limitation the rights
+// // // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// // // copies of the Software, and to permit persons to whom the Software is
+// // // furnished to do so, subject to the following conditions:
+// // //
+// // // The above copyright notice and this permission notice shall be included in all
+// // // copies or substantial portions of the Software.
+// // //
+// // // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// // // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// // // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// // // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// // // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// // // SOFTWARE.
+// // =======
+// #include "cudf/detail/utilities/vector_factories.hpp"
+// // >>>>>>> END NEW CODE (686a482582)
 // =======
-#include "cudf/detail/utilities/vector_factories.hpp"
-// >>>>>>> END NEW CODE (686a482582)
+#include "sort_merge_join.hpp"
+// >>>>>>> END NEW CODE (97de6b4a21)
 
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
@@ -573,6 +577,8 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
 
 }  // anonymous namespace
 
+namespace detail {
+
 void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stream_view stream)
 {
   auto table   = this->_table_view;
@@ -585,7 +591,8 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
   // an all-valid bitmask that is passed to subsequent operations. This bitmask
   // is updated if any of the nested struct/list children columns have nulls.
   if (validity_mask.is_empty())
-    validity_mask = create_null_mask(table.num_rows(), mask_state::ALL_VALID, stream, temp_mr);
+    validity_mask =
+      cudf::create_null_mask(table.num_rows(), mask_state::ALL_VALID, stream, temp_mr);
 
   // step 2: identify nulls at non-root levels
   for (size_type col_idx = 0; col_idx < table.num_columns(); col_idx++) {
@@ -1092,34 +1099,70 @@ sort_merge_join::partitioned_inner_join(cudf::join_partition_context const& cont
   return std::pair{std::move(preprocessed_left_indices), std::move(preprocessed_right_indices)};
 }
 
-std::pair<std::unique_ptr<rmm::device_uvector<size_type>>,
-          std::unique_ptr<rmm::device_uvector<size_type>>>
-sort_merge_inner_join(cudf::table_view const& left_keys,
-                      cudf::table_view const& right_keys,
-                      null_equality compare_nulls,
-                      rmm::cuda_stream_view stream,
-                      rmm::device_async_resource_ref mr)
+}  // namespace detail
+
+sort_merge_join::~sort_merge_join() = default;
+
+sort_merge_join::sort_merge_join(table_view const& right,
+                                 sorted is_right_sorted,
+                                 null_equality compare_nulls,
+                                 rmm::cuda_stream_view stream)
+  : _impl{std::make_unique<impl_type>(right, is_right_sorted, compare_nulls, stream)}
 {
-#ifndef NVTX_DISABLE
-  cudf::scoped_range range{"sort_merge_inner_join"};
-#endif
-  cudf::sort_merge_join obj(right_keys, sorted::NO, compare_nulls, stream);
-  return obj.inner_join(left_keys, sorted::NO, stream, mr);
 }
 
 std::pair<std::unique_ptr<rmm::device_uvector<size_type>>,
           std::unique_ptr<rmm::device_uvector<size_type>>>
-merge_inner_join(cudf::table_view const& left_keys,
-                 cudf::table_view const& right_keys,
-                 null_equality compare_nulls,
-                 rmm::cuda_stream_view stream,
-                 rmm::device_async_resource_ref mr)
+sort_merge_join::inner_join(table_view const& left,
+                            sorted is_left_sorted,
+                            rmm::cuda_stream_view stream,
+                            rmm::device_async_resource_ref mr) const
 {
-#ifndef NVTX_DISABLE
-  cudf::scoped_range range{"merge_inner_join"};
-#endif
-  cudf::sort_merge_join obj(right_keys, sorted::YES, compare_nulls, stream);
-  return obj.inner_join(left_keys, sorted::YES, stream, mr);
+// <<<<<<< OLD CODE from 085f572bf1 (97de6b4a21) - COMMENTED OUT
+// #ifndef NVTX_DISABLE
+//   cudf::scoped_range range{"sort_merge_inner_join"};
+// #endif
+//   cudf::sort_merge_join obj(right_keys, sorted::NO, compare_nulls, stream);
+//   return obj.inner_join(left_keys, sorted::NO, stream, mr);
+// =======
+  return _impl->inner_join(left, is_left_sorted, stream, mr);
+// >>>>>>> END NEW CODE (97de6b4a21)
+}
+
+std::pair<std::unique_ptr<rmm::device_uvector<size_type>>,
+          std::unique_ptr<rmm::device_uvector<size_type>>>
+sort_merge_join::left_join(table_view const& left,
+                           sorted is_left_sorted,
+                           rmm::cuda_stream_view stream,
+                           rmm::device_async_resource_ref mr) const
+{
+  return _impl->left_join(left, is_left_sorted, stream, mr);
+}
+
+std::unique_ptr<join_match_context> sort_merge_join::inner_join_match_context(
+  table_view const& left,
+  sorted is_left_sorted,
+  rmm::cuda_stream_view stream,
+  rmm::device_async_resource_ref mr) const
+{
+  return _impl->inner_join_match_context(left, is_left_sorted, stream, mr);
+}
+
+std::pair<std::unique_ptr<rmm::device_uvector<size_type>>,
+          std::unique_ptr<rmm::device_uvector<size_type>>>
+sort_merge_join::partitioned_inner_join(cudf::join_partition_context const& context,
+                                        rmm::cuda_stream_view stream,
+                                        rmm::device_async_resource_ref mr) const
+{
+// <<<<<<< OLD CODE from 085f572bf1 (97de6b4a21) - COMMENTED OUT
+// #ifndef NVTX_DISABLE
+//   cudf::scoped_range range{"merge_inner_join"};
+// #endif
+//   cudf::sort_merge_join obj(right_keys, sorted::YES, compare_nulls, stream);
+//   return obj.inner_join(left_keys, sorted::YES, stream, mr);
+// =======
+  return _impl->partitioned_inner_join(context, stream, mr);
+// >>>>>>> END NEW CODE (97de6b4a21)
 }
 
 }  // namespace cudf
