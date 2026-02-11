@@ -249,6 +249,7 @@ ConfigureTest(
   reductions/approx_distinct_count_tests.cpp
   reductions/bitwise_tests.cpp
   reductions/collect_ops_tests.cpp
+  reductions/distinct_count_tests.cpp
   reductions/ewm_tests.cpp
   reductions/host_udf_example_tests.cu
   reductions/list_rank_test.cpp
@@ -257,6 +258,7 @@ ConfigureTest(
   reductions/scan_tests.cpp
   reductions/segmented_reduction_tests.cpp
   reductions/tdigest_tests.cpp
+  reductions/unique_count_tests.cpp
   GPUS 1
   PERCENT 70
 )
@@ -538,12 +540,10 @@ ConfigureTest(
 ConfigureTest(
   STREAM_COMPACTION_TEST
   stream_compaction/apply_boolean_mask_tests.cpp
-  stream_compaction/distinct_count_tests.cpp
   stream_compaction/distinct_tests.cpp
   stream_compaction/drop_nans_tests.cpp
   stream_compaction/drop_nulls_tests.cpp
   stream_compaction/stable_distinct_tests.cpp
-  stream_compaction/unique_count_tests.cpp
   stream_compaction/unique_tests.cpp
 )
 
