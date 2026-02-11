@@ -2902,6 +2902,7 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64tz_to_str",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_td64_to_string[DataFrame]",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_td64_to_string[Series]",
+    "tests/frame/methods/test_astype.py::TestAstype::test_astype_str_float",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_with_exclude_string",
     "tests/frame/methods/test_astype.py::test_astype_to_string_not_modifying_input[pyarrow_numpy-None]",
     "tests/frame/methods/test_astype.py::test_astype_to_string_not_modifying_input[pyarrow_numpy-val4]",
@@ -7043,34 +7044,40 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint32]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint64]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint8]",
-# <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
-#     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-# # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
-# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
-# # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
-# # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# <<<<<<< OLD CODE from c16465222d (47c7e570f9) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
+# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+# # # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
+# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
+# # # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
+# # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
+# # # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
+# # # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# # # # # # # =======
+# # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
+# # # # # # # >>>>>>> END NEW CODE (ee26842c72)
 # # # # # # =======
-# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
-# # # # # # >>>>>>> END NEW CODE (ee26842c72)
+# # # # # # >>>>>>> END NEW CODE (d142e22536)
+# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
+# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
 # # # # # =======
-# # # # # >>>>>>> END NEW CODE (d142e22536)
-# # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
-# # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
+# # # # # >>>>>>> END NEW CODE (59b6dddcaf)
+# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
+# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
+# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
+# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
 # # # # =======
-# # # # >>>>>>> END NEW CODE (59b6dddcaf)
-# # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
-# # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
-# # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
-# # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
+# # # # >>>>>>> END NEW CODE (af4ffdd992)
 # # # =======
-# # # >>>>>>> END NEW CODE (af4ffdd992)
+# # # >>>>>>> END NEW CODE (2617fd93c4)
 # # =======
-# # >>>>>>> END NEW CODE (2617fd93c4)
+# # >>>>>>> END NEW CODE (9a0ca028f6)
 # =======
-# >>>>>>> END NEW CODE (9a0ca028f6)
+    "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+    "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
+    "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+# >>>>>>> END NEW CODE (47c7e570f9)
     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_other",
     "tests/series/methods/test_astype.py::TestAstypeString::test_astype_string_to_extension_dtype_roundtrip[string[pyarrow]-data1-category]",
     "tests/series/methods/test_astype.py::TestAstypeString::test_astype_string_to_extension_dtype_roundtrip[string[python]-data1-category]",
@@ -7223,6 +7230,8 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_map.py::test_map_empty[uint64]",
     "tests/series/methods/test_map.py::test_map_empty[uint8]",
     "tests/series/methods/test_map.py::test_map_int",
+    "tests/series/methods/test_map.py::test_map_simple_str_callables_same_as_astype[<lambda>]",
+    "tests/series/methods/test_map.py::test_map_simple_str_callables_same_as_astype[str]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_boundary_datetimelike[nsmallest-datetime64[ns]]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_boundary_datetimelike[nsmallest-timedelta64[ns]]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_error[r4]",
@@ -7483,6 +7492,7 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_numeric_column_with_na[0.5]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_numeric_column_with_na[0]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_string_dtype",
+    "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_string_dtype_list_to_replace",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_value_none_dtype_numeric[2.0]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_value_none_dtype_numeric[2]",
     "tests/series/methods/test_replace.py::TestSeriesReplace::test_replace_value_none_dtype_numeric[nan]",
@@ -8630,6 +8640,7 @@ NODEIDS_THAT_XPASS_WITH_CUDF_PANDAS = {
     "tests/extension/test_categorical.py::TestCategorical::test_getitem_series_integer_with_missing_raises[integer-array]",
     "tests/extension/test_datetime.py::TestDatetimeArray::test_getitem_series_integer_with_missing_raises[US/Central-integer-array]",
     "tests/extension/test_interval.py::TestIntervalArray::test_getitem_series_integer_with_missing_raises[integer-array]",
+    "tests/extension/test_masked.py::TestMaskedArrays::test_astype_str[Float32Dtype]",
     "tests/extension/test_masked.py::TestMaskedArrays::test_getitem_series_integer_with_missing_raises[BooleanDtype-integer-array]",
     "tests/extension/test_masked.py::TestMaskedArrays::test_getitem_series_integer_with_missing_raises[Float32Dtype-integer-array]",
     "tests/extension/test_masked.py::TestMaskedArrays::test_getitem_series_integer_with_missing_raises[Float64Dtype-integer-array]",
@@ -8697,6 +8708,8 @@ NODEIDS_THAT_XPASS_WITH_CUDF_PANDAS = {
     "tests/plotting/test_datetimelike.py::TestTSPlot::test_add_matplotlib_datetime64",
     "tests/series/methods/test_info.py::test_info_memory_usage_deep_pypy",
     "tests/series/test_constructors.py::TestSeriesConstructors::test_constructor_dtype_timedelta_ns_s_astype_int64",
+    "tests/series/test_constructors.py::TestSeriesConstructors::test_constructor_no_data_string_type",
+    "tests/series/test_constructors.py::TestSeriesConstructors::test_series_string_inference_storage_definition",
     "tests/series/test_logical_ops.py::TestSeriesLogicalOps::test_int_dtype_different_index_not_bool",
     "tests/strings/test_api.py::test_api_per_method[index-empty1-partition1-category]",
     "tests/strings/test_api.py::test_api_per_method[index-empty1-partition1-object]",
