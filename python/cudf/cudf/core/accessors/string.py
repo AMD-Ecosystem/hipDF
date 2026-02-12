@@ -311,7 +311,7 @@ class StringMethods(BaseAccessor):
         >>> s.str.cat(['A', 'B', 'C', 'D'], sep=',')
         0     a,A
         1     b,B
-        2    <NA>
+        2    None
         3     d,D
         dtype: object
 
@@ -501,8 +501,8 @@ class StringMethods(BaseAccessor):
         dtype: list
         >>> ser.str.join(sep='_', string_na_rep='k')
         0    a_b_k
-        1     <NA>
-        2     <NA>
+        1     None
+        2     None
         3      c_d
         dtype: object
 
@@ -511,8 +511,8 @@ class StringMethods(BaseAccessor):
 
         >>> ser.str.join(sep=[None, '^', '.', '-'], sep_na_rep='+')
         0    a+b+
-        1    <NA>
-        2    <NA>
+        1    None
+        2    None
         3     c-d
         dtype: object
         """
@@ -614,7 +614,7 @@ class StringMethods(BaseAccessor):
               0     1
         0     a     1
         1     b     2
-        2  <NA>  <NA>
+        2  None  None
 
         A pattern with one group will return a DataFrame with one
         column if expand=True.
@@ -623,14 +623,14 @@ class StringMethods(BaseAccessor):
               0
         0     1
         1     2
-        2  <NA>
+        2  None
 
         A pattern with one group will return a Series if expand=False.
 
         >>> s.str.extract(r'[ab](\d)', expand=False)
         0       1
         1       2
-        2    <NA>
+        2    None
         dtype: object
 
         .. pandas-compat::
@@ -701,7 +701,7 @@ class StringMethods(BaseAccessor):
         1                 dog
         2    house and parrot
         3                  23
-        4                <NA>
+        4                None
         dtype: object
         >>> s1.str.contains('og', regex=False)
         0    False
@@ -978,7 +978,7 @@ class StringMethods(BaseAccessor):
         >>> s
         0     foo
         1     fuz
-        2    <NA>
+        2    None
         dtype: object
 
         When pat is a string and regex is True (the default), the given pat
@@ -989,7 +989,7 @@ class StringMethods(BaseAccessor):
         >>> s.str.replace('f.', 'ba', regex=True)
         0     bao
         1     baz
-        2    <NA>
+        2    None
         dtype: object
 
         When pat is a string and `regex` is False, every pat is replaced
@@ -998,7 +998,7 @@ class StringMethods(BaseAccessor):
         >>> s.str.replace('f.', 'ba', regex=False)
         0     foo
         1     fuz
-        2    <NA>
+        2    None
         dtype: object
 
         .. pandas-compat::
@@ -2347,8 +2347,8 @@ class StringMethods(BaseAccessor):
         dtype: object
         >>> s.str.get(10)
         0       d
-        1    <NA>
-        2    <NA>
+        1    None
+        2    None
         dtype: object
         >>> s.str.get(1)
         0    e
@@ -2519,7 +2519,7 @@ class StringMethods(BaseAccessor):
         >>> s
         0            this is a regular sentence
         1    https://docs.python.org/index.html
-        2                                  <NA>
+        2                                  None
         dtype: object
 
         In the default setting, the string is split by whitespace.
@@ -2563,8 +2563,8 @@ class StringMethods(BaseAccessor):
         >>> s.str.split(expand=True)
                                             0     1     2        3         4
         0                                this    is     a  regular  sentence
-        1  https://docs.python.org/index.html  <NA>  <NA>     <NA>      <NA>
-        2                                <NA>  <NA>  <NA>     <NA>      <NA>
+        1  https://docs.python.org/index.html  None  None     None      None
+        2                                None  None  None     None      None
         """
 
         if expand not in (True, False):
@@ -2696,7 +2696,7 @@ class StringMethods(BaseAccessor):
         >>> s
         0                       this is a regular sentence
         1    https://docs.python.org/3/tutorial/index.html
-        2                                             <NA>
+        2                                             None
         dtype: object
 
         In the default setting, the string is split by whitespace.
@@ -2731,14 +2731,14 @@ class StringMethods(BaseAccessor):
         dtype: list
 
         When using ``expand=True``, the split elements will expand
-        out into separate columns. If ``<NA>`` value is present,
+        out into separate columns. If a null value is present,
         it is propagated throughout the columns during the split.
 
         >>> s.str.rsplit(n=2, expand=True)
                                                        0        1         2
         0                                      this is a  regular  sentence
-        1  https://docs.python.org/3/tutorial/index.html     <NA>      <NA>
-        2                                           <NA>     <NA>      <NA>
+        1  https://docs.python.org/3/tutorial/index.html     None      None
+        2                                           None     None      None
 
         For slightly more complex use cases like splitting the
         html document name from a url, a combination of parameter
@@ -2746,9 +2746,9 @@ class StringMethods(BaseAccessor):
 
         >>> s.str.rsplit("/", n=1, expand=True)
                                             0           1
-        0          this is a regular sentence        <NA>
+        0          this is a regular sentence        None
         1  https://docs.python.org/3/tutorial  index.html
-        2                                <NA>        <NA>
+        2                                None        None
         """
 
         if expand not in (True, False):
@@ -2819,7 +2819,7 @@ class StringMethods(BaseAccessor):
         >>> s.str.split_part(delimiter="_", index=1)
         0       b
         1       e
-        2    <NA>
+        2    None
         dtype: object
         """
 
@@ -3120,7 +3120,7 @@ class StringMethods(BaseAccessor):
         0      -1
         1       1
         2    1000
-        3    <NA>
+        3    None
         dtype: object
 
         Note that ``None`` is not string, therefore it is converted
@@ -3131,7 +3131,7 @@ class StringMethods(BaseAccessor):
         0     -01
         1     001
         2    1000
-        3    <NA>
+        3    None
         dtype: object
         """
         if not is_integer(width):
@@ -3167,31 +3167,31 @@ class StringMethods(BaseAccessor):
         >>> s.str.center(1)
         0       a
         1       b
-        2    <NA>
+        2    None
         3       d
         dtype: object
         >>> s.str.center(1, fillchar='-')
         0       a
         1       b
-        2    <NA>
+        2    None
         3       d
         dtype: object
         >>> s.str.center(2, fillchar='-')
         0      a-
         1      b-
-        2    <NA>
+        2    None
         3      d-
         dtype: object
         >>> s.str.center(5, fillchar='-')
         0    --a--
         1    --b--
-        2     <NA>
+        2     None
         3    --d--
         dtype: object
         >>> s.str.center(6, fillchar='-')
         0    --a---
         1    --b---
-        2      <NA>
+        2      None
         3    --d---
         dtype: object
         """
@@ -3312,19 +3312,19 @@ class StringMethods(BaseAccessor):
         0    1. Ant.
         1    2. Bee!\n
         2    3. Cat?\t
-        3         <NA>
+        3         None
         dtype: object
         >>> s.str.strip()
         0    1. Ant.
         1    2. Bee!
         2    3. Cat?
-        3       <NA>
+        3       None
         dtype: object
         >>> s.str.strip('123.!? \n\t')
         0     Ant
         1     Bee
         2     Cat
-        3    <NA>
+        3    None
         dtype: object
         """
         return self._return_or_inplace(
@@ -3368,7 +3368,7 @@ class StringMethods(BaseAccessor):
         0     Ant.
         1     Bee!\n
         2     Cat?\t
-        3       <NA>
+        3       None
         dtype: object
         """
         return self._return_or_inplace(
@@ -3414,13 +3414,13 @@ class StringMethods(BaseAccessor):
         0    1. Ant.
         1    2. Bee!\n
         2    3. Cat?\t
-        3         <NA>
+        3         None
         dtype: object
         >>> s.str.rstrip('.!? \n\t')
         0    1. Ant
         1    2. Bee
         2    3. Cat
-        3      <NA>
+        3      None
         dtype: object
         """
         return self._return_or_inplace(
@@ -3895,7 +3895,7 @@ class StringMethods(BaseAccessor):
         0     bat
         1    bear
         2     caT
-        3    <NA>
+        3    None
         dtype: object
         >>> s.str.endswith('t')
         0     True
@@ -3946,7 +3946,7 @@ class StringMethods(BaseAccessor):
         0     bat
         1    Bear
         2     cat
-        3    <NA>
+        3    None
         dtype: object
         >>> s.str.startswith('b')
         0     True
