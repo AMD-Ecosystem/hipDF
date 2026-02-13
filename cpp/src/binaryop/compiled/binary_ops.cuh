@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2021-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2021-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -99,7 +99,12 @@ struct typed_casted_writer {
       } else if constexpr (cuda::std::is_constructible_v<Element, FromType>) {
         col.data<typename Element::rep>()[i] = Element{val, scale}.value();
       } else if constexpr (cuda::std::is_floating_point_v<FromType>) {
-        col.data<typename Element::rep>()[i] = convert_floating_to_fixed<Element>(val, scale).value();
+// <<<<<<< OLD CODE from 3149ac1e65 (a3f052fe25) - COMMENTED OUT
+//         col.data<typename Element::rep>()[i] = convert_floating_to_fixed<Element>(val, scale).value();
+// =======
+        col.data<typename Element::rep>()[i] =
+          convert_floating_to_fixed<Element>(val, scale).value();
+// >>>>>>> END NEW CODE (a3f052fe25)
       }
     } else if constexpr (cuda::std::is_floating_point_v<Element> and is_fixed_point<FromType>()) {
       col.data<Element>()[i] = convert_fixed_to_floating<Element>(val);
