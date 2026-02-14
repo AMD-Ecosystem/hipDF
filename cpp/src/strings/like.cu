@@ -50,10 +50,13 @@
 #else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
-#endif
+// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
+// #endif
+// =======
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (c4e8151cb0)
 #include <thrust/copy.h>
 #include <thrust/count.h>
-#include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
@@ -409,7 +412,7 @@ std::unique_ptr<column> like(strings_column_view const& input,
                std::invalid_argument);
 
   auto const d_pattern    = pattern.value(stream);
-  auto const patterns_itr = thrust::make_constant_iterator(d_pattern);
+  auto const patterns_itr = cuda::make_constant_iterator(d_pattern);
   return like(input, patterns_itr, d_escape, stream, mr);
 }
 

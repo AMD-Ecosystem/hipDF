@@ -46,15 +46,20 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <hip/hip_cooperative_groups.h>
-//#include <cooperative_groups/reduce.h>
-//TODO(HIP/AMD): This is a temporary workaround for
-// the missing cg::reduce APIs in HIP's cooperative groups.
-#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
-#include <hip/amd_detail/amd_warp_sync_functions.h>
-
+// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
+// #include <hip/hip_cooperative_groups.h>
+// //#include <cooperative_groups/reduce.h>
+// //TODO(HIP/AMD): This is a temporary workaround for
+// // the missing cg::reduce APIs in HIP's cooperative groups.
+// #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+// #include <hip/amd_detail/amd_warp_sync_functions.h>
+//
+// =======
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (c4e8151cb0)
 #include <cuda/std/utility>
-#include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
@@ -329,8 +334,8 @@ std::unique_ptr<column> slice_strings(strings_column_view const& input,
     if ((start_value >= 0) && (start_value < stop_value)) {
       // this is about 2x faster on long strings for this common case
       return compute_substrings_from_fn(input,
-                                        thrust::constant_iterator<size_type>(start_value),
-                                        thrust::constant_iterator<size_type>(stop_value),
+                                        cuda::constant_iterator<size_type>(start_value),
+                                        cuda::constant_iterator<size_type>(stop_value),
                                         stream,
                                         mr);
     }

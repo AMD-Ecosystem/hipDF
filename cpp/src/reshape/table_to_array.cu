@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -46,9 +46,13 @@
 #include <cub/device/device_memcpy.cuh>
 #endif
 #include <cuda/functional>
-#include <cudf/cuda_runtime.h>
+// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
+// #include <cudf/cuda_runtime.h>
+// =======
+#include <cuda/iterator>
+#include <cuda_runtime.h>
+// >>>>>>> END NEW CODE (c4e8151cb0)
 #include <thrust/device_vector.h>
-#include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 
@@ -100,7 +104,7 @@ void table_to_array_impl(table_view const& input,
   auto d_srcs = cudf::detail::make_device_uvector_async(h_srcs, stream, mr);
   auto d_dsts = cudf::detail::make_device_uvector_async(h_dsts, stream, mr);
 
-  thrust::constant_iterator<size_t> sizes(static_cast<size_t>(item_size * num_rows));
+  cuda::constant_iterator<size_t> sizes(static_cast<size_t>(item_size * num_rows));
 
   cudf::detail::batched_memcpy_async(
     d_srcs.begin(), d_dsts.begin(), sizes, num_columns, stream.value());
