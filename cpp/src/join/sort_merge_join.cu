@@ -65,6 +65,7 @@
 #include <cub/device/device_select.cuh>
 #include <cub/device/device_transform.cuh>
 #include <cuda/functional>
+#include <cuda/std/iterator>
 #include <cuda/std/tuple>
 #include <thrust/binary_search.h>
 #include <thrust/for_each.h>
@@ -607,21 +608,31 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
       rmm::device_uvector<int32_t> child_positions(offsets.size(), stream, temp_mr);
       auto unique_end = thrust::unique_by_key_copy(
         rmm::exec_policy_nosync(stream),
-        thrust::reverse_iterator(lcv.offsets_end()),
-        thrust::reverse_iterator(lcv.offsets_end()) + offsets.size(),
-        thrust::reverse_iterator(thrust::counting_iterator(offsets.size())),
-        thrust::reverse_iterator(offsets_subset.end()),
-        thrust::reverse_iterator(child_positions.end()));
-      // NOTE(HIP/AMD): ROCm 7.2.x and lower has const-correctness issues with cuda::std functions.
-      // We conditionally use thrust:: versions for these ROCm versions.
-#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-      auto subset_size = thrust::distance(thrust::reverse_iterator(offsets_subset.end()),
-                                          thrust::get<0>(unique_end));
-#else
-      auto subset_size   = cuda::std::distance(thrust::reverse_iterator(offsets_subset.end()),
-                                             unique_end.first);
-#endif
+// <<<<<<< OLD CODE from 33f5858e80 (bf63127284) - COMMENTED OUT
+//         thrust::reverse_iterator(lcv.offsets_end()),
+//         thrust::reverse_iterator(lcv.offsets_end()) + offsets.size(),
+//         thrust::reverse_iterator(thrust::counting_iterator(offsets.size())),
+//         thrust::reverse_iterator(offsets_subset.end()),
+//         thrust::reverse_iterator(child_positions.end()));
+//       // NOTE(HIP/AMD): ROCm 7.2.x and lower has const-correctness issues with cuda::std functions.
+//       // We conditionally use thrust:: versions for these ROCm versions.
+// #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+//     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
+//       auto subset_size = thrust::distance(thrust::reverse_iterator(offsets_subset.end()),
+//                                           thrust::get<0>(unique_end));
+// #else
+//       auto subset_size   = cuda::std::distance(thrust::reverse_iterator(offsets_subset.end()),
+//                                              unique_end.first);
+// #endif
+// =======
+        cuda::std::reverse_iterator(lcv.offsets_end()),
+        cuda::std::reverse_iterator(lcv.offsets_end()) + offsets.size(),
+        cuda::std::reverse_iterator(thrust::counting_iterator(offsets.size())),
+        cuda::std::reverse_iterator(offsets_subset.end()),
+        cuda::std::reverse_iterator(child_positions.end()));
+      auto subset_size   = cuda::std::distance(cuda::std::reverse_iterator(offsets_subset.end()),
+                                             cuda::std::get<0>(unique_end));
+// >>>>>>> END NEW CODE (bf63127284)
       auto subset_offset = offsets.size() - subset_size;
 
       auto [reduced_validity_mask, num_nulls] =
