@@ -64,9 +64,13 @@ dependencies = [
 # # >>>>>>> END NEW CODE (094d0854e5)
 # =======
     "cudf==26.4.*,>=0.0.0a0",
-# >>>>>>> END NEW CODE (54690c919f)
-    "cupy-cuda13x>=13.6.0",
-# >>>>>>> END NEW CODE (363a4446f0)
+# <<<<<<< OLD CODE from 4e56e419c6 (662dc43897) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (54690c919f)
+#     "cupy-cuda13x>=13.6.0",
+# # >>>>>>> END NEW CODE (363a4446f0)
+# =======
+    "cupy-cuda13x>=13.6.0,!=14.0.0",
+# >>>>>>> END NEW CODE (662dc43897)
     "fsspec>=0.6.0",
 # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
 #     "numpy>=1.23,<3.0a0",
