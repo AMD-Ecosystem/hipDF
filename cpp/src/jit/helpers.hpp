@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -31,7 +31,12 @@
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/detail/utilities/cuda_memcpy.hpp>
 
-#include <cudf/detail/jit/span.cuh>
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+// #include <cudf/detail/jit/span.cuh>
+// =======
+#include <jit/cache.hpp>
+#include <jit/span.cuh>
+// >>>>>>> END NEW CODE (d4e12e2fee)
 #include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
 
 #include <algorithm>
@@ -117,6 +122,10 @@ std::vector<std::string> column_type_names(std::vector<ColumnView> const& views)
 
   return names;
 }
+
+jitify2::Kernel get_udf_kernel(jitify2::PreprocessedProgramData const& preprocessed_program_data,
+                               std::string const& kernel_name,
+                               std::string const& cuda_source);
 
 }  // namespace jit
 }  // namespace cudf

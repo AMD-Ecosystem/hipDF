@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2025-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -28,6 +28,7 @@
 #pragma once
 
 #include "jit/cache.hpp"
+#include "jit/helpers.hpp"
 #include "jit/parser.hpp"
 #include "jit/util.hpp"
 #include "rolling.hpp"
@@ -115,8 +116,12 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   }
 
 
-  //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
-  std::string kernel_name =
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+//   //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
+//   std::string kernel_name =
+// =======
+  std::string kernel_reflection =
+// >>>>>>> END NEW CODE (d4e12e2fee)
     jitify2::reflection::Template("cudf::rolling::jit::gpu_rolling_new")  //
       .instantiate(cudf::type_to_name(input.type()),  // list of template arguments
                    cudf::type_to_name(output->type()),
@@ -124,28 +129,35 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
-  std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-  jitify2::Kernel kernel;
-
-  if(udf_agg.kind==aggregation::Kind::PTX) {
-    // CAUTION(HIP/AMD): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
-    if constexpr(HIP_PLATFORM_AMD) {
-      kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir);
-    }
-    else {
-      kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
-    }
-  }
-  else {
-    kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-       .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {});
-  }
-
-  kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                                         // for CUDA's jitify.
-        ->launch(input.size(),
-              cudf::jit::get_data_ptr(input),
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+//   std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+//   jitify2::Kernel kernel;
+//
+//   if(udf_agg.kind==aggregation::Kind::PTX) {
+//     // CAUTION(HIP/AMD): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
+//     if constexpr(HIP_PLATFORM_AMD) {
+//       kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+//         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir);
+//     }
+//     else {
+//       kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+//         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
+//     }
+//   }
+//   else {
+//     kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+//        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {});
+//   }
+//
+//   kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                                         // for CUDA's jitify.
+//         ->launch(input.size(),
+//               cudf::jit::get_data_ptr(input),
+// =======
+  cudf::jit::get_udf_kernel(*rolling_jit_kernel_cu_jit, kernel_reflection, cuda_source)
+    ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
+    ->launch(input.size(),
+             cudf::jit::get_data_ptr(input),
+// >>>>>>> END NEW CODE (d4e12e2fee)
              input.null_mask(),
              cudf::jit::get_data_ptr(output_view),
              output_view.null_mask(),

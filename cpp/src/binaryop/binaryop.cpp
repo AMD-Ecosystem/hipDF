@@ -1,7 +1,7 @@
 /*
  * SPDX-FileCopyrightText: Copyright 2018-2019 BlazingDB, Inc.
  * SPDX-FileCopyrightText: Copyright 2018 Christian Noboa Mardini <christian@blazingdb.com>
- * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 /*
@@ -44,6 +44,7 @@
 
 #include "compiled/binary_ops.hpp"
 #include "jit/cache.hpp"
+#include "jit/helpers.hpp"
 #include "jit/parser.hpp"
 #include "jit/util.hpp"
 
@@ -193,23 +194,28 @@ void binary_operation(mutable_column_view& out,
                                          });
   }
 
-  std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
-                              .instantiate(output_type_name,  // list of template arguments
-                                           cudf::type_to_name(lhs.type()),
-                                           cudf::type_to_name(rhs.type()),
-                                           std::string("cudf::binops::jit::UserDefinedOp"));
+  std::string kernel_reflection = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
+                                    .instantiate(output_type_name,  // list of template arguments
+                                                 cudf::type_to_name(lhs.type()),
+                                                 cudf::type_to_name(rhs.type()),
+                                                 std::string("cudf::binops::jit::UserDefinedOp"));
 
-  std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-  jitify2::Kernel kernel;
-  // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
-  if constexpr(HIP_PLATFORM_AMD) {
-    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);
-  } else {
-    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});
-  }
-  kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+//   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+//   jitify2::Kernel kernel;
+//   // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
+//   if constexpr(HIP_PLATFORM_AMD) {
+//     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
+//       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);
+//   } else {
+//     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
+//       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});
+//   }
+//   kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
+// =======
+  cudf::jit::get_udf_kernel(*binaryop_jit_kernel_cu_jit, kernel_reflection, cuda_source)
+    ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
+// >>>>>>> END NEW CODE (d4e12e2fee)
     ->launch(out.size(),
             cudf::jit::get_data_ptr(out),
             cudf::jit::get_data_ptr(lhs),

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -52,31 +52,34 @@ namespace transformation {
 namespace jit {
 namespace {
 
-jitify2::Kernel get_kernel(std::string const& kernel_name,
-                           std::string const& cuda_source,
-                           std::string const* llvm_ir = nullptr)
-{
-// <<<<<<< OLD CODE from dd0d19a1f1 (df596fd490) - COMMENTED OUT
-//   const std::string arch_flag = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-//   if (llvm_ir != nullptr && HIP_PLATFORM_AMD) {
-//     return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-//       .get_kernel(kernel_name,
-//                   {},
-//                   {{"cudf/detail/operation-udf.hpp", cuda_source}},
-//                   {arch_flag},
-//                   {},
-//                   llvm_ir);
-//   } else {
-//     return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-//       .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {arch_flag});
-//   }
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+// jitify2::Kernel get_kernel(std::string const& kernel_name,
+//                            std::string const& cuda_source,
+//                            std::string const* llvm_ir = nullptr)
+// {
+// // <<<<<<< OLD CODE from dd0d19a1f1 (df596fd490) - COMMENTED OUT
+// //   const std::string arch_flag = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+// //   if (llvm_ir != nullptr && HIP_PLATFORM_AMD) {
+// //     return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+// //       .get_kernel(kernel_name,
+// //                   {},
+// //                   {{"cudf/detail/operation-udf.hpp", cuda_source}},
+// //                   {arch_flag},
+// //                   {},
+// //                   llvm_ir);
+// //   } else {
+// //     return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+// //       .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {arch_flag});
+// //   }
+// // =======
+//   CUDF_FUNC_RANGE();
+//   return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+//     .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {"-arch=sm_."});
+// // >>>>>>> END NEW CODE (df596fd490)
+// }
+//
 // =======
-  CUDF_FUNC_RANGE();
-  return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-    .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {"-arch=sm_."});
-// >>>>>>> END NEW CODE (df596fd490)
-}
-
+// >>>>>>> END NEW CODE (d4e12e2fee)
 jitify2::StringVec build_jit_template_params(
   null_aware is_null_aware,
   bool may_evaluate_null,
@@ -167,16 +170,29 @@ jitify2::ConfiguredKernel build_transform_kernel(
              : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
   }
 
-  return get_kernel(jitify2::reflection::Template(kernel_name)
-                      .instantiate(build_jit_template_params(
-                        is_null_aware,
-                        may_evaluate_null,
-                        has_user_data,
-                        {},
-                        cudf::jit::column_type_names(output_columns),
-                        cudf::jit::reflect_input_columns(base_column_size, input_columns))),
-                    cuda_source,
-                    (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+//   return get_kernel(jitify2::reflection::Template(kernel_name)
+//                       .instantiate(build_jit_template_params(
+//                         is_null_aware,
+//                         may_evaluate_null,
+//                         has_user_data,
+//                         {},
+//                         cudf::jit::column_type_names(output_columns),
+//                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
+//                     cuda_source,
+//                     (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
+// =======
+  auto kernel_reflection = jitify2::reflection::Template(kernel_name)
+                             .instantiate(build_jit_template_params(
+                               is_null_aware,
+                               may_evaluate_null,
+                               has_user_data,
+                               {},
+                               cudf::jit::column_type_names(output_columns),
+                               cudf::jit::reflect_input_columns(base_column_size, input_columns)));
+
+  return cudf::jit::get_udf_kernel(*transform_jit_kernel_cu_jit, kernel_reflection, cuda_source)
+// >>>>>>> END NEW CODE (d4e12e2fee)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value());
 }
 
@@ -240,16 +256,29 @@ jitify2::ConfiguredKernel build_span_kernel(std::string const& kernel_name,
            : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
 // >>>>>>> END NEW CODE (df596fd490)
 
-  return get_kernel(jitify2::reflection::Template(kernel_name)
-                      .instantiate(build_jit_template_params(
-                        is_null_aware,
-                        may_evaluate_null,
-                        has_user_data,
-                        span_outputs,
-                        {},
-                        cudf::jit::reflect_input_columns(base_column_size, input_columns))),
-                    cuda_source,
-                    (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
+// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+//   return get_kernel(jitify2::reflection::Template(kernel_name)
+//                       .instantiate(build_jit_template_params(
+//                         is_null_aware,
+//                         may_evaluate_null,
+//                         has_user_data,
+//                         span_outputs,
+//                         {},
+//                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
+//                     cuda_source,
+//                     (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
+// =======
+  auto kernel_reflection = jitify2::reflection::Template(kernel_name)
+                             .instantiate(build_jit_template_params(
+                               is_null_aware,
+                               may_evaluate_null,
+                               has_user_data,
+                               span_outputs,
+                               {},
+                               cudf::jit::reflect_input_columns(base_column_size, input_columns)));
+
+  return cudf::jit::get_udf_kernel(*transform_jit_kernel_cu_jit, kernel_reflection, cuda_source)
+// >>>>>>> END NEW CODE (d4e12e2fee)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value());
 }
 
