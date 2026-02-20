@@ -13,6 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// NOTE(HIP/AMD): Include libhipcxx version header to get CCCL_VERSION macro
+#ifdef __HIP_PLATFORM_AMD__
+#include <cuda/std/version>
+#endif
+
+// TODO(HIP/AMD): Workaround/hack for libhipcxx 3.0.2 cuda::std::swap ambiguity with thrust::swap
+// Force thrust::swap to be preferred over cuda::std::swap in ADL
+#if defined(CCCL_VERSION) && CCCL_VERSION == 3000002
+namespace thrust {
+  using std::swap;
+}
+#endif
+
 #include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/detail/timezone.hpp>
 #include <cudf/detail/utilities/vector_factories.hpp>
