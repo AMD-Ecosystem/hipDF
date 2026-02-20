@@ -46,7 +46,8 @@
  * relies on the `__PRETTY_FUNCTION__` macro which is specific to GCC and Clang
  * to produce better assert messages.
  */
-#if !defined(NDEBUG) && defined(__CUDA_ARCH__) && (defined(__clang__) || defined(__GNUC__))
+// NOTE(HIP/AMD): Also check for __HIP_DEVICE_COMPILE__ for HIP device code
+#if !defined(NDEBUG) && (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && (defined(__clang__) || defined(__GNUC__))
 #define __ASSERT_STR_HELPER(x) #x
 #define cudf_assert(e)        \
   ((e) ? static_cast<void>(0) \
