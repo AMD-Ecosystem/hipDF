@@ -66,7 +66,8 @@ template <typename F>
 struct float_decomposer {
   // NOTE(HIP/AMD): rocPRIM/hipCUB requires rocprim::tuple<T&, U&> for radix sort decomposers.
   // Other tuple types cause SFINAE failures in radix_key_codec's is_tuple_of_references check.
-#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
+#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
   __device__ rocprim::tuple<size_type&, F&> operator()(float_pair<F>& key) const
   {
     return rocprim::tuple<size_type&, F&>{key.s, key.f};
