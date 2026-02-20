@@ -163,10 +163,14 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
     size_type end_counter   = static_cast<size_type>(right_table_row_count);
 
     // Create list of indices that have been marked as invalid
-    // NOTE(HIP/AMD): libhipcxx 2.7.0 has a const-correctness issue where cuda::std::identity
-    // drops const qualifier when used with transform_iterator<bool*> in rocPRIM's select.
-    // This causes compilation errors. We conditionally use a workaround for affected versions.
-#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
+    // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
+    // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+    // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+    // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+    // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+    // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
                                               thrust::make_counting_iterator(begin_counter),
                                               thrust::make_counting_iterator(end_counter),
