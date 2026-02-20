@@ -98,8 +98,9 @@ using uint64_t = __hip_internal::uint64_t;
 #endif
 
 // NOTE(HIP/AMD): Conditional macros for tuple/pair types to handle libhipcxx version compatibility
-// with thrust (libhipcxx 2.7.0 datatypes are not compatbile with thrust)
-#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
+// with thrust (libhipcxx 2.7.0/3.0.2) datatypes are not compatbile with thrust)
+#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
 #define CUDF_TUPLE_PAIR_PROVIDER thrust
 #define CUDF_TUPLE_TYPE thrust::tuple
 #define CUDF_PAIR_TYPE thrust::pair
