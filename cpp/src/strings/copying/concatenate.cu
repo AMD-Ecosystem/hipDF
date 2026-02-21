@@ -46,7 +46,6 @@
 #include <cuda/std/iterator>
 #include <thrust/binary_search.h>
 #include <thrust/execution_policy.h>
-#include <thrust/functional.h>
 #include <thrust/scan.h>
 #include <thrust/transform.h>
 #include <thrust/transform_scan.h>
