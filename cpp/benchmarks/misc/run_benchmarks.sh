@@ -30,8 +30,8 @@ output_directory=results_gbench_$(date +"%Y-%m-%d")
 
 mkdir ${output_directory}
 
-for b in $(ls *_BENCH);
-do 
+for b in *_BENCH;
+do
         ./${b} --benchmark_out_format=csv --benchmark_out=${output_directory}/${b}.csv >> ${output_directory}.log
 done
 #nvbench has special argument to set the device id
@@ -42,7 +42,7 @@ output_directory=results_nvbench_$(date +"%Y-%m-%d")
 
 mkdir ${output_directory}
 
-for b in $(ls *_NVBENCH);
-do 
+for b in *_NVBENCH;
+do
         ./${b} -d ${device_id} --csv ${output_directory}/${b}.csv >> ${output_directory}.log
 done

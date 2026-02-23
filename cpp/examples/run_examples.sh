@@ -23,20 +23,20 @@
 # SOFTWARE.
 
 # Run basic example
-cd basic/
+cd basic/ || exit
 ./build/basic_example
 cd ..
 # Run nested_types example
-cd nested_types/
+cd nested_types/ || exit
 ./build/deduplication
 cd ..
 # Run parquet example
-cd parquet_io/
+cd parquet_io/ || exit
 ./build/parquet_io example.parquet
 ./build/parquet_io_multithreaded example.parquet
 cd ..
 # Run string_transforms examples
-cd string_transforms/
+cd string_transforms/ || exit
 ./build/localize_phone_jit info.csv localize_phone_jit.csv 100000
 ./build/localize_phone_precompiled info.csv localize_phone_precompiled.csv 100000
 ./build/compute_checksum_jit info.csv compute_checksum_jit.csv 100000

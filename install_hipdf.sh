@@ -62,10 +62,11 @@ AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/simple"}
 
 # Helpers
 function __get_rocm_version_header() {
-  local rocm_version_h=$(find $(hipconfig --path) -name "rocm_version.h")
+  local rocm_version_h
+  rocm_version_h=$(find "$(hipconfig --path)" -name "rocm_version.h")
   if [[ -z ${rocm_version_h} ]]; then
     echo "Error: ROCm version could not be identified."
-    exit -1
+    exit 1
   fi
   printf ${rocm_version_h}
 }
@@ -74,24 +75,33 @@ function __get_rocm_version_linearized() {
   local major=$1
   local minor=$2
   local patch=$3
-  let result=(major * 10000 + minor * 100 + patch)
+  local result
+  result=$((major * 10000 + minor * 100 + patch))
   echo "${result}"
 }
 
 function get_rocm_version_linearized() {
-  local rocm_version_h=$(__get_rocm_version_header)
-  local major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
-  local minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
-  local patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
+  local rocm_version_h
+  local major
+  local minor
+  local patch
+  rocm_version_h=$(__get_rocm_version_header)
+  major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
+  minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
+  patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
   __get_rocm_version_linearized ${major} ${minor} ${patch}
 }
 
 # Prints a key 'rocm-X-Y-Z'
 function get_rocm_pip_key() {
-  local rocm_version_h=$(__get_rocm_version_header)
-  local major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
-  local minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
-  local patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
+  local rocm_version_h
+  local major
+  local minor
+  local patch
+  rocm_version_h=$(__get_rocm_version_header)
+  major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
+  minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
+  patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
   printf "rocm-${major}-${minor}-${patch}"
 }
 
@@ -112,7 +122,8 @@ function err_if_blank() {
 # Usage: `err_if_no_boolean $<VALUE>`
 # NOTE: A value must be passed.
 function err_if_no_boolean() {
-  local lowered=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+  local lowered
+  lowered=$(echo "$1" | tr '[:upper:]' '[:lower:]')
   if [[ "${lowered}" == "true" || "${lowered}" == "1" || "${lowered}" == "y"  || "${lowered}" == "yes" || "${lowered}" == "on"  ]]; then
     : # nop
   elif [[ "${lowered}" == "false" || "${lowered}" == "0" || "${lowered}" == "n"  || "${lowered}" == "no" || "${lowered}" == "off"  ]]; then
@@ -129,7 +140,8 @@ function err_if_no_boolean() {
 # Usage: `[ $(is_false $<VALUE>) ]`
 # NOTE: A value must be passed.
 function is_false() {
-  local lowered=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+  local lowered
+  lowered=$(echo "$1" | tr '[:upper:]' '[:lower:]')
   [[ "${lowered}" == "false" || "${lowered}" == "0" || "${lowered}" == "n"  || "${lowered}" == "no" || "${lowered}" == "off"  ]] && printf "1"
 }
 
@@ -162,14 +174,14 @@ export CMAKE_PREFIX_PATH="${ROCM_PATH}/lib/cmake"
 
 if ((  $(get_rocm_version_linearized) < 70000 )); then
   echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 7.0.0"
-  exit -1
+  exit 1
 fi
 
 # Step 1: Install Conda
 # We assume that you have already installed conda
 if [[ -z ${CONDA_EXE} ]]; then
   echo "Error: No conda installation found, please install and activate conda."
-  exit -1
+  exit 1
 fi
 
 # Make sure that conda is initialized correctly.
@@ -189,7 +201,7 @@ conda env create --name hipdf_dev --file conda/environments/all_rocm_arch-x86_64
 conda activate hipdf_dev
 
 # Step 4: Install CuPy into hipdf_dev
-if [ $(is_false "${BUILD_CUPY}") ]; then
+if [ "$(is_false "${BUILD_CUPY}")" ]; then
   pip install amd-cupy~=13.5.1 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
@@ -218,7 +230,7 @@ pip install --extra-index-url=${AMD_PYPI_URL} \
   numba-hip[${ROCM_KEY}]@git+${NUMBA_URL}#${NUMBA_BRANCH}
 
 # Step 6: Install hipMM into `hipdf_dev`.
-if [ $(is_false "${BUILD_HIPMM}") ]; then
+if [ "$(is_false "${BUILD_HIPMM}")" ]; then
   pip install amd-hipmm==3.0.0 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
@@ -270,7 +282,7 @@ if [[ ${CUDF_USE_PER_THREAD_DEFAULT_STREAM} == "true" ]]; then
 fi
 
 if [ ! -z "${cmake_extra_args}" ]; then
-  cmake_extra_args="--cmake-args=\"${cmake_extra_args}\""
+  cmake_extra_args="--cmake-args=${cmake_extra_args}"
 fi
 
 CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake bash build.sh ${components} ${cmake_extra_args}
