@@ -118,9 +118,9 @@ struct lut_arr {
 constexpr int log2_batch_count = 2;  // 1..5
 #if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
 //: results in BATCH_SIZE 64
-constexpr int log2_batch_size  =  6; 
+constexpr int log2_batch_size  =  6;
 #else
-constexpr int log2_batch_size  =  5; 
+constexpr int log2_batch_size  =  5;
 #endif
 constexpr int batch_count      = (1 << log2_batch_count);
 constexpr int batch_size       = (1 << log2_batch_size);

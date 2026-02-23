@@ -511,7 +511,7 @@ TYPED_TEST(TypedStructColumnWrapperTest, StructOfListOfStruct)
 
   auto list_validity =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
-    // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"  
+    // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
   auto [null_mask, null_count] = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
 
   auto lists_col =

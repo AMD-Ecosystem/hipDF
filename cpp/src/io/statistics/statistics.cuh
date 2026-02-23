@@ -107,7 +107,7 @@ using byte_array_stats = t_array_stats<byte_array_view>;
 union statistics_val {
   // NOTE(HIP/AMD): The largest type needs to come first
   // to ensure that all bytes of a union instance are zero-initialized.
-  // Otherwise, we end up in UB situations where some bytes contain 
+  // Otherwise, we end up in UB situations where some bytes contain
   // arbitrary invalid statistics values which may be written into the
   // output file (seen for ORC + sum member in statistics_chunk struct).
   __int128_t d128_val;        //!< decimal128 columns

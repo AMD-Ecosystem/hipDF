@@ -279,7 +279,7 @@ avro_decode_row(schemadesc_s const* schema,
         CUDF_UNREACHABLE("avro type 'duration' not yet implemented");
       } break;
 
-      // TODO(HIP/AMD): Note: it appears that these types are handled elsewhere, but we need this to 
+      // TODO(HIP/AMD): Note: it appears that these types are handled elsewhere, but we need this to
       // avoid errors with HIP clang
       case type_not_set: [[fallthrough]];
       case type_record: [[fallthrough]];

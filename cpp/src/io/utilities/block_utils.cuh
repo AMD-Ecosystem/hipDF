@@ -56,7 +56,7 @@ inline __device__ T shuffle_xor(T var, uint32_t delta)
   return __shfl_xor_sync((uint64_t) LANE_MASK_ALL, var, delta); // NOTE(HIP/AMD): See SWDEV-490930
 }
 
-inline __device__ void syncwarp() { 
+inline __device__ void syncwarp() {
   __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
   __builtin_amdgcn_wave_barrier();
   __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");

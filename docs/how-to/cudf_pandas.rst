@@ -36,7 +36,7 @@ can run on AMD GPUs using accelerated DataFrame operations. ``cudf.pandas`` allo
 by default via ``hipMallocManaged``. On Linux kernels with Heterogeneous Memory Management (HMM) support and on
 supported AMD GPUs, managed memory pages can be transparently migrated to the device on GPU page faults.
 
-This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__, 
+This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__,
 and how to configure your environment for best performance on AMD GPUs depending on your use case. For more information,
 see `HIP memory management <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html>`__.
 
@@ -46,7 +46,7 @@ Recommended: Enable page migration with HSA_XNACK=1
 Enabling GPU page-fault retry requires running the workload with the environment variable ``HSA_XNACK=1``. This activates
 page migration and typically provides significant performance gains for ``cudf.pandas``-accelerated workloads for datasets
 that fit into GPU VRAM and do not cause heavy CPU to GPU paging. Setting ``export HSA_XNACK=1`` is therefore the recommended
-and supported default configuration. 
+and supported default configuration.
 
 Experimental: When to use HSA_XNACK=0
 -------------------------------------
@@ -76,7 +76,7 @@ Summary
 -------
 
 - ``HSA_XNACK=1`` (**Officially Supported**):
-  
+
   - Enables GPU page-fault retry and HMM-based page migration.
   - Managed memory pages can move to GPU on demand.
   - Typically fastest for ``cudf.pandas`` acceleration when data fits in device memory and is mainly used on the GPUs.

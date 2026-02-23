@@ -162,7 +162,7 @@ TYPED_TEST(groupby_max_large_ints_test, basic_large_input)
 {
   // NOTE: This test only works for larger value types (due to overflow otherwise)
   auto constexpr num_rows = 100000;
-  auto constexpr num_unique_keys = 4; 
+  auto constexpr num_unique_keys = 4;
 
   using V = TypeParam;
   using R = cudf::detail::target_type_t<V, cudf::aggregation::MAX>;

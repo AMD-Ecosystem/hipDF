@@ -33,11 +33,7 @@ _today = _datetime.today()
 # Rocm-docs-core
 external_projects_remote_repository = ""
 # TODO extend with ROCm-DS projects
-external_projects = [
-    "hipdf",
-    "hipmm",
-    "python", "rocm"
-]
+external_projects = ["hipdf", "hipmm", "python", "rocm"]
 external_projects_current_project = "hipdf"
 
 setting_all_article_info = True
@@ -55,9 +51,7 @@ article_pages = [
 
 html_theme = "rocm_docs_theme"
 html_theme_options = {"flavor": "rocm-ds"}
-html_context = {
-    "docs_header_version": "25.10"
-}
+html_context = {"docs_header_version": "25.10"}
 
 external_toc_path = "./sphinx/_toc.yml"
 

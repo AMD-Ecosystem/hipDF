@@ -334,7 +334,7 @@ __device__ inline size_type string_view::byte_offset(size_type pos) const
 // TODO(HIP/AMD): On RDNA3, a min reduction of a large column of strings fails/segfaults.
 // This adds a workaround/tmpfix for internal issue 164.
 #ifdef CUDF_USE_WARPSIZE_32
-__attribute__((noinline)) 
+__attribute__((noinline))
 #endif
 __device__ inline int string_view::compare(string_view const& in) const
 {

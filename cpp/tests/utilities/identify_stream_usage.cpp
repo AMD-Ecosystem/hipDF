@@ -176,7 +176,7 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
  * @param function The function to overload.
  * @param signature The function signature (must include names, not just types).
  * @parameter arguments The function arguments (names only, no types).
- * 
+ *
  * NOTE(HIP/AMD): We add overloads for HIP's _spt variants, too
  *  (if a per-thread default stream is used).
  */

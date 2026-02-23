@@ -6230,7 +6230,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   void testWindowingMean() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
         .column( 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3) // GBY Key

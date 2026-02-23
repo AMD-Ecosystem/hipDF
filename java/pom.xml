@@ -148,7 +148,7 @@
             <version>2.25.0</version>
             <scope>test</scope>
         </dependency>
-      
+
       <dependency>
             <groupId>org.apache.arrow</groupId>
             <artifactId>arrow-memory-netty</artifactId>
@@ -309,7 +309,7 @@
                                     <reuseForks>false</reuseForks>
                                     <test>*/CudaFatalTest.java</test>
                                 </configuration>
-                            </execution> 
+                            </execution>
                             <execution>
                                 <id>non-empty-null-test</id>
                                 <phase/>
@@ -604,8 +604,8 @@
                 <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED</argLine>
 
                 <showOutput>true</showOutput>
-                 <!--  <forkCount>0</forkCount> -->     <!-- need to debug stdout or vm/surefire will crash with 
-                                                Corrupted STDOUT by directly writing to native stream 
+                 <!--  <forkCount>0</forkCount> -->     <!-- need to debug stdout or vm/surefire will crash with
+                                                Corrupted STDOUT by directly writing to native stream
                                                 in forked JVM -->
                     <!-- you can turn this off, by passing -DtrimStackTrace=true when running tests -->
                     <trimStackTrace>false</trimStackTrace>

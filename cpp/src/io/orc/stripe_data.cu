@@ -1924,10 +1924,10 @@ CUDF_KERNEL void __launch_bounds__(block_size)
         if (row < max_num_rows) {
           void* data_out = s->chunk.column_data_base;
           switch (s->chunk.type_kind) {
-            // TODO(HIP/AMD): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION' 
+            // TODO(HIP/AMD): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION'
             // not handled in switch [-Werror,-Wswitch]
-            case INVALID_TYPE_KIND: 
-            case STRUCT: 
+            case INVALID_TYPE_KIND:
+            case STRUCT:
             case UNION: break; //TODO(HIP): These cases are not treated in the original code, break for now.
             case FLOAT:
             case INT: static_cast<uint32_t*>(data_out)[row] = s->vals.u32[t + vals_skipped]; break;

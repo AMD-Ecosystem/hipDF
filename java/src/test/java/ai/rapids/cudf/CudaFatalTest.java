@@ -37,9 +37,9 @@
 // SOFTWARE.
 
 // NOTE(HIP/AMD): This test is intended to fail:
-// It is testing how the system handles CUDA-related fatal errors 
+// It is testing how the system handles CUDA-related fatal errors
 // when working with column vectors in cuDF. It creates a ColumnVector,
-// and later, it tries converting the vector to long integers (asLongs()), 
+// and later, it tries converting the vector to long integers (asLongs()),
 // which could trigger CUDA operations.
 // Class BadDeviceBuffer represents a defective device buffer;
 // it causes CUDA fatal error by operating on a bad device buffer.

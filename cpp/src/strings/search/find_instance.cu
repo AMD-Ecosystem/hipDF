@@ -109,10 +109,10 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
     size_type const is_char =
       (itr + d_target.size_bytes() <= end) && !is_utf8_continuation_char(*itr);
     size_type const found = is_char && (d_target.compare(itr, d_target.size_bytes()) == 0);
-    
+
     // count of threads that matched in this warp and produce an offset in each thread
     auto const found_count = cg::reduce(warp, found, cg::plus<size_type>());
-    
+
     size_type found_scan;
     size_type chars_scan;
 #ifdef __HIP_PLATFORM_AMD__
@@ -126,7 +126,7 @@ CUDF_KERNEL void find_instance_warp_parallel_fn(column_device_view const d_strin
     found_scan = cg::inclusive_scan(warp, found);
     chars_scan = cg::exclusive_scan(warp, is_char);
 #endif
-    
+
     // activate the thread where we hit the desired find instance
     auto const found_pos = (found_scan + offset) == (instance + 1) ? chars_scan : char_pos;
     // copy the position value for that thread into all warp threads

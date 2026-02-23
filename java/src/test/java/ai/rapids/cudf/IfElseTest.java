@@ -541,7 +541,7 @@ public class IfElseTest extends CudfTestBase {
     );
   }
 
-  @ParameterizedTest //   
+  @ParameterizedTest //
   @MethodSource("createBooleanVVParams")
   void testBooleanVV(Boolean[] predVals, Boolean[] trueVals, Boolean[] falseVals, Boolean[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1165,7 +1165,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Test //   
+  @Test //
   void testMismatchedTypesVV() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          ColumnVector trueVec = ColumnVector.fromBoxedInts(1, 2, 3, 4);

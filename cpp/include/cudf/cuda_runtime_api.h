@@ -298,7 +298,7 @@
 #endif
 #ifndef cudaInvalidDeviceId
 #  define cudaInvalidDeviceId hipInvalidDeviceId
-#endif 
+#endif
 #ifndef cudaLaunchCooperativeKernel
 #  define cudaLaunchCooperativeKernel hipLaunchCooperativeKernel
 #endif

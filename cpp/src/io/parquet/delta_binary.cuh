@@ -80,7 +80,7 @@ constexpr int max_delta_mini_block_size = 64;
 // wraps around and overwrites values that haven't been consumed
 // yet (by the output warp/wavefront) which would result in failing decoding.
 //TODO(HIP/AMD): Revisit this size.
-#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32) 
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32)
 constexpr int delta_rolling_buf_size = 4 * max_delta_mini_block_size;
 #else
 constexpr int delta_rolling_buf_size = 2 * max_delta_mini_block_size;
@@ -271,7 +271,7 @@ struct delta_binary_decoder {
     uint32_t const batch_len = min(values_per_mb, warp_size);
 
     // need to do in multiple passes if values_per_mb != batch_len
-    // NOTE(HIP/AMD): Pay extra attention to rounding up if 
+    // NOTE(HIP/AMD): Pay extra attention to rounding up if
     // batch_len==64 (on AMD) and values_per_mb==32
     uint32_t const num_pass = (values_per_mb + batch_len - 1) / batch_len;
 
@@ -308,7 +308,7 @@ struct delta_binary_decoder {
             // NOTE(HIP/AMD): Need extra treatment for mb_bits==64, as shift operation is UB in this case
             // zigzag128_t is currently a 64bit type (int64_t)
             delta &= (mb_bits==64) ?  0xffffffffffffffffUL : (static_cast<zigzag128_t>(1) << mb_bits) - 1;
-          }           
+          }
         }
 
         // add min delta to get true delta

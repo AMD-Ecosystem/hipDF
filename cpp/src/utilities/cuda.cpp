@@ -65,8 +65,8 @@ cudf::size_type max_threads_per_multiprocessor()
   int device = 0;
   CUDF_CUDA_TRY(cudaGetDevice(&device));
   int max_threads_per_sm;
-  CUDF_CUDA_TRY(cudaDeviceGetAttribute(&max_threads_per_sm, 
-                                        cudaDevAttrMaxThreadsPerMultiprocessor, 
+  CUDF_CUDA_TRY(cudaDeviceGetAttribute(&max_threads_per_sm,
+                                        cudaDevAttrMaxThreadsPerMultiprocessor,
                                         device));
   return max_threads_per_sm;
 }

@@ -166,7 +166,7 @@ struct input_indexalator : base_normalator<input_indexalator, cudf::size_type> {
 struct output_indexalator : base_normalator<output_indexalator, cudf::size_type> {
   friend struct base_normalator<output_indexalator, cudf::size_type>;  // for CRTP
 
-  using reference = output_indexalator;                // NOTE(HIP/AMD): we need to use a value type for 
+  using reference = output_indexalator;                // NOTE(HIP/AMD): we need to use a value type for
                                                        // this proxy-returning iterator
                                                        // to fix invalid results/UB arising
                                                        // with some implementations of thrust::scatter

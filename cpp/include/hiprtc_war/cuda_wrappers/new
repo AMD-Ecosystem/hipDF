@@ -27,4 +27,3 @@
 // with hipRTC's nostdinc++ option. It is intentionally empty to prevent inclusion of the
 // actual cuda_wrappers/new header which contains include_next directives that fail to
 // resolve when compiling with nostdinc++.
-

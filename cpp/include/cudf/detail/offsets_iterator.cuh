@@ -121,7 +121,7 @@ struct input_offsetalator : base_normalator<input_offsetalator, int64_t> {
 struct output_offsetalator : base_normalator<output_offsetalator, int64_t> {
   friend struct base_normalator<output_offsetalator, int64_t>;  // for CRTP
 
-  using reference = output_offsetalator;                    // NOTE(HIP/AMD): we need to use a value type for 
+  using reference = output_offsetalator;                    // NOTE(HIP/AMD): we need to use a value type for
                                                             // this proxy-returning iterator
                                                             // to fix invalid results/UB arising
                                                             // with some implementations of thrust::scatter

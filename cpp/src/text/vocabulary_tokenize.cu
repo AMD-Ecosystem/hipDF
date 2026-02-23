@@ -66,7 +66,7 @@
 #ifdef __HIP_PLATFORM_AMD__
 #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #endif
- 
+
 #include <cuco/static_map.cuh>
 #include <cuda/std/functional>
 #include <cuda/std/iterator>

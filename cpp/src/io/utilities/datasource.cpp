@@ -88,7 +88,7 @@ class file_wrapper {
     if (fd == -1) {
       CUDF_FAIL("Cannot open file: " + filepath);
     }
-    
+
     struct stat st;
     if (fstat(fd, &st) != 0) {
       close(fd);
@@ -96,12 +96,12 @@ class file_wrapper {
     }
     _size = st.st_size;
   }
-  
+
   ~file_wrapper()
   {
     if (fd >= 0) { close(fd); }
   }
-  
+
   [[nodiscard]] auto size() const { return _size; }
   [[nodiscard]] auto desc() const { return fd; }
 };
@@ -323,7 +323,7 @@ class file_source : public datasource {
   {
     CUDF_FAIL("Device reads are not supported without KvikIO");
   }
-  
+
   std::unique_ptr<buffer> device_read(size_t offset, size_t size, rmm::cuda_stream_view stream) override
   {
     CUDF_FAIL("Device reads are not supported without KvikIO");

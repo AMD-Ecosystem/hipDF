@@ -32,7 +32,7 @@ Code modifications made by Advanced Micro Devices, Inc. are subject to the
 below license:
 
 .. code:: plain
-   
+
    MIT License
    Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
    Permission is hereby granted, free of charge, to any person obtaining a copy

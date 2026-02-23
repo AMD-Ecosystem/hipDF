@@ -567,7 +567,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
     auto const begin_bit = row;
     auto const end_bit   = min(static_cast<size_type>(row + bits_per_word), rg.end);
     auto const mask_len  = end_bit - begin_bit;
-    // HIP/AMD: special treatment of mask_len==bits_per_word is necessary, as the originally generated mask would 
+    // HIP/AMD: special treatment of mask_len==bits_per_word is necessary, as the originally generated mask would
     // be 0 (due to overflow)
     auto const mask_word =
       cudf::detail::get_mask_offset_word(column.pushdown_mask, 0, row, end_bit) &

@@ -84,7 +84,7 @@ public class ColumnVectorTest extends CudfTestBase {
   static final double NEGATIVE_DOUBLE_NAN_UPPER_RANGE = Double.longBitsToDouble(0xffffffffffffffffL);
 
   // c = a * a - a
-  static String llvmir = 
+  static String llvmir =
   " ; Function Attrs: convergent mustprogress noinline nounwind \n"+
   " define hidden void @f(ptr noundef %output, i32 noundef %input) #2 { \n"+
   " entry: \n"+

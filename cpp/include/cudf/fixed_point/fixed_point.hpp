@@ -52,13 +52,13 @@
 #endif
 #include <cassert>
 
-// NOTE(HIP/AMD): Do not include cmath 
+// NOTE(HIP/AMD): Do not include cmath
 // when JIT-compiling through jitify.
 // Jitify does not provide a jitsafe
 // cmath builtin header and requires -nostdinc
-// to avoid duplicate definition conflicts. 
+// to avoid duplicate definition conflicts.
 // With -nostdinc, JIT compilation of cmath would fail
-// in recent ROCm builds as the system header <cmath> 
+// in recent ROCm builds as the system header <cmath>
 // then can't be found.
 #ifndef __HIPCC_RTC__
 #include <cmath>
@@ -218,7 +218,7 @@ CUDF_HOST_DEVICE inline constexpr T shift(T const& val, scale_type const& scale)
  *  It is intended to be used when converting a floating-point value to an integer representation,
  *  treating an overflow where the floating point type does not fit into the integer representation
  *  type specially.
- *  
+ *
  *  Note: This is a WAR for internal issue 106 on AMD platform.
  *  @param val A floating-point value of type T to be converted to type Rep.
  *  @return The converted value of type Rep.
@@ -656,7 +656,7 @@ class fixed_point {
    * @brief Returns a string representation of the fixed_point value.
    */
 // NOTE(AMD/HIP): Redefinition error (issue 304).
-#ifndef __HIPCC_RTC__  
+#ifndef __HIPCC_RTC__
    explicit operator std::string() const
   {
     if (_scale < 0) {

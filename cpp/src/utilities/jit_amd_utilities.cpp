@@ -34,7 +34,7 @@ namespace cudf {
   std::string get_arch_name_of_current_device() {
     hipDevice_t device;
     cudaDeviceProp device_prop;
-    
+
     cudaError_t ret;
 
     CUDF_CUDA_TRY(cudaGetDevice(&device));
@@ -45,7 +45,7 @@ namespace cudf {
     std::smatch match;
     std::string full_arch_name(device_prop.gcnArchName);
     std::string short_arch_name;
-    
+
     if (std::regex_search(full_arch_name, match, gfx_arch_pattern)) {
       short_arch_name = match[1].str(); // Extract the first capture group
     }
@@ -58,13 +58,13 @@ namespace cudf {
 
   std::string get_llvm_ir_target_features_for_arch(const std::string& arch_name) {
     std::string result = "";
-    
+
     // FIXME(HIP/AMD): Instead of hardcoding these strings, we might want to rely on Jitify to compile a dummy UDF to LLVM IR and extract the required attributes string
     if(arch_name=="gfx908") {
       result = "+16-bit-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64";
     }
     else if(arch_name=="gfx90a") {
-      result = "+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64";    
+      result = "+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64";
     }
     else if(arch_name=="gfx940" || arch_name=="gfx941" || arch_name=="gfx942") {
       result = "+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-ds-pk-add-16-insts,+atomic-fadd-rtn-insts,+atomic-flat-pk-add-16-insts,+atomic-global-pk-add-bf16-inst,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+fp8-insts,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+gfx940-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64";

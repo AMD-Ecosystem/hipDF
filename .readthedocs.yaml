@@ -38,4 +38,3 @@ build:
   commands:
     - mkdir --parents _readthedocs/html/
     - cp --recursive docs/_build/html/* _readthedocs/html/
-

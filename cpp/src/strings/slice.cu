@@ -59,7 +59,7 @@
 
 #include <hip/hip_cooperative_groups.h>
 //#include <cooperative_groups/reduce.h>
-//TODO(HIP/AMD): This is a temporary workaround for 
+//TODO(HIP/AMD): This is a temporary workaround for
 // the missing cg::reduce APIs in HIP's cooperative groups.
 #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #include <hip/amd_detail/amd_warp_sync_functions.h>

@@ -34,7 +34,7 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE. 
+// SOFTWARE.
 
 #include "compute_shared_memory_aggs.hpp"
 #include "global_memory_aggregator.cuh"
@@ -316,23 +316,23 @@ size_type get_available_shared_memory_size(cudf::size_type grid_size)
   // TODO(HIP/AMD): Switch to HIP equivalent of, see internal issue 257
   // cudaOccupancyAvailableDynamicSMemPerBlock when available
   // CUDF_CUDA_TRY(cudaOccupancyAvailableDynamicSMemPerBlock(
-  //   &dynamic_shmem_size, single_pass_shmem_aggs_kernel, 
+  //   &dynamic_shmem_size, single_pass_shmem_aggs_kernel,
   //   active_blocks_per_sm, GROUPBY_BLOCK_SIZE));
 
-  dynamic_shmem_size = 
+  dynamic_shmem_size =
       (max_dynamic_shmem_size - active_blocks_per_sm * static_shared_memory_per_block) / active_blocks_per_sm;
 
   // Enforce allocation granularity for static + dynamic shmem per each block
-  dynamic_shmem_size = 
-      allocation_granularity * 
-      ((dynamic_shmem_size + static_shared_memory_per_block) / allocation_granularity) 
+  dynamic_shmem_size =
+      allocation_granularity *
+      ((dynamic_shmem_size + static_shared_memory_per_block) / allocation_granularity)
       - static_shared_memory_per_block;
 
   // Handle invalid case where maximum number of threads is exceeded
   // TODO(HIP/AMD): Handle all invalid cases based on GROUPBY_BLOCK_SIZE
   if(GROUPBY_BLOCK_SIZE * active_blocks_per_sm>max_threads_per_sm)
     CUDF_FAIL("Unsupported configuration: The total number of threads per SM exceeds the maximum number of threads.");
-  
+
   return cudf::util::round_down_safe(static_cast<cudf::size_type>(0.5 * dynamic_shmem_size),
                                      ALIGNMENT);
 }

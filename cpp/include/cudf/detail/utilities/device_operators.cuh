@@ -90,10 +90,10 @@ CUDF_HOST_DEVICE inline auto max(LHS const& lhs, RHS const& rhs)
 // TODO(HIP/AMD): This operator is necessary for ITERATOR_BENCH (iterator.cu) file
 // where it was originally defined.
 // Unfortunately, hipcc/clang seems to need it visible earlier for the template instantiation
-// of DeviceSum::operator() to work properly. We're therefore moving it here for the time 
+// of DeviceSum::operator() to work properly. We're therefore moving it here for the time
 // being.
 template <typename T>
-CUDF_HOST_DEVICE thrust::pair<T, bool> operator+(thrust::pair<T, bool> const& lhs, thrust::pair<T, bool> const& rhs) 
+CUDF_HOST_DEVICE thrust::pair<T, bool> operator+(thrust::pair<T, bool> const& lhs, thrust::pair<T, bool> const& rhs)
 {
   return thrust::pair<T, bool>{lhs.first * lhs.second + rhs.first * rhs.second,
                                lhs.second + rhs.second};

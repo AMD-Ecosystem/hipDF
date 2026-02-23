@@ -55,8 +55,8 @@ A minimal free version of Conda is [Miniforge](https://conda-forge.org/download/
 ## Install hipDF via AMD PyPI
 
 ```{warning}
-Only install hipDF using AMD’s official package index.
-To ensure security, integrity, and supportability of your builds, consume packages exclusively from AMD’s official package index. Do not install, mirror, or resolve dependencies from any third‑party or unofficial indexes.
+Only install hipDF using AMD's official package index.
+To ensure security, integrity, and supportability of your builds, consume packages exclusively from AMD's official package index. Do not install, mirror, or resolve dependencies from any third‑party or unofficial indexes.
 ```
 
 Packaged versions of hipDF and its dependencies are distributed via

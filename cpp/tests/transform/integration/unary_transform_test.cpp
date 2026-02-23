@@ -158,7 +158,7 @@ __device__ inline void    fdsf   (
 )***";
 
   // c = a*a*a*a
-  std::string amd_llvm_ir = 
+  std::string amd_llvm_ir =
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, float noundef %1) #2 {
   %3 = alloca ptr, align 8, addrspace(5)
@@ -259,7 +259,7 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
     "__device__ inline void f(int* output,int input){*output = input*input - input;}";
 
   // c = a * a - a
-  std::string amd_llvm_ir = 
+  std::string amd_llvm_ir =
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i32 noundef %1) #2 {
   %3 = alloca ptr, align 8, addrspace(5)
@@ -350,7 +350,7 @@ __device__ inline void f(
 )***";
 
   // LLVM IR equivalent to cuda UDF
-  std::string amd_llvm_ir = 
+  std::string amd_llvm_ir =
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i8 noundef signext %1) #2 {
   %3 = alloca ptr, align 8, addrspace(5)
@@ -559,7 +559,7 @@ __device__ inline void transform(
 }
 )***";
 
-  std::string const amd_llvm_ir = 
+  std::string const amd_llvm_ir =
     R"***(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, float noundef %1, float noundef %2, float noundef %3) #2 {
   %5 = alloca ptr, align 8, addrspace(5)
@@ -913,7 +913,7 @@ ret;
 }
 )***";
 
-  std::string const amd_llvm_ir =  
+  std::string const amd_llvm_ir =
 R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, float noundef %1, float noundef %2, float noundef %3) #2 {
   %5 = alloca ptr, align 8, addrspace(5)
@@ -962,7 +962,7 @@ attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="
 !9 = !{!"omnipotent char", !10, i64 0}
 !10 = !{!"Simple C++ TBAA"}
 !11 = !{!12, !12, i64 0}
-!12 = !{!"float", !9, i64 0} 
+!12 = !{!"float", !9, i64 0}
 )'''";
 
   float const LOW         = 100.0F;

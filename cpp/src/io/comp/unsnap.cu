@@ -52,14 +52,14 @@
 namespace cudf::io::detail {
 constexpr int log2_batch_count = 2;  // 1..5
 #if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
-// TODO(HIP/AMD): fine-tune these parameters, need a size of 10 here so that 
+// TODO(HIP/AMD): fine-tune these parameters, need a size of 10 here so that
 // with warp_size=64, enough bytes are getting prefetched for WARP0 (decode_symbols)
 constexpr int log2_prefetch_size = 10;  // Must be at least LOG2_BATCH_SIZE+3
 /// 4 batches of 32 symbols
-constexpr int log2_batch_size  =  6; 
+constexpr int log2_batch_size  =  6;
 #else
 constexpr int log2_prefetch_size = 9;  // Must be at least LOG2_BATCH_SIZE+3
-constexpr int log2_batch_size  =  5; 
+constexpr int log2_batch_size  =  5;
 #endif
 
 constexpr int32_t batch_size    = (1 << log2_batch_size);
@@ -334,7 +334,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
     if (t == 0) {
       s->q.prefetch_rdpos = cur;
 // TODO(HIP/AMD): error: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Werror,-Wcuda-compat]
-#pragma unroll 1  // We don't want unrolling here 
+#pragma unroll 1  // We don't want unrolling here
       while (s->q.prefetch_wrpos < min(cur + 5 * batch_size, end)) {
         busy_wait(10);
       }

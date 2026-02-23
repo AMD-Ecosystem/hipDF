@@ -165,7 +165,7 @@ std::pair<rmm::device_uvector<string_index_pair>, std::unique_ptr<column>> gener
   auto const d_counts      = counts.data<size_type>();
 
   // convert match counts to token offsets
-  // NOTE(HIP/AMD): We need a range check, as idx is in [0, strings_count]. 
+  // NOTE(HIP/AMD): We need a range check, as idx is in [0, strings_count].
   // For idx==strings_count, d_strings.is_null(idx) is UB (and leads to a segfault in STRINGS_NVBENCH)
   auto map_fn = cuda::proclaim_return_type<size_type>(
     [strings_count, d_strings, d_counts, max_tokens] __device__(auto idx) -> size_type {

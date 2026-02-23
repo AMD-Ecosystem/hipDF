@@ -419,7 +419,7 @@ void roundtrip_test(cudf::io::compression_type compression)
       nvcomp::is_compression_disabled(nvcomp::compression_type::DEFLATE)) {
     GTEST_SKIP() << "GZIP/ZLIB compression is not supported with hipComp.";
   }
-  
+
   auto const stream = cudf::get_default_stream();
   auto const mr     = rmm::mr::get_current_device_resource();
   std::vector<uint8_t> expected;

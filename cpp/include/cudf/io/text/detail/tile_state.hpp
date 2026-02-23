@@ -93,7 +93,7 @@ struct scan_tile_state_view {
 
     //: NOTE(HIP/AMD): This threadfence is necessary, as the subsequent ThreadLoad
     // otherwise appears re-ordered before the loading of the atomic flag in line 92,
-    // thus resulting in the return of an invalid prefix. 
+    // thus resulting in the return of an invalid prefix.
     // See: internal issue 71
     __threadfence();
 

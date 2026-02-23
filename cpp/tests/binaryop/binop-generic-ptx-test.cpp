@@ -50,8 +50,8 @@ struct BinaryOperationGenericPTXTest : public BinaryOperationTest {};
 
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_FP32_FP32_FP32)
 {
-  // c = a*a*a + b 
-  std::string amd_llvm_ir_str = 
+  // c = a*a*a + b
+  std::string amd_llvm_ir_str =
     R"'''(
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {
@@ -175,8 +175,8 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT32)
 {
-  // c = a*a*a + b 
-  std::string amd_llvm_ir_str = 
+  // c = a*a*a + b
+  std::string amd_llvm_ir_str =
     R"'''(
 ; Function Attrs: cold noreturn nounwind
 declare void @llvm.trap() #1
@@ -298,7 +298,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT64)
 {
   // c = a*a*a + b*b
-  std::string amd_llvm_ir_str = 
+  std::string amd_llvm_ir_str =
     R"'''(
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {

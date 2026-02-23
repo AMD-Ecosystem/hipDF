@@ -169,13 +169,13 @@ void binary_operation(mutable_column_view& out,
   if constexpr(HIP_PLATFORM_AMD) {
     // NOTE(HIPRTC): This is a workaround for Jitify issue #55
     cuda_source = std::string("using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;")
-                + "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
+                + "extern \"C\" __device__ void GENERIC_BINARY_OP("
                 + output_type_name +"*"
                 + ","
                 + cudf::type_to_name(lhs.type())
                 + ","
                 + cudf::type_to_name(rhs.type())
-                + ");"; 
+                + ");";
     parsed_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_BINARY_OP");
     parsed_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_llvm_ir);
   }
@@ -196,11 +196,11 @@ void binary_operation(mutable_column_view& out,
                                            std::string("cudf::binops::jit::UserDefinedOp"));
 
   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-  jitify2::Kernel kernel; 
+  jitify2::Kernel kernel;
   // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
   if constexpr(HIP_PLATFORM_AMD) {
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);   
+      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);
   } else {
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});

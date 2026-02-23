@@ -412,10 +412,10 @@ TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsetsSingleCompressedGZipBlock)
 
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         DataChunkDecompressionTest,
-                        ::testing::Combine(::testing::Values("NVCOMP", 
+                        ::testing::Combine(::testing::Values("NVCOMP",
                                                              // TODO(HIP/AMD): Disable DeviceInternal tests - hipDF does not support DEVICE_INTERNAL decompression
                                                              // mode due to nvcomp policy requirements. LIBCUDF_NVCOMP_POLICY=OFF is not supported on hipDF.
-                                                             // "DEVICE_INTERNAL", 
+                                                             // "DEVICE_INTERNAL",
                                                              "HOST"),
                                            ::testing::Values(cudf::io::compression_type::ZLIB)));
 

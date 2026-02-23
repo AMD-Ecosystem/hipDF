@@ -481,18 +481,18 @@ std::string parse_single_function_cuda(std::string const& src, std::string const
 
 std::string parse_single_function_llvm_ir(std::string const& src, std::string const& function_name)
 {
-  // CAUTION(HIP/AMD): In lack of a better method, the function name of the UDF from Numba needs 
-  // to be "udf_funcname_from_numba_to_be_replaced_in_libcudf", so that we can 
+  // CAUTION(HIP/AMD): In lack of a better method, the function name of the UDF from Numba needs
+  // to be "udf_funcname_from_numba_to_be_replaced_in_libcudf", so that we can
   // match against it and replace it with the ones expected by the jitified kernels.
-  // The reason for this is that we get multiple device functions as LLVM IR from Numba and 
-  // we need to identify the UDF among these device functions so that we can properly link it 
+  // The reason for this is that we get multiple device functions as LLVM IR from Numba and
+  // we need to identify the UDF among these device functions so that we can properly link it
   // to the jitified kernel.
   const std::regex pattern_func_sig_numba("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libcudf");
   const std::regex pattern_func_name_numba("udf_funcname_from_numba_to_be_replaced_in_libcudf");
   const std::regex pattern_func_sig_name("define hidden void (@\\w+)");
 
   std::smatch func_sig_name_matches;
-  
+
   // For NUMBA LLVM IR input
   if(std::regex_search(src, pattern_func_sig_numba)) {
     return std::regex_replace(src, pattern_func_name_numba, function_name);
@@ -500,12 +500,12 @@ std::string parse_single_function_llvm_ir(std::string const& src, std::string co
   // For other input, we simply search for the first function in the LLVM IR and assume it to be the UDF
   else if(std::regex_search(src, func_sig_name_matches, pattern_func_sig_name)) {
     std::string result = src;
-    return result.replace(src.find(func_sig_name_matches[1]), func_sig_name_matches[1].length(), "@"+function_name); 
+    return result.replace(src.find(func_sig_name_matches[1]), func_sig_name_matches[1].length(), "@"+function_name);
   }
   else{
     CUDF_FAIL("Could not identify UDF input LLVM IR. For LLVM IR from Numba, the expected function "
               "name is \"udf_funcname_from_numba_to_be_replaced_in_libcudf\"\n");
-  } 
+  }
 }
 
 }  // namespace jit

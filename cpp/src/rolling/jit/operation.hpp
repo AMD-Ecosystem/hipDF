@@ -46,7 +46,7 @@ struct rolling_udf_ptx {
   __device__ static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
   {
     OutType ret;
-    rolling_udf(&ret, nullptr, nullptr, 0, 0, &in_col[start], count, sizeof(InType)); // NOTE(HIP/AMD): Changed from 0 to nullptr for second & third arguments. 
+    rolling_udf(&ret, nullptr, nullptr, 0, 0, &in_col[start], count, sizeof(InType)); // NOTE(HIP/AMD): Changed from 0 to nullptr for second & third arguments.
                                                                                       // In fact, this is what both CUDA's Numba as well as HIP's NUMBA expect.
     return ret;
   }

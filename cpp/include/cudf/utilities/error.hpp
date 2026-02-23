@@ -139,11 +139,11 @@ struct data_type_error : std::invalid_argument {
 
 }  // namespace CUDF_EXPORT cudf
 
-/** 
+/**
 * @brief Macro indicating that a exception has happened in a device code.
 * HIP: Added this macro to throw exception on the device code.
 *  Used in round_up_safe in cudf/cpp/include/cudf/detail/utilities/integer_utils.hpp.
-*/ 
+*/
 #define CUDF_EXP_ON_DEVICE(msg)         \
   do {                                  \
     printf("Exception: %s\n", msg);     \

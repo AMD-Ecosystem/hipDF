@@ -84,10 +84,10 @@ CUDF_KERNEL void valid_if_kernel(
     bitmask_type ballot = __ballot_sync((uint64_t) active_mask, p(*(begin + i)));
     if (lane_id == leader_lane) {
       output[cudf::word_index(i)] = ballot;
-      warp_valid_count += __POPC(ballot); 
+      warp_valid_count += __POPC(ballot);
     }
     i += stride;
-    active_mask = __ballot_sync((uint64_t) active_mask, i < size); 
+    active_mask = __ballot_sync((uint64_t) active_mask, i < size);
   }
 
   size_type block_count = single_lane_block_sum_reduce<block_size, leader_lane>(warp_valid_count);

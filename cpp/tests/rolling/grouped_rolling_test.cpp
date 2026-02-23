@@ -263,7 +263,7 @@ attributes #4 = { nounwind }
 !14 = !{!"int", !9, i64 0}
 !15 = distinct !{!15, !16}
 !16 = !{!"llvm.loop.mustprogress"}
-    )'''"};  
+    )'''"};
 
 template <typename T>
 class GroupedRollingTest : public cudf::test::BaseFixture {

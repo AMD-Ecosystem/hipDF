@@ -104,7 +104,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
              + "void*, void*, long long, long long, "
              + "const " + cudf::type_to_name(input.type()) + "*,"
              + "long long, long long);";
-        
+
         parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf_agg._source,
                                                                       udf_agg._function_name);
         parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
@@ -114,7 +114,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                                                             udf_agg._function_name,
 							    {{0, cudf::type_to_name(udf_agg._output_type) + " *"},
                                                              {5, "void const *"}});  // args 0 and 5 are pointers
-      }                                                 
+      }
       break;
     case aggregation::Kind::CUDA:
       // NOTE(HIPRTC): This is a workaround for Jitify issue #55
@@ -135,7 +135,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    following_window_str.c_str());
 
   std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-  jitify2::Kernel kernel;   
+  jitify2::Kernel kernel;
 
   if(udf_agg.kind==aggregation::Kind::PTX) {
     // CAUTION(HIP/AMD): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
@@ -147,7 +147,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
       kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
     }
-  } 
+  }
   else {
     kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {});

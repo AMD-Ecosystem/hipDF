@@ -78,7 +78,7 @@ __device__ inline void    fdsf   (
 )***";
 
   // c = a*a*a*a
-  char const* amd_llvm_ir = 
+  char const* amd_llvm_ir =
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)

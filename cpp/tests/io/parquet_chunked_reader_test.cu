@@ -1154,7 +1154,7 @@ void input_limit_test_write(std::vector<std::string> const& test_filenames,
     test_filenames[0], t, cudf::io::compression_type::NONE, cudf::io::dictionary_policy::NEVER);
   // compression with a codec that uses a lot of scratch space at decode time (2.5x the total
   // decompressed buffer size)
-  
+
   // TODO(HIP/AMD): ZSTD is presently not supported on AMD platform, adapt below indices when it becomes available
   //input_limit_test_write_one(
   //  test_filenames[1], t, cudf::io::compression_type::ZSTD, cudf::io::dictionary_policy::NEVER);

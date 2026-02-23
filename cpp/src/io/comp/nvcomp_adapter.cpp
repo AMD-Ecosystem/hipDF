@@ -1256,7 +1256,7 @@ size_t decompress_required_alignment(compression_type compression)
 std::optional<size_t> compress_max_allowed_chunk_size(compression_type compression)
 {
   switch (compression) {
-    case compression_type::DEFLATE: 
+    case compression_type::DEFLATE:
     case compression_type::GZIP: return 64 * 1024;
     case compression_type::SNAPPY: return std::nullopt;
     case compression_type::ZSTD:

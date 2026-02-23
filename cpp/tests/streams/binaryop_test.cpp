@@ -136,7 +136,7 @@ TEST_F(BinaryopPTXTest, ColumnColumnPTX)
 )***";
 
   // c = a*a*a + b*b
-  std::string amd_llvm_ir_str = 
+  std::string amd_llvm_ir_str =
     R"'''(
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {

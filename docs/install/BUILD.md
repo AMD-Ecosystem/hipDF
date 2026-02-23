@@ -38,7 +38,7 @@ For your convenience, the steps for the full installation including python enabl
 into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/rocmds-25.10/install_hipdf.sh) script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
-The following provides details on building the C++ components, running tests and benchmarks, and for building 
+The following provides details on building the C++ components, running tests and benchmarks, and for building
 the full hipDF installation including the Python layer. End users should see the [Installation instructions](./INSTALL.md).
 
 ## Build procedure for the C++ components
@@ -49,7 +49,7 @@ Building the C++/HIP components of hipDF can be achieved via the following comma
 ./build.sh libcudf tests benchmarks
 ```
 
-Here, `tests` and `benchmarks` are optional flags that enable the respective additional functionalities. 
+Here, `tests` and `benchmarks` are optional flags that enable the respective additional functionalities.
 
 ```{note}
 In order to fetch the dependencies `git` needs to be installed on your system.

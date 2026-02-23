@@ -173,7 +173,7 @@ CUDF_KERNEL void materialize_merged_bitmask_kernel(
 
     // Use ballot to find all valid bits in this warp and create the output
     // bitmask element
-    // TODO(HIP/AMD): error: non-constant-expression cannot be narrowed from type 'lane_mask' 
+    // TODO(HIP/AMD): error: non-constant-expression cannot be narrowed from type 'lane_mask'
     // (aka 'unsigned long long') to 'bitmask_type' (aka 'unsigned int') in initializer list [-Wc++11-narrowing]
     bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync((uint64_t) active_threads, source_bit_is_valid))};
 

@@ -106,7 +106,7 @@ rmm::device_uvector<char> make_chars_buffer(column_view const& offsets,
 
   auto const src_ptrs = thrust::make_transform_iterator(
     thrust::make_counting_iterator<uint32_t>(0),
-    cuda::proclaim_return_type<char*>([begin] __device__(uint32_t idx) { //TODO(HIP/AMD): changed return type to char* as otherwise rocPRIM ctries to 
+    cuda::proclaim_return_type<char*>([begin] __device__(uint32_t idx) { //TODO(HIP/AMD): changed return type to char* as otherwise rocPRIM ctries to
                                                                          // create a reference to void which is invalid.
       // Due to a bug in cub (https://github.com/NVIDIA/cccl/issues/586),
       // we have to use `const_cast` to remove `const` qualifier from the source pointer.

@@ -182,7 +182,7 @@ sort_groupby_helper::index_vector const& sort_groupby_helper::group_offsets(
     auto const ufn    = cudf::detail::unique_copy_fn<decltype(itr), decltype(row_eq)>{
       itr, duplicate_keep_option::KEEP_FIRST, row_eq, size - 1};
     thrust::transform(rmm::exec_policy(stream), itr, itr + size, result.begin(), ufn);
-    
+
     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select

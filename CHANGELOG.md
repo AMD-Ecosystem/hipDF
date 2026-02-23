@@ -35,7 +35,7 @@ Documentation for hipDF is available at
 
 ### Known limitations and notes
  * DEBUG builds with -O0 optimization are not currently supported. Use -Og or higher for DEBUG builds (default setting). Support for -O0 is planned in a future toolchain update.
- * When using the cudf.pandas acceleration layer with XNACK enabled and workloads that significantly exceed physical GPU VRAM (oversubscription), some systems may exhibit instability or reduced performance under heavy memory pressure. 
+ * When using the cudf.pandas acceleration layer with XNACK enabled and workloads that significantly exceed physical GPU VRAM (oversubscription), some systems may exhibit instability or reduced performance under heavy memory pressure.
  * Using the cudf.pandas acceleration layer with XNACK disabled (`HSA_XNACK=0`) can trigger instabilities.
 
 ## hipDF 1.0.0b1 for ROCm-DS 25.05

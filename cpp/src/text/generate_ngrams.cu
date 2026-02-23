@@ -34,7 +34,7 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE. 
+// SOFTWARE.
 
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_device_view.cuh>
@@ -61,7 +61,7 @@
 #include <rmm/exec_policy.hpp>
 
 #include <hip/hip_cooperative_groups.h>
-//TODO(HIP/AMD): This is a temporary workaround for 
+//TODO(HIP/AMD): This is a temporary workaround for
 // the missing cg::reduce APIs in HIP's cooperative groups.
 #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #include <cuda/functional>
