@@ -293,37 +293,46 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
   auto const count_matches = thrust::reduce(
     rmm::exec_policy_nosync(stream), count_matches_it, count_matches_it + larger_numrows);
   rmm::device_uvector<size_type> nonzero_matches(count_matches, stream, temp_mr);
-// <<<<<<< OLD CODE from 200637feab (5853dfa03d) - COMMENTED OUT
-//     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-//     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-//     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-//     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-//     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-//     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-//     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-//   thrust::copy_if(rmm::exec_policy_nosync(stream),
-//                   thrust::counting_iterator(0),
-//                   thrust::counting_iterator(0) + larger_numrows,
-//                   match_counts->begin(),
-//                   nonzero_matches.begin(),
-//                   thrust::identity{});
-// #else
-//   thrust::copy_if(rmm::exec_policy_nosync(stream),
-//                   thrust::make_counting_iterator(0),
-//                   thrust::make_counting_iterator(larger_numrows),
-//                   match_counts->begin(),
-//                   nonzero_matches.begin(),
-//                   cuda::std::identity{});
-// #endif
+// <<<<<<< OLD CODE from 5d9cc30a6b (115ec0f260) - COMMENTED OUT
+// // <<<<<<< OLD CODE from 200637feab (5853dfa03d) - COMMENTED OUT
+// //     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
+// //     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+// //     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+// //     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+// //     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+// //     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+// // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+// //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
+// //   thrust::copy_if(rmm::exec_policy_nosync(stream),
+// //                   thrust::counting_iterator(0),
+// //                   thrust::counting_iterator(0) + larger_numrows,
+// //                   match_counts->begin(),
+// //                   nonzero_matches.begin(),
+// //                   thrust::identity{});
+// // #else
+// //   thrust::copy_if(rmm::exec_policy_nosync(stream),
+// //                   thrust::make_counting_iterator(0),
+// //                   thrust::make_counting_iterator(larger_numrows),
+// //                   match_counts->begin(),
+// //                   nonzero_matches.begin(),
+// //                   cuda::std::identity{});
+// // #endif
+// // =======
+//   cudf::detail::copy_if(thrust::counting_iterator<size_type>(0),
+//                         thrust::counting_iterator<size_type>(larger_numrows),
+//                         match_counts->begin(),
+//                         nonzero_matches.begin(),
+//                         cuda::std::identity{},
+//                         stream);
+// // >>>>>>> END NEW CODE (5853dfa03d)
 // =======
-  cudf::detail::copy_if(thrust::counting_iterator<size_type>(0),
-                        thrust::counting_iterator<size_type>(larger_numrows),
-                        match_counts->begin(),
-                        nonzero_matches.begin(),
-                        cuda::std::identity{},
-                        stream);
-// >>>>>>> END NEW CODE (5853dfa03d)
+  cudf::detail::copy_if_async(thrust::counting_iterator<size_type>(0),
+                              thrust::counting_iterator<size_type>(larger_numrows),
+                              match_counts->begin(),
+                              nonzero_matches.begin(),
+                              cuda::std::identity{},
+                              stream);
+// >>>>>>> END NEW CODE (115ec0f260)
 
   // Use 64-bit prefix sums to handle large output sizes (> INT32_MAX rows)
   // The prefix sums can exceed INT32_MAX even though individual match counts are small
@@ -459,12 +468,12 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
   count_matches = reduce(count_matches_it, std::move(count_matches), larger_numrows, stream);
   auto const h_count_matches = count_matches.value(stream);
   rmm::device_uvector<size_type> nonzero_matches(h_count_matches, stream, temp_mr);
-  cudf::detail::copy_if(cuda::counting_iterator<size_type>(0),
-                        cuda::counting_iterator<size_type>(larger_numrows),
-                        match_counts->begin(),
-                        nonzero_matches.begin(),
-                        cuda::std::identity{},
-                        stream);
+  cudf::detail::copy_if_async(cuda::counting_iterator<size_type>(0),
+                              cuda::counting_iterator<size_type>(larger_numrows),
+                              match_counts->begin(),
+                              nonzero_matches.begin(),
+                              cuda::std::identity{},
+                              stream);
 
   cudf::detail::device_scalar<int64_t> total_matches(stream, temp_mr);
   auto match_offsets =
@@ -485,7 +494,7 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
 
   // Fill in unmatched entries (left-join-only rows)
   // These rows exist in the larger table but have no matches in the smaller table
-  cudf::detail::copy_if(
+  cudf::detail::copy_if_async(
     cuda::counting_iterator<size_type>(0),
     cuda::counting_iterator<size_type>(larger_numrows),
     match_counts->begin(),
@@ -782,7 +791,7 @@ rmm::device_uvector<size_type> sort_merge_join::preprocessed_table::map_table_to
   auto temp_mr                  = cudf::get_current_device_resource_ref();
   auto const table_mapping_size = _table_view.num_rows() - _num_nulls.value();
   rmm::device_uvector<size_type> table_mapping(table_mapping_size, stream, temp_mr);
-  cudf::detail::copy_if(
+  cudf::detail::copy_if_async(
     cuda::counting_iterator<size_type>(0),
     cuda::counting_iterator<size_type>(_table_view.num_rows()),
     cuda::counting_iterator<size_type>(0),
@@ -979,12 +988,12 @@ sort_merge_join::left_join(table_view const& left,
       // Append filtered null rows with JoinNoMatch for right side
       auto const validity_mask =
         static_cast<bitmask_type const*>(preprocessed_left._validity_mask.value().data());
-      cudf::detail::copy_if(cuda::counting_iterator<size_type>(0),
-                            cuda::counting_iterator<size_type>(left.num_rows()),
-                            cuda::counting_iterator<size_type>(0),
-                            left_result_indices.begin() + preprocessed_left_indices->size(),
-                            is_row_null{validity_mask},
-                            stream);
+      cudf::detail::copy_if_async(cuda::counting_iterator<size_type>(0),
+                                  cuda::counting_iterator<size_type>(left.num_rows()),
+                                  cuda::counting_iterator<size_type>(0),
+                                  left_result_indices.begin() + preprocessed_left_indices->size(),
+                                  is_row_null{validity_mask},
+                                  stream);
       cub::DeviceTransform::Fill(right_result_indices.begin() + preprocessed_right_indices->size(),
                                  num_filtered_nulls,
                                  JoinNoMatch,
