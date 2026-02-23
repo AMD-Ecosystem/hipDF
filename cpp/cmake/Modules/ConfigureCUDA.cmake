@@ -13,25 +13,22 @@
 # =============================================================================
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # =============================================================================
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -74,23 +71,24 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
   list(APPEND CUDF_GPU_FLAGS -Xcompiler=-rdynamic)
 endif()
 
+# Set cuDF target properties including RPATH, compile options, and flags
 macro(set_cudf_target_properties)
   set_target_properties(
     cudf
     PROPERTIES BUILD_RPATH "\$ORIGIN"
-              INSTALL_RPATH "\$ORIGIN"
-              # set target compile options
-              CXX_STANDARD 20
-              CXX_STANDARD_REQUIRED ON
-              # For std:: support of __int128_t. Can be removed once using cuda::std
-              CXX_EXTENSIONS ON
-              CXX_VISIBILITY_PRESET hidden
-              CUDA_STANDARD 20
-              CUDA_STANDARD_REQUIRED ON
-              CUDA_VISIBILITY_PRESET hidden
-              POSITION_INDEPENDENT_CODE ON
-              INTERFACE_POSITION_INDEPENDENT_CODE ON
-              LINK_FLAGS "-Wl,--exclude-libs,libzstd.a"
+               INSTALL_RPATH "\$ORIGIN"
+               # set target compile options
+               CXX_STANDARD 20
+               CXX_STANDARD_REQUIRED ON
+               # For std:: support of __int128_t. Can be removed once using cuda::std
+               CXX_EXTENSIONS ON
+               CXX_VISIBILITY_PRESET hidden
+               CUDA_STANDARD 20
+               CUDA_STANDARD_REQUIRED ON
+               CUDA_VISIBILITY_PRESET hidden
+               POSITION_INDEPENDENT_CODE ON
+               INTERFACE_POSITION_INDEPENDENT_CODE ON
+               LINK_FLAGS "-Wl,--exclude-libs,libzstd.a"
   )
 
   # Export the compiler flags and definitions so the downstream applications can optionally retrieve
@@ -121,12 +119,12 @@ macro(set_cudf_target_properties)
   endif()
   target_compile_options(
     cudf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-                "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
+                 "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
   )
 
   target_compile_definitions(
     cudf PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
-                 "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_DEFINITIONS}>>"
+                "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_DEFINITIONS}>>"
   )
 
   if(GPU_STATIC_RUNTIME)
@@ -142,6 +140,7 @@ macro(set_cudf_target_properties)
   endif()
 endmacro()
 
+# Set cuDF test default stream target properties
 macro(set_cudftest_default_stream_target)
   set_target_properties(
     cudftest_default_stream
@@ -157,6 +156,7 @@ macro(set_cudftest_default_stream_target)
   )
 endmacro()
 
+# Set cuDF test util target properties
 macro(set_cudftestutil_target)
   set_target_properties(
     cudftestutil

@@ -13,25 +13,22 @@
 # =============================================================================
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # =============================================================================
 
 # Create `jitify_preprocess` executable
@@ -39,7 +36,7 @@ add_executable(jitify_preprocess "${JITIFY_INCLUDE_DIR}/jitify2_preprocess.cpp")
 
 target_compile_definitions(jitify_preprocess PRIVATE "_FILE_OFFSET_BITS=64")
 rapids_hip_set_runtime(jitify_preprocess USE_STATIC ${GPU_STATIC_RUNTIME})
-target_link_libraries(jitify_preprocess PUBLIC hip::host  ${CMAKE_DL_LIBS})
+target_link_libraries(jitify_preprocess PUBLIC hip::host ${CMAKE_DL_LIBS})
 
 # Take a list of files to JIT-compile and run them through jitify_preprocess.
 function(jit_preprocess_files)
@@ -60,14 +57,13 @@ function(jit_preprocess_files)
       set(CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS "-DCUDF_USE_WARPSIZE_32")
     endif()
 
-    # TODO(HIP/AMD): Use base output directory without the file's directory structure to avoid duplication in the folder structur with jitify-hip
-    # The below might have to be re-enabled for upcoming jitify-hip version.
-    # get_filename_component(ARG_OUTPUT_DIR "${ARG_OUTPUT}" DIRECTORY)
+    # TODO(HIP/AMD): Use base output directory without the file's directory structure to avoid
+    # duplication in the folder structure with jitify-hip The below might have to be re-enabled for
+    # upcoming jitify-hip version. get_filename_component(ARG_OUTPUT_DIR "${ARG_OUTPUT}" DIRECTORY)
     set(ARG_OUTPUT_DIR ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files)
-    
-    # FIXME(HIP/AMD): Workaround for libhipcxx to ensure build with nostdinc++
-    # Note: need to pass _FILE_OFFSET_BITS=64 in COMMAND due to a limitation in how conda builds
-    # glibc
+
+    # FIXME(HIP/AMD): Workaround for libhipcxx to ensure build with nostdinc++ Note: need to pass
+    # _FILE_OFFSET_BITS=64 in COMMAND due to a limitation in how conda builds glibc
     add_custom_command(
       OUTPUT ${ARG_OUTPUT}
       DEPENDS jitify_preprocess "${ARG_SOURCE_DIRECTORY}/${ARG_FILE}"
@@ -78,11 +74,14 @@ function(jit_preprocess_files)
         "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR}
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o ${ARG_OUTPUT_DIR} -i -std=c++20
         -D_FILE_OFFSET_BITS=64 # NOTE(HIP/AMD): -remove-unused-globals?
-        -D__HIPCC_RTC__ -DCUDF_RUNTIME_JIT  ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS}
-        -I${CUDF_SOURCE_DIR}/include/hiprtc_war #NOTE(HIP/AMD): Exclude <new>/<cuda_wrapper/new> headers completely from JIT compilation as they do not work with hipRTC's nostdinc++ option (set in jitify)
+        -D__HIPCC_RTC__ -DCUDF_RUNTIME_JIT ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS}
+        -I${CUDF_SOURCE_DIR}/include/hiprtc_war # NOTE(HIP/AMD): Exclude <new>/<cuda_wrapper/new>
+                                                # headers completely from JIT compilation as they do
+                                                # not work with hipRTC's nostdinc++ option (set in
+                                                # jitify)
         -I${CUDF_SOURCE_DIR}/include -I${CUDF_SOURCE_DIR}/src ${includes}
-        -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
-        --no-preinclude-workarounds --no-replace-pragma-once #--diag-suppress=47 --device-int128
+        -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS} --no-preinclude-workarounds
+        --no-replace-pragma-once # --diag-suppress=47 --device-int128
       COMMENT "Custom command to JIT-compile files."
     )
   endforeach()

@@ -2,25 +2,22 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 cmake_minimum_required(VERSION 3.30.4 FATAL_ERROR)
 
@@ -52,25 +49,33 @@ list(APPEND CUDF_CUDA_FLAGS --expt-extended-lambda --expt-relaxed-constexpr)
 
 add_executable(libcudf_apis libcudf_apis.cpp)
 target_compile_features(libcudf_apis PRIVATE cxx_std_20)
-target_link_libraries(libcudf_apis PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+# TODO(HIP/AMD): Re-enable once nvtx equivalent is available
+target_link_libraries(libcudf_apis PRIVATE cudf::cudf)
+# $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
 install(TARGETS libcudf_apis DESTINATION bin/examples/libcudf/strings)
 
 add_executable(custom_with_malloc custom_with_malloc.cu)
 target_compile_features(custom_with_malloc PRIVATE cxx_std_20)
 target_compile_options(custom_with_malloc PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>")
-target_link_libraries(custom_with_malloc PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+# TODO(HIP/AMD): Re-enable once nvtx equivalent is available
+target_link_libraries(custom_with_malloc PRIVATE cudf::cudf)
+# $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
 install(TARGETS custom_with_malloc DESTINATION bin/examples/libcudf/strings)
 
 add_executable(custom_prealloc custom_prealloc.cu)
 target_compile_features(custom_prealloc PRIVATE cxx_std_20)
 target_compile_options(custom_prealloc PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>")
-target_link_libraries(custom_prealloc PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+# TODO(HIP/AMD): Re-enable once nvtx equivalent is available
+target_link_libraries(custom_prealloc PRIVATE cudf::cudf)
+# $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
 install(TARGETS custom_prealloc DESTINATION bin/examples/libcudf/strings)
 
 add_executable(custom_optimized custom_optimized.cu)
 target_compile_features(custom_optimized PRIVATE cxx_std_20)
 target_compile_options(custom_optimized PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>")
-target_link_libraries(custom_optimized PRIVATE cudf::cudf) # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+# TODO(HIP/AMD): Re-enable once nvtx equivalent is available
+target_link_libraries(custom_optimized PRIVATE cudf::cudf)
+# $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
 install(TARGETS custom_optimized DESTINATION bin/examples/libcudf/strings)
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/names.csv DESTINATION bin/examples/libcudf/strings)

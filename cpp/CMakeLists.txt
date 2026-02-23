@@ -15,23 +15,20 @@
 #
 # Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # =============================================================================
 
 cmake_minimum_required(VERSION 3.30.4 FATAL_ERROR)
@@ -43,8 +40,7 @@ include(../cmake/rapids_config.cmake)
 include(rapids-cmake)
 include(rapids-cpm)
 include(rapids-hip)
-#TODO(HIP/AMD): enable
-#include(${rapids-cmake-dir}/cuda/set_runtime.cmake)
+# TODO(HIP/AMD): enable include(${rapids-cmake-dir}/cuda/set_runtime.cmake)
 include(rapids-export)
 include(rapids-find)
 
@@ -63,14 +59,17 @@ project(
 
 # NOTE(HIP/AMD): required for rocThrust
 if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*clang\\+\\+")
-  OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+"))
-  message(FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers.")
+   OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+")
+)
+  message(
+    FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers."
+  )
 endif()
 
-# NOTE(HIP/AMD): for compatibility with existing build scripts,
-# we explicitly treat unsupported CMake operations here.
-# Some of them may be silently ignored, but the default is to exit the CMake build configuration.
-# This options makes the build ignore unsupported but enabled CMake options and proceed.
+# NOTE(HIP/AMD): for compatibility with existing build scripts, we explicitly treat unsupported
+# CMake operations here. Some of them may be silently ignored, but the default is to exit the CMake
+# build configuration. This options makes the build ignore unsupported but enabled CMake options and
+# proceed.
 if($ENV{CUDF_CMAKE_IGNORE_UNSUPPORTED_OPTIONS})
   set(IGNORE_UNSUPPORTED_OPTIONS ON)
 else()
@@ -80,19 +79,37 @@ endif()
 # Helper function to handle unsupported cmake options.
 function(handle_unsupported_cmake_option option_name force_exit)
   if(${option_name} AND ${force_exit})
-    message(FATAL_ERROR "${option_name} option is not supported. Please disable it and reconfigure the project.")
+    message(
+      FATAL_ERROR
+        "${option_name} option is not supported. Please disable it and reconfigure the project."
+    )
   endif()
-  if(${option_name} AND NOT ${force_exit} AND ${IGNORE_UNSUPPORTED_OPTIONS})
-    message(WARNING "${option_name} option is not supported. Disabling ${option_name} and proceeding with build.")
-    set(${option_name} OFF CACHE BOOL "" FORCE)
+  if(${option_name}
+     AND NOT ${force_exit}
+     AND ${IGNORE_UNSUPPORTED_OPTIONS}
+  )
+    message(
+      WARNING
+        "${option_name} option is not supported. Disabling ${option_name} and proceeding with build."
+    )
+    set(${option_name}
+        OFF
+        CACHE BOOL "" FORCE
+    )
   endif()
-  if(${option_name} AND NOT ${force_exit} AND NOT ${IGNORE_UNSUPPORTED_OPTIONS})
-    message(FATAL_ERROR "${option_name} option is not supported. To proceed with build, disable ${option_name} or set the environment variable CUDF_CMAKE_IGNORE_UNSUPPORTED_OPTIONS to \"ON\".")
+  if(${option_name}
+     AND NOT ${force_exit}
+     AND NOT ${IGNORE_UNSUPPORTED_OPTIONS}
+  )
+    message(
+      FATAL_ERROR
+        "${option_name} option is not supported. To proceed with build, disable ${option_name} or set the environment variable CUDF_CMAKE_IGNORE_UNSUPPORTED_OPTIONS to \"ON\"."
+    )
   endif()
 endfunction()
 
-# NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
-# This ensures that those packages are compiled with the same architecture flags.
+# NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags. This ensures
+# that those packages are compiled with the same architecture flags.
 set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 
 rapids_cmake_write_version_file(include/cudf/version_config.hpp)
@@ -110,7 +127,9 @@ option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
-option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx11*/gfx12* architectures (RDNA 3/4)." OFF)
+option(CUDF_USE_WARPSIZE_32
+       "Uses warp size 32 in cuDF. Only to be used for gfx11*/gfx12* architectures (RDNA 3/4)." OFF
+)
 mark_as_advanced(CUDF_USE_WARPSIZE_32)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
@@ -128,16 +147,16 @@ option(
 option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated declarations." OFF)
 # Option to enable line info in CUDA/HIP device compilation to allow introspection when profiling /
 # memchecking
-option(GPU_ENABLE_LINEINFO
-       "Generate line-number information for GPU device code." OFF
-)
+option(GPU_ENABLE_LINEINFO "Generate line-number information for GPU device code." OFF)
 handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
 option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
 option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
-option(BUILD_ASAN "Whether to build with address sanitization" OFF )
-option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS "Enable workarounds for potential compiler bugs in specific code places" ON)
+option(BUILD_ASAN "Whether to build with address sanitization" OFF)
+option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS
+       "Enable workarounds for potential compiler bugs in specific code places" ON
+)
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
@@ -161,37 +180,63 @@ option(
 )
 handle_unsupported_cmake_option("CUDF_KVIKIO_REMOTE_IO" TRUE)
 
-list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx942"
-                        "gfx90a:sramecc+:xnack-" "gfx908:sramecc+:xnack-"
-                        "gfx942:sramecc+:xnack-" "gfx950:sramecc+:xnack-"
-                        "gfx90a:xnack+" "gfx942:xnack+" "gfx950:xnack+"
-                        "gfx90a:xnack-" "gfx942:xnack-" "gfx950:xnack-")
+list(
+  APPEND
+  WS_64_ARCHS
+  "gfx90a"
+  "gfx908"
+  "gfx942"
+  "gfx90a:sramecc+:xnack-"
+  "gfx908:sramecc+:xnack-"
+  "gfx942:sramecc+:xnack-"
+  "gfx950:sramecc+:xnack-"
+  "gfx90a:xnack+"
+  "gfx942:xnack+"
+  "gfx950:xnack+"
+  "gfx90a:xnack-"
+  "gfx942:xnack-"
+  "gfx950:xnack-"
+)
 
-list(APPEND WS_32_ARCHS "gfx1100" "gfx1101" "gfx1102" "gfx1103" "gfx1150" "gfx1151"
-                        "gfx1200" "gfx1201")
+list(APPEND WS_32_ARCHS "gfx1100" "gfx1101" "gfx1102" "gfx1103" "gfx1150" "gfx1151" "gfx1200"
+     "gfx1201"
+)
 
-list(APPEND EXPERIMENTAL_WS_64_ARCHS "gfx950" "gfx950:sramecc+:xnack-"
-                                     "gfx950:xnack+" "gfx950:xnack-")
+list(APPEND EXPERIMENTAL_WS_64_ARCHS "gfx950" "gfx950:sramecc+:xnack-" "gfx950:xnack+"
+     "gfx950:xnack-"
+)
 
 if(CUDF_USE_WARPSIZE_32)
-message(WARNING "Support for warp size 32 is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
+  message(
+    WARNING
+      "Support for warp size 32 is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk."
+  )
 
-foreach(arch ${CMAKE_HIP_ARCHITECTURES})
-  if(${arch} IN_LIST WS_64_ARCHS OR ${arch} IN_LIST EXPERIMENTAL_WS_64_ARCHS)
-    message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with warp size 32.")
-  endif()
-endforeach()
+  foreach(arch ${CMAKE_HIP_ARCHITECTURES})
+    if(${arch} IN_LIST WS_64_ARCHS OR ${arch} IN_LIST EXPERIMENTAL_WS_64_ARCHS)
+      message(
+        FATAL_ERROR
+          "Aborting, as the provided architecture ${arch} is not supported with warp size 32."
+      )
+    endif()
+  endforeach()
 
 else()
 
-foreach(arch ${CMAKE_HIP_ARCHITECTURES})
-  if(${arch} IN_LIST WS_32_ARCHS)
-    message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported when building hipDF for warp size 64. Consider enabling the experimental flag CUDF_USE_WARPSIZE_32 (in CMake) or set --warpsize32 (build.sh) to proceed with the build.")
-  endif()
-  if(${arch} IN_LIST EXPERIMENTAL_WS_64_ARCHS)
-    message(WARNING "The provided architecture ${arch} is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
-  endif()
-endforeach()
+  foreach(arch ${CMAKE_HIP_ARCHITECTURES})
+    if(${arch} IN_LIST WS_32_ARCHS)
+      message(
+        FATAL_ERROR
+          "Aborting, as the provided architecture ${arch} is not supported when building hipDF for warp size 64. Consider enabling the experimental flag CUDF_USE_WARPSIZE_32 (in CMake) or set --warpsize32 (build.sh) to proceed with the build."
+      )
+    endif()
+    if(${arch} IN_LIST EXPERIMENTAL_WS_64_ARCHS)
+      message(
+        WARNING
+          "The provided architecture ${arch} is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk."
+      )
+    endif()
+  endforeach()
 
 endif()
 
@@ -232,7 +277,8 @@ set(CUDF_GPU_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_GPU_DEFINITIONS "HIP_ENABLE_WARP_SYNC_BUILTINS")
 
-# NOTE(HIP/AMD): Add mcmodel flags to avoid "relocation R_X86_64_PC32 out of range" errors with large code
+# NOTE(HIP/AMD): Add mcmodel flags to avoid "relocation R_X86_64_PC32 out of range" errors with
+# large code
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=large")
 set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=large")
 set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -mcmodel=large")
@@ -348,8 +394,9 @@ endfunction()
 
 # ##################################################################################################
 # * conda environment -----------------------------------------------------------------------------
-# TODO(HIP/AMD): We keep debug flags as they are and set them separately, as rapids_cmake_support_conda_env
-# would set them to O0 which is presently not supported for hipDF (internal issue 307)
+#   TODO(HIP/AMD): We keep debug flags as they are and set them separately, as
+#   rapids_cmake_support_conda_env would set them to O0 which is presently not supported for hipDF
+#   (internal issue 307)
 rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH KEEP_DEBUG_FLAGS)
 
 # ##################################################################################################
@@ -389,7 +436,7 @@ include(cmake/thirdparty/get_jitify.cmake)
 
 # find NVTX
 if(USE_NVTX)
-  include(cmake/thirdparty/get_nvtx.cmake) #TODO(HIP/AMD): add rocTX
+  include(cmake/thirdparty/get_nvtx.cmake) # TODO(HIP/AMD): add rocTX
 endif()
 # find nvCOMP
 include(cmake/thirdparty/get_nvcomp.cmake)
@@ -422,7 +469,7 @@ include(cmake/Modules/JitifyPreprocessKernels.cmake)
 
 # find KvikIO
 if(CUDA_BACKEND)
-include(cmake/thirdparty/get_kvikio.cmake)
+  include(cmake/thirdparty/get_kvikio.cmake)
 endif()
 
 # find nanoarrow
@@ -964,500 +1011,510 @@ add_library(
 if((CMAKE_BUILD_TYPE MATCHES Debug) OR BUILD_ASAN)
   message(VERBOSE "CUDF: Building with debugging flags")
 
-  # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is hanging)
-  # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround (issue 66).
-  set_source_files_properties(src/join/mixed_join_size_kernel.cu
-                              src/join/mixed_join_size_kernel_nulls.cu
-                              src/join/mixed_join_kernel.cu
-                              src/join/mixed_join_kernel_nulls.cu
-                              src/join/conditional_join.cu
-                              src/transform/compute_column_kernel_null_complex.cu
-                              src/transform/compute_column_kernel_null_primitive.cu
-                              PROPERTIES COMPILE_FLAGS "-DNDEBUG")
+  # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is
+  # hanging) in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround (issue 66).
+  set_source_files_properties(
+    src/join/mixed_join_size_kernel.cu
+    src/join/mixed_join_size_kernel_nulls.cu
+    src/join/mixed_join_kernel.cu
+    src/join/mixed_join_kernel_nulls.cu
+    src/join/conditional_join.cu
+    src/transform/compute_column_kernel_null_complex.cu
+    src/transform/compute_column_kernel_null_primitive.cu
+    PROPERTIES COMPILE_FLAGS "-DNDEBUG"
+  )
 endif()
 
 if(BUILD_ASAN)
-  list(APPEND SUPPORTED_ASAN_ARCHS "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
-                                   "gfx942:xnack+" "gfx950:xnack+")
+  list(APPEND SUPPORTED_ASAN_ARCHS "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+" "gfx942:xnack+"
+       "gfx950:xnack+"
+  )
   foreach(arch ${CMAKE_HIP_ARCHITECTURES})
     if(NOT ${arch} IN_LIST SUPPORTED_ASAN_ARCHS)
-      message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with ASAN.\n"
-                          "Please make sure you compile for xnack+, e.g., with CMAKE_HIP_ARCHITECTURES=\"gfx90a:xnack+\"")
+      message(
+        FATAL_ERROR
+          "Aborting, as the provided architecture ${arch} is not supported with ASAN.\n"
+          "Please make sure you compile for xnack+, e.g., with CMAKE_HIP_ARCHITECTURES=\"gfx90a:xnack+\""
+      )
     endif()
   endforeach()
 
   # FIXME(HIP/AMD): Not all source files can presently be compiled with ASAN and hipcc
   set(ASAN_SOURCE_FILES
-    src/aggregation/aggregation.cpp
-    src/aggregation/aggregation.cu
-    src/aggregation/result_cache.cpp
-    src/ast/expression_parser.cpp
-    src/ast/expressions.cpp
-    src/ast/operators.cpp
-    src/binaryop/binaryop.cpp
-    src/binaryop/compiled/ATan2.cu
-    src/binaryop/compiled/Add.cu
-    src/binaryop/compiled/BitwiseAnd.cu
-    src/binaryop/compiled/BitwiseOr.cu
-    src/binaryop/compiled/BitwiseXor.cu
-    src/binaryop/compiled/Div.cu
-    src/binaryop/compiled/FloorDiv.cu
-    src/binaryop/compiled/Greater.cu
-    src/binaryop/compiled/GreaterEqual.cu
-    src/binaryop/compiled/IntPow.cu
-    src/binaryop/compiled/Less.cu
-    src/binaryop/compiled/LessEqual.cu
-    src/binaryop/compiled/LogBase.cu
-    src/binaryop/compiled/LogicalAnd.cu
-    src/binaryop/compiled/LogicalOr.cu
-    src/binaryop/compiled/Mod.cu
-    src/binaryop/compiled/Mul.cu
-    src/binaryop/compiled/NullEquals.cu
-    src/binaryop/compiled/NullNotEquals.cu
-    src/binaryop/compiled/NullLogicalAnd.cu
-    src/binaryop/compiled/NullLogicalOr.cu
-    src/binaryop/compiled/NullMax.cu
-    src/binaryop/compiled/NullMin.cu
-    src/binaryop/compiled/PMod.cu
-    src/binaryop/compiled/Pow.cu
-    src/binaryop/compiled/PyMod.cu
-    src/binaryop/compiled/ShiftLeft.cu
-    src/binaryop/compiled/ShiftRight.cu
-    src/binaryop/compiled/ShiftRightUnsigned.cu
-    src/binaryop/compiled/Sub.cu
-    src/binaryop/compiled/TrueDiv.cu
-    src/binaryop/compiled/binary_ops.cu
-    src/binaryop/compiled/equality_ops.cu
-    src/binaryop/compiled/util.cpp
-    src/labeling/label_bins.cu
-    src/bitmask/null_mask.cu
-    src/bitmask/is_element_valid.cpp
-    src/column/column.cu
-    src/column/column_device_view.cu
-    src/column/column_factories.cpp
-    src/column/column_factories.cu
-    src/column/column_view.cpp
-    src/copying/concatenate.cu
-    src/copying/contiguous_split.cu
-    src/copying/copy.cpp
-    src/copying/copy.cu
-    src/copying/copy_range.cu
-    src/copying/gather.cu
-    src/copying/get_element.cu
-    src/copying/pack.cpp
-    src/copying/purge_nonempty_nulls.cu
-    src/copying/reverse.cu
-    src/copying/sample.cu
-    src/copying/scatter.cu
-    src/copying/shift.cu
-    src/copying/slice.cu
-    src/copying/split.cpp
-    src/copying/segmented_shift.cu
-    src/datetime/datetime_ops.cu
-    src/dictionary/add_keys.cu
-    src/dictionary/decode.cu
-    src/dictionary/detail/concatenate.cu
-    src/dictionary/detail/merge.cu
-    src/dictionary/dictionary_column_view.cpp
-    src/dictionary/dictionary_factories.cu
-    src/dictionary/encode.cu
-    src/dictionary/remove_keys.cu
-    src/dictionary/replace.cu
-    src/dictionary/search.cu
-    src/dictionary/set_keys.cu
-    src/filling/calendrical_month_sequence.cu
-    src/filling/fill.cu
-    src/filling/repeat.cu
-    src/filling/sequence.cu
-    src/groupby/groupby.cu
-    src/groupby/hash/compute_aggregations.cu
-    src/groupby/hash/compute_aggregations_null.cu
-    src/groupby/hash/compute_global_memory_aggs.cu
-    src/groupby/hash/compute_global_memory_aggs_null.cu
-    src/groupby/hash/compute_groupby.cu
-    src/groupby/hash/compute_mapping_indices.cu
-    src/groupby/hash/compute_mapping_indices_null.cu
-    src/groupby/hash/compute_shared_memory_aggs.cu
-    src/groupby/hash/create_sparse_results_table.cu
-    src/groupby/hash/flatten_single_pass_aggs.cpp
-    src/groupby/hash/groupby.cu
-    src/groupby/hash/hash_compound_agg_finalizer.cu
-    src/groupby/hash/sparse_to_dense_results.cu
-    src/groupby/sort/aggregate.cpp
-    src/groupby/sort/group_argmax.cu
-    src/groupby/sort/group_argmin.cu
-    src/groupby/sort/group_collect.cu
-    src/groupby/sort/group_correlation.cu
-    src/groupby/sort/group_count.cu
-    src/groupby/sort/group_histogram.cu
-    src/groupby/sort/group_m2.cu
-    src/groupby/sort/group_max.cu
-    src/groupby/sort/group_min.cu
-    src/groupby/sort/group_merge_lists.cu
-    src/groupby/sort/group_merge_m2.cu
-    src/groupby/sort/group_nth_element.cu
-    src/groupby/sort/group_nunique.cu
-    src/groupby/sort/group_product.cu
-    src/groupby/sort/group_quantiles.cu
-    src/groupby/sort/group_std.cu
-    src/groupby/sort/group_sum.cu
-    src/groupby/sort/group_count_scan.cu
-    src/groupby/sort/group_max_scan.cu
-    src/groupby/sort/group_min_scan.cu
-    src/groupby/sort/group_product_scan.cu
-    src/groupby/sort/group_rank_scan.cu
-    src/groupby/sort/group_replace_nulls.cu
-    src/groupby/sort/group_sum_scan.cu
-    src/groupby/sort/host_udf_aggregation.cpp
-    src/groupby/sort/scan.cpp
-    src/groupby/sort/sort_helper.cu
-    src/hash/md5_hash.cu
-    src/hash/murmurhash3_x86_32.cu
-    src/hash/murmurhash3_x64_128.cu
-    src/hash/sha1_hash.cu
-    src/hash/sha224_hash.cu
-    src/hash/sha256_hash.cu
-    src/hash/sha384_hash.cu
-    src/hash/sha512_hash.cu
-    src/hash/xxhash_32.cu
-    src/hash/xxhash_64.cu
-    src/interop/dlpack.cpp
-    src/interop/arrow_utilities.cpp
-    src/interop/decimal_conversion_utilities.cu
-    src/interop/to_arrow_device.cu
-    src/interop/to_arrow_host.cu
-    src/interop/from_arrow_device.cu
-    src/interop/from_arrow_host.cu
-    src/interop/from_arrow_stream.cu
-    src/interop/to_arrow_schema.cpp
-    src/io/avro/avro.cpp
-    src/io/avro/avro_gpu.cu
-    src/io/avro/reader_impl.cu
-    src/io/comp/brotli_dict.cpp
-    src/io/comp/comp.cpp
-    src/io/comp/comp.cu
-    src/io/comp/cpu_unbz2.cpp
-    src/io/comp/debrotli.cu
-    src/io/comp/gpuinflate.cu
-    src/io/comp/nvcomp_adapter.cpp
-    src/io/comp/nvcomp_adapter.cu
-    src/io/comp/snap.cu
-    src/io/comp/uncomp.cpp
-    src/io/comp/unsnap.cu
-    src/io/csv/csv_gpu.cu
-    src/io/csv/durations.cu
-    src/io/csv/reader_impl.cu
-    src/io/csv/writer_impl.cu
-    src/io/functions.cpp
-    src/io/json/host_tree_algorithms.cu
-    src/io/json/json_column.cu
-    src/io/json/column_tree_construction.cu
-    src/io/json/json_normalization.cu
-    src/io/json/json_tree.cu
-    src/io/json/nested_json_gpu.cu
-    src/io/json/read_json.cu
-    src/io/json/parser_features.cpp
-    src/io/json/process_tokens.cu
-    src/io/json/write_json.cu
-    src/io/orc/aggregate_orc_metadata.cpp
-    src/io/orc/dict_enc.cu
-    src/io/orc/orc.cpp
-    src/io/orc/reader_impl.cu
-    src/io/orc/reader_impl_chunking.cu
-    src/io/orc/reader_impl_decode.cu
-    src/io/orc/reader_impl_helpers.cpp
-    src/io/orc/stats_enc.cu
-    src/io/orc/stripe_data.cu
-    src/io/orc/stripe_enc.cu
-    src/io/orc/stripe_init.cu
-    src/datetime/timezone.cpp
-    src/io/orc/writer_impl.cu
-    src/io/parquet/arrow_schema_writer.cpp
-    src/io/parquet/bloom_filter_reader.cu
-    src/io/parquet/compact_protocol_reader.cpp
-    src/io/parquet/compact_protocol_writer.cpp
-    src/io/parquet/decode_preprocess.cu
-    src/io/parquet/page_data.cu
-    src/io/parquet/chunk_dict.cu
-    src/io/parquet/page_enc.cu
-    src/io/parquet/page_hdr.cu
-    src/io/parquet/page_delta_decode.cu
-    src/io/parquet/page_string_decode.cu
-    src/io/parquet/predicate_pushdown.cpp
-    src/io/parquet/reader.cpp
-    src/io/parquet/reader_impl.cpp
-    src/io/parquet/reader_impl_chunking.cu
-    src/io/parquet/reader_impl_helpers.cpp
-    src/io/parquet/reader_impl_preprocess.cu
-    src/io/parquet/writer_impl.cu
-    src/io/parquet/writer_impl_helpers.cpp
-    src/io/parquet/decode_fixed.cu
-    src/io/statistics/orc_column_statistics.cu
-    src/io/statistics/parquet_column_statistics.cu
-    src/io/text/byte_range_info.cpp
-    src/io/text/data_chunk_source_factories.cpp
-    src/io/text/bgzip_data_chunk_source.cu
-    src/io/text/bgzip_utils.cpp
-    src/io/text/multibyte_split.cu
-    src/io/utilities/base64_utilities.cpp
-    src/io/utilities/column_buffer.cpp
-    src/io/utilities/column_buffer_strings.cu
-    src/io/utilities/config_utils.cpp
-    src/io/utilities/data_casting.cu
-    src/io/utilities/data_sink.cpp
-    src/io/utilities/datasource.cpp
-    src/io/utilities/file_io_utilities.cpp
-    src/io/utilities/row_selection.cpp
-    src/io/utilities/type_inference.cu
-    src/io/utilities/trie.cu
-    src/jit/cache.cpp
-    src/jit/parser.cpp
-    src/jit/util.cpp
-    src/join/conditional_join.cu
-    src/join/cross_join.cu
-    src/join/distinct_hash_join.cu
-    src/join/hash_join.cu
-    src/join/join.cu
-    src/join/join_utils.cu
-    src/join/mixed_join.cu
-    src/join/mixed_join_kernel.cu
-    src/join/mixed_join_kernel_nulls.cu
-    src/join/mixed_join_kernels_semi.cu
-    src/join/mixed_join_semi.cu
-    src/join/mixed_join_size_kernel.cu
-    src/join/mixed_join_size_kernel_nulls.cu
-    src/join/semi_join.cu
-    src/json/json_path.cu
-    src/lists/contains.cu
-    src/lists/combine/concatenate_list_elements.cu
-    src/lists/combine/concatenate_rows.cu
-    src/lists/copying/concatenate.cu
-    src/lists/copying/copying.cu
-    src/lists/copying/gather.cu
-    src/lists/copying/segmented_gather.cu
-    src/lists/copying/scatter_helper.cu
-    src/lists/count_elements.cu
-    src/lists/dremel.cu
-    src/lists/explode.cu
-    src/lists/extract.cu
-    src/lists/interleave_columns.cu
-    src/lists/lists_column_factories.cu
-    src/lists/lists_column_view.cu
-    src/lists/reverse.cu
-    src/lists/segmented_sort.cu
-    src/lists/sequences.cu
-    src/lists/set_operations.cu
-    src/lists/stream_compaction/apply_boolean_mask.cu
-    src/lists/stream_compaction/distinct.cu
-    src/lists/utilities.cu
-    src/merge/merge.cu
-    src/partitioning/partitioning.cu
-    src/partitioning/round_robin.cu
-    src/quantiles/tdigest/tdigest.cu
-    src/quantiles/tdigest/tdigest_aggregation.cu
-    src/quantiles/tdigest/tdigest_column_view.cpp
-    src/quantiles/quantile.cu
-    src/quantiles/quantiles.cu
-    src/reductions/all.cu
-    src/reductions/any.cu
-    src/reductions/collect_ops.cu
-    src/reductions/histogram.cu
-    src/reductions/max.cu
-    src/reductions/mean.cu
-    src/reductions/min.cu
-    src/reductions/minmax.cu
-    src/reductions/nth_element.cu
-    src/reductions/product.cu
-    src/reductions/reductions.cpp
-    src/reductions/scan/rank_scan.cu
-    src/reductions/scan/ewm.cu
-    src/reductions/scan/scan.cpp
-    src/reductions/scan/scan_exclusive.cu
-    src/reductions/scan/scan_inclusive.cu
-    src/reductions/segmented/all.cu
-    src/reductions/segmented/any.cu
-    src/reductions/segmented/counts.cu
-    src/reductions/segmented/max.cu
-    src/reductions/segmented/mean.cu
-    src/reductions/segmented/min.cu
-    src/reductions/segmented/nunique.cu
-    src/reductions/segmented/product.cu
-    src/reductions/segmented/reductions.cpp
-    src/reductions/segmented/std.cu
-    src/reductions/segmented/sum.cu
-    src/reductions/segmented/sum_of_squares.cu
-    src/reductions/segmented/update_validity.cu
-    src/reductions/segmented/var.cu
-    src/reductions/std.cu
-    src/reductions/sum.cu
-    src/reductions/sum_of_squares.cu
-    src/reductions/var.cu
-    src/replace/clamp.cu
-    src/replace/nans.cu
-    src/replace/nulls.cu
-    src/replace/replace.cu
-    src/reshape/byte_cast.cu
-    src/reshape/interleave_columns.cu
-    src/reshape/tile.cu
-    src/rolling/detail/optimized_unbounded_window.cpp
-    src/rolling/detail/rolling_collect_list.cu
-    src/rolling/detail/rolling_fixed_window.cu
-    src/rolling/detail/rolling_variable_window.cu
-    src/rolling/grouped_rolling.cu
-    src/rolling/range_window_bounds.cpp
-    src/rolling/rolling.cu
-    src/round/round.cu
-    src/scalar/scalar.cpp
-    src/scalar/scalar_factories.cpp
-    src/search/contains_column.cu
-    src/search/contains_scalar.cu
-    src/search/contains_table.cu
-    src/search/search_ordered.cu
-    src/sort/is_sorted.cu
-    src/sort/rank.cu
-    src/sort/segmented_sort.cu
-    src/sort/sort_column.cu
-    src/sort/sort.cu
-    src/sort/stable_segmented_sort.cu
-    src/sort/stable_sort_column.cu
-    src/sort/stable_sort.cu
-    src/stream_compaction/apply_boolean_mask.cu
-    src/stream_compaction/distinct.cu
-    src/stream_compaction/distinct_count.cu
-    src/stream_compaction/distinct_helpers.cu
-    src/stream_compaction/drop_nans.cu
-    src/stream_compaction/drop_nulls.cu
-    src/stream_compaction/stable_distinct.cu
-    src/stream_compaction/unique.cu
-    src/stream_compaction/unique_count.cu
-    src/stream_compaction/unique_count_column.cu
-    src/strings/attributes.cu
-    src/strings/capitalize.cu
-    src/strings/case.cu
-    src/strings/char_types/char_cases.cu
-    src/strings/char_types/char_types.cu
-    src/strings/combine/concatenate.cu
-    src/strings/combine/join.cu
-    src/strings/combine/join_list_elements.cu
-    src/strings/contains.cu
-    src/strings/convert/convert_booleans.cu
-    src/strings/convert/convert_datetime.cu
-    src/strings/convert/convert_durations.cu
-    src/strings/convert/convert_fixed_point.cu
-    src/strings/convert/convert_floats.cu
-    src/strings/convert/convert_hex.cu
-    src/strings/convert/convert_integers.cu
-    src/strings/convert/convert_ipv4.cu
-    src/strings/convert/convert_urls.cu
-    src/strings/convert/convert_lists.cu
-    src/strings/copying/concatenate.cu
-    src/strings/copying/copying.cu
-    src/strings/copying/copy_range.cu
-    src/strings/copying/shift.cu
-    src/strings/count_matches.cu
-    src/strings/extract/extract.cu
-    src/strings/extract/extract_all.cu
-    src/strings/filling/fill.cu
-    src/strings/filter_chars.cu
-    src/strings/like.cu
-    src/strings/merge/merge.cu
-    src/strings/padding.cu
-    src/strings/regex/regcomp.cpp
-    src/strings/regex/regexec.cpp
-    src/strings/regex/regex_program.cpp
-    src/strings/repeat_strings.cu
-    src/strings/replace/backref_re.cu
-    src/strings/replace/find_replace.cu
-    src/strings/replace/multi.cu
-    src/strings/replace/multi_re.cu
-    src/strings/replace/replace.cu
-    src/strings/replace/replace_nulls.cu
-    src/strings/replace/replace_re.cu
-    src/strings/replace/replace_slice.cu
-    src/strings/reverse.cu
-    src/strings/scan/scan_inclusive.cu
-    src/strings/search/contains_multiple.cu
-    src/strings/search/findall.cu
-    src/strings/search/find.cu
-    src/strings/search/find_multiple.cu
-    src/strings/slice.cu
-    src/strings/split/partition.cu
-    src/strings/split/split.cu
-    src/strings/split/split_re.cu
-    src/strings/split/split_record.cu
-    src/strings/strings_column_factories.cu
-    src/strings/strings_column_view.cpp
-    src/strings/strings_scalar_factories.cpp
-    src/strings/strip.cu
-    src/strings/translate.cu
-    src/strings/utilities.cu
-    src/strings/wrap.cu
-    src/structs/copying/concatenate.cu
-    src/structs/scan/scan_inclusive.cu
-    src/structs/structs_column_factories.cu
-    src/structs/structs_column_view.cpp
-    src/structs/utilities.cpp
-    src/table/row_operators.cu
-    src/table/table.cpp
-    src/table/table_device_view.cu
-    src/table/table_view.cpp
-    src/text/detokenize.cu
-    src/text/edit_distance.cu
-    src/text/generate_ngrams.cu
-    src/text/jaccard.cu
-    src/text/minhash.cu
-    src/text/ngrams_tokenize.cu
-    src/text/normalize.cu
-    src/text/replace.cu
-    src/text/stemmer.cu
-    src/text/bpe/byte_pair_encoding.cu
-    src/text/bpe/load_merge_pairs.cu
-    src/text/subword/data_normalizer.cu
-    src/text/subword/load_hash_file.cu
-    src/text/subword/subword_tokenize.cu
-    src/text/subword/wordpiece_tokenizer.cu
-    src/text/tokenize.cu
-    src/text/vocabulary_tokenize.cu
-    src/transform/bools_to_mask.cu
-    src/transform/compute_column.cu
-    src/transform/encode.cu
-    src/transform/mask_to_bools.cu
-    src/transform/nans_to_nulls.cu
-    src/transform/one_hot_encode.cu
-    src/transform/row_bit_count.cu
-    src/transform/transform.cpp
-    src/transpose/transpose.cu
-    src/unary/cast_ops.cu
-    src/unary/math_ops.cu
-    src/unary/nan_ops.cu
-    src/unary/null_ops.cu
-    src/utilities/cuda.cpp
-    src/utilities/cuda_memcpy.cu
-    src/utilities/default_stream.cpp
-    src/utilities/host_memory.cpp
-    src/utilities/jit_amd_utilities.cpp
-    src/utilities/linked_column.cpp
-    src/utilities/prefetch.cpp
-    src/utilities/stacktrace.cpp
-    src/utilities/stream_pool.cpp
-    src/utilities/traits.cpp
-    src/utilities/type_checks.cpp
-    src/utilities/type_dispatcher.cpp
+      src/aggregation/aggregation.cpp
+      src/aggregation/aggregation.cu
+      src/aggregation/result_cache.cpp
+      src/ast/expression_parser.cpp
+      src/ast/expressions.cpp
+      src/ast/operators.cpp
+      src/binaryop/binaryop.cpp
+      src/binaryop/compiled/ATan2.cu
+      src/binaryop/compiled/Add.cu
+      src/binaryop/compiled/BitwiseAnd.cu
+      src/binaryop/compiled/BitwiseOr.cu
+      src/binaryop/compiled/BitwiseXor.cu
+      src/binaryop/compiled/Div.cu
+      src/binaryop/compiled/FloorDiv.cu
+      src/binaryop/compiled/Greater.cu
+      src/binaryop/compiled/GreaterEqual.cu
+      src/binaryop/compiled/IntPow.cu
+      src/binaryop/compiled/Less.cu
+      src/binaryop/compiled/LessEqual.cu
+      src/binaryop/compiled/LogBase.cu
+      src/binaryop/compiled/LogicalAnd.cu
+      src/binaryop/compiled/LogicalOr.cu
+      src/binaryop/compiled/Mod.cu
+      src/binaryop/compiled/Mul.cu
+      src/binaryop/compiled/NullEquals.cu
+      src/binaryop/compiled/NullNotEquals.cu
+      src/binaryop/compiled/NullLogicalAnd.cu
+      src/binaryop/compiled/NullLogicalOr.cu
+      src/binaryop/compiled/NullMax.cu
+      src/binaryop/compiled/NullMin.cu
+      src/binaryop/compiled/PMod.cu
+      src/binaryop/compiled/Pow.cu
+      src/binaryop/compiled/PyMod.cu
+      src/binaryop/compiled/ShiftLeft.cu
+      src/binaryop/compiled/ShiftRight.cu
+      src/binaryop/compiled/ShiftRightUnsigned.cu
+      src/binaryop/compiled/Sub.cu
+      src/binaryop/compiled/TrueDiv.cu
+      src/binaryop/compiled/binary_ops.cu
+      src/binaryop/compiled/equality_ops.cu
+      src/binaryop/compiled/util.cpp
+      src/labeling/label_bins.cu
+      src/bitmask/null_mask.cu
+      src/bitmask/is_element_valid.cpp
+      src/column/column.cu
+      src/column/column_device_view.cu
+      src/column/column_factories.cpp
+      src/column/column_factories.cu
+      src/column/column_view.cpp
+      src/copying/concatenate.cu
+      src/copying/contiguous_split.cu
+      src/copying/copy.cpp
+      src/copying/copy.cu
+      src/copying/copy_range.cu
+      src/copying/gather.cu
+      src/copying/get_element.cu
+      src/copying/pack.cpp
+      src/copying/purge_nonempty_nulls.cu
+      src/copying/reverse.cu
+      src/copying/sample.cu
+      src/copying/scatter.cu
+      src/copying/shift.cu
+      src/copying/slice.cu
+      src/copying/split.cpp
+      src/copying/segmented_shift.cu
+      src/datetime/datetime_ops.cu
+      src/dictionary/add_keys.cu
+      src/dictionary/decode.cu
+      src/dictionary/detail/concatenate.cu
+      src/dictionary/detail/merge.cu
+      src/dictionary/dictionary_column_view.cpp
+      src/dictionary/dictionary_factories.cu
+      src/dictionary/encode.cu
+      src/dictionary/remove_keys.cu
+      src/dictionary/replace.cu
+      src/dictionary/search.cu
+      src/dictionary/set_keys.cu
+      src/filling/calendrical_month_sequence.cu
+      src/filling/fill.cu
+      src/filling/repeat.cu
+      src/filling/sequence.cu
+      src/groupby/groupby.cu
+      src/groupby/hash/compute_aggregations.cu
+      src/groupby/hash/compute_aggregations_null.cu
+      src/groupby/hash/compute_global_memory_aggs.cu
+      src/groupby/hash/compute_global_memory_aggs_null.cu
+      src/groupby/hash/compute_groupby.cu
+      src/groupby/hash/compute_mapping_indices.cu
+      src/groupby/hash/compute_mapping_indices_null.cu
+      src/groupby/hash/compute_shared_memory_aggs.cu
+      src/groupby/hash/create_sparse_results_table.cu
+      src/groupby/hash/flatten_single_pass_aggs.cpp
+      src/groupby/hash/groupby.cu
+      src/groupby/hash/hash_compound_agg_finalizer.cu
+      src/groupby/hash/sparse_to_dense_results.cu
+      src/groupby/sort/aggregate.cpp
+      src/groupby/sort/group_argmax.cu
+      src/groupby/sort/group_argmin.cu
+      src/groupby/sort/group_collect.cu
+      src/groupby/sort/group_correlation.cu
+      src/groupby/sort/group_count.cu
+      src/groupby/sort/group_histogram.cu
+      src/groupby/sort/group_m2.cu
+      src/groupby/sort/group_max.cu
+      src/groupby/sort/group_min.cu
+      src/groupby/sort/group_merge_lists.cu
+      src/groupby/sort/group_merge_m2.cu
+      src/groupby/sort/group_nth_element.cu
+      src/groupby/sort/group_nunique.cu
+      src/groupby/sort/group_product.cu
+      src/groupby/sort/group_quantiles.cu
+      src/groupby/sort/group_std.cu
+      src/groupby/sort/group_sum.cu
+      src/groupby/sort/group_count_scan.cu
+      src/groupby/sort/group_max_scan.cu
+      src/groupby/sort/group_min_scan.cu
+      src/groupby/sort/group_product_scan.cu
+      src/groupby/sort/group_rank_scan.cu
+      src/groupby/sort/group_replace_nulls.cu
+      src/groupby/sort/group_sum_scan.cu
+      src/groupby/sort/host_udf_aggregation.cpp
+      src/groupby/sort/scan.cpp
+      src/groupby/sort/sort_helper.cu
+      src/hash/md5_hash.cu
+      src/hash/murmurhash3_x86_32.cu
+      src/hash/murmurhash3_x64_128.cu
+      src/hash/sha1_hash.cu
+      src/hash/sha224_hash.cu
+      src/hash/sha256_hash.cu
+      src/hash/sha384_hash.cu
+      src/hash/sha512_hash.cu
+      src/hash/xxhash_32.cu
+      src/hash/xxhash_64.cu
+      src/interop/dlpack.cpp
+      src/interop/arrow_utilities.cpp
+      src/interop/decimal_conversion_utilities.cu
+      src/interop/to_arrow_device.cu
+      src/interop/to_arrow_host.cu
+      src/interop/from_arrow_device.cu
+      src/interop/from_arrow_host.cu
+      src/interop/from_arrow_stream.cu
+      src/interop/to_arrow_schema.cpp
+      src/io/avro/avro.cpp
+      src/io/avro/avro_gpu.cu
+      src/io/avro/reader_impl.cu
+      src/io/comp/brotli_dict.cpp
+      src/io/comp/comp.cpp
+      src/io/comp/comp.cu
+      src/io/comp/cpu_unbz2.cpp
+      src/io/comp/debrotli.cu
+      src/io/comp/gpuinflate.cu
+      src/io/comp/nvcomp_adapter.cpp
+      src/io/comp/nvcomp_adapter.cu
+      src/io/comp/snap.cu
+      src/io/comp/uncomp.cpp
+      src/io/comp/unsnap.cu
+      src/io/csv/csv_gpu.cu
+      src/io/csv/durations.cu
+      src/io/csv/reader_impl.cu
+      src/io/csv/writer_impl.cu
+      src/io/functions.cpp
+      src/io/json/host_tree_algorithms.cu
+      src/io/json/json_column.cu
+      src/io/json/column_tree_construction.cu
+      src/io/json/json_normalization.cu
+      src/io/json/json_tree.cu
+      src/io/json/nested_json_gpu.cu
+      src/io/json/read_json.cu
+      src/io/json/parser_features.cpp
+      src/io/json/process_tokens.cu
+      src/io/json/write_json.cu
+      src/io/orc/aggregate_orc_metadata.cpp
+      src/io/orc/dict_enc.cu
+      src/io/orc/orc.cpp
+      src/io/orc/reader_impl.cu
+      src/io/orc/reader_impl_chunking.cu
+      src/io/orc/reader_impl_decode.cu
+      src/io/orc/reader_impl_helpers.cpp
+      src/io/orc/stats_enc.cu
+      src/io/orc/stripe_data.cu
+      src/io/orc/stripe_enc.cu
+      src/io/orc/stripe_init.cu
+      src/datetime/timezone.cpp
+      src/io/orc/writer_impl.cu
+      src/io/parquet/arrow_schema_writer.cpp
+      src/io/parquet/bloom_filter_reader.cu
+      src/io/parquet/compact_protocol_reader.cpp
+      src/io/parquet/compact_protocol_writer.cpp
+      src/io/parquet/decode_preprocess.cu
+      src/io/parquet/page_data.cu
+      src/io/parquet/chunk_dict.cu
+      src/io/parquet/page_enc.cu
+      src/io/parquet/page_hdr.cu
+      src/io/parquet/page_delta_decode.cu
+      src/io/parquet/page_string_decode.cu
+      src/io/parquet/predicate_pushdown.cpp
+      src/io/parquet/reader.cpp
+      src/io/parquet/reader_impl.cpp
+      src/io/parquet/reader_impl_chunking.cu
+      src/io/parquet/reader_impl_helpers.cpp
+      src/io/parquet/reader_impl_preprocess.cu
+      src/io/parquet/writer_impl.cu
+      src/io/parquet/writer_impl_helpers.cpp
+      src/io/parquet/decode_fixed.cu
+      src/io/statistics/orc_column_statistics.cu
+      src/io/statistics/parquet_column_statistics.cu
+      src/io/text/byte_range_info.cpp
+      src/io/text/data_chunk_source_factories.cpp
+      src/io/text/bgzip_data_chunk_source.cu
+      src/io/text/bgzip_utils.cpp
+      src/io/text/multibyte_split.cu
+      src/io/utilities/base64_utilities.cpp
+      src/io/utilities/column_buffer.cpp
+      src/io/utilities/column_buffer_strings.cu
+      src/io/utilities/config_utils.cpp
+      src/io/utilities/data_casting.cu
+      src/io/utilities/data_sink.cpp
+      src/io/utilities/datasource.cpp
+      src/io/utilities/file_io_utilities.cpp
+      src/io/utilities/row_selection.cpp
+      src/io/utilities/type_inference.cu
+      src/io/utilities/trie.cu
+      src/jit/cache.cpp
+      src/jit/parser.cpp
+      src/jit/util.cpp
+      src/join/conditional_join.cu
+      src/join/cross_join.cu
+      src/join/distinct_hash_join.cu
+      src/join/hash_join.cu
+      src/join/join.cu
+      src/join/join_utils.cu
+      src/join/mixed_join.cu
+      src/join/mixed_join_kernel.cu
+      src/join/mixed_join_kernel_nulls.cu
+      src/join/mixed_join_kernels_semi.cu
+      src/join/mixed_join_semi.cu
+      src/join/mixed_join_size_kernel.cu
+      src/join/mixed_join_size_kernel_nulls.cu
+      src/join/semi_join.cu
+      src/json/json_path.cu
+      src/lists/contains.cu
+      src/lists/combine/concatenate_list_elements.cu
+      src/lists/combine/concatenate_rows.cu
+      src/lists/copying/concatenate.cu
+      src/lists/copying/copying.cu
+      src/lists/copying/gather.cu
+      src/lists/copying/segmented_gather.cu
+      src/lists/copying/scatter_helper.cu
+      src/lists/count_elements.cu
+      src/lists/dremel.cu
+      src/lists/explode.cu
+      src/lists/extract.cu
+      src/lists/interleave_columns.cu
+      src/lists/lists_column_factories.cu
+      src/lists/lists_column_view.cu
+      src/lists/reverse.cu
+      src/lists/segmented_sort.cu
+      src/lists/sequences.cu
+      src/lists/set_operations.cu
+      src/lists/stream_compaction/apply_boolean_mask.cu
+      src/lists/stream_compaction/distinct.cu
+      src/lists/utilities.cu
+      src/merge/merge.cu
+      src/partitioning/partitioning.cu
+      src/partitioning/round_robin.cu
+      src/quantiles/tdigest/tdigest.cu
+      src/quantiles/tdigest/tdigest_aggregation.cu
+      src/quantiles/tdigest/tdigest_column_view.cpp
+      src/quantiles/quantile.cu
+      src/quantiles/quantiles.cu
+      src/reductions/all.cu
+      src/reductions/any.cu
+      src/reductions/collect_ops.cu
+      src/reductions/histogram.cu
+      src/reductions/max.cu
+      src/reductions/mean.cu
+      src/reductions/min.cu
+      src/reductions/minmax.cu
+      src/reductions/nth_element.cu
+      src/reductions/product.cu
+      src/reductions/reductions.cpp
+      src/reductions/scan/rank_scan.cu
+      src/reductions/scan/ewm.cu
+      src/reductions/scan/scan.cpp
+      src/reductions/scan/scan_exclusive.cu
+      src/reductions/scan/scan_inclusive.cu
+      src/reductions/segmented/all.cu
+      src/reductions/segmented/any.cu
+      src/reductions/segmented/counts.cu
+      src/reductions/segmented/max.cu
+      src/reductions/segmented/mean.cu
+      src/reductions/segmented/min.cu
+      src/reductions/segmented/nunique.cu
+      src/reductions/segmented/product.cu
+      src/reductions/segmented/reductions.cpp
+      src/reductions/segmented/std.cu
+      src/reductions/segmented/sum.cu
+      src/reductions/segmented/sum_of_squares.cu
+      src/reductions/segmented/update_validity.cu
+      src/reductions/segmented/var.cu
+      src/reductions/std.cu
+      src/reductions/sum.cu
+      src/reductions/sum_of_squares.cu
+      src/reductions/var.cu
+      src/replace/clamp.cu
+      src/replace/nans.cu
+      src/replace/nulls.cu
+      src/replace/replace.cu
+      src/reshape/byte_cast.cu
+      src/reshape/interleave_columns.cu
+      src/reshape/tile.cu
+      src/rolling/detail/optimized_unbounded_window.cpp
+      src/rolling/detail/rolling_collect_list.cu
+      src/rolling/detail/rolling_fixed_window.cu
+      src/rolling/detail/rolling_variable_window.cu
+      src/rolling/grouped_rolling.cu
+      src/rolling/range_window_bounds.cpp
+      src/rolling/rolling.cu
+      src/round/round.cu
+      src/scalar/scalar.cpp
+      src/scalar/scalar_factories.cpp
+      src/search/contains_column.cu
+      src/search/contains_scalar.cu
+      src/search/contains_table.cu
+      src/search/search_ordered.cu
+      src/sort/is_sorted.cu
+      src/sort/rank.cu
+      src/sort/segmented_sort.cu
+      src/sort/sort_column.cu
+      src/sort/sort.cu
+      src/sort/stable_segmented_sort.cu
+      src/sort/stable_sort_column.cu
+      src/sort/stable_sort.cu
+      src/stream_compaction/apply_boolean_mask.cu
+      src/stream_compaction/distinct.cu
+      src/stream_compaction/distinct_count.cu
+      src/stream_compaction/distinct_helpers.cu
+      src/stream_compaction/drop_nans.cu
+      src/stream_compaction/drop_nulls.cu
+      src/stream_compaction/stable_distinct.cu
+      src/stream_compaction/unique.cu
+      src/stream_compaction/unique_count.cu
+      src/stream_compaction/unique_count_column.cu
+      src/strings/attributes.cu
+      src/strings/capitalize.cu
+      src/strings/case.cu
+      src/strings/char_types/char_cases.cu
+      src/strings/char_types/char_types.cu
+      src/strings/combine/concatenate.cu
+      src/strings/combine/join.cu
+      src/strings/combine/join_list_elements.cu
+      src/strings/contains.cu
+      src/strings/convert/convert_booleans.cu
+      src/strings/convert/convert_datetime.cu
+      src/strings/convert/convert_durations.cu
+      src/strings/convert/convert_fixed_point.cu
+      src/strings/convert/convert_floats.cu
+      src/strings/convert/convert_hex.cu
+      src/strings/convert/convert_integers.cu
+      src/strings/convert/convert_ipv4.cu
+      src/strings/convert/convert_urls.cu
+      src/strings/convert/convert_lists.cu
+      src/strings/copying/concatenate.cu
+      src/strings/copying/copying.cu
+      src/strings/copying/copy_range.cu
+      src/strings/copying/shift.cu
+      src/strings/count_matches.cu
+      src/strings/extract/extract.cu
+      src/strings/extract/extract_all.cu
+      src/strings/filling/fill.cu
+      src/strings/filter_chars.cu
+      src/strings/like.cu
+      src/strings/merge/merge.cu
+      src/strings/padding.cu
+      src/strings/regex/regcomp.cpp
+      src/strings/regex/regexec.cpp
+      src/strings/regex/regex_program.cpp
+      src/strings/repeat_strings.cu
+      src/strings/replace/backref_re.cu
+      src/strings/replace/find_replace.cu
+      src/strings/replace/multi.cu
+      src/strings/replace/multi_re.cu
+      src/strings/replace/replace.cu
+      src/strings/replace/replace_nulls.cu
+      src/strings/replace/replace_re.cu
+      src/strings/replace/replace_slice.cu
+      src/strings/reverse.cu
+      src/strings/scan/scan_inclusive.cu
+      src/strings/search/contains_multiple.cu
+      src/strings/search/findall.cu
+      src/strings/search/find.cu
+      src/strings/search/find_multiple.cu
+      src/strings/slice.cu
+      src/strings/split/partition.cu
+      src/strings/split/split.cu
+      src/strings/split/split_re.cu
+      src/strings/split/split_record.cu
+      src/strings/strings_column_factories.cu
+      src/strings/strings_column_view.cpp
+      src/strings/strings_scalar_factories.cpp
+      src/strings/strip.cu
+      src/strings/translate.cu
+      src/strings/utilities.cu
+      src/strings/wrap.cu
+      src/structs/copying/concatenate.cu
+      src/structs/scan/scan_inclusive.cu
+      src/structs/structs_column_factories.cu
+      src/structs/structs_column_view.cpp
+      src/structs/utilities.cpp
+      src/table/row_operators.cu
+      src/table/table.cpp
+      src/table/table_device_view.cu
+      src/table/table_view.cpp
+      src/text/detokenize.cu
+      src/text/edit_distance.cu
+      src/text/generate_ngrams.cu
+      src/text/jaccard.cu
+      src/text/minhash.cu
+      src/text/ngrams_tokenize.cu
+      src/text/normalize.cu
+      src/text/replace.cu
+      src/text/stemmer.cu
+      src/text/bpe/byte_pair_encoding.cu
+      src/text/bpe/load_merge_pairs.cu
+      src/text/subword/data_normalizer.cu
+      src/text/subword/load_hash_file.cu
+      src/text/subword/subword_tokenize.cu
+      src/text/subword/wordpiece_tokenizer.cu
+      src/text/tokenize.cu
+      src/text/vocabulary_tokenize.cu
+      src/transform/bools_to_mask.cu
+      src/transform/compute_column.cu
+      src/transform/encode.cu
+      src/transform/mask_to_bools.cu
+      src/transform/nans_to_nulls.cu
+      src/transform/one_hot_encode.cu
+      src/transform/row_bit_count.cu
+      src/transform/transform.cpp
+      src/transpose/transpose.cu
+      src/unary/cast_ops.cu
+      src/unary/math_ops.cu
+      src/unary/nan_ops.cu
+      src/unary/null_ops.cu
+      src/utilities/cuda.cpp
+      src/utilities/cuda_memcpy.cu
+      src/utilities/default_stream.cpp
+      src/utilities/host_memory.cpp
+      src/utilities/jit_amd_utilities.cpp
+      src/utilities/linked_column.cpp
+      src/utilities/prefetch.cpp
+      src/utilities/stacktrace.cpp
+      src/utilities/stream_pool.cpp
+      src/utilities/traits.cpp
+      src/utilities/type_checks.cpp
+      src/utilities/type_dispatcher.cpp
   )
 
   # Apply ASAN flags to each source file, appending to any existing flags
   foreach(source_file ${ASAN_SOURCE_FILES})
     get_source_file_property(existing_flags ${source_file} COMPILE_FLAGS)
     if(existing_flags)
-      set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "${existing_flags} -g -fsanitize=address -shared-libsan")
+      set_source_files_properties(
+        ${source_file} PROPERTIES COMPILE_FLAGS
+                                  "${existing_flags} -g -fsanitize=address -shared-libsan"
+      )
     else()
-      set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -shared-libsan")
+      set_source_files_properties(
+        ${source_file} PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -shared-libsan"
+      )
     endif()
   endforeach()
 
   target_link_options(cudf PRIVATE "-g;-fsanitize=address;-shared-libsan")
 endif()
-
 
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
 # in how conda builds glibc
@@ -1495,16 +1552,16 @@ target_include_directories(
 )
 
 if(CUDF_USE_WARPSIZE_32)
-target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
+  target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
 endif()
 
 # NOTE(HIP/AMD): Enable workarounds for potential HIP compiler bugs (mode-specific logic in code)
 if(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
-target_compile_definitions(cudf PUBLIC "CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS")
+  target_compile_definitions(cudf PUBLIC "CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS")
 endif()
 
 if(TARGET KvikIO)
-target_compile_definitions(cudf PUBLIC "CUDF_HAS_KVIKIO")
+  target_compile_definitions(cudf PUBLIC "CUDF_HAS_KVIKIO")
 endif()
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
@@ -1524,11 +1581,12 @@ endif()
 # Per-thread default stream
 if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
-    cudf PUBLIC CUDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
+    cudf PUBLIC CUDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM
+                __HIP_API_PER_THREAD_DEFAULT_STREAM__
   )
-  #: TODO(HIP/AMD): assumes CXX compiler is HIPCC or AMD clang++.
-  target_compile_options(cudf PUBLIC
-    "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP,CXX>:-fgpu-default-stream=per-thread>>"
+  # : TODO(HIP/AMD): assumes CXX compiler is HIPCC or AMD clang++.
+  target_compile_options(
+    cudf PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP,CXX>:-fgpu-default-stream=per-thread>>"
   )
 endif()
 
@@ -1559,9 +1617,9 @@ add_dependencies(cudf jitify_preprocess_run)
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(FALSE)
-set(THRUST_LIBRARY cudf::Thrust)
+  set(THRUST_LIBRARY cudf::Thrust)
 else()
-set(THRUST_LIBRARY roc::rocthrust)
+  set(THRUST_LIBRARY roc::rocthrust)
 endif()
 
 # Specify the target module library dependencies
@@ -1579,8 +1637,8 @@ endif()
 
 rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
-# NOTE(HIP/AMD): Control section ordering to avoid relocation errors
-# Place hip_fatbin first, then text, then ltext sections
+# NOTE(HIP/AMD): Control section ordering to avoid relocation errors Place hip_fatbin first, then
+# text, then ltext sections
 file(
   WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
   [=[
@@ -1624,7 +1682,9 @@ if(CUDF_BUILD_TESTUTIL)
   )
   rapids_hip_set_runtime(cudftest_default_stream USE_STATIC ${GPU_STATIC_RUNTIME})
 
-  target_include_directories(cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
+  target_include_directories(
+    cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
+  )
   target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
 
   add_library(cudf::cudftest_default_stream ALIAS cudftest_default_stream)
@@ -1635,7 +1695,7 @@ if(CUDF_BUILD_TESTUTIL)
 
   target_compile_options(
     cudftestutil INTERFACE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
-                          "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
   )
 
   target_link_libraries(
@@ -1749,7 +1809,7 @@ if(CUDF_BUILD_TESTS)
     set(MEMORYCHECK_TYPE CudaSanitizer)
     set(CUDA_SANITIZER_COMMAND_OPTIONS "--tool memcheck")
   else()
-    #TODO
+    # TODO
   endif()
 
   # Always print verbose output when tests fail if run using `make test`.
@@ -1802,7 +1862,9 @@ install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf ${CUDF_SOURCE_DIR}/include/cud
                   ${CUDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf/hip_extensions DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf/hip_extensions
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
   install(TARGETS cudf_identify_stream_usage_mode_cudf DESTINATION ${lib_dir})
@@ -1898,13 +1960,22 @@ endif()
 # ##################################################################################################
 # * build packages ---------------------------------------------------------------------------------
 
-set(CPACK_PACKAGE_NAME "hipdf" CACHE STRING "Overwrite package name.")
+set(CPACK_PACKAGE_NAME
+    "hipdf"
+    CACHE STRING "Overwrite package name."
+)
 set(CPACK_PACKAGE_VENDOR "Advanced Micro Devices, Inc.")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
-set(CPACK_OUTPUT_FILE_PREFIX "dist" CACHE PATH "Package output file prefix.")
+set(CPACK_OUTPUT_FILE_PREFIX
+    "dist"
+    CACHE PATH "Package output file prefix."
+)
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
-set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/rocm-ds" CACHE PATH "Package install prefix.")
+set(CPACK_PACKAGING_INSTALL_PREFIX
+    "/opt/rocm-ds"
+    CACHE PATH "Package install prefix."
+)
 include(CPack)

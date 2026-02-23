@@ -16,23 +16,20 @@
 #
 # Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # =============================================================================
 
 cmake_minimum_required(VERSION 3.30.4 FATAL_ERROR)
@@ -43,21 +40,19 @@ include(rapids-find)
 
 rapids_cpm_init()
 
-# FIXME(HIP/AMD): During the wheel
-# build process, the hip target and other targets
-# set by find_package(HIP ...) are added multiple
-# times, causing the CMake build to fail.
+# FIXME(HIP/AMD): During the wheel build process, the hip target and other targets set by
+# find_package(HIP ...) are added multiple times, causing the CMake build to fail.
 if(NOT TARGET hip)
-rapids_find_package(
-  HIP REQUIRED
-  BUILD_EXPORT_SET udf-exports
-  INSTALL_EXPORT_SET udf-exports
-)
+  rapids_find_package(
+    HIP REQUIRED
+    BUILD_EXPORT_SET udf-exports
+    INSTALL_EXPORT_SET udf-exports
+  )
 endif()
 
-# TODO(HIP/AMD): Restore NRT (Numba Runtime) include directory once numba-hip supports it.
-# The NRT include directory provides headers for device-side memory management in UDFs.
-# This was removed because numba-hip currently lacks numba.hip.memory_management.nrt module. See internal issue #376
+# TODO(HIP/AMD): Restore NRT (Numba Runtime) include directory once numba-hip supports it. The NRT
+# include directory provides headers for device-side memory management in UDFs. This was removed
+# because numba-hip currently lacks numba.hip.memory_management.nrt module. See internal issue #376
 include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
 rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
 add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
@@ -82,7 +77,7 @@ set(UDF_CXX_FLAGS)
 set(UDF_CUDA_FLAGS)
 target_compile_options(
   cudf_strings_udf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${UDF_CXX_FLAGS}>"
-                            "$<$<COMPILE_LANGUAGE:HIP>:${UDF_CUDA_FLAGS}>"
+                           "$<$<COMPILE_LANGUAGE:HIP>:${UDF_CUDA_FLAGS}>"
 )
 target_link_libraries(cudf_strings_udf PUBLIC cudf::cudf)
 install(TARGETS cudf_strings_udf DESTINATION ./cudf/_lib/)
@@ -119,13 +114,15 @@ set(SHIM_HIP_FLAGS -fgpu-rdc -S -emit-llvm)
 # TODO(HIP/AMD): Using RAPIDS_NO_INITIALIZE is currently not supported/used in hipDF
 
 list(SORT CMAKE_HIP_ARCHITECTURES)
-list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES) 
+list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
 
-set(tgt "shim_") # NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
+# NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
+set(tgt "shim_")
 add_library(${tgt} OBJECT shim.cu)
 set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
 target_include_directories(
-  ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")
+  ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
+)
 target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_HIP_FLAGS}>")
 target_link_libraries(${tgt} PUBLIC cudf::cudf)
 

@@ -14,28 +14,29 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 if(GPU_WARNINGS_AS_ERRORS)
-  list(APPEND CUDF_GPU_FLAGS -Werror -Wno-c++11-narrowing-const-reference -Wno-deprecated  -Wno-pass-failed -Wno-implicit-conversion-floating-point-to-bool ) #TODO(HIP): WAR for some transformation passes failing in hipcub, might degrade performance (see internal issue #202); accept implicit conversion of math operations to integer types like bool
+  # TODO(HIP): WAR for some transformation passes failing in hipcub, might degrade performance (see
+  # internal issue #202); accept implicit conversion of math operations to integer types like bool
+  list(APPEND CUDF_GPU_FLAGS -Werror -Wno-c++11-narrowing-const-reference -Wno-deprecated
+       -Wno-pass-failed -Wno-implicit-conversion-floating-point-to-bool
+  )
 endif()
 
 if(DISABLE_DEPRECATION_WARNINGS)
@@ -44,23 +45,25 @@ if(DISABLE_DEPRECATION_WARNINGS)
 endif()
 
 if(GPU_ENABLE_LINEINFO)
-  #TODO 
+  # TODO
   message(FATAL_ERROR "CUDF does not support line-number information for hip platform")
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(VERBOSE "CUDF: Building with debugging flags")
-  # NOTE(HIP/AMD): CMake incorrectly sets -O as default debug flag, see https://github.com/Kitware/CMake/commit/b805f55325382ede2e3b4e426e4e837d371b7330
+  # NOTE(HIP/AMD): CMake incorrectly sets -O as default debug flag, see
+  # https://github.com/Kitware/CMake/commit/b805f55325382ede2e3b4e426e4e837d371b7330
   set(CMAKE_HIP_FLAGS_DEBUG "-Og -g -ggdb")
-  # NOTE(HIP/AMD): We use -mcmodel=large here to ensure that all code and data references remain valid, 
-  # even if the executable or shared object becomes very large. The default small code model 
-  # on x86-64 uses 32-bit relative addressing, which can overflow for large binaries. 
+  # NOTE(HIP/AMD): We use -mcmodel=large here to ensure that all code and data references remain
+  # valid, even if the executable or shared object becomes very large. The default small code model
+  # on x86-64 uses 32-bit relative addressing, which can overflow for large binaries.
   add_compile_options(-mcmodel=large)
   add_link_options(-mcmodel=large)
   add_link_options(-fuse-ld=lld)
 
 endif()
 
+# Set cuDF target properties including RPATH, compile options, and flags
 macro(set_cudf_target_properties)
   set_target_properties(
     cudf
@@ -76,7 +79,7 @@ macro(set_cudf_target_properties)
                POSITION_INDEPENDENT_CODE ON
                INTERFACE_POSITION_INDEPENDENT_CODE ON
   )
-  
+
   # Export the compiler flags and definitions so the downstream applications can optionally retrieve
   # and use them.
   set_target_properties(
@@ -88,7 +91,7 @@ macro(set_cudf_target_properties)
                CUDF_CXX_DEFINITIONS "${CUDF_CXX_DEFINITIONS}"
                CUDF_GPU_DEFINITIONS "${CUDF_GPU_DEFINITIONS}"
   )
-  
+
   # Note: This must come before the target_compile_options below so that the function can modify the
   # flags if necessary.
   if(CUDF_CLANG_TIDY OR CUDF_IWYU)
@@ -106,16 +109,16 @@ macro(set_cudf_target_properties)
 
   target_compile_options(
     cudf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-                  "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>"
+                 "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>"
   )
 
   target_compile_definitions(
     cudf PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
-                 "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_DEFINITIONS}>>"
+                "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_DEFINITIONS}>>"
   )
 
   if(GPU_STATIC_RUNTIME)
-    #TODO
+    # TODO
     message(FATAL_ERROR "CUDF does not support static runtime linking")
   else()
     # Tell CMake what HIP language runtime to use
@@ -125,6 +128,7 @@ macro(set_cudf_target_properties)
   endif()
 endmacro()
 
+# Set cuDF test default stream target properties
 macro(set_cudftest_default_stream_target)
   set_target_properties(
     cudftest_default_stream
@@ -140,6 +144,7 @@ macro(set_cudftest_default_stream_target)
   )
 endmacro()
 
+# Set cuDF test util target properties
 macro(set_cudftestutil_target)
   set_target_properties(
     cudftestutil

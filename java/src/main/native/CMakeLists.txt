@@ -14,25 +14,22 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 cmake_minimum_required(VERSION 3.30.4 FATAL_ERROR)
 
@@ -53,18 +50,19 @@ project(
   LANGUAGES C CXX HIP
 )
 
-
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
-option(USE_NVTX "Build with NVTX support" OFF)  # TODO(HIP/AMD): this option is currently not supported
+# TODO(HIP/AMD): this option is currently not supported
+option(USE_NVTX "Build with NVTX support" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF JNI shared libraries" ON)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(CUDF_USE_PER_THREAD_DEFAULT_STREAM "Build with per-thread default stream" OFF)
 option(CUDA_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 option(USE_GDS "Build with GPUDirect Storage (GDS)/cuFile support" OFF)
 option(CUDF_JNI_LIBCUDF_STATIC "Link with libcudf.a" OFF)
-option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" OFF) # TODO(HIP/AMD): this option is currently not supported
+# TODO(HIP/AMD): this option is currently not supported
+option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" OFF)
 option(CUDA_STATIC_CUFILE "Statically link cuFile" OFF)
 option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
 
@@ -93,7 +91,10 @@ rapids_find_package(HIP REQUIRED)
 
 if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
   message(STATUS "Using per-thread default stream")
-  add_compile_definitions(CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__ CUDF_USE_PER_THREAD_DEFAULT_STREAM)
+  add_compile_definitions(
+    CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
+    CUDF_USE_PER_THREAD_DEFAULT_STREAM
+  )
 endif()
 
 # Set a default build type if none was specified
@@ -139,12 +140,9 @@ get_target_property(CUDF_CUDA_DEFINITIONS cudf::cudf CUDF_CUDA_DEFINITIONS)
 #   fetch (and install) from source if the target does not exist to avoid name conflict when the
 #   same target is exported multiple times.
 
-# TODO(HIP/AMD): Reenable nvtx equivalent later
-# if(NOT TARGET nvtx3::nvtx3-cpp AND NOT DEFINED ENV{CUDF_INSTALL_DIR})
-#  message(STATUS "Fetch package nvtx3 from source.")
-#  include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvtx.cmake)
-# endif()
-# find_package(nvtx3 REQUIRED)
+# TODO(HIP/AMD): Re-enable nvtx equivalent later if(NOT TARGET nvtx3::nvtx3-cpp AND NOT DEFINED
+# ENV{CUDF_INSTALL_DIR}) message(STATUS "Fetch package nvtx3 from source.")
+# include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvtx.cmake) endif() find_package(nvtx3 REQUIRED)
 
 if(NOT TARGET hipcomp
    AND NOT TARGET hipcomp::hipcomp
@@ -153,7 +151,6 @@ if(NOT TARGET hipcomp
   include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvcomp.cmake)
 endif()
 find_package(hipcomp REQUIRED)
-
 
 message(STATUS "CUDF CPP BUILD DIR ${CUDF_CPP_BUILD_DIR}")
 # ##################################################################################################
@@ -247,11 +244,9 @@ endif()
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
 
-
 target_include_directories(
   cudfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
-                  "../../../../cpp/include"
-                 "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
+                 "../../../../cpp/include" "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
 )
 
 # ##################################################################################################
@@ -314,8 +309,9 @@ endif()
 # When nvcomp is installed we need to use nvcomp::nvcomp but from the cudf build directory it will
 # just be nvcomp.
 target_link_libraries(
-  cudfjni ${CUDF_LINK} PRIVATE $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp> $<TARGET_NAME_IF_EXISTS:hipcomp>
-                               $<TARGET_NAME_IF_EXISTS:hipcomp::hipcomp>
+  cudfjni ${CUDF_LINK}
+  PRIVATE $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp> $<TARGET_NAME_IF_EXISTS:hipcomp>
+          $<TARGET_NAME_IF_EXISTS:hipcomp::hipcomp>
 )
 
 # ##################################################################################################
@@ -333,7 +329,6 @@ else()
 endif()
 
 # Dynamically build and link hipcomp
-
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------

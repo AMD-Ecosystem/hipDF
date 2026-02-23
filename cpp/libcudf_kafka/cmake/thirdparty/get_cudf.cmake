@@ -13,25 +13,22 @@
 # =============================================================================
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+# associated documentation files (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge, publish, distribute,
+# sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all copies or
+# substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+# NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+# OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # =============================================================================
 
 # This function finds cudf and sets any additional necessary environment variables.
@@ -41,9 +38,7 @@ function(find_and_configure_cudf VERSION)
     cudf ${VERSION}
     BUILD_EXPORT_SET cudf_kafka-exports
     INSTALL_EXPORT_SET cudf_kafka-exports
-    CPM_ARGS
-    #: GIT_REPOSITORY https://github.com/rapidsai/cudf.git
-    #: GIT_TAG branch-${major_minor}
+    CPM_ARGS # : GIT_REPOSITORY https://github.com/rapidsai/cudf.git : GIT_TAG branch-${major_minor}
     GIT_REPOSITORY https://github.com/ROCm/hipdf.git
     GIT_TAG dev
     GIT_SHALLOW TRUE SOURCE_SUBDIR cpp
@@ -52,7 +47,7 @@ function(find_and_configure_cudf VERSION)
   # If after loading cudf we now have the CMAKE_CUDA_COMPILER variable we know that we need to
   # re-enable the cuda language
   if(CMAKE_HIP_COMPILER)
-  #: if(CMAKE_CUDA_COMPILER)
+    # : if(CMAKE_CUDA_COMPILER)
     set(cudf_REQUIRES_CUDA
         TRUE
         PARENT_SCOPE
@@ -69,8 +64,7 @@ if(cudf_REQUIRES_CUDA)
   rapids_cuda_init_architectures(CUDF_KAFKA)
 
   # Since we are building cudf as part of ourselves we need to enable the CUDA language in the
-  # top-most scope
-  #: enable_language(CUDA)
+  # top-most scope : enable_language(CUDA)
   enable_language(HIP)
 
   # Since CUDF_KAFKA only enables CUDA optionally we need to manually include the file that
