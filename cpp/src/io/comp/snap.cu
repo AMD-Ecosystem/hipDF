@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -303,8 +303,8 @@ CUDF_KERNEL void __launch_bounds__(128)
     s->copy_length    = 0;
     s->copy_distance  = 0;
   }
-  // TODO(HIP/AMD): Check if this error is justified: /home/hipdf/cpp/src/io/comp/snap.cu:294:48: error: expression does not compute the number of elements in this array; 
-  //element type is 'uint16_t' (aka 'unsigned short'), not 'uint32_t' (aka 'unsigned int') [-Werror,-Wsizeof-array-div], we're surpressing it with parens around sizeof(uint32_t)
+  // TODO(HIP/AMD): Check if this error is justified: /home/hipdf/cpp/src/io/comp/snap.cu:294:48: error: expression does not compute the number of elements in this array;
+  //element type is 'uint16_t' (aka 'unsigned short'), not 'uint32_t' (aka 'unsigned int') [-Werror,-Wsizeof-array-div], we're suppressing it with parens around sizeof(uint32_t)
   for (uint32_t i = t; i < sizeof(s->hash_map) / (sizeof(uint32_t)); i += 128) {
     *reinterpret_cast<volatile uint32_t*>(&s->hash_map[i * 2]) = 0;
   }

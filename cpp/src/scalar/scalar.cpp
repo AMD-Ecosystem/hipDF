@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -494,7 +494,7 @@ timestamp_scalar<T>::timestamp_scalar(timestamp_scalar<T> const& other,
 // TODO(HIP/AMD): If we removed the following 5 COPY_CTORs, we get an error in TYPED_TEST(TypedScalarTest, CopyConstructor):
 // undefined symbol timestamp_scalar referenced in scalar_test.cpp
 /**
- * @brief Explicit instantiations of the copy construtor.
+ * @brief Explicit instantiations of the copy constructor.
  */
 COPY_CTOR(timestamp_D)
 COPY_CTOR(timestamp_s)

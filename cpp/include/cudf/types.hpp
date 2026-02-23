@@ -98,7 +98,7 @@ using uint64_t = __hip_internal::uint64_t;
 #endif
 
 // NOTE(HIP/AMD): Conditional macros for tuple/pair types to handle libhipcxx version compatibility
-// with thrust. libhipcxx 2.7.0/3.0.2 datatypes are not compatbile with thrust.
+// with thrust (libhipcxx 2.7.0/3.0.2) datatypes are not compatible with thrust)
 #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
 #define CUDF_TUPLE_PAIR_PROVIDER thrust
@@ -156,7 +156,7 @@ class mutable_table_view;
  * @file
  */
 
-#ifdef __HIP_PLATFORM_AMD__  
+#ifdef __HIP_PLATFORM_AMD__
   constexpr bool HIP_PLATFORM_AMD = true;
 #else
   constexpr bool HIP_PLATFORM_AMD = false;
@@ -305,7 +305,7 @@ __device__ inline int __POPC<uint64_t>(uint64_t v) {
 }
 
 //With hiprtc/jitify, uint64_t == unsigned long long int, so this would give a re-definition error.
-//TODO/FIXME(HIP): use type_traits to not provide template specialization when uint64_t == unsigned long long int 
+//TODO/FIXME(HIP): use type_traits to not provide template specialization when uint64_t == unsigned long long int
 #ifndef __HIPCC_RTC__
  template <> //: On x86_64, uint64_t == unsigned long int != unsigned long long int, both have 64 bit
  __device__ inline int __POPC<unsigned long long int>(unsigned long long int v) {

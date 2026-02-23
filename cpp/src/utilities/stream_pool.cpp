@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -179,8 +179,8 @@ class debug_cuda_stream_pool : public cuda_stream_pool {
   [[nodiscard]] std::size_t get_stream_pool_size() const override { return 1UL; }
 };
 
-// NOTE(HIP/AMD): Disable inlining to ensure that calls 
-// to this function can be intercepted and overriden through a library loaded via LD_PRELOAD. This allows the 
+// NOTE(HIP/AMD): Disable inlining to ensure that calls
+// to this function can be intercepted and overridden through a library loaded via LD_PRELOAD. This allows the
 // stream-identification library to provide its own implementation.
 __attribute__((noinline)) cuda_stream_pool* create_global_cuda_stream_pool()
 {

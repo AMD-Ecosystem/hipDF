@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@
 #include <rmm/exec_policy.hpp>
 
 #include <cudf/cuda_runtime.h>
-//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Re-enable once nvtx equivalent is available
 #include <thrust/scan.h>
 
 /**
@@ -151,7 +151,7 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   constexpr int block_size = 128;  // this arbitrary size should be a power of 2
   int const blocks         = (names.size() + block_size - 1) / block_size;
 
-  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
+  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Re-enable once nvtx equivalent is available
 
   // create offsets vector
   auto offsets = rmm::device_uvector<cudf::size_type>(names.size() + 1, stream);
@@ -184,6 +184,6 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   // wait for all of the above to finish
   stream.synchronize();
 
-  //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
+  //nvtxRangePop(); // TODO(HIP/AMD): Re-enable once nvtx equivalent is available
   return result;
 }

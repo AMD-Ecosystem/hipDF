@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@
 #include <cudf/strings/strings_column_view.hpp>
 
 #include <cudf/cuda_runtime.h>
-//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Reenable once nvtx equivalent is available
+//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Re-enable once nvtx equivalent is available
 
 /**
  * @brief Redacts each name per the corresponding visibility entry
@@ -63,7 +63,7 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   auto const visible   = cudf::string_scalar(std::string("public"));
   auto const redaction = cudf::string_scalar(std::string("X X"));
 
-  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
+  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Re-enable once nvtx equivalent is available
 
   auto const allowed      = cudf::strings::contains(visibilities, visible);
   auto const redacted     = cudf::copy_if_else(names, redaction, allowed->view());
@@ -78,6 +78,6 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
 
   cudaStreamSynchronize(0);
 
-  //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
+  //nvtxRangePop(); // TODO(HIP/AMD): Re-enable once nvtx equivalent is available
   return result;
 }

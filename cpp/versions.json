@@ -1,0 +1,31 @@
+{
+  "packages" : {
+    "rocmds_logger": {
+      "version": "2.0.0",
+      "git_shallow": false,
+      "git_url": "https://github.com/${RAPIDS_CMAKE_ROCM_DS_ORG}/ROCmDS-Logger",
+      "git_tag": "amd-internal"
+    },
+    "hipmm": {
+      "version": "3.0.0",
+      "git_shallow": false,
+      "git_url": "https://github.com/${RAPIDS_CMAKE_ROCM_DS_ORG}/hipMM",
+      "git_tag": "amd-integration"
+    },
+    "hipco": {
+      "version": "0.3.0",
+      "git_shallow": false,
+      "git_url": "https://github.com/${RAPIDS_CMAKE_ROCM_DS_ORG}/hipCollections",
+      "git_tag": "amd-integration"
+    },
+    "libhipcxx": {
+      "version": "2.7.0",
+      "git_url": "https://github.com/${RAPIDS_CMAKE_ROCM_ORG}/libhipcxx",
+      "git_tag": "fix/psamfass/add_missing_includes_hiprtc_cmath"
+    },
+    "jitify-hip": {
+      "git_url":  "https://github.com/${RAPIDS_CMAKE_ROCM_ORG}/jitify",
+      "git_tag": "amd-integration"
+    }        
+  }
+}

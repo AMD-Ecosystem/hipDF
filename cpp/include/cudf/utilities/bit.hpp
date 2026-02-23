@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -185,7 +185,7 @@ constexpr CUDF_HOST_DEVICE inline bitmask_type set_most_significant_bits(size_ty
 
 // HIP: This method is the 32 bit version of set_most_significant_bits which is defined at line 171.
 // This method is only used in cudf/cpp/src/copying/contiguous_split.hip in copy_buffer method.
-// We added this implementation to avoid overwritting copy_buffer.
+// We added this implementation to avoid overwriting copy_buffer.
 /**
  * @brief Returns a bitmask word with the `n` most significant bits set.
  *
@@ -204,7 +204,7 @@ constexpr CUDF_HOST_DEVICE inline uint32_t set_most_significant_bits_32(size_typ
   return (n==0) ? 0 : ~((uint32_t{1} << (word_size - n)) - 1);
 }
 
-#if defined(__HIPCC__) || defined(__CUDACC__) 
+#if defined(__HIPCC__) || defined(__CUDACC__)
 
 /**
  * @brief Sets the specified bit to `1`

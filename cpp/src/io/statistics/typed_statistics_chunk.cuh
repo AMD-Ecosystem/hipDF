@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -82,7 +82,7 @@ class union_member {
     return val.u_val;
   }
 
-  // NOTE(HIP/AMD): The check for !std::is_same_v<T, __int128_t> was added to resolve compiler error (ambiguity when selecing correct template)
+  // NOTE(HIP/AMD): The check for !std::is_same_v<T, __int128_t> was added to resolve compiler error (ambiguity when selecting correct template)
   template <typename T, typename U>
   __device__ static type<T, U> get(U& val)
     requires(!std::is_same_v<T, __int128_t> and std::is_integral_v<T> and std::is_signed_v<T>)
