@@ -258,7 +258,11 @@ class Aggregation:
         type_signature = (nb_type[:],)
         # TODO(HIP/AMD): On AMD backend, we need to give LLVM IR UDF function a specific name.
         # This kind of postprocessing could also be done in libcudf.
-        ptx_code, output_dtype = compile_udf(op, type_signature, name = "udf_funcname_from_numba_to_be_replaced_in_libcudf")
+        ptx_code, output_dtype = compile_udf(
+            op,
+            type_signature,
+            name="udf_funcname_from_numba_to_be_replaced_in_libcudf",
+        )
         output_np_dtype = np.dtype(output_dtype)
         if output_np_dtype not in SUPPORTED_NUMPY_TO_PYLIBCUDF_TYPES:
             raise TypeError(

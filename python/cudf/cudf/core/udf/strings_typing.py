@@ -31,6 +31,7 @@ from numba.core.extending import models, register_model
 from numba.core.typing import signature as nb_signature
 from numba.core.typing.templates import AbstractTemplate, AttributeTemplate
 from numba.cuda.cudadecl import registry as cuda_decl_registry
+
 # FIXME(HIP/AMD): missing numba-hip mapping?
 from numba.cuda.descriptor import hip_target as cuda_target
 

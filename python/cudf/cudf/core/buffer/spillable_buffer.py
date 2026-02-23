@@ -31,6 +31,7 @@ from threading import RLock
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy
+
 #: import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 from typing_extensions import Self
 

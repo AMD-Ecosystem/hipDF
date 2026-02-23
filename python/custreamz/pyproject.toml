@@ -79,7 +79,6 @@ matrix-entry = "cuda_suffixed=true"
 [tool.setuptools]
 license-files = ["LICENSE"]
 zip-safe = false
-packages = ["hipstreamz", "custreamz"]
 
 [tool.setuptools.dynamic]
 version = {file = "custreamz/VERSION"}
@@ -114,6 +113,8 @@ rapids = ["rmm", "cudf", "dask_cudf"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "F401"]
+# Re-export modules that intentionally use `from X import *`
+"hipstreamz/__init__.py" = ["F403"]
 
 [tool.pytest.ini_options]
 addopts = "--tb=native --strict-config --strict-markers"

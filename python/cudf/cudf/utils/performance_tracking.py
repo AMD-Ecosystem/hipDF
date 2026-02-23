@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +29,17 @@ import functools
 import hashlib
 import sys
 
+import rmm.statistics
+
+from cudf.options import get_option
+
 # import nvtx  # NOTE(HIP/AMD): we follow cudf/pandas/annotation.py here
+
 
 class nvtx:  # type: ignore
     """Noop-stub with the same API as nvtx."""
 
+    @staticmethod
     def enabled():
         return False
 
@@ -60,11 +66,8 @@ class nvtx:  # type: ignore
 
         __call__ = lambda self, fn: fn  # noqa: E731
 
+
 nvtx_annotate = nvtx.annotate
-
-import rmm.statistics
-
-from cudf.options import get_option
 
 _NVTX_COLORS = ["green", "blue", "purple", "rapids"]
 

@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,29 +24,28 @@
 
 
 def validate_setup():
+    import importlib.metadata
     import os
     import warnings
-    import sys
-    import importlib.metadata
 
     # NOTE(HIP/AMD): Check for conflicting installations.
     # Currently, this will only work in some circumstances, e.g.,
     # if hipdf is installed after cudf into the same environment.
-    conflicts = [
-            'cudf',
-            'cudf-cu11',
-            'cudf-cu12']
-    conflicts_installed = [ conflict for conflict in conflicts
-                            if list(importlib.metadata.distributions(name=conflict))]
+    conflicts = ["cudf", "cudf-cu11", "cudf-cu12"]
+    conflicts_installed = [
+        conflict
+        for conflict in conflicts
+        if list(importlib.metadata.distributions(name=conflict))
+    ]
 
-    conflicts_installed = ', '.join(conflicts_installed)
+    conflicts_installed = ", ".join(conflicts_installed)
 
-    if len(conflicts_installed)>0:
-      warnings.warn(
-        "The following conflicting packages were detected:\n"
-        f"{conflicts_installed}\n"
-        "HipDF may not work correctly, please fix your environment\n"
-        "by removing the conflicting packages and re-installing hipDF.\n"
+    if len(conflicts_installed) > 0:
+        warnings.warn(
+            "The following conflicting packages were detected:\n"
+            f"{conflicts_installed}\n"
+            "HipDF may not work correctly, please fix your environment\n"
+            "by removing the conflicting packages and re-installing hipDF.\n"
         )
 
     # TODO: Remove the following check once we arrive at a solution for #4827
@@ -206,30 +205,33 @@ def validate_setup():
     else:
         warnings.warn("No NVIDIA GPU detected")
 
+
 del validate_setup
+
+
 def validate_setup():
+    import importlib.metadata
     import os
     import warnings
-    import importlib.metadata
 
     # NOTE(HIP/AMD): Check for conflicting installations.
     # Currently, this will only work in some circumstances, e.g.,
     # if hipdf is installed after cudf into the same environment.
-    conflicts = [
-            'cudf',
-            'cudf-cu11',
-            'cudf-cu12']
-    conflicts_installed = [ conflict for conflict in conflicts
-                            if list(importlib.metadata.distributions(name=conflict))]
+    conflicts = ["cudf", "cudf-cu11", "cudf-cu12"]
+    conflicts_installed = [
+        conflict
+        for conflict in conflicts
+        if list(importlib.metadata.distributions(name=conflict))
+    ]
 
-    conflicts_installed = ', '.join(conflicts_installed)
+    conflicts_installed = ", ".join(conflicts_installed)
 
-    if len(conflicts_installed)>0:
-      warnings.warn(
-        "The following conflicting packages were detected:\n"
-        f"{conflicts_installed}\n"
-        "HipDF may not work correctly, please fix your environment\n"
-        "by removing the conflicting packages and re-installing hipDF.\n"
+    if len(conflicts_installed) > 0:
+        warnings.warn(
+            "The following conflicting packages were detected:\n"
+            f"{conflicts_installed}\n"
+            "HipDF may not work correctly, please fix your environment\n"
+            "by removing the conflicting packages and re-installing hipDF.\n"
         )
 
     # TODO: Remove the following check once we arrive at a solution for #4827
@@ -248,8 +250,6 @@ def validate_setup():
         CUDARuntimeError,
         getDeviceCount,
     )
-
-    from cudf.errors import UnsupportedCUDAError
 
     notify_caller_errors = {
         cudaError_t.cudaErrorInitializationError,

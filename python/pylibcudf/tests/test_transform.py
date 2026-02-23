@@ -109,8 +109,10 @@ def test_transform_udf():
     # NOTE(HIP/AMD): The name argument is required for the HIP/AMD port.
     # The cudf backend searches for this name to identify the UDF in the code.
     ptx, _ = cuda.compile_ptx_for_current_device(
-        op, (numba.float64, numba.float64, numba.float64), device=True,
-        name="udf_funcname_from_numba_to_be_replaced_in_libcudf"
+        op,
+        (numba.float64, numba.float64, numba.float64),
+        device=True,
+        name="udf_funcname_from_numba_to_be_replaced_in_libcudf",
     )
 
     A = 5.0

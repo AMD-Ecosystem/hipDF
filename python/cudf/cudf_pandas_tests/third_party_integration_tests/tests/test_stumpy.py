@@ -22,12 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import cudf
 import pytest
+
+import cudf
+
 # Skip the entire file if running on the HIP AMD port (Issue #336).
 if getattr(cudf, "__is_hip_amd_port__", False):
-    pytest.skip("This test is CUDA-specific and not supported on HIP/AMD platform.",
-                allow_module_level=True)
+    pytest.skip(
+        "This test is CUDA-specific and not supported on HIP/AMD platform.",
+        allow_module_level=True,
+    )
 
 import numpy as np
 import pandas as pd

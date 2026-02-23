@@ -27,19 +27,19 @@ import pytest
 from numba.cuda import compile_ptx
 from numba.np import numpy_support
 
+import pylibcudf as plc
 import rmm
 
 import cudf
 from cudf import Series
 from cudf.utils import dtypes as dtypeutils
-import pylibcudf as plc
 
 _driver_version = rmm._cuda.gpu.driverGetVersion()
 _runtime_version = rmm._cuda.gpu.runtimeGetVersion()
 _CUDA_JIT128INT_SUPPORTED = (_driver_version >= 11050) and (
     _runtime_version >= 11050
 )
-_CUDA_JIT128INT_SUPPORTED = True # NOTE(HIP/AMD): ROCm>=7.0.0 supports this
+_CUDA_JIT128INT_SUPPORTED = True  # NOTE(HIP/AMD): ROCm>=7.0.0 supports this
 
 
 @pytest.mark.skipif(not _CUDA_JIT128INT_SUPPORTED, reason="requires CUDA 11.5")
@@ -47,13 +47,13 @@ _CUDA_JIT128INT_SUPPORTED = True # NOTE(HIP/AMD): ROCm>=7.0.0 supports this
     "dtype", sorted(list(dtypeutils.NUMERIC_TYPES - {"int8"}))
 )
 def test_generic_ptx(dtype):
-
     size = 500
+    rng = np.random.default_rng(42)
 
-    lhs_arr = np.random.random(size).astype(dtype)
+    lhs_arr = rng.random(size).astype(dtype)
     lhs_col = Series(lhs_arr)._column
 
-    rhs_arr = np.random.random(size).astype(dtype)
+    rhs_arr = rng.random(size).astype(dtype)
     rhs_col = Series(rhs_arr)._column
 
     def generic_function(a, b):
@@ -64,16 +64,20 @@ def test_generic_ptx(dtype):
 
     # TODO(HIP/AMD): hardcoding this name because the cudf backend will search for it to identify the UDF in the code
     ptx_code, output_type = compile_ptx(
-        generic_function, type_signature, device=True, name="udf_funcname_from_numba_to_be_replaced_in_libcudf"
+        generic_function,
+        type_signature,
+        device=True,
+        name="udf_funcname_from_numba_to_be_replaced_in_libcudf",
     )
 
     dtype = numpy_support.as_dtype(output_type).type
 
     out_col = plc.binaryop.binaryop_udf(
-        lhs_col.to_pylibcudf(mode="read"), 
-        rhs_col.to_pylibcudf(mode="read"), 
-        ptx_code, 
-        dtype)
+        lhs_col.to_pylibcudf(mode="read"),
+        rhs_col.to_pylibcudf(mode="read"),
+        ptx_code,
+        dtype,
+    )
     # Wrap the plc column into a cuDF Series
     out_series = Series.from_pylibcudf(out_col)
     # Convert to NumPy array on host

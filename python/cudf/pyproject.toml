@@ -190,3 +190,7 @@ rapids = ["rmm", "pylibcudf"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "F401"]
+# Re-export modules that intentionally use `from X import *`
+"hipdf/__init__.py" = ["F403", "F821"]
+# Test file that explicitly tests all imports - ignore unused imports and import sorting
+"hipdf/tests/test_import.py" = ["F401", "I001"]

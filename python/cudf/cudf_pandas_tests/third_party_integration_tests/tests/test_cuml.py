@@ -28,10 +28,13 @@ import pandas as pd
 import pytest
 
 import cudf
+
 # Skip the entire file if running on the HIP AMD port
 if getattr(cudf, "__is_hip_amd_port__", False):
-    pytest.skip("This test is not supported on HIP/AMD platform.",
-                allow_module_level=True)
+    pytest.skip(
+        "This test is not supported on HIP/AMD platform.",
+        allow_module_level=True,
+    )
 
 from cuml.cluster import KMeans
 from cuml.decomposition import PCA

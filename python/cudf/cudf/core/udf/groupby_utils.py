@@ -27,7 +27,7 @@ from functools import cache
 import cupy as cp
 import numpy as np
 from numba import cuda, types
-from numba.core.errors import TypingError, NumbaPendingDeprecationWarning
+from numba.core.errors import TypingError
 from numba.cuda.cudadrv.devices import get_context
 from numba.np import numpy_support
 

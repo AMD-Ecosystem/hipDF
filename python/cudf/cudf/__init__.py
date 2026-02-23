@@ -43,6 +43,7 @@ validate_setup()
 
 try:
     from numba import hip
+
     hip.pose_as_cuda()
 except ImportError:
     pass
@@ -128,6 +129,7 @@ del RMMNumbaManager
 
 
 from cuda import cuda as _cuda_python_cuda
+
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
 del _cuda_python_cuda
 

@@ -73,6 +73,7 @@ if TYPE_CHECKING:
 # Maximum size of a string column is 2 GiB
 _STRINGS_UDF_DEFAULT_HEAP_SIZE = os.environ.get("STRINGS_UDF_HEAP_SIZE", 2**31)
 _HEAP_SIZE = 0
+_cudf_str_dtype = string_view
 
 JIT_SUPPORTED_TYPES = (
     NUMERIC_TYPES
@@ -296,7 +297,7 @@ def _make_free_string_kernel():
     # Return None, callers should check before using
     if not _USE_NRT:
         return None
-        
+
     with nrt_enabled():
 
         @cuda.jit(
@@ -311,15 +312,21 @@ def _make_free_string_kernel():
 
     return free_managed_udf_string_array
 
+
 def _post_process_output_col(col, retty):
+    from cudf.core.column import ColumnBase, as_column
+
     if retty == _cudf_str_dtype:
         return ColumnBase.from_pylibcudf(
             strings_udf.column_from_udf_string_array(col)
         )
     return as_column(col, retty)
 
+
 try:
-    from numba.hip.amdgcn import DATA_LAYOUT as _nvvm_data_layout #: if this succeeds, we assume HIP/AMD build
+    from numba.hip.amdgcn import (
+        DATA_LAYOUT as _nvvm_data_layout,  #: if this succeeds, we assume HIP/AMD build
+    )
 except ImportError:
     # The only supported data layout in NVVM.
     # See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout

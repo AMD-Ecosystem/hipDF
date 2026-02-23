@@ -1477,14 +1477,14 @@ def test_binop_bool_uint(request, binary_op_method, rhs):
         )
     psr = pd.Series([True, False, False])
     gsr = cudf.from_pandas(psr)
-    
+
     # TODO(HIP/AMD):
-    # On HIP/AMD backend, the special case of rmod 0 actually results in 
+    # On HIP/AMD backend, the special case of rmod 0 actually results in
     # a dataframe that is compatible to the one from Pandas (i.e. the issue
     # https://github.com/rapidsai/cudf/issues/12162 does not apply).
     # On HIP/AMD backend, "0 rmod 0" returns 0 (compatible with Pandas),
     # while on CUDA, "0 rmod 0" returns -1 (incompatible with Pandas).
-    # The modulo 0 operation is UB which explains the differences in how this is treated. 
+    # The modulo 0 operation is UB which explains the differences in how this is treated.
     #
     # The unit test on CUDA therefore fails expectedly (cudf df != pandas df),
     # but it would pass on HIP/AMD per default.

@@ -52,9 +52,8 @@ import numba
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-#: from nvtx import annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 
-from packaging import version
+#: from nvtx import annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 from pandas.io.formats import console
 from pandas.io.formats.printing import pprint_thing
 from typing_extensions import Self, assert_never
@@ -137,8 +136,10 @@ from cudf.utils.ioutils import (
     _update_pandas_metadata_types_inplace,
     buffer_write_lines,
 )
-from cudf.utils.performance_tracking import _performance_tracking
-from cudf.utils.performance_tracking import nvtx_annotate as annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (2/2)
+from cudf.utils.performance_tracking import (
+    _performance_tracking,
+    nvtx_annotate as annotate,  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (2/2)
+)
 from cudf.utils.utils import (
     _EQUALITY_OPS,
     _external_only_api,

@@ -69,6 +69,8 @@ rapids = ["rmm", "cudf", "dask_cudf"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402", "F401"]
+# Re-export modules that intentionally use `from X import *`
+"hipdf_kafka/__init__.py" = ["F403"]
 
 [tool.pydistcheck]
 select = [

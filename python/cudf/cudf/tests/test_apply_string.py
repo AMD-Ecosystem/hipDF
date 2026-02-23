@@ -20,36 +20,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import numpy as np
+import pandas as pd
+import pytest
+
 import cudf
 from cudf.testing import assert_eq
 
-import pandas as pd
-import numpy as np
-import pytest
 
 @pytest.fixture(scope="module")
 def data():
-    np.random.seed(42)
+    rng = np.random.default_rng(42)
     num_records = 2000
-    pdf = pd.DataFrame({'TransactionType': np.random.choice(['Deposit', 'Withdrawal', 'Transfer', 'Payment'], num_records),})
+    pdf = pd.DataFrame(
+        {
+            "TransactionType": rng.choice(
+                ["Deposit", "Withdrawal", "Transfer", "Payment"], num_records
+            ),
+        }
+    )
     gdf = cudf.from_pandas(pdf)
     return pdf, gdf
 
+
 def convert_udf_strings(transformation, pdf, gdf):
     def transform_func(transformation):
-        if transformation == 'lower':
+        if transformation == "lower":
             return lambda x: x.lower()
-        elif transformation == 'upper':
+        elif transformation == "upper":
             return lambda x: x.upper()
-        elif transformation == 'replace':
+        elif transformation == "replace":
             return lambda x: x + " replaced"
         else:
             raise ValueError("Unsupported transformation type")
 
-    pdf['TransactionType'] = pdf['TransactionType'].apply(transform_func(transformation))
-    gdf['TransactionType'] = gdf['TransactionType'].apply(transform_func(transformation))
+    pdf["TransactionType"] = pdf["TransactionType"].apply(
+        transform_func(transformation)
+    )
+    gdf["TransactionType"] = gdf["TransactionType"].apply(
+        transform_func(transformation)
+    )
 
     assert_eq(pdf, gdf)
+
 
 @pytest.mark.parametrize(
     "conversion",

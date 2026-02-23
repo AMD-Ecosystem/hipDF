@@ -27,6 +27,8 @@
 import os
 import warnings
 
+from hip import hip
+
 import pylibcudf
 import rmm.mr
 
@@ -37,7 +39,6 @@ from .fast_slow_proxy import (
 )
 from .magics import load_ipython_extension
 from .profiler import Profiler
-from hip import hip
 
 __all__ = [
     "Profiler",
@@ -77,31 +78,41 @@ def install():
     rmm_mode_explicitly_set = rmm_mode is not None
     if rmm_mode is None:
         rmm_mode = "managed_pool" if managed_memory_is_supported else "pool"
-    
+
     # TODO(HIP/AMD): On MI300A, prefetching is not supported due to a known ROCm issue. Bypass prefetching by default.
     is_mi300a = False
     prop = hip.hipDeviceProp_t()
-    err = hip.hipGetDeviceProperties(prop, 0)
-    arch_name = prop.name.decode('utf-8')
-    gcn_arch_name = prop.gcnArchName.decode('utf-8') if hasattr(prop, 'gcnArchName') else ""
-    
+    hip.hipGetDeviceProperties(prop, 0)
+    arch_name = prop.name.decode("utf-8")
+    gcn_arch_name = (
+        prop.gcnArchName.decode("utf-8")
+        if hasattr(prop, "gcnArchName")
+        else ""
+    )
+
     # Extract the base GCN architecture (e.g., "gfx1100")
     import re
-    gfx_match = re.match(r'(gfx[0-9a-fA-F]+)', gcn_arch_name)
+
+    gfx_match = re.match(r"(gfx[0-9a-fA-F]+)", gcn_arch_name)
     gfx_arch = gfx_match.group(1) if gfx_match else ""
-    
+
     if "300A" in arch_name:
         is_mi300a = True
-    
+
     # According to LLVM AMDGPU documentation, gfx11xx (RDNA 3/3.5) and gfx1200/gfx1201 (RDNA 4)
     # do not support XNACK (they are listed without xnack in the target features column)
     # MI series architectures (gfx90a, gfx94x, gfx95x) do support XNACK
-    is_rdna_arch = gfx_arch.startswith("gfx11") or gfx_arch in ("gfx1200", "gfx1201")
-    
+    is_rdna_arch = gfx_arch.startswith("gfx11") or gfx_arch in (
+        "gfx1200",
+        "gfx1201",
+    )
+
     # Check HSA_XNACK setting for page migration support, do not use prefetching if not set
     # RDNA devices do not support page migration, so disable prefetch adaptor to avoid crashes
     hsa_xnack = os.getenv("HSA_XNACK", "0")
-    use_prefetch_adaptor = hsa_xnack != "0" and not is_mi300a and not is_rdna_arch
+    use_prefetch_adaptor = (
+        hsa_xnack != "0" and not is_mi300a and not is_rdna_arch
+    )
     bypass_check = os.getenv("CUDF_PANDAS_BYPASS_XNACK_CHECK", "0") == "1"
 
     if "managed" in rmm_mode:
@@ -115,7 +126,7 @@ def install():
                 f"cudf.pandas on RDNA architecture ({gfx_arch}) is currently in experimental mode only "
                 "and is not recommended for production workloads. RDNA architectures do not support "
                 "XNACK, which may affect performance and stability.",
-                UserWarning
+                UserWarning,
             )
         elif hsa_xnack == "0" and not bypass_check and not is_mi300a:
             raise RuntimeError(
@@ -127,7 +138,7 @@ def install():
             warnings.warn(
                 f"HSA_XNACK check bypassed. Current HSA_XNACK={hsa_xnack!r}. "
                 "This may cause crashes with managed memory operations on recent AMDGPU drivers.",
-                UserWarning
+                UserWarning,
             )
 
     # Check if a non-default memory resource is set

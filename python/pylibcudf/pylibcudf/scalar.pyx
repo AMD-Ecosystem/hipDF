@@ -75,7 +75,6 @@ from pylibcudf.libcudf.wrappers.timestamps cimport (
 
 from rmm.pylibrmm.memory_resource cimport get_current_device_resource
 from rmm.pylibrmm.stream cimport Stream
-from rmm.librmm.cuda_stream_view cimport cuda_stream_view
 
 from .column cimport Column
 from .traits cimport is_floating_point
@@ -84,9 +83,11 @@ from .utils cimport _get_stream
 
 # NOTE(HIP/AMD): Due to Cython's type narrowing limitations, we must
 # explicitly declare `cdef Stream c_stream` variables instead of shadowing
-# the Python function parameters with direct reassignment (stream = _get_stream(stream)).
-# While the underlying C++ scalar factory functions have default stream parameters
-# (rmm::cuda_stream_view stream = cudf::get_default_stream()), Cython's type
+# the Python function parameters with direct reassignment
+# (stream = _get_stream(stream)).
+# While the underlying C++ scalar factory functions have default stream
+# parameters (rmm::cuda_stream_view stream = cudf::get_default_stream()),
+# Cython's type
 # checker cannot properly resolve method calls like stream.view() after the variable
 # has been reassigned. Using explicit variable declarations ensures correct type
 # inference and method resolution.
@@ -788,7 +789,9 @@ if np is not None:
         cdef DataType dtype = DataType(type_id.BOOL8)
         cdef Stream c_stream
         c_stream = _get_stream(stream)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         cdef cbool c_val = np_val
         (<numeric_scalar[cbool]*>c_obj.get()).set_value(c_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
@@ -810,7 +813,9 @@ if np is not None:
     def _(np_val, stream: Stream | None):
         cdef Stream c_stream = _get_stream(stream)
         dtype = DataType(type_id.INT8)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[int8_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -820,7 +825,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.INT16)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[int16_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -830,7 +837,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.INT32)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[int32_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -840,7 +849,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.INT64)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[int64_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -850,7 +861,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.UINT8)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -860,7 +873,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.UINT16)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -870,7 +885,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.UINT32)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -880,7 +897,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.UINT64)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -890,7 +909,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.FLOAT32)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[float]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
@@ -900,7 +921,9 @@ if np is not None:
         cdef Stream c_stream
         c_stream = _get_stream(stream)
         dtype = DataType(type_id.FLOAT64)
-        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(dtype.c_obj, c_stream.view())
+        cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
+            dtype.c_obj, c_stream.view()
+        )
         (<numeric_scalar[double]*>c_obj.get()).set_value(np_val)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr

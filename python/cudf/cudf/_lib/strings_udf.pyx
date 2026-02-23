@@ -66,7 +66,7 @@ def column_from_managed_udf_string_array(DeviceBuffer d_buffer):
 
 def free_managed_udf_string_array(DeviceBuffer d_buffer):
     """Free the udf_string data within managed_udf_string array.
-    
+
     Use this on HIP/AMD where NRT is not available for automatic memory management.
     """
     cdef size_t size = int(d_buffer.c_size() / sizeof(managed_udf_string))

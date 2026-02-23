@@ -30,6 +30,7 @@ from numba import config as numba_config
 # NOTE(HIP/AMD): Detect if we're running on HIP/AMD - numba-hip lacks NRT support
 try:
     from numba.hip.amdgcn import DATA_LAYOUT  # noqa: F401
+
     _USE_NRT = False  # NRT not available in numba-hip
 except ImportError:
     _USE_NRT = True  # CUDA build - NRT is available
@@ -45,7 +46,7 @@ class CaptureNRTUsage:
     Managed types may set use_nrt to be true during
     instantiation to signal that NRT must be enabled
     during code generation.
-    
+
     NOTE(HIP/AMD): On HIP, use_nrt is always False since NRT is not available.
     """
 
@@ -70,14 +71,14 @@ def nrt_enabled():
     config. CUDA_ENABLE_NRT may be toggled dynamically
     for a single kernel launch, so we use this context
     to enable it for those that we know need it.
-    
+
     NOTE(HIP/AMD): This is a no-op on HIP since NRT is not available.
     """
     if not _USE_NRT:
         # NRT not available, just yield without enabling
         yield
         return
-        
+
     original_value = getattr(numba_config, "CUDA_ENABLE_NRT", False)
     numba_config.CUDA_ENABLE_NRT = True
     try:

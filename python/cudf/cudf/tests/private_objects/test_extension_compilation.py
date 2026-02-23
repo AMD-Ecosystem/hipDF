@@ -88,8 +88,9 @@ number_ids = tuple(str(t) for t in number_types)
 def test_compile_masked_unary(op, ty):
     def func(x):
         return op(x)
+
     # NOTE(HIP/AMD): Setting arch
-    cc = "gfx90a" # CUDA: cc = (7, 5)
+    cc = "gfx90a"  # CUDA: cc = (7, 5)
     ptx, resty = compile_ptx(func, (MaskedType(ty),), cc=cc, device=True)
 
 
@@ -141,8 +142,9 @@ def test_execute_masked_binary(op, ty):
 def test_compile_arith_masked_vs_constant(op, ty, constant):
     def func(x):
         return op(x, constant)
+
     # NOTE(HIP/AMD): Setting arch
-    cc = "gfx90a" # CUDA: cc = (7, 5)
+    cc = "gfx90a"  # CUDA: cc = (7, 5)
     ptx, resty = compile_ptx(func, (MaskedType(ty),), cc=cc, device=True)
 
     assert isinstance(resty, MaskedType)
@@ -158,8 +160,9 @@ def test_compile_arith_masked_vs_constant(op, ty, constant):
 def test_compile_arith_constant_vs_masked(op, ty, constant):
     def func(x):
         return op(constant, x)
+
     # NOTE(HIP/AMD): Setting arch
-    cc = "gfx90a" # CUDA: cc = (7, 5)
+    cc = "gfx90a"  # CUDA: cc = (7, 5)
     ptx, resty = compile_ptx(func, (MaskedType(ty),), cc=cc, device=True)
 
     assert isinstance(resty, MaskedType)
@@ -170,8 +173,9 @@ def test_compile_arith_constant_vs_masked(op, ty, constant):
 def test_compile_arith_masked_vs_na(op, ty):
     def func(x):
         return op(x, NA)
+
     # NOTE(HIP/AMD): Setting arch
-    cc = "gfx90a" # CUDA: cc = (7, 5)
+    cc = "gfx90a"  # CUDA: cc = (7, 5)
     ptx, resty = compile_ptx(func, (MaskedType(ty),), cc=cc, device=True)
 
     assert isinstance(resty, MaskedType)
@@ -182,8 +186,9 @@ def test_compile_arith_masked_vs_na(op, ty):
 def test_compile_arith_na_vs_masked(op, ty):
     def func(x):
         return op(NA, x)
+
     # NOTE(HIP/AMD): Setting arch
-    cc = "gfx90a" # CUDA: cc = (7, 5)
+    cc = "gfx90a"  # CUDA: cc = (7, 5)
     ptx, resty = compile_ptx(func, (MaskedType(ty),), cc=cc, device=True)
 
 
@@ -198,8 +203,9 @@ def test_compile_arith_masked_ops(
 ):
     def func(x, y):
         return op(x, y)
+
     # NOTE(HIP/AMD): Setting arch
-    cc = "gfx90a" # CUDA: cc = (7, 5)
+    cc = "gfx90a"  # CUDA: cc = (7, 5)
 
     ty1 = from_dtype(np.dtype(numeric_types_as_str))
     ty2 = from_dtype(np.dtype(numeric_types_as_str2))

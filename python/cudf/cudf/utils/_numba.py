@@ -24,11 +24,15 @@
 
 from __future__ import annotations
 
+import glob
+import os
+
 import numba
 from numba import config as numba_config
 from packaging import version
 
 # HIP implementation
+
 
 def _get_ptx_file(path, prefix):
     """HIP implementation.
@@ -47,16 +51,18 @@ def _get_ptx_file(path, prefix):
         )
     return files[0]
 
+
 def _setup_numba():
     """HIP implementation does nothing.
 
-    TODO:
+    Todo:
         Put code that delegates `numba.cuda` to
         `numba.hip` here.
     """
     from numba import hip
 
     hip.pose_as_cuda()
+
 
 # Avoids using contextlib.contextmanager due to additional overhead
 class _CUDFNumbaConfig:

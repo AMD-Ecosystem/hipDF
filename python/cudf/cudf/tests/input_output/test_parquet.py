@@ -4584,7 +4584,9 @@ def test_parquet_reader_empty_compressed_page(datadir):
 
 # TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
 # NOTE: gzip decompression is not supported on HIP/AMD
-@pytest.mark.parametrize("compression", ["brotli", "snappy"])  # , "gzip", "zstd"
+@pytest.mark.parametrize(
+    "compression", ["brotli", "snappy"]
+)  # , "gzip", "zstd"
 def test_parquet_decompression(
     set_decomp_env_vars, pdf_day_timestamps, compression
 ):

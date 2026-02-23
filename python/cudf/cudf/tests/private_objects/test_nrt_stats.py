@@ -23,11 +23,14 @@
 # SOFTWARE.
 
 import pytest
+
 import cudf
 
 if getattr(cudf, "__is_hip_amd_port__", False):
-    pytest.skip("This test is not supported on HIP/AMD platform (missing NRT implementation).",
-                allow_module_level=True)
+    pytest.skip(
+        "This test is not supported on HIP/AMD platform (missing NRT implementation).",
+        allow_module_level=True,
+    )
 
 from numba import config
 from numba.cuda.memory_management.nrt import rtsys

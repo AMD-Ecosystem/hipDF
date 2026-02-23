@@ -97,6 +97,10 @@ exclude = ["*tests*"]
 [tool.ruff]
 extend = "../../pyproject.toml"
 
+[tool.ruff.lint.per-file-ignores]
+# Re-export modules that intentionally use `from X import *`
+"dask_hipdf/__init__.py" = ["F403"]
+
 [tool.ruff.lint.isort]
 combine-as-imports = true
 known-first-party = ["dask_cudf"]

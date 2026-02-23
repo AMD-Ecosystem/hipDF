@@ -619,13 +619,13 @@ def test_pyarrow_array_construction(data):
     "op", [">", "<", "==", "<=", ">=", "+", "%", "-", "*", "/"]
 )
 def test_cudf_pandas_eval_series(op):
-    lhs = xpd.Series([10, 11, 12])  # noqa: F841
-    rhs = xpd.Series([100, 1, 12])  # noqa: F841
+    lhs = xpd.Series([10, 11, 12])
+    rhs = xpd.Series([100, 1, 12])
 
     actual = xpd.eval(f"lhs {op} rhs", local_dict=locals())
 
-    pd_lhs = pd.Series([10, 11, 12])  # noqa: F841
-    pd_rhs = pd.Series([100, 1, 12])  # noqa: F841
+    pd_lhs = pd.Series([10, 11, 12])
+    pd_rhs = pd.Series([100, 1, 12])
 
     expected = pd.eval(f"pd_lhs {op} pd_rhs", local_dict=locals())
 
@@ -636,13 +636,13 @@ def test_cudf_pandas_eval_series(op):
     "op", [">", "<", "==", "<=", ">=", "+", "%", "-", "*", "/"]
 )
 def test_cudf_pandas_eval_dataframe(op):
-    lhs = xpd.DataFrame({"a": [10, 11, 12], "b": [1, 2, 3]})  # noqa: F841
-    rhs = xpd.DataFrame({"a": [100, 1, 12], "b": [15, -10, 3]})  # noqa: F841
+    lhs = xpd.DataFrame({"a": [10, 11, 12], "b": [1, 2, 3]})
+    rhs = xpd.DataFrame({"a": [100, 1, 12], "b": [15, -10, 3]})
 
     actual = xpd.eval(f"lhs {op} rhs", local_dict=locals())
 
-    pd_lhs = pd.DataFrame({"a": [10, 11, 12], "b": [1, 2, 3]})  # noqa: F841
-    pd_rhs = pd.DataFrame({"a": [100, 1, 12], "b": [15, -10, 3]})  # noqa: F841
+    pd_lhs = pd.DataFrame({"a": [10, 11, 12], "b": [1, 2, 3]})
+    pd_rhs = pd.DataFrame({"a": [100, 1, 12], "b": [15, -10, 3]})
 
     expected = pd.eval(f"pd_lhs {op} pd_rhs", local_dict=locals())
 
@@ -1169,7 +1169,7 @@ def test_dataframe_query():
 
     tm.assert_equal(actual, expected)
 
-    bizz = 2  # noqa: F841
+    bizz = 2
     actual = cudf_pandas_df.query("foo > @bizz", local_dict=locals())
     expected = pd_df.query("foo > @bizz")
 

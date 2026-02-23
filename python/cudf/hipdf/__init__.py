@@ -25,10 +25,7 @@ import sys as _sys
 
 # generic
 class _MirrorModule:
-
-    def __init__(
-        self, name, module, parent
-    ):  # type: (_MirrorModule, str, _sys.ModuleType, (str|None)) -> None
+    def __init__(self, name, module, parent):  # type: (_MirrorModule, str, _sys.ModuleType, (str|None)) -> None
         self.parent = parent  # type: _MirrorModule
         self.module = module  # type: _sys.ModuleType
         self.name = name  # type: str
@@ -43,9 +40,7 @@ class _MirrorModule:
             result.append(current.name)
         return ".".join(reversed(result))
 
-    def get_or_insert(
-        self, name, module
-    ):  # type: (_MirrorModule, str, _sys.ModuleType) -> _MirrorModule
+    def get_or_insert(self, name, module):  # type: (_MirrorModule, str, _sys.ModuleType) -> _MirrorModule
         """Get child with the given name, create it if it doesn't exist."""
         assert module is not None
         for child in self.children:
@@ -77,7 +72,7 @@ class _MirrorModule:
 
 # project-specific
 def _variants(mod):
-    "Project-specific package name variant generator."
+    """Project-specific package name variant generator."""
     yield mod
     if "cudf" in mod:
         yield mod.replace("cudf", "hipdf")
@@ -88,9 +83,7 @@ def _variants(mod):
 
 
 # generic
-def _descend(
-    current, global_module_name_parts, lvl
-):  # type: (_MirrorModule, list[str], int) -> None
+def _descend(current, global_module_name_parts, lvl):  # type: (_MirrorModule, list[str], int) -> None
     if lvl >= len(global_module_name_parts):
         return
     for v in _variants(global_module_name_parts[lvl]):
