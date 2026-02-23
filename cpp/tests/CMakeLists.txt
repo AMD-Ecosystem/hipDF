@@ -704,6 +704,7 @@ ConfigureTest(
   dictionary/search_test.cpp
   dictionary/set_keys_test.cpp
   dictionary/slice_test.cpp
+  dictionary/sort_test.cpp
 )
 
 # ##################################################################################################
