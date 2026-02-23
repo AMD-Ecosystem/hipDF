@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -55,7 +55,7 @@ void ASSERT_UNARY(cudf::column_view const& out, cudf::column_view const& in, Typ
   auto out_h    = cudf::test::to_host<TypeOut>(out);
   auto out_data = out_h.first;
 
-  ASSERT_TRUE(out_data.size() == in_data.size());
+  ASSERT_EQ(out_data.size(), in_data.size());
 
   auto begin = thrust::make_zip_iterator(MAKE_TUPLE(in_data.begin(), out_data.begin()));
   auto end   = thrust::make_zip_iterator(MAKE_TUPLE(in_data.end(), out_data.end()));
@@ -68,7 +68,7 @@ void ASSERT_UNARY(cudf::column_view const& out, cudf::column_view const& in, Typ
   auto in_valid  = in_h.second;
   auto out_valid = out_h.second;
 
-  ASSERT_TRUE(out_valid.size() == in_valid.size());
+  ASSERT_EQ(out_valid.size(), in_valid.size());
 
   auto valid_begin =
     thrust::make_zip_iterator(MAKE_TUPLE(in_valid.begin(), out_valid.begin()));
