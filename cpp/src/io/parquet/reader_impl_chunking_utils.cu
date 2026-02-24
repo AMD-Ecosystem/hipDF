@@ -53,7 +53,6 @@
 #include <cuda/iterator>
 // >>>>>>> END NEW CODE (c4e8151cb0)
 #include <thrust/binary_search.h>
-#include <thrust/iterator/discard_iterator.h>
 #include <thrust/sequence.h>
 #include <thrust/transform_scan.h>
 #include <thrust/unique.h>
@@ -351,7 +350,7 @@ adjust_cumulative_sizes(device_span<cumulative_page_info const> c_info,
   auto const key_offsets_end = cudf::detail::reduce_by_key(page_keys,
                                                            page_keys + pages.size(),
                                                            cuda::make_constant_iterator(1),
-                                                           thrust::make_discard_iterator(),
+                                                           cuda::make_discard_iterator(),
                                                            key_offsets.begin(),
                                                            cuda::std::plus<>{},
                                                            stream)
@@ -687,7 +686,7 @@ void detect_malformed_pages(device_span<PageInfo const> pages,
   auto const row_counts_end   = cudf::detail::reduce_by_key(page_keys,
                                                           page_keys + pages.size(),
                                                           size_iter,
-                                                          thrust::make_discard_iterator(),
+                                                          cuda::make_discard_iterator(),
                                                           row_counts_begin,
                                                           cuda::std::plus<>{},
                                                           stream)

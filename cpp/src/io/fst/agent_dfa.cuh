@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2022-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -34,13 +34,13 @@
 #include <hipcub/hipcub.hpp>
 #include <cuda/cmath>
 #include <cuda/functional>
+#include <cuda/iterator>
 #include <cuda/std/array>
 #include <cuda/std/type_traits>
 
 #include <hipcub/agent/single_pass_scan_operators.hpp>
 
 #include <thrust/execution_policy.h>
-#include <thrust/iterator/discard_iterator.h>
 #include <thrust/sequence.h>
 
 namespace cudf::io::fst::detail {
@@ -801,9 +801,9 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) CUDF_KERNEL
   // static constexpr int32_t MIN_TRANSLATED_OUT = DfaT::MIN_TRANSLATED_OUT;
   static constexpr int32_t num_max_translated_out = DfaT::MAX_TRANSLATED_OUT;
   static constexpr bool discard_out_index =
-    ::cuda::std::is_same<TransducedIndexOutItT, thrust::discard_iterator<>>::value;
+    ::cuda::std::is_same<TransducedIndexOutItT, cuda::discard_iterator>::value;
   static constexpr bool discard_out_it =
-    ::cuda::std::is_same<TransducedOutItT, thrust::discard_iterator<>>::value;
+    ::cuda::std::is_same<TransducedOutItT, cuda::discard_iterator>::value;
   using NonWriteCoalescingT =
     DFAWriteCallbackWrapper<num_max_translated_out,
                             decltype(dfa.InitTranslationTable(transducer_table_storage)),

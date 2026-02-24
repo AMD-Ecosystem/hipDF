@@ -50,7 +50,11 @@
 // =======
 #include <cooperative_groups.h>
 #include <cub/cub.cuh>
-// >>>>>>> END NEW CODE (21cd733d12)
+// <<<<<<< OLD CODE from 489b45b2f6 (683861603a) - COMMENTED OUT
+// // >>>>>>> END NEW CODE (21cd733d12)
+// =======
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (683861603a)
 #include <cuda/std/chrono>
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
@@ -59,7 +63,6 @@
 #include <cuda/std/utility>
 #include <thrust/binary_search.h>
 #include <thrust/gather.h>
-#include <thrust/iterator/discard_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/merge.h>
