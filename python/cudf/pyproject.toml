@@ -103,8 +103,12 @@ dependencies = [
 # # >>>>>>> END NEW CODE (8a74308629)
 # =======
     "numba-cuda>=0.22.2",
-# >>>>>>> END NEW CODE (cec4045be7)
-    "numba>=0.60.0,<0.62.0",
+# <<<<<<< OLD CODE from c6da435b6b (38980f684a) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (cec4045be7)
+#     "numba>=0.60.0,<0.62.0",
+# =======
+    "numba>=0.60.0,<0.65.0",
+# >>>>>>> END NEW CODE (38980f684a)
     "numpy>=1.23,<3.0",
     "nvtx>=0.2.1",
 # >>>>>>> END NEW CODE (fce3d155f1)
