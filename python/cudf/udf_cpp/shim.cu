@@ -49,7 +49,7 @@
 
 // TODO(HIP/AMD): Restore NRT (Numba Runtime) support for proper UDF string memory management.
 // NRT was removed to avoid dependency on numba.cuda.memory_management which is not available
-// in numba-hip. 
+// in numba-hip.
 // See internal issue 376
 
 #include <limits>

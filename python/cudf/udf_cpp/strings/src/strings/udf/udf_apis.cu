@@ -128,8 +128,8 @@ void free_managed_udf_string_array(managed_udf_string* managed_strings,
   thrust::for_each_n(rmm::exec_policy(stream),
                      thrust::make_counting_iterator(0),
                      size,
-                     [managed_strings] __device__(auto idx) { 
-                       managed_strings[idx].udf_str.clear(); 
+                     [managed_strings] __device__(auto idx) {
+                       managed_strings[idx].udf_str.clear();
                      });
   stream.synchronize();
 }
