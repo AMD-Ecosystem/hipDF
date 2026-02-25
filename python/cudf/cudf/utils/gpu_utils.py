@@ -209,7 +209,7 @@ def validate_setup():
 del validate_setup
 
 
-def validate_setup():
+def validate_setup():  # type: ignore[no-redef]
     import importlib.metadata
     import os
     import warnings
