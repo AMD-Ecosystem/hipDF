@@ -49,7 +49,7 @@ project(
   LANGUAGES CXX HIP
 )
 
-option(USE_NVCOMP_RUNTIME_WHEEL "Use the nvcomp wheel at runtime instead of vendoring nvcomp" OFF)
+option(USE_HIPCOMP_RUNTIME_WHEEL "Use the hipcomp wheel at runtime instead of vendoring hipcomp" OFF)
 
 # Check if cudf is already available. If so, it is the user's responsibility to ensure that the
 # CMake package is also available at build time of the Python cudf package.
@@ -69,27 +69,27 @@ set(CUDF_EXPORT_NVCOMP OFF)
 
 include(../../cpp/cmake/thirdparty/get_nvcomp.cmake)
 
-# Install only the specific libnvcomp.so.* library instead of all nvcomp targets
-if(TARGET nvcomp::nvcomp)
-  get_target_property(is_imported nvcomp::nvcomp IMPORTED)
+# Install only the specific libhipcomp.so.* library instead of all hipcomp targets
+if(TARGET hipcomp)
+  get_target_property(is_imported hipcomp IMPORTED)
   if(is_imported)
-    get_target_property(nvcomp_lib_path nvcomp::nvcomp IMPORTED_LOCATION_RELEASE)
+    get_target_property(hipcomp_lib_path hipcomp IMPORTED_LOCATION_RELEASE)
     # Compute the SOVERSION from the library path
-    get_filename_component(nvcomp_lib_dir ${nvcomp_lib_path} DIRECTORY)
-    get_filename_component(nvcomp_lib_name ${nvcomp_lib_path} NAME)
-    string(REGEX REPLACE "^libnvcomp\\.so\\.([0-9]+).*$" "\\1" nvcomp_soversion_major
-                         ${nvcomp_lib_name}
+    get_filename_component(hipcomp_lib_dir ${hipcomp_lib_path} DIRECTORY)
+    get_filename_component(hipcomp_lib_name ${hipcomp_lib_path} NAME)
+    string(REGEX REPLACE "^libhipcomp\\.so\\.([0-9]+).*$" "\\1" hipcomp_soversion_major
+                         ${hipcomp_lib_name}
     )
     install(
-      FILES ${nvcomp_lib_path}
+      FILES ${hipcomp_lib_path}
       DESTINATION ${SKBUILD_PLATLIB_DIR}/libcudf/lib64/
-      RENAME libnvcomp.so.${nvcomp_soversion_major}
+      RENAME libhipcomp.so.${hipcomp_soversion_major}
     )
   else()
-    message(FATAL_ERROR "nvcomp target must be imported")
+    message(FATAL_ERROR "hipcomp target must be imported")
   endif()
 else()
-  message(FATAL_ERROR "nvcomp target not found")
+  message(FATAL_ERROR "hipcomp target not found")
 endif()
 set(CUDA_STATIC_RUNTIME OFF) # NOTE(HIP/AMD): Unsupported.
 
@@ -97,8 +97,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(../../cpp cudf-cpp)
 
-if(USE_NVCOMP_RUNTIME_WHEEL)
-  set(rpaths "$ORIGIN/../../nvidia/nvcomp")
+if(USE_HIPCOMP_RUNTIME_WHEEL)
+  set(rpaths "$ORIGIN/../../amd/hipcomp")
   set_property(
     TARGET cudf
     PROPERTY INSTALL_RPATH ${rpaths}
