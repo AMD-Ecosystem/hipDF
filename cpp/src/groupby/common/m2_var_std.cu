@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -195,11 +195,11 @@ std::unique_ptr<column> compute_variance(column_view const& m2,
   auto const transform_func =
     [m2 = m2.begin<M2Type>(), count = count.begin<CountType>(), ddof] __device__(
       size_type const idx) {
-    auto const group_count = count[idx];
-    auto const df          = group_count - ddof;
+      auto const group_count = count[idx];
+      auto const df          = group_count - ddof;
       if (group_count == 0 || df <= 0) { return CUDF_MAKE_TUPLE(VarianceType{}, false); }
-      return CUDF_MAKE_TUPLE(m2[idx] / df, true);
-  };
+        return CUDF_MAKE_TUPLE(m2[idx] / df, true);
+    };
   return compute_variance_std<VarianceType>(transform_func, m2.size(), stream, mr);
 }
 
@@ -216,11 +216,11 @@ std::unique_ptr<column> compute_std(column_view const& m2,
   auto const transform_func =
     [m2 = m2.begin<M2Type>(), count = count.begin<CountType>(), ddof] __device__(
       size_type const idx) {
-    auto const group_count = count[idx];
-    auto const df          = group_count - ddof;
+      auto const group_count = count[idx];
+      auto const df          = group_count - ddof;
       if (group_count == 0 || df <= 0) { return CUDF_MAKE_TUPLE(StdType{}, false); }
         return CUDF_MAKE_TUPLE(cuda::std::sqrt(m2[idx] / df), true);
-  };
+    };
   return compute_variance_std<StdType>(transform_func, m2.size(), stream, mr);
 }
 

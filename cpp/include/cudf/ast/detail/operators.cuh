@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -173,12 +173,12 @@ CUDF_HOST_DEVICE inline constexpr decltype(auto) ast_operator_dispatcher(ast_ope
       return f.template operator()<ast_operator::CAST_TO_UINT64>(cuda::std::forward<Ts>(args)...);
     case ast_operator::CAST_TO_FLOAT64:
       return f.template operator()<ast_operator::CAST_TO_FLOAT64>(cuda::std::forward<Ts>(args)...);
-        default: {
-    #if !defined(__HIP_DEVICE_COMPILE__) and !defined(__CUDA_ARCH__)
+    default: {
+#if !defined(__HIP_DEVICE_COMPILE__) and !defined(__CUDA_ARCH__)
       CUDF_FAIL("Invalid operator.");
-    #else
+#else
       CUDF_UNREACHABLE("Invalid operator.");
-    #endif
+#endif
     }
   }
 }
