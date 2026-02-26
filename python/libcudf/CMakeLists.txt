@@ -71,26 +71,11 @@ set(CUDF_EXPORT_NVCOMP OFF)
 
 include(../../cpp/cmake/thirdparty/get_nvcomp.cmake)
 
-# Install only the specific libhipcomp.so.* library instead of all hipcomp targets
-if(TARGET hipcomp)
-  get_target_property(is_imported hipcomp IMPORTED)
-  if(is_imported)
-    get_target_property(hipcomp_lib_path hipcomp IMPORTED_LOCATION_RELEASE)
-    # Compute the SOVERSION from the library path
-    get_filename_component(hipcomp_lib_dir ${hipcomp_lib_path} DIRECTORY)
-    get_filename_component(hipcomp_lib_name ${hipcomp_lib_path} NAME)
-    string(REGEX REPLACE "^libhipcomp\\.so\\.([0-9]+).*$" "\\1" hipcomp_soversion_major
-                         ${hipcomp_lib_name}
-    )
-    install(
-      FILES ${hipcomp_lib_path}
-      DESTINATION ${SKBUILD_PLATLIB_DIR}/libcudf/lib64/
-      RENAME libhipcomp.so.${hipcomp_soversion_major}
-    )
-  else()
-    message(FATAL_ERROR "hipcomp target must be imported")
-  endif()
-else()
+# NOTE(HIP/AMD): hipcomp is built from source via CPM, not imported as a prebuilt library.
+# The installation of hipcomp is handled by the main cudf build (add_subdirectory below),
+# so we don't need to explicitly install it here like nvcomp does in CUDA builds.
+# Just verify the target exists.
+if(NOT TARGET hipcomp)
   message(FATAL_ERROR "hipcomp target not found")
 endif()
 set(CUDA_STATIC_RUNTIME OFF) # NOTE(HIP/AMD): Unsupported.
