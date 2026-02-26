@@ -49,7 +49,9 @@ project(
   LANGUAGES CXX HIP
 )
 
-option(USE_HIPCOMP_RUNTIME_WHEEL "Use the hipcomp wheel at runtime instead of vendoring hipcomp" OFF)
+# TODO(HIP/AMD): hipcomp is not shipped as wheel yet
+# option(USE_HIPCOMP_RUNTIME_WHEEL "Use the hipcomp wheel at runtime instead of vendoring hipcomp" OFF)
+set(USE_HIPCOMP_RUNTIME_WHEEL OFF)
 
 # Check if cudf is already available. If so, it is the user's responsibility to ensure that the
 # CMake package is also available at build time of the Python cudf package.
@@ -97,6 +99,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(../../cpp cudf-cpp)
 
+# TODO(HIP/AMD): Enable when hipcomp wheel becomes available
 if(USE_HIPCOMP_RUNTIME_WHEEL)
   set(rpaths "$ORIGIN/../../amd/hipcomp")
   set_property(
