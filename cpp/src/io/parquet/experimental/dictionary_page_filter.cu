@@ -453,7 +453,8 @@ __device__ T decode_fixed_width_value(PageInfo const& page,
   auto decoded_value = T{};
 
   // Check for decimal types
-  auto const is_decimal = chunk.logical_type.has_value() && chunk.logical_type->type == LogicalType::DECIMAL;
+  auto const is_decimal =
+    chunk.logical_type.has_value() && chunk.logical_type->type == LogicalType::DECIMAL;
   if (is_decimal and not cudf::is_fixed_point<T>()) {
     set_error(error, decode_error::INVALID_DATA_TYPE);
     return {};
