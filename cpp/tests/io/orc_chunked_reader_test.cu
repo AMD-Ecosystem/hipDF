@@ -1193,7 +1193,7 @@ TEST_F(OrcChunkedReaderInputLimitTest, ListType)
                     value_gen<int>{});
 
   auto const lists_col =
-    cudf::make_lists_column(num_rows, std::move(offset_col), std::move(value_col), 0, {}, stream);
+    cudf::make_lists_column(num_rows, std::move(offset_col), std::move(value_col), 0, {});
 
   auto const filename   = std::string{"list_type"};
   auto const test_files = input_limit_get_test_names(temp_env->get_temp_filepath(filename));
@@ -1254,7 +1254,7 @@ TEST_F(OrcChunkedReaderInputLimitTest, MixedColumnsHavingList)
                     value_gen<int>{});
 
   auto const lists_col =
-    cudf::make_lists_column(num_rows, std::move(offset_col), std::move(value_col), 0, {}, stream);
+    cudf::make_lists_column(num_rows, std::move(offset_col), std::move(value_col), 0, {});
 
   // strings
   int constexpr num_chars = num_rows * str_size;
