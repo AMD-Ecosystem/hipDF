@@ -41,7 +41,7 @@ namespace detail {
 template <typename T>
 CUDF_HOST_DEVICE inline auto rtc_floor_war(T x) noexcept -> decltype(::floor(x))
 {
-#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
   return ::floor(x);
 #else
   return cuda::std::floor(x);

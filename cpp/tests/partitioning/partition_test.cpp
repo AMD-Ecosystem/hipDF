@@ -53,7 +53,7 @@
 
 // NOTE(HIP/AMD): cuda::std::tuple from libhipcxx 2.7.0 doesn't provide iterator traits required by thrust::zip_iterator
 // in ROCm/HIP, causing compilation errors. Use thrust::make_tuple for compatibility.
-#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
 #define MAKE_TUPLE thrust::make_tuple
 #else
 #define MAKE_TUPLE cuda::std::make_tuple

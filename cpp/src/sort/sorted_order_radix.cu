@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@ template <typename F>
 struct float_decomposer {
   // NOTE(HIP/AMD): rocPRIM/hipCUB requires rocprim::tuple<T&, U&> for radix sort decomposers.
   // Other tuple types cause SFINAE failures in radix_key_codec's is_tuple_of_references check.
-#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
   __device__ rocprim::tuple<size_type&, F&> operator()(float_pair<F>& key) const
   {
     return rocprim::tuple<size_type&, F&>{key.s, key.f};

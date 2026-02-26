@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -259,7 +259,7 @@ std::optional<cudf::data_type> integer_cast_type(strings_column_view const& inpu
                              size_type{0},
                              // NOTE(HIP/AMD): libhipcxx 2.7.0 does not have cuda::maximum yet.
                              // Use thrust::maximum as a workaround for affected versions.
-#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
                              thrust::maximum<size_type>{});
 #else
                              cuda::maximum<size_type>{});

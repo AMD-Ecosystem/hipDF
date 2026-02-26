@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -99,7 +99,7 @@ using uint64_t = __hip_internal::uint64_t;
 
 // NOTE(HIP/AMD): Conditional macros for tuple/pair types to handle libhipcxx version compatibility
 // with thrust (libhipcxx 2.7.0 datatypes are not compatbile with thrust)
-#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
 #define CUDF_TUPLE_PAIR_PROVIDER thrust
 #define CUDF_TUPLE_TYPE thrust::tuple
 #define CUDF_PAIR_TYPE thrust::pair

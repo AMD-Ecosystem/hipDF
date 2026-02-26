@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -108,7 +108,7 @@ std::unique_ptr<table> unique(table_view const& input,
       // NOTE(HIP/AMD): libhipcxx 2.7.0 has a const-correctness issue where cuda::std::identity
       // drops const qualifier when used with transform_iterator<bool*> in rocPRIM's select.
       // This causes compilation errors. We conditionally use a workaround for affected versions.
-#if defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
       auto result_end = thrust::copy_if(rmm::exec_policy(stream),
                                         itr,
                                         itr + num_rows,

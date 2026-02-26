@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ namespace rtc_math_workaround {
 template <typename T>
 __device__ inline auto floor(T x) noexcept -> decltype(::floor(x))
 {
-#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
   return ::floor(x);
 #else
   return cuda::std::floor(x);
@@ -69,7 +69,7 @@ __device__ inline auto floor(T x) noexcept -> decltype(::floor(x))
 template <typename T>
 __device__ inline auto cbrt(T x) noexcept -> decltype(::cbrt(x))
 {
-#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
   return ::cbrt(x);
 #else
   return cuda::std::cbrt(x);
@@ -79,7 +79,7 @@ __device__ inline auto cbrt(T x) noexcept -> decltype(::cbrt(x))
 template <typename T>
 __device__ inline auto rint(T x) noexcept -> decltype(::rint(x))
 {
-#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION == 2007000
+#if defined(__HIPCC_RTC__) && defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
   return ::rint(x);
 #else
   return cuda::std::rint(x);
