@@ -15,7 +15,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -39,14 +39,14 @@ cmake_minimum_required(VERSION 3.30.4 FATAL_ERROR)
 
 include(../../cmake/rapids_config.cmake)
 include(rapids-cpm)
-include(rapids-cuda)
-rapids_cuda_init_architectures(libcudf-python)
+include(rapids-hip)
+rapids_hip_init_architectures(libcudf-python)
 rapids_cpm_init()
 
 project(
   libcudf-python
   VERSION "${RAPIDS_VERSION}"
-  LANGUAGES CXX CUDA
+  LANGUAGES CXX HIP
 )
 
 option(USE_NVCOMP_RUNTIME_WHEEL "Use the nvcomp wheel at runtime instead of vendoring nvcomp" OFF)
