@@ -234,7 +234,12 @@ minimum-version = "build-system.requires"
 ninja.make-fallback = false
 sdist.exclude = ["*tests*"]
 sdist.reproducible = true
-wheel.packages = ["pylibcudf", "pylibhipdf"]
+# <<<<<<< OLD CODE from bba09edc3a (851cf9f871) - COMMENTED OUT
+# wheel.packages = ["pylibcudf", "pylibhipdf"]
+# =======
+wheel.packages = ["pylibcudf"]
+wheel.py-api = "cp311" # overridden in CI builds by arguments from `ci/build_wheel_*.sh` scripts.
+# >>>>>>> END NEW CODE (851cf9f871)
 
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
