@@ -517,9 +517,9 @@ __device__ T decode_fixed_width_value(PageInfo const& page,
       }
 
       // Calculate the bitwidth of the int32 encoded value
-      auto const int32_type_len = chunk.logical_type.has_value() 
+      auto const int32_type_len = chunk.logical_type.has_value()
                                     ? get_int32_type_len(*chunk.logical_type)
-                         : sizeof(uint32_t);
+                                    : sizeof(uint32_t);
       // Check if we are reading INT32 TIME_MILLIS into 64-bit DURATION_MILLISECONDS
       if (int32_type_len == sizeof(int64_t) and not cudf::is_duration<T>()) {
         set_error(error, decode_error::INVALID_DATA_TYPE);
