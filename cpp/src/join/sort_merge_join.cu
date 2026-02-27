@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -272,12 +272,27 @@ merge<LargerIterator, SmallerIterator>::operator()(rmm::cuda_stream_view stream,
   auto const count_matches =
     thrust::reduce(rmm::exec_policy(stream), count_matches_it, count_matches_it + larger_numrows);
   rmm::device_uvector<size_type> nonzero_matches(count_matches, stream, temp_mr);
+    // NOTE(HIP/AMD): There is a const correctness issue where cuda::std::identity
+    // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+    // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+    // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+    // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+    // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
   thrust::copy_if(rmm::exec_policy_nosync(stream),
                   thrust::counting_iterator(0),
                   thrust::counting_iterator(0) + larger_numrows,
                   match_counts->begin(),
                   nonzero_matches.begin(),
                   thrust::identity{});
+#else
+  thrust::copy_if(rmm::exec_policy_nosync(stream),
+                  thrust::counting_iterator(0),
+                  thrust::counting_iterator(0) + larger_numrows,
+                  match_counts->begin(),
+                  nonzero_matches.begin(),
+                  cuda::std::identity{});
+#endif
 
   thrust::exclusive_scan(rmm::exec_policy_nosync(stream),
                          match_counts->begin(),
@@ -361,8 +376,15 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
         thrust::reverse_iterator(thrust::counting_iterator(offsets.size())),
         thrust::reverse_iterator(offsets_subset.end()),
         thrust::reverse_iterator(child_positions.end()));
+      // NOTE(HIP/AMD): There are const-correctness issues with cuda::std functions.
+      // We conditionally use thrust:: versions for CCCL 2.7.0.
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
+      auto subset_size = thrust::distance(thrust::reverse_iterator(offsets_subset.end()),
+                                          thrust::get<0>(unique_end));
+#else
       auto subset_size   = cuda::std::distance(thrust::reverse_iterator(offsets_subset.end()),
                                              unique_end.first);
+#endif
       auto subset_offset = offsets.size() - subset_size;
 
       auto [reduced_validity_mask, num_nulls] =
