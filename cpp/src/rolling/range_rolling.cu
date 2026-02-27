@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -87,22 +87,22 @@ rmm::device_uvector<cudf::size_type> nulls_per_group(column_view const& orderby,
       }));
   rmm::device_uvector<cudf::size_type> null_counts{num_groups, stream};
   CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
-                                        bytes,
-                                        is_null_it,
-                                        null_counts.begin(),
-                                        num_groups,
-                                        offsets.begin(),
-                                        offsets.begin() + 1,
-                                        stream.value()));
+                                                   bytes,
+                                                   is_null_it,
+                                                   null_counts.begin(),
+                                                   num_groups,
+                                                   offsets.begin(),
+                                                   offsets.begin() + 1,
+                                                   stream.value()));
   auto tmp = rmm::device_buffer(bytes, stream);
   CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(tmp.data(),
-                                        bytes,
-                                        is_null_it,
-                                        null_counts.begin(),
-                                        num_groups,
-                                        offsets.begin(),
-                                        offsets.begin() + 1,
-                                        stream.value()));
+                                                   bytes,
+                                                   is_null_it,
+                                                   null_counts.begin(),
+                                                   num_groups,
+                                                   offsets.begin(),
+                                                   offsets.begin() + 1,
+                                                   stream.value()));
   return null_counts;
 }
 

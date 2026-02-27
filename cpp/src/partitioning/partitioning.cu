@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -692,26 +692,26 @@ struct dispatch_map_type {
     size_type const lower_level  = 0;
     size_type const upper_level  = num_partitions;
     CUDF_CUDA_TRY(hipcub::DeviceHistogram::HistogramEven(nullptr,
-                      temp_storage_bytes,
-                      partition_map.begin<MapType>(),
-                      histogram.data(),
-                      num_levels,
-                      lower_level,
-                      upper_level,
-                      partition_map.size(),
-                      stream.value()));
+                                                         temp_storage_bytes,
+                                                         partition_map.begin<MapType>(),
+                                                         histogram.data(),
+                                                         num_levels,
+                                                         lower_level,
+                                                         upper_level,
+                                                         partition_map.size(),
+                                                         stream.value()));
 
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
 
     CUDF_CUDA_TRY(hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
-                      temp_storage_bytes,
-                      partition_map.begin<MapType>(),
-                      histogram.data(),
-                      num_levels,
-                      lower_level,
-                      upper_level,
-                      partition_map.size(),
-                      stream.value()));
+                                                         temp_storage_bytes,
+                                                         partition_map.begin<MapType>(),
+                                                         histogram.data(),
+                                                         num_levels,
+                                                         lower_level,
+                                                         upper_level,
+                                                         partition_map.size(),
+                                                         stream.value()));
 
     // `histogram` was created with an extra entry at the end such that an
     // exclusive scan will put the total number of rows at the end
