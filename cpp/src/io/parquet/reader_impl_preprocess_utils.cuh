@@ -503,7 +503,6 @@ struct page_offset_output_iter {
   using reference         = size_t&;
   using iterator_category = thrust::output_device_iterator_tag;
 
-  CUDF_HOST_DEVICE constexpr inline page_offset_output_iter operator+(int i) { return {p + i}; }
   CUDF_HOST_DEVICE constexpr inline page_offset_output_iter operator+(int i) const { return {p + i}; }
 
   CUDF_HOST_DEVICE constexpr inline page_offset_output_iter& operator++()
