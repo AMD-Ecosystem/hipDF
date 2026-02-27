@@ -497,7 +497,7 @@ add_library(
   src/binaryop/compiled/TrueDiv.cu
   src/binaryop/compiled/binary_ops.cu
   src/binaryop/compiled/equality_ops.cu
-  src/binaryop/compiled/util.cpp  # temporarily disabled to skip build
+  src/binaryop/compiled/util.cpp
   src/labeling/label_bins.cu
   src/bitmask/null_mask.cu
   src/bitmask/is_element_valid.cpp
@@ -1027,7 +1027,7 @@ if(BUILD_ASAN)
     src/binaryop/compiled/TrueDiv.cu
     src/binaryop/compiled/binary_ops.cu
     src/binaryop/compiled/equality_ops.cu
-    src/binaryop/compiled/util.cpp  # temporarily disabled to skip build
+    src/binaryop/compiled/util.cpp
     src/labeling/label_bins.cu
     src/bitmask/null_mask.cu
     src/bitmask/is_element_valid.cpp
