@@ -393,10 +393,15 @@ __device__ __inline__ bool less_equal_than(char const* data, char const (&golden
  * the interpreted data type
  */
 // TODO(HIP/AMD): Workaround for internal issue 275, required for ROCm 7.1.x
-__device__ __attribute__((optnone)) cudf::size_type* infer_integral_field_counter(char const* data_begin,
-                                                                    char const* data_end,
-                                                                    bool is_negative,
-                                                                    column_type_histogram& stats)
+#if defined(HIP_VERSION_MAJOR) && defined(HIP_VERSION_MINOR) && HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR == 1
+__device__ __attribute__((optnone))
+#else
+__device__
+#endif
+cudf::size_type* infer_integral_field_counter(char const* data_begin,
+                                               char const* data_end,
+                                               bool is_negative,
+                                               column_type_histogram& stats)
 {
   static constexpr char uint64_max_abs[] = "18446744073709551615";
   static constexpr char int64_min_abs[]  = "9223372036854775808";
