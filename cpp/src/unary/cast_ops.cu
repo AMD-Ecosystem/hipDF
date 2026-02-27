@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -84,10 +84,12 @@ struct unary_cast {
     }
   }
 
+  // NOTE(HIP/AMD): General numeric cast - excludes float/double to long conversions which are handled above
+  // with special inf/NaN/range handling for HIP/AMD compatibility
   template <typename SourceT, typename TargetT = _TargetT>
   __device__ inline TargetT operator()(SourceT const element)
     requires(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>() &&
-             !((cuda::std::is_same_v<SourceT, float> || cuda::std::is_same_v<SourceT, double>) && cuda::std::is_same_v<TargetT, long>)) 
+             !((cuda::std::is_same_v<SourceT, float> || cuda::std::is_same_v<SourceT, double>) && cuda::std::is_same_v<TargetT, long>))
   {
     return static_cast<TargetT>(element);
   }
