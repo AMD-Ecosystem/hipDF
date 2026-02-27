@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -78,21 +78,21 @@ struct MurmurHash3_x64_128 {
 
 template <>
 MurmurHash3_x64_128<bool>::result_type __device__ constexpr inline MurmurHash3_x64_128<bool>::operator()(
-  bool const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
+  bool const& key) const
 {
   return this->compute<uint8_t>(key);
 }
 
 template <>
 MurmurHash3_x64_128<float>::result_type __device__ constexpr inline MurmurHash3_x64_128<float>::operator()(
-  float const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
+  float const& key) const
 {
   return this->compute(normalize_nans(key));
 }
 
 template <>
 MurmurHash3_x64_128<double>::result_type __device__ constexpr inline MurmurHash3_x64_128<double>::operator()(
-  double const& key) const //FIXME(HIP/AMD): added constexpr as WAR for #254
+  double const& key) const
 {
   return this->compute(normalize_nans(key));
 }
@@ -100,7 +100,7 @@ MurmurHash3_x64_128<double>::result_type __device__ constexpr inline MurmurHash3
 template <>
 MurmurHash3_x64_128<cudf::string_view>::result_type
   __device__ constexpr inline MurmurHash3_x64_128<cudf::string_view>::
-  operator()(cudf::string_view const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
+  operator()(cudf::string_view const& key) const
 {
   return this->compute_bytes(reinterpret_cast<cuda::std::byte const*>(key.data()),
                              key.size_bytes());
@@ -109,7 +109,7 @@ MurmurHash3_x64_128<cudf::string_view>::result_type
 template <>
 MurmurHash3_x64_128<numeric::decimal32>::result_type
   __device__ constexpr inline MurmurHash3_x64_128<numeric::decimal32>::
-  operator()(numeric::decimal32 const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
+  operator()(numeric::decimal32 const& key) const
 {
   return this->compute(key.value());
 }
@@ -117,7 +117,7 @@ MurmurHash3_x64_128<numeric::decimal32>::result_type
 template <>
 MurmurHash3_x64_128<numeric::decimal64>::result_type
   __device__ constexpr inline MurmurHash3_x64_128<numeric::decimal64>::
-  operator()(numeric::decimal64 const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
+  operator()(numeric::decimal64 const& key) const
 {
   return this->compute(key.value());
 }
@@ -125,7 +125,7 @@ MurmurHash3_x64_128<numeric::decimal64>::result_type
 template <>
 MurmurHash3_x64_128<numeric::decimal128>::result_type
   __device__ constexpr inline MurmurHash3_x64_128<numeric::decimal128>::
-  operator()(numeric::decimal128 const& key) const  //FIXME(HIP/AMD): added constexpr as WAR for #254
+  operator()(numeric::decimal128 const& key) const
 {
   return this->compute(key.value());
 }
