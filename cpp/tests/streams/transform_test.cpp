@@ -38,7 +38,10 @@
 class TransformTest : public cudf::test::BaseFixture {};
 
 template <class dtype, class Data>
-void test_udf(char const* udf, Data data_init, cudf::size_type size, bool is_ptx)
+void test_udf(char const* udf,
+              Data data_init,
+              cudf::size_type size,
+              cudf::udf_source_type source_type)
 {
   auto all_valid = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return true; });
   auto data_iter = cudf::detail::make_counting_transform_iterator(0, data_init);
@@ -50,7 +53,7 @@ void test_udf(char const* udf, Data data_init, cudf::size_type size, bool is_ptx
   cudf::transform_extended(inputs,
                            udf,
                            cudf::data_type(cudf::type_to_id<dtype>()),
-                           is_ptx,
+                           source_type,
                            std::nullopt,
                            cudf::null_aware::NO,
                            std::nullopt,
@@ -154,8 +157,13 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 )***";
 
   auto data_init = [](cudf::size_type row) { return row % 3; };
-  test_udf<float>(cuda, data_init, 500, false);
-  test_udf<float>(cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, data_init, 500, true);
+// <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
+//   test_udf<float>(cuda, data_init, 500, false);
+//   test_udf<float>(cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, data_init, 500, true);
+// =======
+  test_udf<float>(cuda, data_init, 500, cudf::udf_source_type::CUDA);
+  test_udf<float>(ptx, data_init, 500, cudf::udf_source_type::PTX);
+// >>>>>>> END NEW CODE (924d3073fb)
 }
 
 TEST_F(TransformTest, ComputeColumn)

@@ -141,7 +141,7 @@ jitify2::ConfiguredKernel build_transform_kernel(
   bool may_evaluate_null,
   bool has_user_data,
   std::string const& udf,
-  bool is_ptx,
+  cudf::udf_source_type source_type,
   rmm::cuda_stream_view stream,
   rmm::device_async_resource_ref mr)
 {
@@ -211,11 +211,12 @@ jitify2::ConfiguredKernel build_transform_kernel(
   auto input_reflections = cudf::jit::reflect_inputs(inputs);
 
   auto const cuda_source =
-    is_ptx ? cudf::jit::parse_single_function_ptx(
-               udf,
-               "GENERIC_TRANSFORM_OP",
-               cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
-           : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
+    (source_type == cudf::udf_source_type::PTX)
+      ? cudf::jit::parse_single_function_ptx(
+          udf,
+          "GENERIC_TRANSFORM_OP",
+          cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
+      : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
 
   auto kernel_reflection =
     jitify2::reflection::Template(kernel_name)
@@ -235,7 +236,7 @@ jitify2::ConfiguredKernel build_span_kernel(std::string_view kernel_name,
                                             bool may_evaluate_null,
                                             bool has_user_data,
                                             std::string const& udf,
-                                            bool is_ptx,
+                                            cudf::udf_source_type source_type,
                                             rmm::cuda_stream_view stream,
                                             rmm::device_async_resource_ref mr)
 {
@@ -283,35 +284,44 @@ jitify2::ConfiguredKernel build_span_kernel(std::string_view kernel_name,
   auto input_reflections = cudf::jit::reflect_inputs(inputs);
 
   auto const cuda_source =
-    is_ptx ? cudf::jit::parse_single_function_ptx(
-               udf,
-               "GENERIC_TRANSFORM_OP",
-               cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
-           : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
-// <<<<<<< OLD CODE from 59b8f88be1 (442af46486) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (df596fd490)
-//
-// // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-// //   return get_kernel(jitify2::reflection::Template(kernel_name)
-// //                       .instantiate(build_jit_template_params(
-// //                         is_null_aware,
-// //                         may_evaluate_null,
-// //                         has_user_data,
-// //                         span_outputs,
-// //                         {},
-// //                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
-// //                     cuda_source,
-// //                     (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
+// <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
+//     is_ptx ? cudf::jit::parse_single_function_ptx(
+//                udf,
+//                "GENERIC_TRANSFORM_OP",
+//                cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
+//            : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
+// // <<<<<<< OLD CODE from 59b8f88be1 (442af46486) - COMMENTED OUT
+// // // >>>>>>> END NEW CODE (df596fd490)
+// //
+// // // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
+// // //   return get_kernel(jitify2::reflection::Template(kernel_name)
+// // //                       .instantiate(build_jit_template_params(
+// // //                         is_null_aware,
+// // //                         may_evaluate_null,
+// // //                         has_user_data,
+// // //                         span_outputs,
+// // //                         {},
+// // //                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
+// // //                     cuda_source,
+// // //                     (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
+// // // =======
+// //   auto kernel_reflection = jitify2::reflection::Template(kernel_name)
+// //                              .instantiate(build_jit_template_params(
+// //                                is_null_aware,
+// //                                may_evaluate_null,
+// //                                has_user_data,
+// //                                span_outputs,
+// //                                {},
+// //                                cudf::jit::reflect_input_columns(base_column_size, input_columns)));
 // // =======
-//   auto kernel_reflection = jitify2::reflection::Template(kernel_name)
-//                              .instantiate(build_jit_template_params(
-//                                is_null_aware,
-//                                may_evaluate_null,
-//                                has_user_data,
-//                                span_outputs,
-//                                {},
-//                                cudf::jit::reflect_input_columns(base_column_size, input_columns)));
 // =======
+    (source_type == cudf::udf_source_type::PTX)
+      ? cudf::jit::parse_single_function_ptx(
+          udf,
+          "GENERIC_TRANSFORM_OP",
+          cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
+      : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
+// >>>>>>> END NEW CODE (924d3073fb)
 
   auto kernel_reflection =
     jitify2::reflection::Template(kernel_name)
@@ -451,7 +461,7 @@ std::unique_ptr<column> transform_operation(size_type row_size,
                                             InputsView inputs,
                                             std::string const& udf,
                                             data_type output_type,
-                                            bool is_ptx,
+                                            cudf::udf_source_type source_type,
                                             std::optional<void*> user_data,
                                             null_aware is_null_aware,
                                             output_nullability null_policy,
@@ -484,7 +494,7 @@ std::unique_ptr<column> transform_operation(size_type row_size,
                                        may_return_nulls,
                                        user_data.has_value(),
                                        udf,
-                                       is_ptx,
+                                       source_type,
                                        stream,
                                        mr);
 
@@ -516,7 +526,7 @@ std::unique_ptr<column> string_view_operation(size_type row_size,
                                               InputsView inputs,
                                               std::string const& udf,
                                               data_type output_type,
-                                              bool is_ptx,
+                                              cudf::udf_source_type source_type,
                                               std::optional<void*> user_data,
                                               null_aware is_null_aware,
                                               output_nullability null_policy,
@@ -549,7 +559,7 @@ std::unique_ptr<column> string_view_operation(size_type row_size,
                                   may_return_nulls,
                                   user_data.has_value(),
                                   udf,
-                                  is_ptx,
+                                  source_type,
                                   stream,
                                   mr);
 
@@ -638,7 +648,7 @@ namespace detail {
 std::unique_ptr<column> transform(InputsView inputs,
                                   std::string const& udf,
                                   data_type output_type,
-                                  bool is_ptx,
+                                  cudf::udf_source_type source_type,
                                   std::optional<void*> user_data,
                                   null_aware is_null_aware,
                                   std::optional<size_type> in_row_size,
@@ -648,7 +658,7 @@ std::unique_ptr<column> transform(InputsView inputs,
 {
   CUDF_EXPECTS(
     !inputs.empty(), "Transform must have at least 1 input column", std::invalid_argument);
-  CUDF_EXPECTS(!(is_null_aware == null_aware::YES && is_ptx),
+  CUDF_EXPECTS(!(is_null_aware == null_aware::YES && source_type == cudf::udf_source_type::PTX),
                "Optional types are not supported in PTX UDFs",
                std::invalid_argument);
 
@@ -661,7 +671,7 @@ std::unique_ptr<column> transform(InputsView inputs,
                                                     inputs,
                                                     udf,
                                                     output_type,
-                                                    is_ptx,
+                                                    source_type,
                                                     user_data,
                                                     is_null_aware,
                                                     null_policy,
@@ -672,7 +682,7 @@ std::unique_ptr<column> transform(InputsView inputs,
                                                       inputs,
                                                       udf,
                                                       output_type,
-                                                      is_ptx,
+                                                      source_type,
                                                       user_data,
                                                       is_null_aware,
                                                       null_policy,
@@ -689,7 +699,7 @@ std::unique_ptr<column> transform_extended(
   std::span<std::variant<column_view, scalar_column_view> const> inputs,
   std::string const& udf,
   data_type output_type,
-  bool is_ptx,
+  udf_source_type source_type,
   std::optional<void*> user_data,
   null_aware is_null_aware,
   std::optional<size_type> row_size,
@@ -698,8 +708,16 @@ std::unique_ptr<column> transform_extended(
   rmm::device_async_resource_ref mr)
 {
   CUDF_FUNC_RANGE();
-  return detail::transform(
-    inputs, udf, output_type, is_ptx, user_data, is_null_aware, row_size, null_policy, stream, mr);
+  return detail::transform(inputs,
+                           udf,
+                           output_type,
+                           source_type,
+                           user_data,
+                           is_null_aware,
+                           row_size,
+                           null_policy,
+                           stream,
+                           mr);
 }
 
 std::unique_ptr<column> transform(std::vector<column_view> const& columns,
@@ -731,7 +749,7 @@ std::unique_ptr<column> transform(std::vector<column_view> const& columns,
   return detail::transform(inputs,
                            transform_udf,
                            output_type,
-                           is_ptx,
+                           is_ptx ? udf_source_type::PTX : udf_source_type::CUDA,
                            user_data,
                            is_null_aware,
                            base_column->size(),
@@ -752,7 +770,7 @@ std::unique_ptr<column> compute_column_jit(table_view const& table,
   return cudf::transform_extended(args.inputs,
                                   args.udf,
                                   args.output_type,
-                                  args.is_ptx,
+                                  args.source_type,
                                   args.user_data,
                                   args.is_null_aware,
                                   args.row_size,
