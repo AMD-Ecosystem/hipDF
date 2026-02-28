@@ -72,17 +72,21 @@ dependencies = [
     "cupy-cuda13x>=13.6.0,!=14.0.0",
 # >>>>>>> END NEW CODE (662dc43897)
     "fsspec>=0.6.0",
-# <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
-#     "numpy>=1.23,<3.0a0",
-#     "pandas>=2.0,<2.4.0dev0",
-# # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
+# <<<<<<< OLD CODE from 0e18a94103 (a99c4f6cf9) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
+# #     "numpy>=1.23,<3.0a0",
+# #     "pandas>=2.0,<2.4.0dev0",
+# # # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
+# # # # =======
+# # #     "rapids-dask-dependency==25.12.*,>=0.0.0a0",
+# # # # >>>>>>> END NEW CODE (363a4446f0)
 # # # =======
-# #     "rapids-dask-dependency==25.12.*,>=0.0.0a0",
-# # # >>>>>>> END NEW CODE (363a4446f0)
 # # =======
+#     "numpy>=1.23,<3.0",
 # =======
-    "numpy>=1.23,<3.0",
+    "numpy>=1.26,<3.0",
+# >>>>>>> END NEW CODE (a99c4f6cf9)
     "nvidia-ml-py>=12",
     "pandas>=2.0,<2.4.0",
 # <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT

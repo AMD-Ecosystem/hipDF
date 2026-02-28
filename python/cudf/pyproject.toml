@@ -108,8 +108,12 @@ dependencies = [
 #     "numba>=0.60.0,<0.62.0",
 # =======
     "numba>=0.60.0,<0.65.0",
-# >>>>>>> END NEW CODE (38980f684a)
-    "numpy>=1.23,<3.0",
+# <<<<<<< OLD CODE from 0e18a94103 (a99c4f6cf9) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (38980f684a)
+#     "numpy>=1.23,<3.0",
+# =======
+    "numpy>=1.26,<3.0",
+# >>>>>>> END NEW CODE (a99c4f6cf9)
     "nvtx>=0.2.1",
 # >>>>>>> END NEW CODE (fce3d155f1)
     "packaging",
