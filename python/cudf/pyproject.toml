@@ -243,45 +243,49 @@ dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true"
 requires = [
     "cmake>=3.30.4",
-# <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 15cd313824 (797a9ac6ed) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 1282d4cd47 (1bb674c580) - COMMENTED OUT
-# # #     "cython>=3.0.3",
-# # # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
-# # # #     "amd-libhipdf==3.*,>=3.0.00",
-# # # #     "amd-libhipmm==4.*,>=4.0.0a0",
-# # # #     "ninja",
-# # # #     # "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
-# # # #     "amd-pylibhipdf==3.*,>=3.0.00",
-# # # #     "amd-hipmm==3.*,>=3.0.0a0"
+# <<<<<<< OLD CODE from 7608fa060c (81375d5646) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from 15cd313824 (797a9ac6ed) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 1282d4cd47 (1bb674c580) - COMMENTED OUT
+# # # #     "cython>=3.0.3",
+# # # # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
+# # # # #     "amd-libhipdf==3.*,>=3.0.00",
+# # # # #     "amd-libhipmm==4.*,>=4.0.0a0",
+# # # # #     "ninja",
+# # # # #     # "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
+# # # # #     "amd-pylibhipdf==3.*,>=3.0.00",
+# # # # #     "amd-hipmm==3.*,>=3.0.0a0"
+# # # # # =======
 # # # # =======
+# # #     "cython>=3.0.0,<3.2.0",
+# # # # >>>>>>> END NEW CODE (1bb674c580)
 # # # =======
-# #     "cython>=3.0.0,<3.2.0",
-# # # >>>>>>> END NEW CODE (1bb674c580)
+# #     "cython>=3.0.3,<3.2.0a0",
+# # # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
+# # # # >>>>>>> END NEW CODE (797a9ac6ed)
+# # #     "libcudf==25.12.*,>=0.0.0a0",
+# # #     "librmm==25.12.*,>=0.0.0a0",
+# # #     "ninja",
+# # #     "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
+# # #     "pylibcudf==25.12.*,>=0.0.0a0",
+# # #     "rmm==25.12.*,>=0.0.0a0",
+# # # # >>>>>>> END NEW CODE (363a4446f0)
+# # # =======
 # # =======
-#     "cython>=3.0.3,<3.2.0a0",
-# # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
-# # # >>>>>>> END NEW CODE (797a9ac6ed)
-# #     "libcudf==25.12.*,>=0.0.0a0",
-# #     "librmm==25.12.*,>=0.0.0a0",
+#     "cython>=3.0.3,<3.2.0",
+# # <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (fce3d155f1)
+# #     "libcudf==26.2.*,>=0.0.0a0",
+# #     "librmm==26.2.*,>=0.0.0a0",
 # #     "ninja",
-# #     "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
-# #     "pylibcudf==25.12.*,>=0.0.0a0",
-# #     "rmm==25.12.*,>=0.0.0a0",
-# # # >>>>>>> END NEW CODE (363a4446f0)
+# #     "numba-cuda[cu13]>=0.22.2,<0.23.0",
+# #     "pylibcudf==26.2.*,>=0.0.0a0",
+# #     "rmm==26.2.*,>=0.0.0a0",
+# # # >>>>>>> END NEW CODE (094d0854e5)
 # # =======
 # =======
-    "cython>=3.0.3,<3.2.0",
-# <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (fce3d155f1)
-#     "libcudf==26.2.*,>=0.0.0a0",
-#     "librmm==26.2.*,>=0.0.0a0",
-#     "ninja",
-#     "numba-cuda[cu13]>=0.22.2,<0.23.0",
-#     "pylibcudf==26.2.*,>=0.0.0a0",
-#     "rmm==26.2.*,>=0.0.0a0",
-# # >>>>>>> END NEW CODE (094d0854e5)
-# =======
+    "cython>=3.2.2",
+# >>>>>>> END NEW CODE (81375d5646)
     "libcudf==26.4.*,>=0.0.0a0",
     "librmm==26.4.*,>=0.0.0a0",
     "ninja",
