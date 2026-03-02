@@ -52,25 +52,29 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 # >>>>>>> END NEW CODE (d728df239b)
 dependencies = [
-# <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
-#     "confluent-kafka>=2.8.0,<2.9.0a0",
-# # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
-# # #     "amd-hipdf>=3.0,<4.0",
-# # #     "amd-hipdf_kafka==25.10.*,>=0.0.0a0",
+# <<<<<<< OLD CODE from 412b4d53b6 (f6147ec9c5) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
+# #     "confluent-kafka>=2.8.0,<2.9.0a0",
+# # # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
+# # # #     "amd-hipdf>=3.0,<4.0",
+# # # #     "amd-hipdf_kafka==25.10.*,>=0.0.0a0",
+# # # # =======
+# # #     "cudf==25.12.*,>=0.0.0a0",
+# # #     "cudf_kafka==25.12.*,>=0.0.0a0",
+# # # # >>>>>>> END NEW CODE (363a4446f0)
 # # # =======
-# #     "cudf==25.12.*,>=0.0.0a0",
-# #     "cudf_kafka==25.12.*,>=0.0.0a0",
-# # # >>>>>>> END NEW CODE (363a4446f0)
+# # =======
+#     "confluent-kafka>=2.8.0,<2.9.0",
+# # <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (fce3d155f1)
+# #     "cudf==26.2.*,>=0.0.0a0",
+# #     "cudf_kafka==26.2.*,>=0.0.0a0",
+# # # >>>>>>> END NEW CODE (094d0854e5)
 # # =======
 # =======
-    "confluent-kafka>=2.8.0,<2.9.0",
-# <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (fce3d155f1)
-#     "cudf==26.2.*,>=0.0.0a0",
-#     "cudf_kafka==26.2.*,>=0.0.0a0",
-# # >>>>>>> END NEW CODE (094d0854e5)
-# =======
+    "confluent-kafka",
+# >>>>>>> END NEW CODE (f6147ec9c5)
     "cudf==26.4.*,>=0.0.0a0",
     "cudf_kafka==26.4.*,>=0.0.0a0",
 # >>>>>>> END NEW CODE (54690c919f)
@@ -90,6 +94,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [project.optional-dependencies]
