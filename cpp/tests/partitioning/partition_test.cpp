@@ -54,7 +54,7 @@
 // NOTE(HIP/AMD): Conditional macros for tuple/pair types to handle libhipcxx version compatibility
 // with thrust (libhipcxx 2.7.0/3.0.2) datatypes are not compatbile with thrust)
 #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
 #define MAKE_TUPLE thrust::make_tuple
 #else
 #define MAKE_TUPLE cuda::std::make_tuple

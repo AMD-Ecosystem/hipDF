@@ -279,7 +279,7 @@ merge<LargerIterator, SmallerIterator>::operator()(rmm::cuda_stream_view stream,
     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
 #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
   thrust::copy_if(rmm::exec_policy_nosync(stream),
                   thrust::counting_iterator(0),
                   thrust::counting_iterator(0) + larger_numrows,
@@ -380,7 +380,7 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
       // NOTE(HIP/AMD): ROCm 7.2.x and lower has const-correctness issues with cuda::std functions.
       // We conditionally use thrust:: versions for these ROCm versions.
 #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
       auto subset_size = thrust::distance(thrust::reverse_iterator(offsets_subset.end()),
                                           thrust::get<0>(unique_end));
 #else

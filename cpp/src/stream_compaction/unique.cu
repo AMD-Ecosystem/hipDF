@@ -112,7 +112,7 @@ std::unique_ptr<table> unique(table_view const& input,
       // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
       // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
 #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 2))
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
       auto result_end = thrust::copy_if(rmm::exec_policy(stream),
                                         itr,
                                         itr + num_rows,
