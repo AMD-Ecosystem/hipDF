@@ -89,6 +89,8 @@ struct level_ordering {
   device_span<TreeDepthT const> node_levels;
   device_span<NodeIndexT const> col_ids;
   device_span<NodeIndexT const> parent_node_ids;
+  // NOTE(HIP/AMD): Workaround for potential hipcc compiler bug in ROCm 7.2 where inlining this
+  // comparator can produce incorrect sorting results. Without this, thrust::sort_by_key may produce wrong output.
 #if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
   __attribute__((noinline))
 #endif
