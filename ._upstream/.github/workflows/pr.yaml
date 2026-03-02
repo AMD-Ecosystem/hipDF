@@ -531,6 +531,7 @@ jobs:
       cuda: '["13.1"]'
 # >>>>>>> END NEW CODE (cb56a2cbc5)
       node_type: "cpu8"
+      timeout-minutes: 45
       env: |
         SCCACHE_DIST_MAX_RETRIES=inf
         SCCACHE_SERVER_LOG=sccache=debug
