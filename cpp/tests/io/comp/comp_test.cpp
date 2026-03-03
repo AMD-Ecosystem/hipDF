@@ -355,6 +355,104 @@ TEST_P(ZstdDecompressTest, HelloWorld)
   EXPECT_EQ(output, input);
 }
 
+// NOTE(HIP/AMD): More tests to stress test hipcomp
+// Test CPU compression followed by GPU decompression for ZSTD
+// This validates that hipcomp GPU decompression works with CPU-compressed ZSTD data
+TEST_F(ZstdDecompressTest, CpuCompressGpuDecompress)
+{
+  auto const stream = cudf::get_default_stream();
+  auto const mr     = rmm::mr::get_current_device_resource();
+
+  // Create test data - use multiple chunks to stress GPU path
+  // Each chunk is 256 KB, total 10 chunks = 2.5 MB
+  constexpr size_t num_chunks      = 10;
+  constexpr size_t chunk_size      = 256 * 1024;  // 256 KB per chunk
+  constexpr size_t total_data_size = num_chunks * chunk_size;
+
+  std::vector<std::vector<uint8_t>> expected_chunks(num_chunks);
+  std::vector<std::vector<uint8_t>> compressed_chunks(num_chunks);
+
+  // Create and compress each chunk on CPU
+  for (size_t chunk_id = 0; chunk_id < num_chunks; ++chunk_id) {
+    expected_chunks[chunk_id].reserve(chunk_size);
+    for (size_t i = 0; i < chunk_size; ++i) {
+      // Create somewhat compressible data with patterns unique to each chunk
+      expected_chunks[chunk_id].push_back(
+        static_cast<uint8_t>((i % 256) + (i / 256) % 128 + chunk_id));
+    }
+
+    // Compress this chunk on CPU
+    compressed_chunks[chunk_id] =
+      cudf::io::detail::compress(cudf::io::compression_type::ZSTD, expected_chunks[chunk_id]);
+    ASSERT_GT(compressed_chunks[chunk_id].size(), 0) << "CPU compression failed for chunk "
+                                                      << chunk_id;
+    ASSERT_LT(compressed_chunks[chunk_id].size(), expected_chunks[chunk_id].size())
+      << "Data should be compressed for chunk " << chunk_id;
+  }
+
+  // Prepare device buffers for all compressed chunks
+  std::vector<rmm::device_uvector<uint8_t>> d_compressed;
+  std::vector<rmm::device_uvector<uint8_t>> d_decompressed;
+  d_compressed.reserve(num_chunks);
+  d_decompressed.reserve(num_chunks);
+
+  for (size_t i = 0; i < num_chunks; ++i) {
+    d_compressed.emplace_back(cudf::detail::make_device_uvector_async(compressed_chunks[i], stream, mr));
+    d_decompressed.emplace_back(rmm::device_uvector<uint8_t>(chunk_size, stream, mr));
+  }
+
+  // Setup input/output spans
+  auto hd_srcs = cudf::detail::hostdevice_vector<device_span<uint8_t const>>(num_chunks, stream);
+  auto hd_dsts = cudf::detail::hostdevice_vector<device_span<uint8_t>>(num_chunks, stream);
+  for (size_t i = 0; i < num_chunks; ++i) {
+    hd_srcs[i] = d_compressed[i];
+    hd_dsts[i] = d_decompressed[i];
+  }
+  hd_srcs.host_to_device_async(stream);
+  hd_dsts.host_to_device_async(stream);
+
+  auto hd_stats = cudf::detail::hostdevice_vector<codec_exec_result>(num_chunks, stream);
+  for (size_t i = 0; i < num_chunks; ++i) {
+    hd_stats[i] = codec_exec_result{0, codec_status::FAILURE};
+  }
+  hd_stats.host_to_device_async(stream);
+
+  // Perform GPU decompression with explicit environment check
+  std::cout << "LIBCUDF_HOST_DECOMPRESSION = "
+            << (getenv("LIBCUDF_HOST_DECOMPRESSION") ? getenv("LIBCUDF_HOST_DECOMPRESSION")
+                                                      : "not set (defaults to OFF)")
+            << std::endl;
+  std::cout << "Decompressing " << num_chunks << " chunks (" << total_data_size
+            << " bytes total) on GPU..." << std::endl;
+
+  cudf::io::detail::decompress(cudf::io::compression_type::ZSTD,
+                                hd_srcs,
+                                hd_dsts,
+                                hd_stats,
+                                chunk_size,
+                                total_data_size,
+                                stream);
+  stream.synchronize();  // Ensure kernel completion
+
+  hd_stats.device_to_host(stream);
+
+  // Verify all chunks decompressed successfully
+  for (size_t i = 0; i < num_chunks; ++i) {
+    ASSERT_EQ(hd_stats[i].status, codec_status::SUCCESS)
+      << "GPU decompression failed for chunk " << i;
+    ASSERT_EQ(hd_stats[i].bytes_written, chunk_size)
+      << "Decompressed size mismatch for chunk " << i << ": expected " << chunk_size << " but got "
+      << hd_stats[i].bytes_written;
+
+    // Verify the decompressed data matches the original
+    auto const got = cudf::detail::make_std_vector(d_decompressed[i], stream);
+    EXPECT_EQ(got, expected_chunks[i]) << "Decompressed data does not match original for chunk "
+                                        << i;
+  }
+
+  std::cout << "Successfully decompressed all " << num_chunks << " chunks on GPU" << std::endl;
+}
+
 struct NvcompConfigTest : public cudf::test::BaseFixture {};
 
 TEST_F(NvcompConfigTest, Compression)
