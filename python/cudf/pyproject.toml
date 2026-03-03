@@ -93,20 +93,24 @@ dependencies = [
 # # =======
 # =======
     "libcudf==26.4.*,>=0.0.0a0",
-# <<<<<<< OLD CODE from 3ea2b06ee1 (cec4045be7) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 0fe0c5a7ee (8a74308629) - COMMENTED OUT
-# # # >>>>>>> END NEW CODE (54690c919f)
-# #     "numba-cuda[cu13]>=0.22.2,<0.23.0",
-# # # >>>>>>> END NEW CODE (78e5697afa)
+# <<<<<<< OLD CODE from 2eb7121f49 (90d76d706f) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 3ea2b06ee1 (cec4045be7) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from 0fe0c5a7ee (8a74308629) - COMMENTED OUT
+# # # # >>>>>>> END NEW CODE (54690c919f)
+# # #     "numba-cuda[cu13]>=0.22.2,<0.23.0",
+# # # # >>>>>>> END NEW CODE (78e5697afa)
+# # # =======
+# #     "numba-cuda>=0.22.2,<0.23.0",
+# # # >>>>>>> END NEW CODE (8a74308629)
 # # =======
-#     "numba-cuda>=0.22.2,<0.23.0",
-# # >>>>>>> END NEW CODE (8a74308629)
+#     "numba-cuda>=0.22.2",
+# # <<<<<<< OLD CODE from c6da435b6b (38980f684a) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (cec4045be7)
+# #     "numba>=0.60.0,<0.62.0",
+# # =======
 # =======
-    "numba-cuda>=0.22.2",
-# <<<<<<< OLD CODE from c6da435b6b (38980f684a) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (cec4045be7)
-#     "numba>=0.60.0,<0.62.0",
-# =======
+    "numba-cuda>=0.22.2,<0.28.0",
+# >>>>>>> END NEW CODE (90d76d706f)
     "numba>=0.60.0,<0.65.0",
 # <<<<<<< OLD CODE from 0e18a94103 (a99c4f6cf9) - COMMENTED OUT
 # # >>>>>>> END NEW CODE (38980f684a)
@@ -290,7 +294,7 @@ requires = [
     "libcudf==26.4.*,>=0.0.0a0",
     "librmm==26.4.*,>=0.0.0a0",
     "ninja",
-    "numba-cuda>=0.22.2",
+    "numba-cuda>=0.22.2,<0.28.0",
     "pylibcudf==26.4.*,>=0.0.0a0",
     "rmm==26.4.*,>=0.0.0a0",
 # >>>>>>> END NEW CODE (54690c919f)
