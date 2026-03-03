@@ -86,10 +86,16 @@
 
 #define NVCOMP_HAS_COMP_TEMPSIZE_EX(MAJOR, MINOR, PATCH) (MAJOR > 2 or (MAJOR == 2 and MINOR >= 6))
 
+#ifdef __HIP_PLATFORM_AMD__
+// NOTE(HIP/AMD): hipcomp 2.3.0 has stable zstd decompression support
+#define NVCOMP_ZSTD_DECOMP_IS_STABLE(MAJOR, MINOR, PATCH) \
+  (MAJOR > 2 or (MAJOR == 2 and MINOR >= 3))
+#else
 // ZSTD is stable for nvcomp 2.3.2 or newer
 #define NVCOMP_ZSTD_DECOMP_IS_STABLE(MAJOR, MINOR, PATCH) \
   (MAJOR > 2 or (MAJOR == 2 and MINOR > 3) or (MAJOR == 2 and MINOR == 3 and PATCH >= 2))
 
+#endif
 namespace cudf::io::detail::nvcomp {
 namespace {
 

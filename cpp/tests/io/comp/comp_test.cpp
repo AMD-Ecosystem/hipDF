@@ -397,8 +397,13 @@ TEST_F(NvcompConfigTest, Decompression)
   EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 4, 0, true, true}));
   EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 2, false, true}));
   EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 0, true, true}));
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): 2.3.1 is stable, stable_integrations=true is enough
+  EXPECT_FALSE(decomp_disabled(compression_type::ZSTD, {2, 3, 1, false, true}));
+  #else
   // 2.3.1 and earlier requires all integrations to be enabled
   EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 3, 1, false, true}));
+#endif
   // 2.3 version required
   EXPECT_TRUE(decomp_disabled(compression_type::ZSTD, {2, 2, 0, true, true}));
   // stable integrations enabled required
