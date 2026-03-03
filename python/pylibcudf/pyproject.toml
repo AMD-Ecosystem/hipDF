@@ -43,7 +43,7 @@ requires-python = ">=3.10"
 dependencies = [
     "hip-python>=7.0",
     "hip-python-as-cuda>=7.0",
-    "amd-libhipdf==3.*,>=3.0.00a0",
+    "amd-libhipdf==3.*,>=3.0.00",
     # "nvtx>=0.2.1", # TODO(HIP/AMD): find replacement
     "packaging",
     "amd-hipmm==4.0.*,>=4.0.0a0",
