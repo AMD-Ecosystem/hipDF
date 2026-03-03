@@ -338,14 +338,12 @@ TEST_P(BrotliDecompressTest, HelloWorld)
   EXPECT_EQ(output, input);
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. ZSTD tests disabled.
+// NOTE(HIP/AMD): Enable ZSTD decompression tests (compression is not yet supported in hipcomp)
 INSTANTIATE_TEST_CASE_P(
   ZstdDecompressTest,
   ZstdDecompressTest,
   ::testing::Values(std::make_tuple(hw::CPU, cudf::io::compression_type::AUTO),
                     std::make_tuple(hw::CPU, cudf::io::compression_type::ZSTD)));
-*/
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ZstdDecompressTest); // TODO(HIP/AMD): Remove when ZSTD is available.
 
 TEST_P(ZstdDecompressTest, HelloWorld)
 {
