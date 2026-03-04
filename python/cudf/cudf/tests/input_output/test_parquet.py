@@ -3164,15 +3164,15 @@ def test_parquet_reader_decimal_columns():
     assert_eq(actual, expected)
 
 
-# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
-# def test_parquet_reader_zstd_compression(datadir):
-#     fname = datadir / "spark_zstd.parquet"
-#     try:
-#         df = cudf.read_parquet(fname)
-#         pdf = pd.read_parquet(fname)
-#         assert_eq(df, pdf)
-#     except RuntimeError:
-#         pytest.skip(reason="zstd support is not enabled")
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+def test_parquet_reader_zstd_compression(datadir):
+    fname = datadir / "spark_zstd.parquet"
+    try:
+        df = cudf.read_parquet(fname)
+        pdf = pd.read_parquet(fname)
+        assert_eq(df, pdf)
+    except RuntimeError:
+        pytest.skip(reason="zstd support is not enabled")
 
 
 def test_read_parquet_multiple_files(tmp_path):
@@ -3441,16 +3441,16 @@ def test_writer_lz4():
     assert_eq(gdf, got)
 
 
-# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
-# def test_parquet_reader_zstd_huff_tables(datadir):
-#     # Ensure that this zstd-compressed file does not overrun buffers. The
-#     # problem was fixed in nvcomp 3.0.6.
-#     # See https://github.com/rapidsai/cudf/issues/15096
-#     fname = datadir / "zstd_huff_tables_bug.parquet"
-#
-#     expected = pa.parquet.read_table(fname).to_pandas()
-#     actual = cudf.read_parquet(fname)
-#     assert_eq(actual, expected)
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+def test_parquet_reader_zstd_huff_tables(datadir):
+    # Ensure that this zstd-compressed file does not overrun buffers. The
+    # problem was fixed in nvcomp 3.0.6.
+    # See https://github.com/rapidsai/cudf/issues/15096
+    fname = datadir / "zstd_huff_tables_bug.parquet"
+
+    expected = pa.parquet.read_table(fname).to_pandas()
+    actual = cudf.read_parquet(fname)
+    assert_eq(actual, expected)
 
 
 def test_parquet_reader_roundtrip_with_arrow_schema():
@@ -4582,11 +4582,9 @@ def test_parquet_reader_empty_compressed_page(datadir):
     assert_eq(cudf.read_parquet(fname), df)
 
 
-# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports zstd decompression
 # NOTE: gzip decompression is not supported on HIP/AMD
-@pytest.mark.parametrize(
-    "compression", ["brotli", "snappy"]
-)  # , "gzip", "zstd"
+@pytest.mark.parametrize("compression", ["brotli", "snappy", "zstd"])  # , "gzip"
 def test_parquet_decompression(
     set_decomp_env_vars, pdf_day_timestamps, compression
 ):

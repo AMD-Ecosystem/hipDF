@@ -1594,18 +1594,18 @@ def test_empty_columns():
     assert_eq(expected, got_df)
 
 
-# TODO(HIP/AMD): ZSTD compression not yet supported on HIP/AMD
-# def test_orc_reader_zstd_compression(list_struct_buff):
-#     expected = cudf.read_orc(list_struct_buff)
-#     # save with ZSTD compression
-#     buffer = BytesIO()
-#     pyarrow_tbl = orc.ORCFile(list_struct_buff).read()
-#     with orc.ORCWriter(buffer, compression="zstd") as writer:
-#         writer.write(pyarrow_tbl)
-#     got = cudf.read_orc(buffer)
-#     # compare with pyarrow since pandas doesn't
-#     # have a list or struct
-#     assert expected.to_arrow().equals(got.to_arrow())
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports zstd decompression
+def test_orc_reader_zstd_compression(list_struct_buff):
+    expected = cudf.read_orc(list_struct_buff)
+    # save with ZSTD compression
+    buffer = BytesIO()
+    pyarrow_tbl = orc.ORCFile(list_struct_buff).read()
+    with orc.ORCWriter(buffer, compression="zstd") as writer:
+        writer.write(pyarrow_tbl)
+    got = cudf.read_orc(buffer)
+    # compare with pyarrow since pandas doesn't
+    # have a list or struct
+    assert expected.to_arrow().equals(got.to_arrow())
 
 
 def test_writer_protobuf_large_rowindexentry():

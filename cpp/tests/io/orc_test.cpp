@@ -1158,8 +1158,8 @@ TEST_F(OrcReaderTest, SingleInputs)
   CUDF_TEST_EXPECT_TABLES_EQUAL(*result.tbl, *table1);
 }
 
-// NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
-TEST_F(OrcReaderTest, DISABLED_zstdCompressionRegression)
+// NOTE(HIP/AMD): hipComp 2.3.0+ supports zstd decompression
+TEST_F(OrcReaderTest, zstdCompressionRegression)
 {
   // Test with zstd compressed orc file with high compression ratio.
   constexpr std::array<uint8_t, 170> input_buffer{
