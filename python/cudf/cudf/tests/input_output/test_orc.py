@@ -1639,6 +1639,54 @@ def test_writer_protobuf_large_rowindexentry():
 #         assert_eq(expected, got)
 
 
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+# Test CPU compression (pandas) + GPU decompression (cudf) for ZSTD
+def test_orc_writer_zstd_cpu_compress_gpu_decompress():
+    """Test ZSTD decompression by using pandas for CPU compression and cudf for GPU decompression."""
+    pdf = pd.DataFrame(
+        {
+            "a": range(12345),
+            "b": [f"string_{i}" for i in range(12345)],
+            "c": [float(i) * 1.5 for i in range(12345)],
+        }
+    )
+
+    buff = BytesIO()
+    # Use pandas/PyArrow to write with ZSTD compression (CPU-based)
+    pdf.to_orc(buff, engine_kwargs={"compression": "zstd"})
+
+    # Use cudf to read with ZSTD decompression (GPU-based via hipComp)
+    got = cudf.read_orc(buff)
+    expected = cudf.from_pandas(pdf)
+
+    assert_eq(expected, got)
+
+
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+# Test ZSTD decompression with large data
+def test_orc_zstd_decompression_large_data():
+    """Test ZSTD decompression with large ORC files."""
+    nrows = 50000
+    pdf = pd.DataFrame(
+        {
+            "id": range(nrows),
+            "str_col": [f"string_{i % 1000}" for i in range(nrows)],
+            "float_col": [float(i) * 0.5 for i in range(nrows)],
+            "int_col": [i * 2 for i in range(nrows)],
+        }
+    )
+
+    buff = BytesIO()
+    # Use pandas/PyArrow to write with ZSTD compression (CPU-based)
+    pdf.to_orc(buff, engine_kwargs={"compression": "zstd"})
+
+    # Use cudf to read with ZSTD decompression (GPU-based via hipComp)
+    got = cudf.read_orc(buff)
+    expected = cudf.from_pandas(pdf)
+
+    assert_eq(expected, got)
+
+
 def run_orc_columns_and_index_param(index_obj, index, columns):
     buffer = BytesIO()
     df = cudf.DataFrame(

@@ -2976,6 +2976,25 @@ def test_per_column_compression_option(set_decomp_env_vars, compression):
     assert fmd.row_group(0).column(1).compression == compression
 
 
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+# Test CPU compression (pandas) + GPU decompression (cudf) for ZSTD
+def test_per_column_compression_zstd_cpu_compress_gpu_decompress(set_decomp_env_vars):
+    """Test ZSTD decompression by using pandas for CPU compression and cudf for GPU decompression."""
+    pdf = pd.DataFrame(
+        {"ilist": [[1, 2, 3, 1, 2, 3]], "i1": [[1, 2, 3, 1, 2, 3]]}
+    )
+    buffer = BytesIO()
+
+    # Use pandas/PyArrow to write with ZSTD compression (CPU-based)
+    pdf.to_parquet(buffer, compression="ZSTD", engine="pyarrow")
+
+    # Use cudf to read with ZSTD decompression (GPU-based via hipComp)
+    result = cudf.read_parquet(buffer)
+    expected = cudf.from_pandas(pdf)
+
+    assert_eq(expected, result)
+
+
 @pytest.mark.parametrize(
     "encoding",
     ["DELTA_LENGTH_BYTE_ARRAY", "DELTA_BYTE_ARRAY"],
@@ -4599,6 +4618,86 @@ def test_parquet_decompression(
     got = cudf.read_parquet(buffer)
 
     assert_eq(expect, got)
+
+
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+# Comprehensive test for ZSTD decompression with various data types
+def test_parquet_zstd_decompression_comprehensive(set_decomp_env_vars):
+    """Test ZSTD decompression with various data types using CPU compression and GPU decompression."""
+    # Create a DataFrame with various data types
+    pdf = pd.DataFrame(
+        {
+            "int_col": range(1000),
+            "float_col": [float(i) * 1.5 for i in range(1000)],
+            "str_col": [f"string_{i}" for i in range(1000)],
+            "bool_col": [i % 2 == 0 for i in range(1000)],
+            "nullable_int": [i if i % 10 != 0 else None for i in range(1000)],
+            "nullable_float": [
+                float(i) * 2.5 if i % 7 != 0 else None for i in range(1000)
+            ],
+        }
+    )
+
+    buffer = BytesIO()
+    # Use pandas/PyArrow to write with ZSTD compression (CPU-based)
+    pdf.to_parquet(buffer, compression="ZSTD", engine="pyarrow")
+
+    # Use cudf to read with ZSTD decompression (GPU-based via hipComp)
+    result = cudf.read_parquet(buffer)
+    expected = cudf.from_pandas(pdf)
+
+    assert_eq(expected, result)
+
+
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+# Test ZSTD decompression with nested types (lists)
+def test_parquet_zstd_decompression_nested_types(set_decomp_env_vars):
+    """Test ZSTD decompression with nested list columns."""
+    pdf = pd.DataFrame(
+        {
+            "list_int": [[1, 2, 3], [4, 5], [6, 7, 8, 9], []],
+            "list_str": [["a", "b"], ["c"], ["d", "e", "f"], []],
+            "list_nested": [[[1, 2], [3]], [[4]], [[5, 6]], [[]]],
+        }
+    )
+
+    buffer = BytesIO()
+    # Use pandas/PyArrow to write with ZSTD compression (CPU-based)
+    pdf.to_parquet(buffer, compression="ZSTD", engine="pyarrow")
+
+    # Use cudf to read with ZSTD decompression (GPU-based via hipComp)
+    result = cudf.read_parquet(buffer)
+    expected = cudf.from_pandas(pdf)
+
+    assert_eq(expected, result)
+
+
+# NOTE(HIP/AMD): hipComp 2.3.0+ supports ZSTD decompression
+# Test ZSTD decompression with large data (multiple row groups)
+def test_parquet_zstd_decompression_large_data(set_decomp_env_vars):
+    """Test ZSTD decompression with large data spanning multiple row groups."""
+    # Create a large DataFrame to ensure multiple row groups
+    nrows = 100000
+    pdf = pd.DataFrame(
+        {
+            "id": range(nrows),
+            "data": [f"data_{i % 1000}" for i in range(nrows)],
+            "value": [float(i) * 0.1 for i in range(nrows)],
+        }
+    )
+
+    buffer = BytesIO()
+    # Use pandas/PyArrow to write with ZSTD compression (CPU-based)
+    # Use smaller row group size to create multiple row groups
+    pdf.to_parquet(
+        buffer, compression="ZSTD", engine="pyarrow", row_group_size=10000
+    )
+
+    # Use cudf to read with ZSTD decompression (GPU-based via hipComp)
+    result = cudf.read_parquet(buffer)
+    expected = cudf.from_pandas(pdf)
+
+    assert_eq(expected, result)
 
 
 def test_parquet_long_list(tmp_path):
