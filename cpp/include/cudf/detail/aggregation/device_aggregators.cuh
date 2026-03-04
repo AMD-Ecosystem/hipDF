@@ -266,7 +266,7 @@ struct update_target_element<dictionary32, k> {
                                size_type target_index,
                                column_device_view source,
                                size_type source_index) const noexcept
-      requires(!is_dictionary<KeysType>() && cudf::is_relationally_comparable<KeysType, KeysType>())
+      requires(cudf::is_dictionary_key<KeysType>())
     {
       using Target = target_type_t<KeysType, aggregation::ARGMIN>;
       auto old     = cudf::detail::atomic_cas(
@@ -286,8 +286,7 @@ struct update_target_element<dictionary32, k> {
                                size_type,
                                column_device_view,
                                size_type) const noexcept
-      requires(is_dictionary<KeysType>() or
-               not cudf::is_relationally_comparable<KeysType, KeysType>())
+      requires(not cudf::is_dictionary_key<KeysType>())
     {
     }
   };
@@ -311,7 +310,7 @@ struct update_target_element<dictionary32, k> {
                                size_type target_index,
                                column_device_view source,
                                size_type source_index) const noexcept
-      requires(!is_dictionary<KeysType>() && cudf::is_relationally_comparable<KeysType, KeysType>())
+      requires(cudf::is_dictionary_key<KeysType>())
     {
       using Target = target_type_t<KeysType, aggregation::ARGMAX>;
       auto old     = cudf::detail::atomic_cas(
@@ -331,8 +330,7 @@ struct update_target_element<dictionary32, k> {
                                size_type,
                                column_device_view,
                                size_type) const noexcept
-      requires(is_dictionary<KeysType>() or
-               not cudf::is_relationally_comparable<KeysType, KeysType>())
+      requires(not cudf::is_dictionary_key<KeysType>())
     {
     }
   };
@@ -402,7 +400,7 @@ struct update_target_element<Source, aggregation::COUNT_ALL> {
 };
 
 template <typename Source>
-  requires(!cudf::is_dictionary<Source>() && cudf::is_relationally_comparable<Source, Source>())
+  requires(cudf::is_dictionary_key<Source>())
 struct update_target_element<Source, aggregation::ARGMAX> {
   __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
@@ -421,7 +419,7 @@ struct update_target_element<Source, aggregation::ARGMAX> {
 };
 
 template <typename Source>
-  requires(!cudf::is_dictionary<Source>() && cudf::is_relationally_comparable<Source, Source>())
+  requires(cudf::is_dictionary_key<Source>())
 struct update_target_element<Source, aggregation::ARGMIN> {
   __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
