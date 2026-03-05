@@ -2894,7 +2894,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64_to_string[Series-None]",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64tz",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64tz_to_str",
-    "tests/frame/methods/test_astype.py::TestAstype::test_astype_str_float",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_td64_to_string[DataFrame]",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_td64_to_string[Series]",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_with_exclude_string",
@@ -7109,41 +7108,44 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint32]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint64]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint8]",
-# <<<<<<< OLD CODE from c16465222d (47c7e570f9) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
-# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-# # # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
-# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
-# # # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
-# # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
-# # # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# <<<<<<< OLD CODE from 88f5f27ae2 (cf69ee3c54) - COMMENTED OUT
+# # <<<<<<< OLD CODE from c16465222d (47c7e570f9) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
+# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+# # # # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
+# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
+# # # # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
+# # # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
+# # # # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
+# # # # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# # # # # # # # =======
+# # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
+# # # # # # # # >>>>>>> END NEW CODE (ee26842c72)
 # # # # # # # =======
-# # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
-# # # # # # # >>>>>>> END NEW CODE (ee26842c72)
+# # # # # # # >>>>>>> END NEW CODE (d142e22536)
+# # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
+# # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
 # # # # # # =======
-# # # # # # >>>>>>> END NEW CODE (d142e22536)
-# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
-# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
+# # # # # # >>>>>>> END NEW CODE (59b6dddcaf)
+# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
+# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
+# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
+# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
 # # # # # =======
-# # # # # >>>>>>> END NEW CODE (59b6dddcaf)
-# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
-# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
-# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
-# # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
+# # # # # >>>>>>> END NEW CODE (af4ffdd992)
 # # # # =======
-# # # # >>>>>>> END NEW CODE (af4ffdd992)
+# # # # >>>>>>> END NEW CODE (2617fd93c4)
 # # # =======
-# # # >>>>>>> END NEW CODE (2617fd93c4)
+# # # >>>>>>> END NEW CODE (9a0ca028f6)
 # # =======
-# # >>>>>>> END NEW CODE (9a0ca028f6)
+#     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+#     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+# # <<<<<<< OLD CODE from 4ee759c0ad (f2324e18ac) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (47c7e570f9)
+# # =======
 # =======
-    "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-    "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# <<<<<<< OLD CODE from 4ee759c0ad (f2324e18ac) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (47c7e570f9)
-# =======
+# >>>>>>> END NEW CODE (cf69ee3c54)
     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
 # >>>>>>> END NEW CODE (f2324e18ac)
     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_other",
@@ -7298,8 +7300,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_map.py::test_map_empty[uint64]",
     "tests/series/methods/test_map.py::test_map_empty[uint8]",
     "tests/series/methods/test_map.py::test_map_int",
-    "tests/series/methods/test_map.py::test_map_simple_str_callables_same_as_astype[<lambda>]",
-    "tests/series/methods/test_map.py::test_map_simple_str_callables_same_as_astype[str]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_boundary_datetimelike[nsmallest-datetime64[ns]]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_boundary_datetimelike[nsmallest-timedelta64[ns]]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_error[r4]",
@@ -8870,28 +8870,14 @@ NODEIDS_THAT_XPASS_WITH_CUDF_PANDAS = {
 
 # TODO: Investigate why sometimes these fail
 NODEIDS_THAT_FLAKY_XFAIL_WITH_CUDF_PANDAS = {
-    "tests/groupby/test_groupby.py::test_single_element_list_grouping[selection2]",
-    "tests/groupby/test_groupby.py::test_obj_arg_get_group_deprecated",
-    "tests/frame/methods/test_sort_index.py::TestDataFrameSortIndex::test_sort_index_inplace",
-    "tests/frame/methods/test_sort_index.py::TestDataFrameSortIndex::test_sort_index",
-    "tests/reshape/test_crosstab.py::test_categoricals[category-category]",
-    "tests/reshape/test_crosstab.py::test_categoricals[category-int64]",
-    "tests/reshape/test_crosstab.py::test_categoricals[int64-category]",
-    "tests/reshape/test_crosstab.py::test_categoricals[int64-int64]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_arith_series_with_scalar[uint8-__rpow__]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_arith_series_with_scalar[uint16-__rpow__]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_arith_series_with_scalar[uint32-__rpow__]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_arith_frame_with_scalar[uint8-__rpow__]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_arith_frame_with_scalar[uint16-__rpow__]",
-    "tests/extension/test_arrow.py::TestArrowArray::test_arith_frame_with_scalar[uint32-__rpow__]",
-    r"tests/tools/test_to_datetime.py::TestToDatetimeMisc::test_to_datetime_iso8601_fails[True-2012-01-01 10:00-%Y-%m-%d %H:%M:%S]",
-    "tests/tools/test_to_datetime.py::TestToDatetimeMisc::test_to_datetime_iso8601_fails[True-2012-01-01-%Y-%m-%d %H]",
-    "tests/tools/test_to_datetime.py::TestToDatetimeMisc::test_to_datetime_iso8601_fails[True-2012-01-01 10-%Y-%m-%d %H:%M]",
-    "tests/indexing/test_chaining_and_caching.py::TestChaining::test_detect_chained_assignment_warnings_errors",
-    "tests/indexes/multi/test_indexing.py::test_pyint_engine",
-    "tests/indexes/multi/test_monotonic.py::test_is_monotonic_with_nans[values0-is_monotonic_increasing]",
     "tests/arithmetic/test_timedelta64.py::TestTimedeltaArraylikeAddSubOps::test_td64arr_sub_timedeltalike[timedelta64_0-array]",
     "tests/arithmetic/test_timedelta64.py::TestTimedeltaArraylikeAddSubOps::test_td64arr_sub_timedeltalike[timedelta64_1-array]",
+    "tests/extension/test_arrow.py::TestArrowArray::test_arith_frame_with_scalar[uint16-__rpow__]",
+    "tests/extension/test_arrow.py::TestArrowArray::test_arith_frame_with_scalar[uint32-__rpow__]",
+    "tests/extension/test_arrow.py::TestArrowArray::test_arith_frame_with_scalar[uint8-__rpow__]",
+    "tests/extension/test_arrow.py::TestArrowArray::test_arith_series_with_scalar[uint16-__rpow__]",
+    "tests/extension/test_arrow.py::TestArrowArray::test_arith_series_with_scalar[uint32-__rpow__]",
+    "tests/extension/test_arrow.py::TestArrowArray::test_arith_series_with_scalar[uint8-__rpow__]",
     "tests/extension/test_string.py::TestStringArray::test_getitem_series_integer_with_missing_raises[string=str[pyarrow]-False-integer-array]",
     "tests/extension/test_string.py::TestStringArray::test_getitem_series_integer_with_missing_raises[string=str[pyarrow]-True-integer-array]",
     "tests/extension/test_string.py::TestStringArray::test_getitem_series_integer_with_missing_raises[string=str[python]-False-integer-array]",
@@ -8900,34 +8886,49 @@ NODEIDS_THAT_FLAKY_XFAIL_WITH_CUDF_PANDAS = {
     "tests/extension/test_string.py::TestStringArray::test_getitem_series_integer_with_missing_raises[string=string[pyarrow]-True-integer-array]",
     "tests/extension/test_string.py::TestStringArray::test_getitem_series_integer_with_missing_raises[string=string[python]-False-integer-array]",
     "tests/extension/test_string.py::TestStringArray::test_getitem_series_integer_with_missing_raises[string=string[python]-True-integer-array]",
-    "tests/indexing/test_indexing.py::TestMisc::test_no_reference_cycle",
     "tests/frame/indexing/test_indexing.py::TestDataFrameIndexing::test_iloc_ea_series_indexer_with_na",
     "tests/frame/indexing/test_indexing.py::TestDataFrameIndexing::test_type_error_multiindex",
+    "tests/frame/methods/test_dot.py::TestSeriesDot::test_dot_2d_ndarray",
+    "tests/frame/methods/test_sort_index.py::TestDataFrameSortIndex::test_sort_index",
+    "tests/frame/methods/test_sort_index.py::TestDataFrameSortIndex::test_sort_index_inplace",
+    "tests/groupby/test_counting.py::TestCounting::test_ngroup_respects_groupby_order[False]",
+    "tests/groupby/test_groupby.py::test_basic_aggregations[float32]",
+    "tests/groupby/test_groupby.py::test_obj_arg_get_group_deprecated",
+    "tests/groupby/test_groupby.py::test_single_element_list_grouping[selection2]",
     "tests/indexes/datetimes/test_partial_slicing.py::TestSlicing::test_slice_month",
+    "tests/indexes/multi/test_indexing.py::test_pyint_engine",
+    "tests/indexes/multi/test_monotonic.py::test_is_monotonic_with_nans[values0-is_monotonic_increasing]",
+    "tests/indexes/test_common.py::test_sort_values_with_missing[nullable_int-first]",
+    "tests/indexes/test_common.py::test_sort_values_with_missing[nullable_int-last]",
     "tests/indexes/test_setops.py::test_union_different_types[bool-dtype-nullable_int]",
     "tests/indexes/test_setops.py::test_union_different_types[categorical-nullable_int]",
     "tests/indexes/test_setops.py::test_union_different_types[nullable_int-bool-dtype]",
     "tests/indexes/test_setops.py::test_union_different_types[nullable_int-categorical]",
     "tests/indexes/test_setops.py::test_union_different_types[nullable_int-timedelta]",
     "tests/indexes/test_setops.py::test_union_different_types[timedelta-nullable_int]",
+    "tests/indexing/test_chaining_and_caching.py::TestChaining::test_detect_chained_assignment_warnings_errors",
+    "tests/indexing/test_indexing.py::TestMisc::test_no_reference_cycle",
     "tests/indexing/test_loc.py::TestLocBooleanLabelsAndSlices::test_loc_bool_slice_raises[nullable_int-DataFrame]",
     "tests/indexing/test_loc.py::TestLocBooleanLabelsAndSlices::test_loc_bool_slice_raises[nullable_int-Series]",
     "tests/indexing/test_loc.py::TestLocSetitemWithExpansion::test_loc_setitem_with_expansion_nonunique_index[nullable_int]",
     "tests/reshape/merge/test_multi.py::TestMergeMulti::test_merge_na_keys",
+    "tests/reshape/test_crosstab.py::test_categoricals[category-category]",
+    "tests/reshape/test_crosstab.py::test_categoricals[category-int64]",
+    "tests/reshape/test_crosstab.py::test_categoricals[int64-category]",
+    "tests/reshape/test_crosstab.py::test_categoricals[int64-int64]",
+    "tests/series/methods/test_reindex.py::test_reindexing_with_float64_NA_log",
     "tests/series/test_constructors.py::TestSeriesConstructors::test_constructor_maskedarray_hardened",
-    # We accelerate np.dot via cupy.dot when the proxy array inputs are backed by real
-    # cupy arrays. So it is possible for tests asserting equality like test_dot_2d_ndarray
-    # fail due to tiny FP differences.
-    "tests/frame/methods/test_dot.py::TestSeriesDot::test_dot_2d_ndarray",
-    # TODO: These tests pass when run locally: with pandas 2.3.3, numpy 2.2.6, and cupy 13.6.0
-    # bash python/cudf/cudf/pandas/scripts/run-pandas-tests.sh
+    "tests/tools/test_to_datetime.py::TestToDatetimeMisc::test_to_datetime_iso8601_fails[True-2012-01-01 10-%Y-%m-%d %H:%M]",
+    "tests/tools/test_to_datetime.py::TestToDatetimeMisc::test_to_datetime_iso8601_fails[True-2012-01-01-%Y-%m-%d %H]",
     #      -q tests/indexes/test_common.py::test_sort_values_with_missing[nullable_int-first]
     # Investigate why.
-    "tests/indexes/test_common.py::test_sort_values_with_missing[nullable_int-first]",
-    "tests/indexes/test_common.py::test_sort_values_with_missing[nullable_int-last]",
+    # TODO: These tests pass when run locally: with pandas 2.3.3, numpy 2.2.6, and cupy 13.6.0
+    # We accelerate np.dot via cupy.dot when the proxy array inputs are backed by real
+    # bash python/cudf/cudf/pandas/scripts/run-pandas-tests.sh
+    # cupy arrays. So it is possible for tests asserting equality like test_dot_2d_ndarray
+    # fail due to tiny FP differences.
     # flaky xpasses after https://github.com/rapidsai/cudf/pull/21499
-    "tests/series/methods/test_reindex.py::test_reindexing_with_float64_NA_log",
-    "tests/groupby/test_groupby.py::test_basic_aggregations[float32]",
+    r"tests/tools/test_to_datetime.py::TestToDatetimeMisc::test_to_datetime_iso8601_fails[True-2012-01-01 10:00-%Y-%m-%d %H:%M:%S]",
 }
 
 # TODO: Ideally cudf.pandas should be able to pass assertions with private APIs,
