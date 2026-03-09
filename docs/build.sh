@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,5 +21,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# Set locale to avoid sphinx locale errors (only if unset)
+export LC_ALL=${LC_ALL:-C.UTF-8}
+export LANG=${LANG:-C.UTF-8}
 
 python3 -m sphinx -j 8 -T -E -b html -d _build/doctrees -D language=en . _build/html
