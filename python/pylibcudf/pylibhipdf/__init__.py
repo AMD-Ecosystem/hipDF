@@ -121,7 +121,10 @@ from pylibcudf import *
 
 # generic
 for _child in _root.children:
-    globals()[_child.name] = _child.module
+    # Only set if not already defined by "from pylibcudf import *"
+    # This prevents overwriting classes (like gpumemoryview) with their parent modules
+    if _child.name not in globals():
+        globals()[_child.name] = _child.module
 
 del _mirrored
 del _descend
