@@ -21,8 +21,10 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 
+.. _pylibhipdf-reference:
+
 =============
-API Reference
+pylibhipdf API Reference
 =============
 
 This page provides API documentation for pylibhipdf.
