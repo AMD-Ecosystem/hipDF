@@ -166,7 +166,7 @@ minimum-version = "build-system.requires"
 ninja.make-fallback = false
 sdist.exclude = ["*tests*"]
 sdist.reproducible = true
-wheel.packages = ["pylibcudf"]
+wheel.packages = ["pylibcudf", "pylibhipdf"]
 
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
