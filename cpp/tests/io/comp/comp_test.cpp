@@ -53,6 +53,8 @@
 #include <src/io/comp/nvcomp_adapter.hpp>
 
 #include <vector>
+#include <iostream>
+#include <cstdlib>
 
 using cudf::device_span;
 using cudf::io::detail::codec_exec_result;
