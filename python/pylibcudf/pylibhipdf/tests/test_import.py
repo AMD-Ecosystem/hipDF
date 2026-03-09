@@ -22,130 +22,130 @@
 
 
 def test_import_pylibhipdf():
-    # Main package
-    import pylibhipdf
-
-    # Core submodules (41 top-level modules from pylibcudf)
-    import pylibhipdf.aggregation
-    import pylibhipdf.binaryop
-    import pylibhipdf.column_factories
-    import pylibhipdf.concatenate
-    import pylibhipdf.contiguous_split
-    import pylibhipdf.copying
-    import pylibhipdf.datetime
-    import pylibhipdf.expressions
-    import pylibhipdf.filling
-    import pylibhipdf.groupby
-    import pylibhipdf.hashing
-    import pylibhipdf.interop
-    import pylibhipdf.join
-    import pylibhipdf.json
-    import pylibhipdf.labeling
-    import pylibhipdf.lists
-    import pylibhipdf.merge
-    import pylibhipdf.null_mask
-    import pylibhipdf.partitioning
-    import pylibhipdf.prefetch
-    import pylibhipdf.quantiles
-    import pylibhipdf.reduce
-    import pylibhipdf.replace
-    import pylibhipdf.reshape
-    import pylibhipdf.rolling
-    import pylibhipdf.round
-    import pylibhipdf.search
-    import pylibhipdf.sorting
-    import pylibhipdf.stream_compaction
-    import pylibhipdf.traits
-    import pylibhipdf.transform
-    import pylibhipdf.transpose
-    import pylibhipdf.types
-    import pylibhipdf.unary
-    import pylibhipdf.utilities
-
-    # IO submodules
-    import pylibhipdf.io
-    import pylibhipdf.io.avro
-    import pylibhipdf.io.csv
-    import pylibhipdf.io.datasource
-    import pylibhipdf.io.json
-    import pylibhipdf.io.orc
-    import pylibhipdf.io.parquet
-    import pylibhipdf.io.parquet_metadata
-    import pylibhipdf.io.text
-    import pylibhipdf.io.timezone
-    import pylibhipdf.io.types
-
-    # NVText submodules (and test the hiptext variant)
-    import pylibhipdf.nvtext
-    import pylibhipdf.nvtext.byte_pair_encode
-    import pylibhipdf.nvtext.deduplicate
-    import pylibhipdf.nvtext.edit_distance
-    import pylibhipdf.nvtext.generate_ngrams
-    import pylibhipdf.nvtext.jaccard
-    import pylibhipdf.nvtext.minhash
-    import pylibhipdf.nvtext.ngrams_tokenize
-    import pylibhipdf.nvtext.normalize
-    import pylibhipdf.nvtext.replace
-    import pylibhipdf.nvtext.stemmer
-    import pylibhipdf.nvtext.tokenize
-    import pylibhipdf.nvtext.wordpiece_tokenize
-
-    # Test hiptext variant alias
-    import pylibhipdf.hiptext
-    import pylibhipdf.hiptext.byte_pair_encode
-    import pylibhipdf.hiptext.deduplicate
-    import pylibhipdf.hiptext.edit_distance
-    import pylibhipdf.hiptext.generate_ngrams
-    import pylibhipdf.hiptext.jaccard
-    import pylibhipdf.hiptext.minhash
-    import pylibhipdf.hiptext.ngrams_tokenize
-    import pylibhipdf.hiptext.normalize
-    import pylibhipdf.hiptext.replace
-    import pylibhipdf.hiptext.stemmer
-    import pylibhipdf.hiptext.tokenize
-    import pylibhipdf.hiptext.wordpiece_tokenize
-
-    # Strings submodules
-    import pylibhipdf.strings
-    import pylibhipdf.strings.attributes
-    import pylibhipdf.strings.capitalize
-    import pylibhipdf.strings.case
-    import pylibhipdf.strings.char_types
-    import pylibhipdf.strings.combine
-    import pylibhipdf.strings.contains
-    import pylibhipdf.strings.extract
-    import pylibhipdf.strings.find
-    import pylibhipdf.strings.find_multiple
-    import pylibhipdf.strings.findall
-    import pylibhipdf.strings.padding
-    import pylibhipdf.strings.regex_flags
-    import pylibhipdf.strings.regex_program
-    import pylibhipdf.strings.repeat
-    import pylibhipdf.strings.replace
-    import pylibhipdf.strings.replace_re
-    import pylibhipdf.strings.reverse
-    import pylibhipdf.strings.side_type
-    import pylibhipdf.strings.slice
-    import pylibhipdf.strings.strip
-    import pylibhipdf.strings.translate
-    import pylibhipdf.strings.wrap
+    # Strings nested submodules - split
+    import pylibhipdf.strings.split.split
+    import pylibhipdf.strings.split.partition
+    import pylibhipdf.strings.split
 
     # Strings nested submodules - convert
-    import pylibhipdf.strings.convert
-    import pylibhipdf.strings.convert.convert_booleans
-    import pylibhipdf.strings.convert.convert_datetime
-    import pylibhipdf.strings.convert.convert_durations
-    import pylibhipdf.strings.convert.convert_fixed_point
-    import pylibhipdf.strings.convert.convert_floats
-    import pylibhipdf.strings.convert.convert_integers
-    import pylibhipdf.strings.convert.convert_ipv4
-    import pylibhipdf.strings.convert.convert_lists
     import pylibhipdf.strings.convert.convert_urls
+    import pylibhipdf.strings.convert.convert_lists
+    import pylibhipdf.strings.convert.convert_ipv4
+    import pylibhipdf.strings.convert.convert_integers
+    import pylibhipdf.strings.convert.convert_floats
+    import pylibhipdf.strings.convert.convert_fixed_point
+    import pylibhipdf.strings.convert.convert_durations
+    import pylibhipdf.strings.convert.convert_datetime
+    import pylibhipdf.strings.convert.convert_booleans
+    import pylibhipdf.strings.convert
 
-    # Strings nested submodules - split
-    import pylibhipdf.strings.split
-    import pylibhipdf.strings.split.partition
-    import pylibhipdf.strings.split.split
+    # Strings submodules
+    import pylibhipdf.strings.wrap
+    import pylibhipdf.strings.translate
+    import pylibhipdf.strings.strip
+    import pylibhipdf.strings.slice
+    import pylibhipdf.strings.side_type
+    import pylibhipdf.strings.reverse
+    import pylibhipdf.strings.replace_re
+    import pylibhipdf.strings.replace
+    import pylibhipdf.strings.repeat
+    import pylibhipdf.strings.regex_program
+    import pylibhipdf.strings.regex_flags
+    import pylibhipdf.strings.padding
+    import pylibhipdf.strings.findall
+    import pylibhipdf.strings.find_multiple
+    import pylibhipdf.strings.find
+    import pylibhipdf.strings.extract
+    import pylibhipdf.strings.contains
+    import pylibhipdf.strings.combine
+    import pylibhipdf.strings.char_types
+    import pylibhipdf.strings.case
+    import pylibhipdf.strings.capitalize
+    import pylibhipdf.strings.attributes
+    import pylibhipdf.strings
+
+    # Hiptext variant alias submodules
+    import pylibhipdf.hiptext.wordpiece_tokenize
+    import pylibhipdf.hiptext.tokenize
+    import pylibhipdf.hiptext.stemmer
+    import pylibhipdf.hiptext.replace
+    import pylibhipdf.hiptext.normalize
+    import pylibhipdf.hiptext.ngrams_tokenize
+    import pylibhipdf.hiptext.minhash
+    import pylibhipdf.hiptext.jaccard
+    import pylibhipdf.hiptext.generate_ngrams
+    import pylibhipdf.hiptext.edit_distance
+    import pylibhipdf.hiptext.deduplicate
+    import pylibhipdf.hiptext.byte_pair_encode
+    import pylibhipdf.hiptext
+
+    # NVText submodules
+    import pylibhipdf.nvtext.wordpiece_tokenize
+    import pylibhipdf.nvtext.tokenize
+    import pylibhipdf.nvtext.stemmer
+    import pylibhipdf.nvtext.replace
+    import pylibhipdf.nvtext.normalize
+    import pylibhipdf.nvtext.ngrams_tokenize
+    import pylibhipdf.nvtext.minhash
+    import pylibhipdf.nvtext.jaccard
+    import pylibhipdf.nvtext.generate_ngrams
+    import pylibhipdf.nvtext.edit_distance
+    import pylibhipdf.nvtext.deduplicate
+    import pylibhipdf.nvtext.byte_pair_encode
+    import pylibhipdf.nvtext
+
+    # IO submodules
+    import pylibhipdf.io.types
+    import pylibhipdf.io.timezone
+    import pylibhipdf.io.text
+    import pylibhipdf.io.parquet_metadata
+    import pylibhipdf.io.parquet
+    import pylibhipdf.io.orc
+    import pylibhipdf.io.json
+    import pylibhipdf.io.datasource
+    import pylibhipdf.io.csv
+    import pylibhipdf.io.avro
+    import pylibhipdf.io
+
+    # Core submodules
+    import pylibhipdf.utilities
+    import pylibhipdf.unary
+    import pylibhipdf.types
+    import pylibhipdf.transpose
+    import pylibhipdf.transform
+    import pylibhipdf.traits
+    import pylibhipdf.stream_compaction
+    import pylibhipdf.sorting
+    import pylibhipdf.search
+    import pylibhipdf.round
+    import pylibhipdf.rolling
+    import pylibhipdf.reshape
+    import pylibhipdf.replace
+    import pylibhipdf.reduce
+    import pylibhipdf.quantiles
+    import pylibhipdf.prefetch
+    import pylibhipdf.partitioning
+    import pylibhipdf.null_mask
+    import pylibhipdf.merge
+    import pylibhipdf.lists
+    import pylibhipdf.labeling
+    import pylibhipdf.json
+    import pylibhipdf.join
+    import pylibhipdf.interop
+    import pylibhipdf.hashing
+    import pylibhipdf.groupby
+    import pylibhipdf.filling
+    import pylibhipdf.expressions
+    import pylibhipdf.datetime
+    import pylibhipdf.copying
+    import pylibhipdf.contiguous_split
+    import pylibhipdf.concatenate
+    import pylibhipdf.column_factories
+    import pylibhipdf.binaryop
+    import pylibhipdf.aggregation
+
+    # Main package
+    import pylibhipdf
 
 
 def test_pylibhipdf_attributes():
