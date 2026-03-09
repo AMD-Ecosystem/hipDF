@@ -360,6 +360,21 @@ TEST_P(ZstdDecompressTest, HelloWorld)
 // This validates that hipcomp GPU decompression works with CPU-compressed ZSTD data
 TEST_F(ZstdDecompressTest, CpuCompressGpuDecompress)
 {
+  // Skip if device ZSTD decompression is not supported
+  if (!cudf::io::detail::is_device_decompression_supported(cudf::io::compression_type::ZSTD)) {
+    GTEST_SKIP() << "Device ZSTD decompression is not supported in this configuration";
+  }
+
+  // Set environment variables to enforce GPU decompression
+  // LIBCUDF_HOST_DECOMPRESSION=OFF ensures we don't fall back to host path
+  // LIBCUDF_NVCOMP_POLICY=ALWAYS ensures device path is always attempted
+  setenv("LIBCUDF_HOST_DECOMPRESSION", "OFF", 1);
+  setenv("LIBCUDF_NVCOMP_POLICY", "ALWAYS", 1);
+
+  // Forward-looking: Enforce CPU compression for when hipcomp supports GPU compression
+  // This ensures we're testing the specific path: CPU compress -> GPU decompress
+  setenv("LIBCUDF_HOST_COMPRESSION", "ON", 1);
+
   auto const stream = cudf::get_default_stream();
   auto const mr     = rmm::mr::get_current_device_resource();
 
@@ -381,7 +396,7 @@ TEST_F(ZstdDecompressTest, CpuCompressGpuDecompress)
         static_cast<uint8_t>((i % 256) + (i / 256) % 128 + chunk_id));
     }
 
-    // Compress this chunk on CPU
+    // Compress this chunk on CPU (host compression is enforced via env var)
     compressed_chunks[chunk_id] =
       cudf::io::detail::compress(cudf::io::compression_type::ZSTD, expected_chunks[chunk_id]);
     ASSERT_GT(compressed_chunks[chunk_id].size(), 0) << "CPU compression failed for chunk "
@@ -451,6 +466,11 @@ TEST_F(ZstdDecompressTest, CpuCompressGpuDecompress)
   }
 
   std::cout << "Successfully decompressed all " << num_chunks << " chunks on GPU" << std::endl;
+
+  // Clean up environment variables
+  unsetenv("LIBCUDF_HOST_DECOMPRESSION");
+  unsetenv("LIBCUDF_NVCOMP_POLICY");
+  unsetenv("LIBCUDF_HOST_COMPRESSION");
 }
 
 struct NvcompConfigTest : public cudf::test::BaseFixture {};
