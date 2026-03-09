@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2020-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <cudf/detail/utilities/cuda_memcpy.hpp>
 #include <cudf/io/config_utils.hpp>
 #include <cudf/io/data_sink.hpp>
 #include <cudf/logger.hpp>
@@ -33,7 +34,11 @@
 #endif
 #include <rmm/cuda_stream_view.hpp>
 
-#include <fstream>
+// <<<<<<< OLD CODE from f806865c64 (c74aea08ab) - COMMENTED OUT
+// #include <fstream>
+// =======
+#include <cuda_runtime_api.h>
+// >>>>>>> END NEW CODE (c74aea08ab)
 
 namespace cudf {
 namespace io {
@@ -167,6 +172,12 @@ class host_buffer_sink : public data_sink {
   {
     auto const current_size = buffer_->size();
     buffer_->resize(current_size + size);
+    // TODO: https://github.com/rapidsai/cudf/issues/21680
+    // We need to replace this with memcpy_batch_async after fixing stream
+    // ordering. The issue is that buffer_->resize() can reallocate,
+    // invalidating pointers from previous async copies that are still
+    // in-flight when using cudaMemcpySrcAccessOrderStream. Need to ensure
+    // stream ordering or pre-reserve buffer to avoid reallocation.
     CUDF_CUDA_TRY(cudaMemcpyAsync(
       buffer_->data() + current_size, gpu_data, size, cudaMemcpyDeviceToHost, stream.value()));
     return std::async(std::launch::deferred, [stream]() -> void { stream.synchronize(); });
