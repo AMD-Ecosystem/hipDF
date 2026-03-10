@@ -36,7 +36,7 @@ hipDF enables you to easily port your existing Pandas and cuDF workloads to AMD 
 is aligned with and is API-compatible with RAPIDS® cuDF 25.10, allowing for workloads to be
 transitioned to AMD devices without hipification.
 
-hipDF v2.0.0 includes the following features:
+hipDF v3.0.0 includes the following features:
 
 * hipDF offers the Series and DataFrame data structures for storing and manipulating data
   directly on the GPU. The Series data structure acts as a one-dimensional array, while the DataFrame

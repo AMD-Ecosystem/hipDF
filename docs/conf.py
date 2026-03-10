@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -74,7 +74,7 @@ extensions = [
 
 
 # for PDF output on Read the Docs
-version_number = "2.0.0"
+version_number = "3.0.0"
 project = "hipDF"
 author = "Advanced Micro Devices, Inc."
 copyright = f"Copyright (c) 2023-{_today.strftime(r'%Y')} Advanced Micro Devices, Inc. All rights reserved."

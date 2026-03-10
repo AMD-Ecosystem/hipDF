@@ -1,7 +1,7 @@
 <!---
     MIT License
 
-    Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+    Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -61,5 +61,5 @@ Python 3.12.11 | packaged by conda-forge | (main, Jun  4 2025, 14:45:31) [GCC 13
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import hipdf
 >>> print(hipdf.__version__)
-2.0.00
+3.0.00
 ```
