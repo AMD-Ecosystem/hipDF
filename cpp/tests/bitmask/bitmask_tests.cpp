@@ -117,7 +117,7 @@ rmm::device_uvector<cudf::bitmask_type> make_mask(cudf::size_type size, bool fil
   } else {
     auto ret = rmm::device_uvector<cudf::bitmask_type>(size, cudf::get_default_stream());
     CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(),
-                                  -1,
+                                  static_cast<int>(0xffffffff),
                                   size * sizeof(cudf::bitmask_type),
                                   cudf::get_default_stream().value()));
     return ret;
