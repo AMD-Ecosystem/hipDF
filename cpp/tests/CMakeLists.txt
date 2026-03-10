@@ -78,6 +78,8 @@ function(ConfigureTest CMAKE_TEST_NAME)
                CUDA_STANDARD_REQUIRED ON
   )
 
+  target_compile_options(${CMAKE_TEST_NAME} PRIVATE -Wno-braced-scalar-init)
+
   target_compile_definitions(
     ${CMAKE_TEST_NAME} PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1 CCCL_AVOID_SORT_UNROLL=1
                                ${_CUDF_TEST_EXTRA_COMPILE_DEFINITIONS}

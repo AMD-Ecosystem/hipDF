@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -273,6 +273,15 @@ inline void throw_cuda_error(cudaError_t error, char const* file, unsigned int l
     cudaError_t const status = (call);                                                         \
     if (cudaSuccess != status) { cudf::detail::throw_cuda_error(status, __FILE__, __LINE__); } \
   } while (0);
+
+#define HIPDF_ASSERT_CUDA_SUCCESS(_call)                                      \
+  cudaError_t const status__ = (_call);                                       \
+  if (status__ != cudaSuccess) {                                              \
+    std::cerr << "CUDA Error detected. " << cudaGetErrorName(status__) << " " \
+              << cudaGetErrorString(status__) << std::endl;                   \
+  }                                                                           \
+  /* NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay) */   \
+  assert(status__ == cudaSuccess);
 
 /**
  * @brief Debug macro to check for CUDA errors

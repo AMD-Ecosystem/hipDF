@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_view.hpp>
 #include <cudf/detail/null_mask.hpp>
 #include <cudf/hashing/detail/hashing.hpp>
@@ -43,18 +65,18 @@ void prefetch_col_data(ColumnView& col, void const* data_ptr, std::string_view k
       // Skip prefetching for empty columns
       return;
     } else if (cudf::is_fixed_width(col.type())) {
-      cudf::prefetch::detail::prefetch_noexcept(
-        data_ptr, col.size() * size_of(col.type()), cudf::get_default_stream());
+      HIPDF_ASSERT_CUDA_SUCCESS(cudf::prefetch::detail::prefetch_noexcept(
+        data_ptr, col.size() * size_of(col.type()), cudf::get_default_stream()));
     } else if (col.type().id() == type_id::STRING) {
       strings_column_view const scv{col};
       if (data_ptr == nullptr) {
         // Do not call chars_size if the data_ptr is nullptr.
         return;
       }
-      cudf::prefetch::detail::prefetch_noexcept(
+      HIPDF_ASSERT_CUDA_SUCCESS(cudf::prefetch::detail::prefetch_noexcept(
         data_ptr,
         scv.chars_size(cudf::get_default_stream()) * sizeof(char),
-        cudf::get_default_stream());
+        cudf::get_default_stream()));
     } else {
       CUDF_LOG_DEBUG("Unsupported type: %d", static_cast<int32_t>(col.type().id()));
     }

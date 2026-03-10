@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -117,7 +117,7 @@ rmm::device_uvector<cudf::bitmask_type> make_mask(cudf::size_type size, bool fil
   } else {
     auto ret = rmm::device_uvector<cudf::bitmask_type>(size, cudf::get_default_stream());
     CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(),
-                                  ~cudf::bitmask_type{0},
+                                  -1,
                                   size * sizeof(cudf::bitmask_type),
                                   cudf::get_default_stream().value()));
     return ret;

@@ -121,6 +121,7 @@ namespace {
     case nvcompStatus_t::nvcompErrorCannotCompress: return "nvcompErrorCannotCompress";
     case nvcompStatus_t::nvcompErrorWrongInputLength: return "nvcompErrorWrongInputLength";
 #endif
+    default: break;
   }
   return "nvcompStatus_t(" + std::to_string(static_cast<int>(status)) + ")";
 }

@@ -82,7 +82,7 @@ std::size_t constexpr STREAM_POOL_SIZE = 32;
  */
 struct cuda_event {
   cuda_event() { CUDF_CUDA_TRY(cudaEventCreateWithFlags(&e_, cudaEventDisableTiming)); }
-  virtual ~cuda_event() { CUDF_ASSERT_CUDA_SUCCESS(cudaEventDestroy(e_)); }
+  virtual ~cuda_event() { HIPDF_ASSERT_CUDA_SUCCESS(cudaEventDestroy(e_)); }
 
   // Moveable but not copyable.
   cuda_event(const cuda_event&)            = delete;
