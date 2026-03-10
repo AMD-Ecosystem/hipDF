@@ -35,7 +35,7 @@ hipDF requires ROCm 7.2.1 running on a `ROCm-supported operating system <https:/
 See `ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
 for installation instructions.
 
-hipDF is supported on gfx942 and gfx90a only.
+hipDF is supported on gfx90a, gfx942, and gfx950.
 
 hipDF only supports features from cuDF 25.10. Support is limited to C++ and Python interfaces.
 A Java interface is not supported.
