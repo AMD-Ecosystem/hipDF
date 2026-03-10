@@ -73,7 +73,7 @@ conda activate hipdf
 hipDF can then be installed into this environment using pip and the AMD PyPI URL:
 
 ```bash
-pip install amd-hipdf==2.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.0.2/simple
+pip install amd-hipdf==3.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.2.1/simple
 ```
 
 ### Verify correct installation

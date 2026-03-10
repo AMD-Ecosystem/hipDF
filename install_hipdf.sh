@@ -32,10 +32,10 @@ AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx942"}
 BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
 
 # set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
-export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-ROCm-DS}"
+export GITHUB_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-ROCm-DS}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
-export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"
+export GITHUB_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG:-ROCm}"
 
 BUILD_CUPY=${BUILD_CUPY:-"false"}
 BUILD_HIPMM=${BUILD_HIPMM:-"false"}
@@ -47,16 +47,18 @@ CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
 CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
 CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
 
-NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
-NUMBA_BRANCH=${NUMBA_BRANCH:-"release/rocmds-25.10"}
-CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
-CUPY_BRANCH=${CUPY_BRANCH:-"release/rocmds-25.10"}
-HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"release/rocmds-25.10"}
-HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
-HIPDF_BRANCH=${HIPDF_BRANCH:-"release/rocmds-25.10"}
+GITHUB_ROCM_DS_BRANCH="release/rocmds-26.03"
 
-AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/simple"}
+NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
+NUMBA_BRANCH=${NUMBA_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
+CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
+CUPY_BRANCH=${CUPY_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
+HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
+HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
+HIPDF_BRANCH=${HIPDF_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
+
+AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/rocm-7.2.1/simple"}
 
 # We assume that you have already installed ROCm into /opt/rocm
 
