@@ -1,7 +1,7 @@
 <!---
     MIT License
 
-    Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+    Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -197,8 +197,8 @@ optional dependency key `rocm-X-Y-Z`, as shown in the following command.
 conda activate hipdf_dev
 
 pip install --upgrade pip
-pip install --extra-index-url https://pypi.amd.com/simple \
-  numba-hip[rocm-7-0-2]@git+https://github.com/rocm/numba-hip.git
+pip install --extra-index-url https://pypi.amd.com/rocm-7.2.1/simple \
+  numba-hip[rocm-7-2-1]@git+https://github.com/rocm/numba-hip.git
   # NOTE: adapt ROCm key to your Python version
 ```
 
@@ -207,7 +207,7 @@ pip install --extra-index-url https://pypi.amd.com/simple \
 #### Via AMD PyPI (recommended)
 
 ```bash
-pip install amd-hipmm==3.0.0 --extra-index-url=https://pypi.amd.com/simple
+pip install amd-hipmm==4.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.2.1/simple
 ```
 
 #### From source

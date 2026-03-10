@@ -1,7 +1,7 @@
 <!---
     MIT License
 
-    Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+    Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ To ensure security, integrity, and supportability of your builds, consume packag
 ```
 
 Packaged versions of hipDF and its dependencies are distributed via
-[AMD PyPI](https://pypi.amd.com/rocm-7.0.2/simple). This section discusses how to install
+[AMD PyPI](https://pypi.amd.com/rocm-7.2.1/simple). This section discusses how to install
 hipDF via this package index.
 
 Create and activate a Conda environment with Python 3.12 as shown below:
