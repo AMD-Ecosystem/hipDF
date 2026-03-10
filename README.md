@@ -29,7 +29,7 @@
 > This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
 
 > [!NOTE]
-> This ROCm&trade; port is derived work based on the NVIDIA RAPIDS&reg; cuDF project (**version 25.02**). It aims to
+> This ROCm&trade; port is derived work based on the NVIDIA RAPIDS&reg; cuDF project (**version 25.10**). It aims to
 follow the latter's directory structure and API naming as closely as possible to minimize porting friction for users that are interested in using both projects.
 
 ## Resources

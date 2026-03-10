@@ -1,7 +1,7 @@
 ..
     MIT License
 
-    Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+    Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ What is hipDF?
 
 In addition to containing the necessary tools to build powerful new data processing applications,
 hipDF enables you to easily port your existing Pandas and cuDF workloads to AMD GPUs. hipDF
-is aligned with and is API-compatible with RAPIDS® cuDF 25.02, allowing for workloads to be
+is aligned with and is API-compatible with RAPIDS® cuDF 25.10, allowing for workloads to be
 transitioned to AMD devices without hipification.
 
 hipDF v2.0.0 includes the following features:
