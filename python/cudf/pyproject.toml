@@ -66,53 +66,57 @@ dependencies = [
     "cupy-cuda13x>=13.6.0,!=14.0.0",
 # >>>>>>> END NEW CODE (662dc43897)
     "fsspec>=0.6.0",
-# <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
-# # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
-# # #     "amd-libhipdf==3.*,>=3.0.00",
-# # #     # "numba-cuda[cu13]>=0.19.1,<0.20.0a0", # FIXME(HIP/AMD): use numba-hip?
-# # # =======
-# #     "libcudf==25.12.*,>=0.0.0a0",
-# # =======
-#     "libcudf==26.2.*,>=0.0.0a0",
-# # <<<<<<< OLD CODE from 43e8f7461f (78e5697afa) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from b11e3e61a0 (29d080d4c1) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
-# # # # # >>>>>>> END NEW CODE (094d0854e5)
-# # # #     "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
-# # # # # >>>>>>> END NEW CODE (363a4446f0)
-# # # #     "numba>=0.60.0,<0.62.0a0",
-# # # #     "numba-hip>=0.1.6",
-# # # #     "numpy>=1.23,<3.0a0",
-# # # #     # "nvtx>=0.2.1", # FIXME(HIP/AMD): rocTX bindings?
+# <<<<<<< OLD CODE from 46d2c08ec9 (d8db1df927) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from e2cc35a022 (094d0854e5) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 4990b67586 (363a4446f0) - COMMENTED OUT
+# # # #     "amd-libhipdf==3.*,>=3.0.00",
+# # # #     # "numba-cuda[cu13]>=0.19.1,<0.20.0a0", # FIXME(HIP/AMD): use numba-hip?
 # # # # =======
-# # #     "numba-cuda[cu13]>=0.19.1,<0.20.0",
+# # #     "libcudf==25.12.*,>=0.0.0a0",
 # # # =======
-# #     "numba-cuda[cu13]>=0.22.1,<0.23.0",
-# # # >>>>>>> END NEW CODE (29d080d4c1)
+# #     "libcudf==26.2.*,>=0.0.0a0",
+# # # <<<<<<< OLD CODE from 43e8f7461f (78e5697afa) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from b11e3e61a0 (29d080d4c1) - COMMENTED OUT
+# # # # # <<<<<<< OLD CODE from 33b66f81fd (fce3d155f1) - COMMENTED OUT
+# # # # # # >>>>>>> END NEW CODE (094d0854e5)
+# # # # #     "numba-cuda[cu13]>=0.19.1,<0.20.0a0",
+# # # # # # >>>>>>> END NEW CODE (363a4446f0)
+# # # # #     "numba>=0.60.0,<0.62.0a0",
+# # # # #     "numba-hip>=0.1.6",
+# # # # #     "numpy>=1.23,<3.0a0",
+# # # # #     # "nvtx>=0.2.1", # FIXME(HIP/AMD): rocTX bindings?
+# # # # # =======
+# # # #     "numba-cuda[cu13]>=0.19.1,<0.20.0",
+# # # # =======
+# # #     "numba-cuda[cu13]>=0.22.1,<0.23.0",
+# # # # >>>>>>> END NEW CODE (29d080d4c1)
+# # # =======
+# # =======
+#     "libcudf==26.4.*,>=0.0.0a0",
+# # <<<<<<< OLD CODE from 90a09d5ea1 (02dae96cfe) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from 2eb7121f49 (90d76d706f) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 3ea2b06ee1 (cec4045be7) - COMMENTED OUT
+# # # # # <<<<<<< OLD CODE from 0fe0c5a7ee (8a74308629) - COMMENTED OUT
+# # # # # # >>>>>>> END NEW CODE (54690c919f)
+# # # # #     "numba-cuda[cu13]>=0.22.2,<0.23.0",
+# # # # # # >>>>>>> END NEW CODE (78e5697afa)
+# # # # # =======
+# # # #     "numba-cuda>=0.22.2,<0.23.0",
+# # # # # >>>>>>> END NEW CODE (8a74308629)
+# # # # =======
+# # #     "numba-cuda>=0.22.2",
+# # # # <<<<<<< OLD CODE from c6da435b6b (38980f684a) - COMMENTED OUT
+# # # # # >>>>>>> END NEW CODE (cec4045be7)
+# # # #     "numba>=0.60.0,<0.62.0",
+# # # # =======
+# # # =======
+# #     "numba-cuda>=0.22.2,<0.28.0",
+# # # >>>>>>> END NEW CODE (90d76d706f)
 # # =======
 # =======
-    "libcudf==26.4.*,>=0.0.0a0",
-# <<<<<<< OLD CODE from 90a09d5ea1 (02dae96cfe) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 2eb7121f49 (90d76d706f) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 3ea2b06ee1 (cec4045be7) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from 0fe0c5a7ee (8a74308629) - COMMENTED OUT
-# # # # # >>>>>>> END NEW CODE (54690c919f)
-# # # #     "numba-cuda[cu13]>=0.22.2,<0.23.0",
-# # # # # >>>>>>> END NEW CODE (78e5697afa)
-# # # # =======
-# # #     "numba-cuda>=0.22.2,<0.23.0",
-# # # # >>>>>>> END NEW CODE (8a74308629)
-# # # =======
-# #     "numba-cuda>=0.22.2",
-# # # <<<<<<< OLD CODE from c6da435b6b (38980f684a) - COMMENTED OUT
-# # # # >>>>>>> END NEW CODE (cec4045be7)
-# # #     "numba>=0.60.0,<0.62.0",
-# # # =======
-# # =======
-#     "numba-cuda>=0.22.2,<0.28.0",
-# # >>>>>>> END NEW CODE (90d76d706f)
-# =======
+    "libcudf==26.6.*,>=0.0.0a0",
+# >>>>>>> END NEW CODE (d8db1df927)
     "numba-cuda>=0.22.2",
 # >>>>>>> END NEW CODE (02dae96cfe)
     "numba>=0.60.0,<0.65.0",
@@ -148,15 +152,21 @@ dependencies = [
 # # =======
 # =======
     "pyarrow>=19.0.0",
-# >>>>>>> END NEW CODE (95060807d2)
-    "pylibcudf==26.4.*,>=0.0.0a0",
-    "rich",
-    "rmm==26.4.*,>=0.0.0a0",
-# <<<<<<< OLD CODE from 4c76cc3a0a (54d57759c1) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (54690c919f)
-#     "typing_extensions>=4.0.0",
+# <<<<<<< OLD CODE from 46d2c08ec9 (d8db1df927) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (95060807d2)
+#     "pylibcudf==26.4.*,>=0.0.0a0",
+#     "rich",
+#     "rmm==26.4.*,>=0.0.0a0",
+# # <<<<<<< OLD CODE from 4c76cc3a0a (54d57759c1) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (54690c919f)
+# #     "typing_extensions>=4.0.0",
+# # =======
+# # >>>>>>> END NEW CODE (54d57759c1)
 # =======
-# >>>>>>> END NEW CODE (54d57759c1)
+    "pylibcudf==26.6.*,>=0.0.0a0",
+    "rich",
+    "rmm==26.6.*,>=0.0.0a0",
+# >>>>>>> END NEW CODE (d8db1df927)
 ] # This list was generated by `rapids-dependency-file-generator`. To make changes, edit ../../dependencies.yaml and run `rapids-dependency-file-generator`.
 classifiers = [
     "Intended Audience :: Developers",
@@ -297,14 +307,23 @@ requires = [
 # # =======
 # =======
     "cython>=3.2.2",
-# >>>>>>> END NEW CODE (81375d5646)
-    "libcudf==26.4.*,>=0.0.0a0",
-    "librmm==26.4.*,>=0.0.0a0",
+# <<<<<<< OLD CODE from 46d2c08ec9 (d8db1df927) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (81375d5646)
+#     "libcudf==26.4.*,>=0.0.0a0",
+#     "librmm==26.4.*,>=0.0.0a0",
+#     "ninja",
+#     "numba-cuda>=0.22.2",
+#     "pylibcudf==26.4.*,>=0.0.0a0",
+#     "rmm==26.4.*,>=0.0.0a0",
+# # >>>>>>> END NEW CODE (54690c919f)
+# =======
+    "libcudf==26.6.*,>=0.0.0a0",
+    "librmm==26.6.*,>=0.0.0a0",
     "ninja",
     "numba-cuda>=0.22.2",
-    "pylibcudf==26.4.*,>=0.0.0a0",
-    "rmm==26.4.*,>=0.0.0a0",
-# >>>>>>> END NEW CODE (54690c919f)
+    "pylibcudf==26.6.*,>=0.0.0a0",
+    "rmm==26.6.*,>=0.0.0a0",
+# >>>>>>> END NEW CODE (d8db1df927)
 ] # This list was generated by `rapids-dependency-file-generator`. To make changes, edit ../../dependencies.yaml and run `rapids-dependency-file-generator`.
 
 [tool.scikit-build]
