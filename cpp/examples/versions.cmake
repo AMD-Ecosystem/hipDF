@@ -52,10 +52,14 @@
 # # =======
 # =======
 # rapids-pre-commit-hooks: disable-next-line[verify-hardcoded-version]
-# <<<<<<< OLD CODE from e666bdc8cc (7178a8fb8e) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (2903d6b1dd)
-# set(CUDF_TAG main)
-# # >>>>>>> END NEW CODE (4694b55cdf)
+# <<<<<<< OLD CODE from 13430211a5 (f4fad16f50) - COMMENTED OUT
+# # <<<<<<< OLD CODE from e666bdc8cc (7178a8fb8e) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (2903d6b1dd)
+# # set(CUDF_TAG main)
+# # # >>>>>>> END NEW CODE (4694b55cdf)
+# # =======
+# set(CUDF_TAG release/26.04)
+# # >>>>>>> END NEW CODE (7178a8fb8e)
 # =======
-set(CUDF_TAG release/26.04)
-# >>>>>>> END NEW CODE (7178a8fb8e)
+set(CUDF_TAG main)
+# >>>>>>> END NEW CODE (f4fad16f50)
