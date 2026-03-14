@@ -573,10 +573,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/arrays/string_/test_string.py::test_astype_roundtrip[pyarrow]",
     "tests/arrays/string_/test_string.py::test_astype_roundtrip[pyarrow_numpy]",
     "tests/arrays/string_/test_string.py::test_astype_roundtrip[python]",
-    "tests/arrays/string_/test_string.py::test_astype_roundtrip[string=str[pyarrow]]",
-    "tests/arrays/string_/test_string.py::test_astype_roundtrip[string=str[python]]",
-    "tests/arrays/string_/test_string.py::test_astype_roundtrip[string=string[pyarrow]]",
-    "tests/arrays/string_/test_string.py::test_astype_roundtrip[string=string[python]]",
     "tests/arrays/string_/test_string.py::test_isin[pyarrow]",
     "tests/arrays/string_/test_string.py::test_isin[pyarrow_numpy]",
     "tests/arrays/string_/test_string.py::test_isin[python]",
@@ -2889,8 +2885,7 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64_to_string[Series-None]",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64tz",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_dt64tz_to_str",
-    "tests/frame/methods/test_astype.py::TestAstype::test_astype_td64_to_string[DataFrame]",
-    "tests/frame/methods/test_astype.py::TestAstype::test_astype_td64_to_string[Series]",
+    "tests/frame/methods/test_astype.py::TestAstype::test_astype_str_float",
     "tests/frame/methods/test_astype.py::TestAstype::test_astype_with_exclude_string",
     "tests/frame/methods/test_astype.py::test_astype_to_string_not_modifying_input[pyarrow_numpy-None]",
     "tests/frame/methods/test_astype.py::test_astype_to_string_not_modifying_input[pyarrow_numpy-val4]",
@@ -2958,6 +2953,7 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/frame/methods/test_join.py::test_join_index",
     "tests/frame/methods/test_join.py::test_join_index_more",
     "tests/frame/methods/test_map.py::test_map",
+    "tests/frame/methods/test_map.py::test_map_str",
     "tests/frame/methods/test_map.py::test_map_empty[<lambda>-expected0]",
     "tests/frame/methods/test_map.py::test_map_empty[<lambda>-expected2]",
     "tests/frame/methods/test_map.py::test_map_empty[round-expected0]",
@@ -7060,44 +7056,48 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint32]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint64]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint8]",
-# <<<<<<< OLD CODE from 88f5f27ae2 (cf69ee3c54) - COMMENTED OUT
-# # <<<<<<< OLD CODE from c16465222d (47c7e570f9) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
-# # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-# # # # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
-# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
-# # # # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
-# # # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
-# # # # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # # # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# <<<<<<< OLD CODE from 3653594e3e (ba681397fb) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 88f5f27ae2 (cf69ee3c54) - COMMENTED OUT
+# # # <<<<<<< OLD CODE from c16465222d (47c7e570f9) - COMMENTED OUT
+# # # # <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
+# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+# # # # # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
+# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
+# # # # # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
+# # # # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
+# # # # # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
+# # # # # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
+# # # # # # # # # =======
+# # # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
+# # # # # # # # # >>>>>>> END NEW CODE (ee26842c72)
 # # # # # # # # =======
-# # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
-# # # # # # # # >>>>>>> END NEW CODE (ee26842c72)
+# # # # # # # # >>>>>>> END NEW CODE (d142e22536)
+# # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
+# # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
 # # # # # # # =======
-# # # # # # # >>>>>>> END NEW CODE (d142e22536)
-# # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
-# # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
+# # # # # # # >>>>>>> END NEW CODE (59b6dddcaf)
+# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
+# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
+# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
+# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
 # # # # # # =======
-# # # # # # >>>>>>> END NEW CODE (59b6dddcaf)
-# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
-# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
-# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
-# # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
+# # # # # # >>>>>>> END NEW CODE (af4ffdd992)
 # # # # # =======
-# # # # # >>>>>>> END NEW CODE (af4ffdd992)
+# # # # # >>>>>>> END NEW CODE (2617fd93c4)
 # # # # =======
-# # # # >>>>>>> END NEW CODE (2617fd93c4)
+# # # # >>>>>>> END NEW CODE (9a0ca028f6)
 # # # =======
-# # # >>>>>>> END NEW CODE (9a0ca028f6)
+# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
+# # # <<<<<<< OLD CODE from 4ee759c0ad (f2324e18ac) - COMMENTED OUT
+# # # # >>>>>>> END NEW CODE (47c7e570f9)
+# # # =======
 # # =======
-#     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-#     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# # <<<<<<< OLD CODE from 4ee759c0ad (f2324e18ac) - COMMENTED OUT
-# # # >>>>>>> END NEW CODE (47c7e570f9)
-# # =======
+# # >>>>>>> END NEW CODE (cf69ee3c54)
 # =======
-# >>>>>>> END NEW CODE (cf69ee3c54)
+    "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
+# >>>>>>> END NEW CODE (ba681397fb)
     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
 # >>>>>>> END NEW CODE (f2324e18ac)
     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_other",
@@ -7251,7 +7251,9 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_map.py::test_map_empty[uint32]",
     "tests/series/methods/test_map.py::test_map_empty[uint64]",
     "tests/series/methods/test_map.py::test_map_empty[uint8]",
+    "tests/series/methods/test_map.py::test_map_simple_str_callables_same_as_astype[<lambda>]",
     "tests/series/methods/test_map.py::test_map_int",
+    "tests/series/methods/test_map.py::test_map_categorical_na_action[None-expected0]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_boundary_datetimelike[nsmallest-datetime64[ns]]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_boundary_datetimelike[nsmallest-timedelta64[ns]]",
     "tests/series/methods/test_nlargest.py::TestSeriesNLargestNSmallest::test_nlargest_error[r4]",
