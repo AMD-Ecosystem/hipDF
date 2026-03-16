@@ -189,6 +189,7 @@ list(
   "gfx90a:sramecc+:xnack-"
   "gfx908:sramecc+:xnack-"
   "gfx942:sramecc+:xnack-"
+  "gfx950"
   "gfx950:sramecc+:xnack-"
   "gfx90a:xnack+"
   "gfx942:xnack+"
@@ -202,9 +203,8 @@ list(APPEND WS_32_ARCHS "gfx1100" "gfx1101" "gfx1102" "gfx1103" "gfx1150" "gfx11
      "gfx1201"
 )
 
-list(APPEND EXPERIMENTAL_WS_64_ARCHS "gfx950" "gfx950:sramecc+:xnack-" "gfx950:xnack+"
-     "gfx950:xnack-"
-)
+# Empty list for future experimental warp size 64 architectures
+list(APPEND EXPERIMENTAL_WS_64_ARCHS)
 
 if(CUDF_USE_WARPSIZE_32)
   message(
