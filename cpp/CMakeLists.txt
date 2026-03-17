@@ -1637,21 +1637,23 @@ endif()
 
 rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
-# NOTE(HIP/AMD): Control section ordering to avoid relocation errors Place hip_fatbin first, then
-# text, then ltext sections
+# NOTE(HIP/AMD): Control section ordering to avoid relocation errors 
 file(
   WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
   [=[
 SECTIONS
 {
-  /* Place hip_fatbin first */
-  .hip_fatbin : { *(.hip_fatbin) }
-  /* Then .text section */
-  .text : { *(.text .text.*) }
-  /* Then .ltext sections */
   .ltext : { *(.ltext .ltext.*) }
 }
-INSERT BEFORE .rodata;
+INSERT AFTER .fini;
+
+/* --- GPU fat binary at the very end, out of the way ----------------------- */
+SECTIONS
+{
+  .hip_fatbin       : { *(.hip_fatbin) }
+  .hipFatBinSegment : { *(.hipFatBinSegment) }
+}
+INSERT AFTER .bss;
   ]=]
 )
 target_link_options(cudf PRIVATE "$<HOST_LINK:${CUDF_BINARY_DIR}/fatbin.ld>")
