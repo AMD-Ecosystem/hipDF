@@ -116,9 +116,13 @@ dependencies = [
 # # =======
 # =======
     "libcudf==26.6.*,>=0.0.0a0",
-# >>>>>>> END NEW CODE (d8db1df927)
-    "numba-cuda>=0.22.2",
-# >>>>>>> END NEW CODE (02dae96cfe)
+# <<<<<<< OLD CODE from 19bd6f48fc (58a36fa926) - COMMENTED OUT
+# # >>>>>>> END NEW CODE (d8db1df927)
+#     "numba-cuda>=0.22.2",
+# # >>>>>>> END NEW CODE (02dae96cfe)
+# =======
+    "numba-cuda>=0.22.2,<0.29.0",
+# >>>>>>> END NEW CODE (58a36fa926)
     "numba>=0.60.0,<0.65.0",
 # <<<<<<< OLD CODE from 0e18a94103 (a99c4f6cf9) - COMMENTED OUT
 # # >>>>>>> END NEW CODE (38980f684a)
@@ -320,7 +324,7 @@ requires = [
     "libcudf==26.6.*,>=0.0.0a0",
     "librmm==26.6.*,>=0.0.0a0",
     "ninja",
-    "numba-cuda>=0.22.2",
+    "numba-cuda>=0.22.2,<0.29.0",
     "pylibcudf==26.6.*,>=0.0.0a0",
     "rmm==26.6.*,>=0.0.0a0",
 # >>>>>>> END NEW CODE (d8db1df927)
