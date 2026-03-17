@@ -47,11 +47,20 @@
 #include <hipcub/device/device_radix_sort.hpp>
 #else
 #include <cub/device/device_radix_sort.cuh>
-// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
-// #endif
+// <<<<<<< OLD CODE from d2c03bca39 (c1e02c46b1) - COMMENTED OUT
+// // <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
+// // #endif
+// // =======
+// #include <cuda/iterator>
+// // >>>>>>> END NEW CODE (c4e8151cb0)
 // =======
+#include <cuda/functional>
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (c4e8151cb0)
+#include <cuda/std/cmath>
+#include <cuda/std/functional>
+#include <cuda/std/optional>
+#include <cuda/std/utility>
+// >>>>>>> END NEW CODE (c1e02c46b1)
 #include <thrust/binary_search.h>
 #include <thrust/sequence.h>
 #include <thrust/transform_scan.h>
