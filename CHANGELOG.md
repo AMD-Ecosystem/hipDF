@@ -27,11 +27,26 @@
 Documentation for hipDF is available at
 [https://rocm.docs.amd.com/projects/hipDF/en/latest/](https://rocm.docs.amd.com/projects/hipDF/en/latest/).
 
+## hipDF 3.0.0 for ROCm-DS 26.03
+
+### Added
+
+ * Major upgrade aligning hipDF APIs with RAPIDS cuDF 25.10 APIs (from 25.02). For detailed upstream changes, see the [original changelog](CHANGELOG_UPSTREAM_CUDF.md)
+ * Added pylibhipdf wrapper module providing Python bindings compatible with upstream pylibcudf
+ * Added support for gfx950 GPU architecture
+ * Added experimental support for gfx11*/gfx12* RDNA architectures (gfx1100, gfx1101, gfx1200, gfx1201)
+ * Added hipcomp zstd GPU decompression support for ORC and Parquet file formats
+
+### Known limitations and notes
+ * DEBUG builds with -O0 optimization are not currently supported. Use -Og or higher for DEBUG builds (default setting). Support for -O0 is planned in a future toolchain update.
+ * When using the cudf.pandas acceleration layer with XNACK enabled and workloads that significantly exceed physical GPU VRAM (oversubscription), some systems may exhibit instability or reduced performance under heavy memory pressure.
+ * Using the cudf.pandas acceleration layer with XNACK disabled (`HSA_XNACK=0`) can trigger instabilities.
+
 ## hipDF 2.0.0 for ROCm-DS 25.10
 
 ### Added
 
- * Major upgrade aligning hipDF APIs with RAPIDS cuDF 25.02 APIs. For the detailed changes, see the original changelog at [original changelog](CHANGELOG_UPSTREAM_CUDF_25.02.md)
+ * Major upgrade aligning hipDF APIs with RAPIDS cuDF 25.02 APIs. For the detailed changes, see the [original changelog](CHANGELOG_UPSTREAM_CUDF.md)
 
 ### Known limitations and notes
  * DEBUG builds with -O0 optimization are not currently supported. Use -Og or higher for DEBUG builds (default setting). Support for -O0 is planned in a future toolchain update.
