@@ -191,7 +191,7 @@ commit-files = [
   "pylibcudf/COMMIT"
 ]
 dependencies-file = "../../dependencies.yaml"
-matrix-entry = "cuda_suffixed=true"
+matrix-entry = "cuda_suffixed=true;use_cuda_wheels=true"
 requires = [
     "cmake>=3.30.4",
 # <<<<<<< OLD CODE from 7608fa060c (81375d5646) - COMMENTED OUT
