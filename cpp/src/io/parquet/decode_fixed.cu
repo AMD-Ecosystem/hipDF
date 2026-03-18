@@ -968,7 +968,7 @@ __device__ void skip_ahead_in_decoding(page_state_s* s,
 }
 
 template <decode_kernel_mask kernel_mask_t>
-constexpr bool has_dict()
+CUDF_HOST_DEVICE constexpr bool has_dict()
 {
   return (kernel_mask_t == decode_kernel_mask::FIXED_WIDTH_DICT) ||
          (kernel_mask_t == decode_kernel_mask::FIXED_WIDTH_DICT_NESTED) ||
@@ -979,7 +979,7 @@ constexpr bool has_dict()
 }
 
 template <decode_kernel_mask kernel_mask_t>
-constexpr bool has_bools()
+CUDF_HOST_DEVICE constexpr bool has_bools()
 {
   return (kernel_mask_t == decode_kernel_mask::BOOLEAN) ||
          (kernel_mask_t == decode_kernel_mask::BOOLEAN_NESTED) ||
@@ -987,7 +987,7 @@ constexpr bool has_bools()
 }
 
 template <decode_kernel_mask kernel_mask_t>
-constexpr bool has_nesting()
+CUDF_HOST_DEVICE constexpr bool has_nesting()
 {
   return (kernel_mask_t == decode_kernel_mask::BOOLEAN_NESTED) ||
          (kernel_mask_t == decode_kernel_mask::FIXED_WIDTH_DICT_NESTED) ||
@@ -999,7 +999,7 @@ constexpr bool has_nesting()
 }
 
 template <decode_kernel_mask kernel_mask_t>
-constexpr bool has_lists()
+CUDF_HOST_DEVICE constexpr bool has_lists()
 {
   return (kernel_mask_t == decode_kernel_mask::BOOLEAN_LIST) ||
          (kernel_mask_t == decode_kernel_mask::FIXED_WIDTH_DICT_LIST) ||
@@ -1011,7 +1011,7 @@ constexpr bool has_lists()
 }
 
 template <decode_kernel_mask kernel_mask_t>
-constexpr bool is_split_decode()
+CUDF_HOST_DEVICE constexpr bool is_split_decode()
 {
   return (kernel_mask_t == decode_kernel_mask::BYTE_STREAM_SPLIT_FIXED_WIDTH_FLAT) ||
          (kernel_mask_t == decode_kernel_mask::BYTE_STREAM_SPLIT_FIXED_WIDTH_NESTED) ||

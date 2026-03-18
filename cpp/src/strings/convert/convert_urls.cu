@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -44,10 +44,18 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <hip/hip_cooperative_groups.h>
-//#include <cooperative_groups/reduce.h>
-//#include <cooperative_groups/scan.h>
-#include <hipcub/hipcub.hpp>
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+// #include <hip/hip_cooperative_groups.h>
+// //#include <cooperative_groups/reduce.h>
+// //#include <cooperative_groups/scan.h>
+// #include <hipcub/hipcub.hpp>
+// =======
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+#include <cooperative_groups/scan.h>
+#include <cub/cub.cuh>
+#include <cuda/std/algorithm>
+// >>>>>>> END NEW CODE (2d6106360e)
 
 namespace cudf {
 namespace strings {
@@ -172,7 +180,7 @@ namespace detail {
 namespace {
 
 // utility to convert a hex char into a single byte
-constexpr uint8_t hex_char_to_byte(char ch)
+__device__ constexpr uint8_t hex_char_to_byte(char ch)
 {
   if (ch >= '0' && ch <= '9') return (ch - '0');
   if (ch >= 'A' && ch <= 'F') return (ch - 'A' + 10);  // in hex A=10,B=11,...,F=15
@@ -180,7 +188,7 @@ constexpr uint8_t hex_char_to_byte(char ch)
   return 0;
 }
 
-constexpr bool is_hex_digit(char ch)
+__device__ constexpr bool is_hex_digit(char ch)
 {
   return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
 }
@@ -244,7 +252,7 @@ CUDF_KERNEL void url_decode_char_counter(column_device_view const in_strings,
 
     for (size_type block_idx = 0; block_idx < nblocks; block_idx++) {
       auto const string_length_block =
-        std::min(char_block_size, string_length - char_block_size * block_idx);
+        cuda::std::min(char_block_size, string_length - char_block_size * block_idx);
 
       // Each warp collectively loads input characters of the current block to the shared memory.
       // When testing whether a location is the start of an escaped character, we need to access
@@ -348,7 +356,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
 
     for (size_type block_idx = 0; block_idx < nblocks; block_idx++) {
       auto const string_length_block =
-        std::min(char_block_size, string_length - char_block_size * block_idx);
+        cuda::std::min(char_block_size, string_length - char_block_size * block_idx);
 
       // Each warp collectively loads input characters of the current block to shared memory.
       // Two halo cells before and after the block are added. The halo cells are used to test

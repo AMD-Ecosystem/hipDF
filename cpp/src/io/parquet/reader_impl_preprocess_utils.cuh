@@ -393,7 +393,10 @@ struct chunk_row_output_iter {
   using reference         = size_type&;
   using iterator_category = thrust::output_device_iterator_tag;
 
-  CUDF_HOST_DEVICE constexpr inline chunk_row_output_iter operator+(int i) { return {p + i}; }
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+//   CUDF_HOST_DEVICE constexpr inline chunk_row_output_iter operator+(int i) { return {p + i}; }
+// =======
+// >>>>>>> END NEW CODE (2d6106360e)
   CUDF_HOST_DEVICE constexpr inline chunk_row_output_iter operator+(int i) const { return {p + i}; }
 
   CUDF_HOST_DEVICE constexpr inline chunk_row_output_iter& operator++()
@@ -422,7 +425,7 @@ struct start_offset_output_iterator {
   using reference         = size_type&;
   using iterator_category = thrust::output_device_iterator_tag;
 
-  constexpr inline void operator=(start_offset_output_iterator const& other)
+  CUDF_HOST_DEVICE constexpr inline void operator=(start_offset_output_iterator const& other)
   {
     pages      = other.pages;
     cur_index  = other.cur_index;
@@ -431,17 +434,21 @@ struct start_offset_output_iterator {
     num_pages  = other.num_pages;
   }
 
-  constexpr inline start_offset_output_iterator operator+(size_t i)
+  CUDF_HOST_DEVICE constexpr inline start_offset_output_iterator operator+(size_t i) const
   {
     return start_offset_output_iterator{pages, cur_index + i, input_cols, max_depth, num_pages};
   }
 
-  constexpr inline start_offset_output_iterator operator+(size_t i) const
-  {
-    return start_offset_output_iterator{pages, cur_index + i, input_cols, max_depth, num_pages};
-  }
-
-  constexpr inline start_offset_output_iterator& operator++()
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+//   constexpr inline start_offset_output_iterator operator+(size_t i) const
+//   {
+//     return start_offset_output_iterator{pages, cur_index + i, input_cols, max_depth, num_pages};
+//   }
+//
+//   constexpr inline start_offset_output_iterator& operator++()
+// =======
+  CUDF_HOST_DEVICE constexpr inline start_offset_output_iterator& operator++()
+// >>>>>>> END NEW CODE (2d6106360e)
   {
     cur_index++;
     return *this;
@@ -494,7 +501,14 @@ struct page_offset_output_iter {
   using reference         = size_t&;
   using iterator_category = thrust::output_device_iterator_tag;
 
-  CUDF_HOST_DEVICE constexpr inline page_offset_output_iter operator+(int i) const { return {p + i}; }
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+//   CUDF_HOST_DEVICE constexpr inline page_offset_output_iter operator+(int i) const { return {p + i}; }
+// =======
+  CUDF_HOST_DEVICE constexpr inline page_offset_output_iter operator+(int i) const
+  {
+    return {p + i};
+  }
+// >>>>>>> END NEW CODE (2d6106360e)
 
   CUDF_HOST_DEVICE constexpr inline page_offset_output_iter& operator++()
   {

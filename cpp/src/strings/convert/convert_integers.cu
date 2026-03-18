@@ -43,6 +43,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <cuda/std/limits>
+#include <cuda/std/type_traits>
 #include <cuda/std/utility>
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -65,17 +67,24 @@ struct string_to_integer_check_fn {
     if (!p.second || p.first.empty()) { return false; }
 
     auto const d_str = p.first.data();
-    if (d_str[0] == '-' && std::is_unsigned_v<IntegerType>) { return false; }
+    if (d_str[0] == '-' && cuda::std::is_unsigned_v<IntegerType>) { return false; }
 
     auto iter           = d_str + static_cast<int>((d_str[0] == '-' || d_str[0] == '+'));
     auto const iter_end = d_str + p.first.size_bytes();
     if (iter == iter_end) { return false; }
-    // TODO(HIP/AMD): error: constant expression evaluates to -1 which cannot be narrowed to type
-    // 'unsigned char' [-Wc++11-narrowing]
-    //  auto const sign = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
-    auto const sign = d_str[0] == '-' ? -1 : 1;
-    auto const bound_val =
-      sign > 0 ? std::numeric_limits<IntegerType>::max() : std::numeric_limits<IntegerType>::min();
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+//     // TODO(HIP/AMD): error: constant expression evaluates to -1 which cannot be narrowed to type
+//     // 'unsigned char' [-Wc++11-narrowing]
+//     //  auto const sign = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
+//     auto const sign = d_str[0] == '-' ? -1 : 1;
+//     auto const bound_val =
+//       sign > 0 ? std::numeric_limits<IntegerType>::max() : std::numeric_limits<IntegerType>::min();
+// =======
+
+    auto const sign      = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
+    auto const bound_val = sign > 0 ? cuda::std::numeric_limits<IntegerType>::max()
+                                    : cuda::std::numeric_limits<IntegerType>::min();
+// >>>>>>> END NEW CODE (2d6106360e)
 
     IntegerType value = 0;      // parse the string to integer and check for overflow along the way
     while (iter != iter_end) {  // check all bytes for valid characters

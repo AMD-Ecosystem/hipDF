@@ -46,6 +46,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
+#include <cuda/std/algorithm>
 #include <cuda/std/optional>
 #include <cuda/std/utility>
 #include <thrust/execution_policy.h>
@@ -241,7 +242,8 @@ struct parse_datetime {
     auto length = d_string.size_bytes();
     for (auto item : d_format_items) {
       if (item.value != 'f')
-        item.length = static_cast<int8_t>(std::min(static_cast<size_type>(item.length), length));
+        item.length =
+          static_cast<int8_t>(cuda::std::min(static_cast<size_type>(item.length), length));
 
       if (item.item_type == format_char_type::literal) {
         // static character we'll just skip;
@@ -305,7 +307,7 @@ struct parse_datetime {
         }
         case 'f': {
           int32_t const read_size =
-            std::min(static_cast<int32_t>(item.length), static_cast<int32_t>(length));
+            cuda::std::min(static_cast<int32_t>(item.length), static_cast<int32_t>(length));
           auto const [fraction, left] = parse_int(ptr, read_size);
           timeparts.subsecond =
             static_cast<int32_t>(fraction * power_of_ten(item.length - read_size + left));
@@ -549,7 +551,8 @@ struct check_datetime_format {
       }
       // allow for specifiers to be truncated
       if (item.value != 'f')
-        item.length = static_cast<int8_t>(std::min(static_cast<size_type>(item.length), length));
+        item.length =
+          static_cast<int8_t>(cuda::std::min(static_cast<size_type>(item.length), length));
 
       // special logic for each specifier
       // reference: https://man7.org/linux/man-pages/man3/strptime.3.html
@@ -616,7 +619,7 @@ struct check_datetime_format {
         }
         case 'f': {
           int32_t const read_size =
-            std::min(static_cast<int32_t>(item.length), static_cast<int32_t>(length));
+            cuda::std::min(static_cast<int32_t>(item.length), static_cast<int32_t>(length));
           result     = check_digits(ptr, read_size);
           bytes_read = read_size;
           break;

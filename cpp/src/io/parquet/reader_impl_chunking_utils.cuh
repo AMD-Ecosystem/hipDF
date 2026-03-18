@@ -38,7 +38,11 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/functional>
-#include <cuda/std/iterator>
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+// #include <cuda/std/iterator>
+// =======
+#include <cuda/std/utility>
+// >>>>>>> END NEW CODE (2d6106360e)
 #include <thrust/binary_search.h>
 
 namespace cudf::io::parquet::detail {
@@ -623,7 +627,7 @@ struct page_total_size {
   {
     // sum sizes for each input column at this row
     size_t sum = 0;
-    for (auto idx = 0; std::cmp_less(idx, num_keys); idx++) {
+    for (auto idx = 0; cuda::std::cmp_less(idx, num_keys); idx++) {
       auto const start = key_offsets[idx];
       auto const end   = key_offsets[idx + 1];
       auto iter        = cudf::detail::make_counting_transform_iterator(

@@ -70,10 +70,15 @@ Mark Adler    madler@alumni.caltech.edu
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// #include <hipcub/hipcub.hpp>
-//
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+// // <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+// // #include <hipcub/hipcub.hpp>
+// //
+// // =======
 // =======
+#include <cuda/std/algorithm>
+#include <cuda/std/cmath>
+// >>>>>>> END NEW CODE (2d6106360e)
 #include <cuda/std/tuple>
 // >>>>>>> END NEW CODE (261b12adc2)
 #include <thrust/gather.h>
@@ -1264,7 +1269,8 @@ class cost_model {
                                              task_type task_type)
   {
     if (task_type == task_type::DECOMPRESSION) {
-      auto const compression_ratio = std::max(1., static_cast<double>(output_size) / input_size);
+      auto const compression_ratio =
+        cuda::std::max(1., static_cast<double>(output_size) / input_size);
       // When the compression ratio is one, the cost factor is the same as the copy cost ratio,
       // meaning that the cost of decompressing the block is the same as the cost of copying it. The
       // cost factor asymptotes to one as the compression ratio increases, meaning that the cost

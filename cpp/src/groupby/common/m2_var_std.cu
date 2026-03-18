@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2020-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -46,17 +46,21 @@ namespace cudf::groupby::detail {
 namespace {
 
 template <typename Source>
-// NOTE(HIP/AMD): __host__ is necessary because this function is called in a requires clause
-// during constraint checking at compile-time, which happens on the host. HIP requires explicit
-// __host__ qualification for constexpr functions used in compile-time contexts.
-__host__ __device__ constexpr bool is_m2_supported()
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+// // NOTE(HIP/AMD): __host__ is necessary because this function is called in a requires clause
+// // during constraint checking at compile-time, which happens on the host. HIP requires explicit
+// // __host__ qualification for constexpr functions used in compile-time contexts.
+// __host__ __device__ constexpr bool is_m2_supported()
+// =======
+constexpr bool is_m2_supported()
+// >>>>>>> END NEW CODE (2d6106360e)
 {
   return is_numeric<Source>() && !is_fixed_point<Source>();
 }
 
 struct m2_functor {
   template <typename Source, typename... Args>
-  void operator()(Args...)  //
+  void operator()(Args&&...)  //
     requires(!is_m2_supported<Source>())
   {
     CUDF_FAIL("Invalid source type for M2 aggregation.");

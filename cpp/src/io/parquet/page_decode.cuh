@@ -270,7 +270,11 @@ template <typename state_buf>
 inline __device__ string_index_pair gpuGetStringData(page_state_s* s, state_buf* sb, int src_pos)
 {
   char const* ptr = nullptr;
-  using len_type  = thrust::tuple_element<1, string_index_pair>::type;
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+//   using len_type  = thrust::tuple_element<1, string_index_pair>::type;
+// =======
+  using len_type  = cuda::std::tuple_element<1, string_index_pair>::type;
+// >>>>>>> END NEW CODE (2d6106360e)
   len_type len    = 0;
 
   if (s->dict_base) {

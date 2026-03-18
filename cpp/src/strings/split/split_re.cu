@@ -42,6 +42,7 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/functional>
+#include <cuda/std/algorithm>
 #include <cuda/std/iterator>
 #include <cuda/std/tuple>
 #include <thrust/iterator/counting_iterator.h>
@@ -154,8 +155,13 @@ std::pair<rmm::device_uvector<string_index_pair>, std::unique_ptr<column>> gener
   // NOTE(HIP/AMD): We need a range check, as idx is in [0, strings_count].
   // For idx==strings_count, d_strings.is_null(idx) is UB (and leads to a segfault in STRINGS_NVBENCH)
   auto map_fn = cuda::proclaim_return_type<size_type>(
-    [strings_count, d_strings, d_counts, max_tokens] __device__(auto idx) -> size_type {
-    return ((idx>=strings_count) || d_strings.is_null(idx)) ? 0 : std::min(d_counts[idx], max_tokens) + 1;
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+//     [strings_count, d_strings, d_counts, max_tokens] __device__(auto idx) -> size_type {
+//     return ((idx>=strings_count) || d_strings.is_null(idx)) ? 0 : std::min(d_counts[idx], max_tokens) + 1;
+// =======
+    [d_strings, d_counts, max_tokens] __device__(auto idx) -> size_type {
+      return d_strings.is_null(idx) ? 0 : cuda::std::min(d_counts[idx], max_tokens) + 1;
+// >>>>>>> END NEW CODE (2d6106360e)
     });
 
   auto const begin = cudf::detail::make_counting_transform_iterator(0, map_fn);

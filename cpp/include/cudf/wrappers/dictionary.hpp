@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2020-2024, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -28,9 +28,12 @@
 
 #include <cudf/types.hpp>
 
-#include <cudf/cuda_runtime.h>
-
-#include <limits>
+// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
+// #include <cudf/cuda_runtime.h>
+// =======
+#include <cuda/std/limits>
+#include <cuda_runtime.h>
+// >>>>>>> END NEW CODE (2d6106360e)
 
 /**
  * @file
@@ -106,7 +109,7 @@ struct dictionary_wrapper {
    */
   static CUDF_HOST_DEVICE inline constexpr value_type max_value()
   {
-    return std::numeric_limits<value_type>::max();
+    return cuda::std::numeric_limits<value_type>::max();
   }
 
   /**
@@ -116,7 +119,7 @@ struct dictionary_wrapper {
    */
   static CUDF_HOST_DEVICE inline constexpr value_type min_value()
   {
-    return std::numeric_limits<value_type>::min();
+    return cuda::std::numeric_limits<value_type>::min();
   }
 
   /**
@@ -126,7 +129,7 @@ struct dictionary_wrapper {
    */
   static CUDF_HOST_DEVICE inline constexpr value_type lowest_value()
   {
-    return std::numeric_limits<value_type>::lowest();
+    return cuda::std::numeric_limits<value_type>::lowest();
   }
 
  private:
