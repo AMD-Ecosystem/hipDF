@@ -49,6 +49,7 @@
 #include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
 #include <cuco/static_set.cuh>
+#include <cuda/functional>
 #include <cuda/std/tuple>
 #include <thrust/fill.h>
 #include <thrust/iterator/counting_iterator.h>

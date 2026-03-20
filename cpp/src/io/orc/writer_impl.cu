@@ -55,8 +55,14 @@
 #include <rmm/exec_policy.hpp>
 #include <rmm/mr/polymorphic_allocator.hpp>
 
-#include <hip/hip_cooperative_groups.h>
-//#include <cooperative_groups/memcpy_async.h>
+// <<<<<<< OLD CODE from 181cd92f4c (6764de76ae) - COMMENTED OUT
+// #include <hip/hip_cooperative_groups.h>
+// //#include <cooperative_groups/memcpy_async.h>
+// =======
+#include <cooperative_groups.h>
+#include <cooperative_groups/memcpy_async.h>
+#include <cuda/functional>
+// >>>>>>> END NEW CODE (6764de76ae)
 #include <cuda/std/climits>
 #include <cuda/std/iterator>
 #include <cuda/std/limits>

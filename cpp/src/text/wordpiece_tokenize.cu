@@ -60,6 +60,7 @@
 #include <cub/cub.cuh>
 #endif
 #include <cuco/static_map.cuh>
+#include <cuda/functional>
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
 #include <cuda/std/limits>
