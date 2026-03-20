@@ -304,7 +304,7 @@ sort_groupby_helper::column_ptr sort_groupby_helper::sorted_values(
   auto sorted_values_table = cudf::detail::gather(table_view({values}),
                                                   gather_map,
                                                   cudf::out_of_bounds_policy::DONT_CHECK,
-                                                  cudf::detail::negative_index_policy::NOT_ALLOWED,
+                                                  cudf::negative_index_policy::NOT_ALLOWED,
                                                   stream,
                                                   mr);
 
@@ -319,7 +319,7 @@ sort_groupby_helper::column_ptr sort_groupby_helper::grouped_values(
   auto grouped_values_table = cudf::detail::gather(table_view({values}),
                                                    gather_map,
                                                    cudf::out_of_bounds_policy::DONT_CHECK,
-                                                   cudf::detail::negative_index_policy::NOT_ALLOWED,
+                                                   cudf::negative_index_policy::NOT_ALLOWED,
                                                    stream,
                                                    mr);
 
@@ -350,7 +350,7 @@ std::unique_ptr<table> sort_groupby_helper::sorted_keys(rmm::cuda_stream_view st
   return cudf::detail::gather(_keys,
                               key_sort_order(stream),
                               cudf::out_of_bounds_policy::DONT_CHECK,
-                              cudf::detail::negative_index_policy::NOT_ALLOWED,
+                              cudf::negative_index_policy::NOT_ALLOWED,
                               stream,
                               mr);
 }

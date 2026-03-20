@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2021-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2021-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -332,7 +332,7 @@ std::unique_ptr<table> segmented_sort_by_key_common(table_view const& values,
   return detail::gather(values,
                         sorted_order->view(),
                         out_of_bounds_policy::DONT_CHECK,
-                        detail::negative_index_policy::NOT_ALLOWED,
+                        negative_index_policy::NOT_ALLOWED,
                         stream,
                         mr);
 }
