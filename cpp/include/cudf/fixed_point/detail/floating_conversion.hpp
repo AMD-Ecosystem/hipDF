@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2024-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -20,7 +20,7 @@
 
 #include <cstring>
 
-namespace CUDF_EXPORT numeric {
+namespace numeric {
 namespace detail {
 
 // NOTE(HIP/AMD): HIPRTC workaround: cuda::std::floor may be unavailable under __HIPCC_RTC__.
@@ -1139,4 +1139,4 @@ CUDF_HOST_DEVICE inline FloatingType convert_integral_to_floating(Rep const& val
 }
 
 }  // namespace detail
-}  // namespace CUDF_EXPORT numeric
+}  // namespace numeric

@@ -288,7 +288,6 @@ gather_data make_gather_data(cudf::lists_column_view const& source_column,
  *
  * @returns column with elements gathered based on `gather_data`
  */
-CUDF_EXPORT
 std::unique_ptr<column> gather_list_nested(lists_column_view const& list,
                                            gather_data& gd,
                                            rmm::cuda_stream_view stream,
@@ -306,7 +305,6 @@ std::unique_ptr<column> gather_list_nested(lists_column_view const& list,
  *
  * @returns column with elements gathered based on `gather_data`
  */
-CUDF_EXPORT
 std::unique_ptr<column> gather_list_leaf(column_view const& column,
                                          gather_data const& gd,
                                          rmm::cuda_stream_view stream,
