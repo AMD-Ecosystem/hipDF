@@ -4,24 +4,23 @@
 
 set -euo pipefail
 
-# Test cudf_polars with rapidsmpf integration
-# This script runs experimental tests with single cluster mode and the rapidsmpf runtime
+# Test cudf_polars experimental.
 
 # It is essential to cd into python/cudf_polars as `pytest-xdist` + `coverage` seem to work only at this directory level.
-
-# Support invoking run_cudf_polars_with_rapidsmpf_pytests.sh outside the script directory
+# Support invoking outside the script directory
 cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../python/cudf_polars/
 
-# Run experimental tests with the "single" cluster mode and the "rapidsmpf" runtime
-rapids-logger "Running experimental tests with the 'rapidsmpf' runtime and a 'single' cluster"
-timeout 10m python -m pytest --cache-clear "$@" "tests/experimental" \
+rapids-logger "Running experimental legacy tests with the 'rapidsmpf' runtime and a 'single' cluster"
+timeout 10m python -m pytest --cache-clear "$@" "tests/experimental/legacy" \
     --executor streaming \
     --cluster single \
     --runtime rapidsmpf
 
-# Run experimental tests with the "distributed" cluster mode and the "rapidsmpf" runtime
-rapids-logger "Running experimental tests with the 'rapidsmpf' runtime and a 'distributed' cluster"
-timeout 10m python -m pytest --cache-clear "$@" "tests/experimental" \
+rapids-logger "Running experimental legacy tests with the 'rapidsmpf' runtime and a 'distributed' cluster"
+timeout 10m python -m pytest --cache-clear "$@" "tests/experimental/legacy" \
     --executor streaming \
     --cluster distributed \
     --runtime rapidsmpf
+
+rapids-logger "Running experimental tests"
+timeout 10m python -m pytest --cache-clear "$@" tests/experimental --ignore=tests/experimental/legacy
