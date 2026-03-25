@@ -37,6 +37,8 @@ include(../fetch_dependencies.cmake)
 include(rapids-cmake)
 rapids_cmake_build_type("Release")
 
+find_package(Threads REQUIRED) # note: pthread required for parquet_io_multithreaded
+
 # For now, disable CMake's automatic module scanning for C++ files. There is an sccache bug in the
 # version RAPIDS uses in CI that causes it to handle the resulting -M* flags incorrectly with
 # gcc>=14. We can remove this once we upgrade to a newer sccache version.
@@ -60,6 +62,7 @@ target_link_libraries(
   parquet_io_multithreaded
   PRIVATE
     cudf::cudf
+    Threads::Threads
     $<TARGET_OBJECTS:parquet_io_utils> # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> # TODO(HIP/AMD):
                                        # Re-enable once nvtx equivalent is available
 )

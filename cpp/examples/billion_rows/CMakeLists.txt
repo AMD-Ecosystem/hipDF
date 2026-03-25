@@ -37,6 +37,8 @@ include(../fetch_dependencies.cmake)
 include(rapids-cmake)
 rapids_cmake_build_type("Release")
 
+find_package(Threads REQUIRED) # note: pthread for brc_pipeline
+
 # For now, disable CMake's automatic module scanning for C++ files. There is an sccache bug in the
 # version RAPIDS uses in CI that causes it to handle the resulting -M* flags incorrectly with
 # gcc>=14. We can remove this once we upgrade to a newer sccache version.
@@ -65,6 +67,7 @@ install(TARGETS brc_chunks DESTINATION bin/examples/libcudf/billion_rows)
 add_executable(brc_pipeline brc_pipeline.cpp)
 # TODO(HIP/AMD): Re-enable once nvtx equivalent is available
 target_link_libraries(brc_pipeline PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>)
+target_link_libraries(brc_pipeline PRIVATE Threads::Threads)
 # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
 target_compile_features(brc_pipeline PRIVATE cxx_std_20)
 install(TARGETS brc_pipeline DESTINATION bin/examples/libcudf/billion_rows)
