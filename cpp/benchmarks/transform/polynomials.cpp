@@ -26,10 +26,10 @@
 // SOFTWARE.
 
 #include <benchmarks/common/generate_input.hpp>
+#include <benchmarks/common/nvtx_ranges.hpp>
 
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_factories.hpp>
-#include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/transform.hpp>
 #include <cudf/types.hpp>
 
@@ -78,9 +78,13 @@ static void BM_transform_polynomials(nvbench::state& state)
   state.exec(nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
     // computes polynomials: (((ax + b)x + c)x + d)x + e... = ax**4 + bx**3 + cx**2 + dx + e....
 
-#ifndef NVTX_DISABLE
-    cudf::scoped_range range{"benchmark_iteration"};
-#endif
+// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
+// #ifndef NVTX_DISABLE
+//     cudf::scoped_range range{"benchmark_iteration"};
+// #endif
+// =======
+    cudf::benchmark::scoped_range range{"benchmark_iteration"};
+// >>>>>>> END NEW CODE (fd4947d8e2)
 
     std::string type = cudf::type_to_name(cudf::data_type{cudf::type_to_id<key_type>()});
 
