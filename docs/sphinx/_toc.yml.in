@@ -32,9 +32,9 @@ subtrees:
 - caption: Install
   entries:
   - file: install/hipDF-support.rst
-  - file: install/INSTALL.md
-  - file: install/BUILD.md
-  - file: install/VERIFY.md
+  - file: install/INSTALL.rst
+  - file: install/BUILD.rst
+  - file: install/VERIFY.rst
 
 - caption: How to
   entries:

@@ -38,7 +38,7 @@ transitioned to AMD devices without hipification.
 
 hipDF v3.0.0 includes the following features:
 
-* hipDF offers the Series and DataFrame data structures for storing and manipulating data
+* hipDF offers Series and DataFrame data structures for storing and manipulating data
   directly on the GPU. The Series data structure acts as a one-dimensional array, while the DataFrame
   acts as a two-dimensional array with rows and columns. These data structures are similar to those
   in the widely used Pandas library and include similar methods to their Pandas counterparts allowing you
@@ -51,7 +51,7 @@ hipDF v3.0.0 includes the following features:
   - Perform statistical operations on windows within the data.
   - Perform comparative operations on and within data structures.
   - Concatenate, merge, cut, and otherwise manipulate the data structures to better work on or analyze the data.
-  - Run Sub-word Tokenizers on the data to prepare it for your large language models.
+  - Run subword tokenizers on the data to prepare it for your large language models.
   - Perform a variety of commonly used string-handling operations on text data.
   - Use well-known and commonly used list operations to process and extract information from the data structures.
 
