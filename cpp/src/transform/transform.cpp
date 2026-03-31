@@ -53,7 +53,7 @@
 #include <jit/helpers.hpp>
 #include <jit/parser.hpp>
 #include <jit/row_ir.hpp>
-#include <jit/span.cuh>
+#include <cudf/detail/jit/span.cuh>
 #include <jit/util.hpp>
 #include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
 

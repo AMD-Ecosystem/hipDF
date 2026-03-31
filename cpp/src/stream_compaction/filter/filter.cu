@@ -60,7 +60,7 @@
 #include <jit/cache.hpp>
 #include <jit/helpers.hpp>
 #include <jit/parser.hpp>
-#include <jit/span.cuh>
+#include <cudf/detail/jit/span.cuh>
 #include <jit_preprocessed_files/stream_compaction/filter/jit/kernel.cu.jit.hpp>
 
 #include <utility>
