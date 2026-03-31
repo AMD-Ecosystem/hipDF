@@ -39,8 +39,8 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/bit.hpp>
 
-#include <rolling/detail/rolling_jit.hpp>
-#include <rolling/jit/operation.hpp>
+#include <cudf/detail/rolling/rolling_jit.hpp>
+#include <cudf/detail/rolling/jit/operation.hpp>
 
 namespace cudf {
 namespace rolling {

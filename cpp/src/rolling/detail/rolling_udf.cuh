@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,8 @@
 #include "jit/parser.hpp"
 #include "jit/util.hpp"
 #include "rolling.hpp"
-#include "rolling_jit.hpp"
+
+#include <cudf/detail/rolling/rolling_jit.hpp>
 
 #include <cudf/aggregation.hpp>
 #include <cudf/column/column_factories.hpp>
