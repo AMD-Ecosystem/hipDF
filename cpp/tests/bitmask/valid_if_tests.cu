@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2024, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -34,7 +34,7 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/memory_resource.hpp>
 
-#include <thrust/iterator/counting_iterator.h>
+#include <cuda/iterator>
 
 struct ValidIfTest : public cudf::test::BaseFixture {};
 
@@ -52,8 +52,8 @@ struct all_null {
 
 TEST_F(ValidIfTest, EmptyRange)
 {
-  auto actual        = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(0),
+  auto actual        = cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
+                                       cuda::counting_iterator<cudf::size_type>{0},
                                        odds_valid{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());
@@ -65,8 +65,8 @@ TEST_F(ValidIfTest, EmptyRange)
 
 TEST_F(ValidIfTest, InvalidRange)
 {
-  EXPECT_THROW(cudf::detail::valid_if(thrust::make_counting_iterator(1),
-                                      thrust::make_counting_iterator(0),
+  EXPECT_THROW(cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{1},
+                                      cuda::counting_iterator<cudf::size_type>{0},
                                       odds_valid{},
                                       cudf::get_default_stream(),
                                       cudf::get_current_device_resource_ref()),
@@ -76,9 +76,15 @@ TEST_F(ValidIfTest, InvalidRange)
 TEST_F(ValidIfTest, OddsValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, odds_valid{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
-  auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10240),
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+//   auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
+//   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
+//                                        thrust::make_counting_iterator(10240),
+// =======
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto actual   = cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
+                                       cuda::counting_iterator<cudf::size_type>{10000},
+// >>>>>>> END NEW CODE (4b19041ca0)
                                        odds_valid{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());
@@ -90,9 +96,15 @@ TEST_F(ValidIfTest, OddsValid)
 TEST_F(ValidIfTest, AllValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_valid{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
-  auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10240),
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+//   auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
+//   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
+//                                        thrust::make_counting_iterator(10240),
+// =======
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto actual   = cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
+                                       cuda::counting_iterator<cudf::size_type>{10000},
+// >>>>>>> END NEW CODE (4b19041ca0)
                                        all_valid{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());
@@ -104,9 +116,15 @@ TEST_F(ValidIfTest, AllValid)
 TEST_F(ValidIfTest, AllNull)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_null{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
-  auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10240),
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+//   auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
+//   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
+//                                        thrust::make_counting_iterator(10240),
+// =======
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto actual   = cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
+                                       cuda::counting_iterator<cudf::size_type>{10000},
+// >>>>>>> END NEW CODE (4b19041ca0)
                                        all_null{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());

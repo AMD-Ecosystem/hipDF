@@ -39,8 +39,8 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
+#include <cuda/iterator>
 #include <cuda/std/utility>
-#include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 
 #include <functional>
@@ -244,7 +244,7 @@ class alignas(16) column_device_view : public column_device_view_core {
   }
 
   /// Counting iterator
-  using count_it = thrust::counting_iterator<size_type>;
+  using count_it = cuda::counting_iterator<size_type>;
   /**
    * @brief Iterator for navigating this column
    */
@@ -712,7 +712,7 @@ class alignas(16) mutable_column_device_view : public mutable_column_device_view
   }
 
   /// Counting iterator
-  using count_it = thrust::counting_iterator<size_type>;
+  using count_it = cuda::counting_iterator<size_type>;
   /**
    * @brief Iterator for navigating this column
    */

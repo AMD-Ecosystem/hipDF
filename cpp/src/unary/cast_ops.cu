@@ -45,8 +45,12 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cuda/std/cmath>
-
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// #include <cuda/std/cmath>
+//
+// =======
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/transform.h>
 
 namespace cudf {
@@ -346,8 +350,8 @@ struct dispatch_unary_cast_to {
       // rows corresponding to NaN and inf in the input.
       auto const d_input_ptr = column_device_view::create(input, stream);
       auto [null_mask, null_count] =
-        cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                               thrust::make_counting_iterator(size),
+        cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
+                               cuda::counting_iterator{size},
                                is_convertible_floating_point<SourceT>{*d_input_ptr},
                                stream,
                                mr);

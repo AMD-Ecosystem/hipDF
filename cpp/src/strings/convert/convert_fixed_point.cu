@@ -43,11 +43,11 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <cuda/iterator>
 #include <cuda/std/climits>
 #include <cuda/std/limits>
 #include <cuda/std/type_traits>
 #include <thrust/execution_policy.h>
-#include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
 namespace cudf {
@@ -159,8 +159,8 @@ struct dispatch_to_fixed_point_fn {
 
     // convert strings into decimal values
     thrust::transform(rmm::exec_policy_nosync(stream),
-                      thrust::make_counting_iterator<size_type>(0),
-                      thrust::make_counting_iterator<size_type>(input.size()),
+                      cuda::counting_iterator<size_type>{0},
+                      cuda::counting_iterator<size_type>{input.size()},
                       d_results,
                       string_to_decimal_fn<DecimalType>{*d_column, output_type.scale()});
     results->set_null_count(input.null_count());
@@ -323,8 +323,8 @@ struct dispatch_is_fixed_point_fn {
 
     // check strings for valid fixed-point chars
     thrust::transform(rmm::exec_policy_nosync(stream),
-                      thrust::make_counting_iterator<size_type>(0),
-                      thrust::make_counting_iterator<size_type>(input.size()),
+                      cuda::counting_iterator<size_type>{0},
+                      cuda::counting_iterator<size_type>{input.size()},
                       d_results,
                       string_to_decimal_check_fn<DecimalType>{*d_column, decimal_type.scale()});
     results->set_null_count(input.null_count());

@@ -46,12 +46,16 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <hipcub/hipcub.hpp>
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// #include <hipcub/hipcub.hpp>
+// =======
+#include <cub/cub.cuh>
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
 #include <thrust/binary_search.h>
 #include <thrust/execution_policy.h>
-#include <thrust/iterator/counting_iterator.h>
 #include <thrust/reduce.h>
 #include <thrust/scan.h>
 #include <thrust/sequence.h>
@@ -499,8 +503,8 @@ std::unique_ptr<cudf::column> jaccard_index(cudf::strings_column_view const& inp
 
   // compute the jaccard using the unique counts and the intersect counts
   thrust::transform(rmm::exec_policy_nosync(stream),
-                    thrust::counting_iterator<cudf::size_type>(0),
-                    thrust::counting_iterator<cudf::size_type>(results->size()),
+                    cuda::counting_iterator<cudf::size_type>{0},
+                    cuda::counting_iterator<cudf::size_type>{results->size()},
                     d_results,
                     jaccard_fn{d_uniques1.data(), d_uniques2.data(), d_intersects.data()});
 

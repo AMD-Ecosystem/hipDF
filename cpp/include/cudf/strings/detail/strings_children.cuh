@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -45,8 +45,8 @@
 
 #include <hipcub/hipcub.hpp>
 #include <cuda/functional>
+#include <cuda/iterator>
 #include <thrust/for_each.h>
-#include <thrust/iterator/counting_iterator.h>
 
 #include <stdexcept>
 
@@ -94,20 +94,25 @@ rmm::device_uvector<char> make_chars_buffer(column_view const& offsets,
   auto const d_offsets = cudf::detail::offsetalator_factory::make_input_iterator(offsets);
 
   auto const src_ptrs = thrust::make_transform_iterator(
-    thrust::make_counting_iterator<uint32_t>(0),
-    cuda::proclaim_return_type<char*>([begin] __device__(uint32_t idx) { //TODO(HIP/AMD): changed return type to char* as otherwise rocPRIM ctries to
-                                                                         // create a reference to void which is invalid.
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+//     thrust::make_counting_iterator<uint32_t>(0),
+//     cuda::proclaim_return_type<char*>([begin] __device__(uint32_t idx) { //TODO(HIP/AMD): changed return type to char* as otherwise rocPRIM ctries to
+//                                                                          // create a reference to void which is invalid.
+// =======
+    cuda::counting_iterator<uint32_t>{0},
+    cuda::proclaim_return_type<void*>([begin] __device__(uint32_t idx) {
+// >>>>>>> END NEW CODE (4b19041ca0)
       // Due to a bug in cub (https://github.com/NVIDIA/cccl/issues/586),
       // we have to use `const_cast` to remove `const` qualifier from the source pointer.
       // This should be fine as long as we only read but not write anything to the source.
       return const_cast<char*>(begin[idx].first); //reinterpret_cast<void*>(const_cast<char*>(begin[idx].first));
     }));
   auto const src_sizes = thrust::make_transform_iterator(
-    thrust::make_counting_iterator<uint32_t>(0),
+    cuda::counting_iterator<uint32_t>{0},
     cuda::proclaim_return_type<size_type>(
       [begin] __device__(uint32_t idx) { return begin[idx].second; }));
   auto const dst_ptrs = thrust::make_transform_iterator(
-    thrust::make_counting_iterator<uint32_t>(0),
+    cuda::counting_iterator<uint32_t>{0},
     cuda::proclaim_return_type<char*>([offsets = d_offsets, output = chars_data.data()] __device__(
                                         uint32_t idx) { return output + offsets[idx]; }));
 

@@ -57,8 +57,11 @@
 // // >>>>>>> END NEW CODE (ac8bfb73a5)
 // =======
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (8924413131)
-#include <thrust/iterator/counting_iterator.h>
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// // >>>>>>> END NEW CODE (8924413131)
+// #include <thrust/iterator/counting_iterator.h>
+// =======
+// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/scan.h>
 #include <thrust/transform.h>
 
@@ -405,7 +408,7 @@ rmm::device_uvector<size_type> compute_gather_map(size_type num_rows,
                                                   size_type grid_size,
                                                   rmm::cuda_stream_view stream)
 {
-  auto sequence = thrust::make_counting_iterator(0);
+  auto sequence = cuda::counting_iterator<cudf::size_type>{0};
   rmm::device_uvector<size_type> gather_map(num_rows, stream);
 
   copy_block_partitions_impl(sequence,

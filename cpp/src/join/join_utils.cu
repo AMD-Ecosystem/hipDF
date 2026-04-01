@@ -38,7 +38,6 @@
 #include <cuda/iterator>
 #include <cuda/std/functional>
 #include <thrust/copy.h>
-#include <thrust/iterator/counting_iterator.h>
 #include <thrust/scatter.h>
 #include <thrust/sequence.h>
 #include <thrust/uninitialized_fill.h>
@@ -157,9 +156,14 @@ VectorPair get_left_join_indices_complement(
 //     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
 // =======
     size_type indices_count = thrust::copy_if(rmm::exec_policy_nosync(stream),
-// >>>>>>> END NEW CODE (820f9f7c3f)
-                                              thrust::make_counting_iterator(begin_counter),
-                                              thrust::make_counting_iterator(end_counter),
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// // >>>>>>> END NEW CODE (820f9f7c3f)
+//                                               thrust::make_counting_iterator(begin_counter),
+//                                               thrust::make_counting_iterator(end_counter),
+// =======
+                                              cuda::counting_iterator{begin_counter},
+                                              cuda::counting_iterator{end_counter},
+// >>>>>>> END NEW CODE (4b19041ca0)
                                               invalid_index_map->begin(),
                                               right_indices_complement->begin(),
                                               cuda::std::identity{}) -

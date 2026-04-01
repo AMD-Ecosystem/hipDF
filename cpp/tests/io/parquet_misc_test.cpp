@@ -32,6 +32,8 @@
 
 #include <cudf/io/parquet.hpp>
 
+#include <cuda/iterator>
+
 #include <array>
 
 ////////////////////////////////
@@ -99,7 +101,7 @@ TYPED_TEST(ParquetWriterDeltaTest, SupportedDeltaListSliced)
   std::bernoulli_distribution bn(0.7f);
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [&](int index) { return bn(gen); });
-  auto values = thrust::make_counting_iterator(0);
+  auto values = cuda::counting_iterator<int64_t>{0};
 
   // list<T>
   constexpr int vals_per_row = 4;

@@ -46,7 +46,6 @@
 
 #include <cuda/iterator>
 #include <thrust/host_vector.h>
-#include <thrust/iterator/counting_iterator.h>
 
 #include <src/rolling/detail/rolling.hpp>
 
@@ -773,16 +772,18 @@ TEST_F(RollingErrorTest, WindowWrongDtype)
 TEST_F(RollingErrorTest, SumTimestampNotSupported)
 {
   constexpr cudf::size_type size{10};
+  auto const d_iter  = cuda::counting_iterator<cudf::timestamp_D::rep>{0};
+  auto const ns_iter = cuda::counting_iterator<cudf::timestamp_s::rep>{0};
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_D, cudf::timestamp_D::rep> input_D(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    d_iter, d_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_s, cudf::timestamp_s::rep> input_s(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_ms, cudf::timestamp_ms::rep> input_ms(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_us, cudf::timestamp_us::rep> input_us(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_ns, cudf::timestamp_ns::rep> input_ns(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
 
   EXPECT_THROW(cudf::rolling_window(
                  input_D, 2, 2, 0, *cudf::make_sum_aggregation<cudf::rolling_aggregation>()),
@@ -805,16 +806,18 @@ TEST_F(RollingErrorTest, SumTimestampNotSupported)
 TEST_F(RollingErrorTest, MeanTimestampNotSupported)
 {
   constexpr cudf::size_type size{10};
+  auto const d_iter  = cuda::counting_iterator<cudf::timestamp_D::rep>{0};
+  auto const ns_iter = cuda::counting_iterator<cudf::timestamp_s::rep>{0};
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_D, cudf::timestamp_D::rep> input_D(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    d_iter, d_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_s, cudf::timestamp_s::rep> input_s(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_ms, cudf::timestamp_ms::rep> input_ms(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_us, cudf::timestamp_us::rep> input_us(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
   cudf::test::fixed_width_column_wrapper<cudf::timestamp_ns, cudf::timestamp_ns::rep> input_ns(
-    thrust::make_counting_iterator(0), thrust::make_counting_iterator(size));
+    ns_iter, ns_iter + size);
 
   EXPECT_THROW(cudf::rolling_window(
                  input_D, 2, 2, 0, *cudf::make_mean_aggregation<cudf::rolling_aggregation>()),
@@ -1124,7 +1127,7 @@ TYPED_TEST(RollingTest, RandomDynamicAllValid)
   std::vector<cudf::size_type> preceding_window(num_rows);
   std::vector<cudf::size_type> following_window(num_rows);
 
-  auto it = thrust::make_counting_iterator<cudf::size_type>(0);
+  auto it = cuda::counting_iterator<cudf::size_type>{0};
   std::transform(it, it + num_rows, preceding_window.begin(), [&window_rng, num_rows](auto i) {
     auto p = window_rng.generate();
     return std::min(i + 1, std::max(p, i + 1 - num_rows));
@@ -1158,7 +1161,7 @@ TYPED_TEST(RollingTest, RandomDynamicWithInvalid)
   std::vector<cudf::size_type> preceding_window(num_rows);
   std::vector<cudf::size_type> following_window(num_rows);
 
-  auto it = thrust::make_counting_iterator<cudf::size_type>(0);
+  auto it = cuda::counting_iterator<cudf::size_type>{0};
   std::transform(it, it + num_rows, preceding_window.begin(), [&window_rng, num_rows](auto i) {
     auto p = window_rng.generate();
     return std::min(i + 1, std::max(p, i + 1 - num_rows));
@@ -1429,15 +1432,15 @@ TEST_F(RollingTestUdf, StaticWindow)
 {
   cudf::size_type size = 1000;
 
-  cudf::test::fixed_width_column_wrapper<int32_t> input(thrust::make_counting_iterator(0),
-                                                        thrust::make_counting_iterator(size),
+  cudf::test::fixed_width_column_wrapper<int32_t> input(cuda::counting_iterator<int32_t>{0},
+                                                        cuda::counting_iterator{size},
                                                         cuda::make_constant_iterator(true));
 
   std::unique_ptr<cudf::column> output;
 
   auto start = cudf::detail::make_counting_transform_iterator(0, [size](cudf::size_type row) {
-    return std::accumulate(thrust::make_counting_iterator(std::max(0, row - 2 + 1)),
-                           thrust::make_counting_iterator(std::min(size, row + 2 + 1)),
+    return std::accumulate(cuda::counting_iterator{std::max(0, row - 2 + 1)},
+                           cuda::counting_iterator{std::min(size, row + 2 + 1)},
                            0);
   });
 
@@ -1471,8 +1474,8 @@ TEST_F(RollingTestUdf, DynamicWindow)
 {
   cudf::size_type size = 1000;
 
-  cudf::test::fixed_width_column_wrapper<int32_t> input(thrust::make_counting_iterator(0),
-                                                        thrust::make_counting_iterator(size),
+  cudf::test::fixed_width_column_wrapper<int32_t> input(cuda::counting_iterator<int32_t>{0},
+                                                        cuda::counting_iterator{size},
                                                         cuda::make_constant_iterator(true));
 
   auto prec = cudf::detail::make_counting_transform_iterator(
@@ -1487,9 +1490,15 @@ TEST_F(RollingTestUdf, DynamicWindow)
 
    // TODO(HIP/AMD): We need __host__ here to fix a template instantiation compiler error from rocthrust.
   auto start =
-    cudf::detail::make_counting_transform_iterator(0, [size] __host__ __device__(cudf::size_type row) {
-      return std::accumulate(thrust::make_counting_iterator(std::max(0, row - (row % 2 + 2) + 1)),
-                             thrust::make_counting_iterator(std::min(size, row + (row % 2) + 1)),
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+//     cudf::detail::make_counting_transform_iterator(0, [size] __host__ __device__(cudf::size_type row) {
+//       return std::accumulate(thrust::make_counting_iterator(std::max(0, row - (row % 2 + 2) + 1)),
+//                              thrust::make_counting_iterator(std::min(size, row + (row % 2) + 1)),
+// =======
+    cudf::detail::make_counting_transform_iterator(0, [size] __device__(cudf::size_type row) {
+      return std::accumulate(cuda::counting_iterator{std::max(0, row - (row % 2 + 2) + 1)},
+                             cuda::counting_iterator{std::min(size, row + (row % 2) + 1)},
+// >>>>>>> END NEW CODE (4b19041ca0)
                              0);
     });
 

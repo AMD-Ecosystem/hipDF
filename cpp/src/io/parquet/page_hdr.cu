@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2018-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2018-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -40,14 +40,19 @@
 #include <hip/hip_cooperative_groups.h>
 #else
 #include <cooperative_groups.h>
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-// // #endif
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// // <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+// // // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
+// // // #endif
+// // // =======
+// // #include <thrust/binary_search.h>
+// // // >>>>>>> END NEW CODE (bc42a0c110)
+// // #include <thrust/tuple.h>
 // // =======
-// #include <thrust/binary_search.h>
-// // >>>>>>> END NEW CODE (bc42a0c110)
-// #include <thrust/tuple.h>
 // =======
+#include <cuda/iterator>
+#include <cuda/std/iterator>
+// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/tuple>
 #include <thrust/binary_search.h>
 // >>>>>>> END NEW CODE (261b12adc2)
@@ -1013,8 +1018,8 @@ void decode_page_headers_with_pgidx(cudf::device_span<ColumnChunkDesc const> chu
                                     rmm::cuda_stream_view stream)
 {
   thrust::for_each(rmm::exec_policy_nosync(stream),
-                   thrust::counting_iterator(0),
-                   thrust::counting_iterator<cudf::size_type>(pages.size()),
+                   cuda::counting_iterator<cudf::size_type>{0},
+                   cuda::counting_iterator{static_cast<cudf::size_type>(pages.size())},
                    decode_page_headers_with_pgidx_fn{.colchunks          = chunks,
                                                      .pages              = pages,
                                                      .page_locations     = page_locations,

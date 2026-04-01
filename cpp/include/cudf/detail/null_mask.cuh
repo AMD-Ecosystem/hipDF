@@ -52,25 +52,28 @@
 #include <hipcub/block/block_reduce.hpp>
 #include <hipcub/device/device_segmented_reduce.hpp>
 #include <cuda/functional>
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-//
-// // NOTE(HIP/AMD): /opt/rocm hipcub has own rocprim backend which defines ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
-// //                If this macro is not undefined by hipcub's rocprim, this might cause a "define previously defined macro"
-// //                issue with local rocThrust versions that have been installed via RAPIDS-CMake.
-// //                A file-by-file comparison between the locally installed rocThrust version and
-// //                the one coming with ROCm has not shown any differences between the file that made an issue
-// //                (cpp/src/reductions/segmented/counts.cu).
-// //                The inspection of the compile commands have not shown any differences aside the addition
-// //                of the rocthrust-build and rocthrust-src include folders.
-// #ifdef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
-// #  undef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
-// #endif
-//
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// // <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
+// //
+// // // NOTE(HIP/AMD): /opt/rocm hipcub has own rocprim backend which defines ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+// // //                If this macro is not undefined by hipcub's rocprim, this might cause a "define previously defined macro"
+// // //                issue with local rocThrust versions that have been installed via RAPIDS-CMake.
+// // //                A file-by-file comparison between the locally installed rocThrust version and
+// // //                the one coming with ROCm has not shown any differences between the file that made an issue
+// // //                (cpp/src/reductions/segmented/counts.cu).
+// // //                The inspection of the compile commands have not shown any differences aside the addition
+// // //                of the rocthrust-build and rocthrust-src include folders.
+// // #ifdef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+// // #  undef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+// // #endif
+// //
+// // =======
 // =======
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/tuple>
 // >>>>>>> END NEW CODE (261b12adc2)
 #include <thrust/for_each.h>
-#include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
@@ -764,10 +767,10 @@ std::vector<size_type> segmented_count_bits(bitmask_type const* bitmask,
 
   // Compute the bit counts over each segment.
   auto first_bit_indices_begin = thrust::make_transform_iterator(
-    thrust::make_counting_iterator(0), index_alternator{false, d_indices.data()});
+    cuda::counting_iterator<cudf::size_type>{0}, index_alternator{false, d_indices.data()});
   auto const first_bit_indices_end = first_bit_indices_begin + num_segments;
   auto last_bit_indices_begin      = thrust::make_transform_iterator(
-    thrust::make_counting_iterator(0), index_alternator{true, d_indices.data()});
+    cuda::counting_iterator<cudf::size_type>{0}, index_alternator{true, d_indices.data()});
   rmm::device_uvector<size_type> d_bit_counts =
     cudf::detail::segmented_count_bits(bitmask,
                                        first_bit_indices_begin,

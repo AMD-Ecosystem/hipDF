@@ -46,9 +46,13 @@
 #include <hipcub/device/device_merge_sort.hpp>
 #else
 #include <cub/device/device_merge_sort.cuh>
-// <<<<<<< OLD CODE from 420b69cec5 (7a145e245c) - COMMENTED OUT
-// #endif
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// // <<<<<<< OLD CODE from 420b69cec5 (7a145e245c) - COMMENTED OUT
+// // #endif
+// // =======
 // =======
+#include <cuda/iterator>
+// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/gather.h>
 // >>>>>>> END NEW CODE (7a145e245c)
 
@@ -113,7 +117,7 @@ struct column_sorted_order_fn {
   {
     auto keys      = column_device_view::create(input, stream);
     auto comp      = simple_comparator<T>{*keys, input.has_nulls(), ascending, null_precedence};
-    auto in_keys   = thrust::make_counting_iterator<cudf::size_type>(0);
+    auto in_keys   = cuda::counting_iterator<cudf::size_type>{0};
     auto out_keys  = indices.begin<size_type>();
     auto tmp_bytes = std::size_t{0};
     if constexpr (method == sort_method::STABLE) {

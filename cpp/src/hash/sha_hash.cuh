@@ -49,7 +49,6 @@
 #include <thrust/execution_policy.h>
 #include <thrust/fill.h>
 #include <thrust/for_each.h>
-#include <thrust/iterator/counting_iterator.h>
 
 #include <algorithm>
 #include <memory>
@@ -544,15 +543,21 @@ std::unique_ptr<column> sha_hash(table_view const& input,
   // Hash each row, hashing each element sequentially left to right
   thrust::for_each(
     rmm::exec_policy_nosync(stream),
-    thrust::make_counting_iterator(0),
-    thrust::make_counting_iterator(input.num_rows()),
-    [d_chars, device_input = *device_input]
-// TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
-// compiler optimization misbehavior.
-#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
-    __attribute__((noinline))
-#endif
-    __device__(auto row_index) {
+// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+//     thrust::make_counting_iterator(0),
+//     thrust::make_counting_iterator(input.num_rows()),
+//     [d_chars, device_input = *device_input]
+// // TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
+// // compiler optimization misbehavior.
+// #if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
+//     __attribute__((noinline))
+// #endif
+//     __device__(auto row_index) {
+// =======
+    cuda::counting_iterator<cudf::size_type>{0},
+    cuda::counting_iterator{input.num_rows()},
+    [d_chars, device_input = *device_input] __device__(auto row_index) {
+// >>>>>>> END NEW CODE (4b19041ca0)
       Hasher hasher(d_chars + (static_cast<int64_t>(row_index) * Hasher::digest_size));
       for (auto const& col : device_input) {
         if (col.is_valid(row_index)) {
