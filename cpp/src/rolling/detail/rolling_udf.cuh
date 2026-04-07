@@ -115,6 +115,15 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
     default: CUDF_FAIL("Unsupported UDF type.");
   }
 
+// <<<<<<< OLD CODE from 95848036cc (decfac207a) - COMMENTED OUT
+// =======
+  std::unique_ptr<column> output = make_numeric_column(
+    udf_agg._output_type, input.size(), cudf::mask_state::UNINITIALIZED, stream, mr);
+
+  auto output_view = output->mutable_view();
+  cudf::detail::device_scalar<size_type> device_valid_count{
+    0, stream, cudf::get_current_device_resource_ref()};
+// >>>>>>> END NEW CODE (decfac207a)
 
 // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
 //   //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
