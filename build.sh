@@ -89,16 +89,16 @@ CUSTREAMZ_BUILD_DIR=${REPODIR}/python/custreamz/build
 CUDF_JAR_JAVA_BUILD_DIR="$REPODIR/java/target"
 #: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
-#: NOTE(HIP/AMD): We need to use declare -x (or export() to forward the variables to subprocesses such as those related to scikit-build.
+#: NOTE(HIP/AMD): We need to use export to forward the variables to subprocesses such as those related to scikit-build.
 #:                scikit-build checks CXX + CC on Linux, it is used to compile Cython files.
 #: NOTE(HIP/AMD): CUDF_HIPCC allows to point to specific 'hipcc' implementations that are not part of the $PATH.
 #: NOTE(HIP/AMD): ROCM_PATH must be set for compiling cudf_kafka in order to specify include folders for the Cython build.
-declare -x CXX=${CUDF_HIPCC:-hipcc}
-declare -x CC=${CUDF_HIPCC:-hipcc}
-declare -x CFLAGS="${CFLAGS} -D__HIP_PLATFORM_AMD__"
-declare -x CXXFLAGS="${CXXFLAGS} -D__HIP_PLATFORM_AMD__"
-declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"}
-declare -x CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH:-"/opt/rocm/lib/cmake"}
+export CXX=${CUDF_HIPCC:-hipcc}
+export CC=${CUDF_HIPCC:-hipcc}
+export CFLAGS="${CFLAGS} -D__HIP_PLATFORM_AMD__"
+export CXXFLAGS="${CXXFLAGS} -D__HIP_PLATFORM_AMD__"
+export ROCM_PATH=${ROCM_PATH:-"/opt/rocm"}
+export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH:-"${ROCM_PATH}"}
 
 BUILD_DIRS="${LIB_BUILD_DIR} ${CUDF_BUILD_DIR} ${DASK_CUDF_BUILD_DIR} ${KAFKA_LIB_BUILD_DIR} ${CUDF_KAFKA_BUILD_DIR} ${CUSTREAMZ_BUILD_DIR} ${CUDF_JAR_JAVA_BUILD_DIR} ${PYLIBCUDF_BUILD_DIR}"
 
@@ -423,12 +423,16 @@ if buildAll || hasArg libcudf; then
 fi
 
 export RAPIDS_CMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES}
+# NOTE(HIP/AMD): Re-export CMAKE_PREFIX_PATH so that install prefix or build dir is included
+export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}\
+${INSTALL_PREFIX:+:${INSTALL_PREFIX}}\
+${INSTALL_TARGET:-:${LIBCUDF_BUILD_DIR}}"
 
 # Build and install the pylibcudf Python package
 if buildAll || hasArg pylibcudf; then
 
     cd "${REPODIR}/python/pylibcudf"
-    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
+    SKBUILD_CMAKE_ARGS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
         python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
@@ -436,7 +440,7 @@ fi
 if buildAll || hasArg cudf; then
 
     cd "${REPODIR}/python/cudf"
-    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
+    SKBUILD_CMAKE_ARGS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}" \
         python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
@@ -488,7 +492,7 @@ fi
 if hasArg cudf_kafka; then
     cd "${REPODIR}/python/cudf_kafka"
     # shellcheck disable=2034
-    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}"
+    SKBUILD_CMAKE_ARGS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};${EXTRA_CMAKE_ARGS[*]}"
         python "${PYTHON_ARGS_FOR_INSTALL[@]}" .
 fi
 
