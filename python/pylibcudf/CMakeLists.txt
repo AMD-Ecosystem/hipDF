@@ -50,6 +50,13 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(IS_DIRECTORY "/opt/rocm")
+  list(APPEND CMAKE_PREFIX_PATH "/opt/rocm")
+else()
+  message(WARNING "/opt/rocm not found. ROCm transitive dependencies (libhipcxx, rocthrust, etc.) "
+                  "may not be discoverable, which will likely cause build failures.")
+endif()
+
 find_package(cudf "${RAPIDS_VERSION}" REQUIRED)
 
 # an installed version of libcudf doesn't provide the dlpack headers so we need to download dlpack
