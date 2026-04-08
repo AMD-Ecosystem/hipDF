@@ -60,9 +60,9 @@ if TYPE_CHECKING:
 
 
 def _is_supported_regex_flags(flags: int) -> bool:
+    all_flags = re.MULTILINE | re.DOTALL | re.IGNORECASE
     return flags == 0 or (
-        (flags & (re.MULTILINE | re.DOTALL) != 0)
-        and (flags & ~(re.MULTILINE | re.DOTALL) == 0)
+        (flags & all_flags) != 0 and (flags & ~all_flags) == 0
     )
 
 
@@ -638,8 +638,8 @@ class StringMethods(BaseAccessor):
         .. pandas-compat::
             :meth:`pandas.Series.str.extract`
 
-            The `flags` parameter currently only supports re.DOTALL and
-            re.MULTILINE.
+            The `flags` parameter currently only supports re.DOTALL,
+            re.MULTILINE and re.IGNORECASE.
         """
         if not isinstance(expand, bool):
             raise ValueError("expand parameter must be True or False")
@@ -799,8 +799,8 @@ class StringMethods(BaseAccessor):
             The parameter `case` is not yet supported and will
             raise a NotImplementedError if anything other than the default
             value is set.
-            The `flags` parameter currently only supports re.DOTALL and
-            re.MULTILINE.
+            The `flags` parameter currently only supports re.DOTALL,
+            re.MULTILINE and re.IGNORECASE.
         """
         if (
             na is not no_default
@@ -3640,7 +3640,7 @@ class StringMethods(BaseAccessor):
             :meth:`pandas.Series.str.count`
 
             -   `flags` parameter currently only supports re.DOTALL
-                and re.MULTILINE.
+                and re.MULTILINE and re.IGNORECASE.
             -   Some characters need to be escaped when passing
                 in pat. e.g. ``'$'`` has a special meaning in regex
                 and must be escaped when finding this literal character.
@@ -3737,8 +3737,8 @@ class StringMethods(BaseAccessor):
         .. pandas-compat::
             :meth:`pandas.Series.str.findall`
 
-            The `flags` parameter currently only supports re.DOTALL and
-            re.MULTILINE.
+            The `flags` parameter currently only supports re.DOTALL,
+            re.MULTILINE and re.IGNORECASE.
         """
         return self._findall(plc.strings.findall.findall, pat, flags)
 
@@ -4387,8 +4387,8 @@ class StringMethods(BaseAccessor):
             :meth:`pandas.Series.str.match`
 
             Parameter `case` is currently not supported.
-            The `flags` parameter currently only supports re.DOTALL and
-            re.MULTILINE.
+            The `flags` parameter currently only supports re.DOTALL,
+            re.MULTILINE and re.IGNORECASE.
         """
         if case is not True:
             raise NotImplementedError("`case` parameter is not yet supported")
