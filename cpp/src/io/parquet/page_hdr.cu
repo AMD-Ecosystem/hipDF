@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -526,7 +526,15 @@ void __launch_bounds__(decode_page_headers_block_size)
     page_info     = chunk_pages ? chunk_pages[chunk].pages : nullptr;
     max_num_pages = page_info ? (bs->ck.num_data_pages + bs->ck.num_dict_pages) : 0;
     values_found  = 0;
+    // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+    // which is a heavyweight system-wide memory fence. For warp-level coordination after thread-0
+    // initialization, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and
+    // provides significantly better performance.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
     while (values_found < num_values && bs->cur < bs->end) {
       int index_out = -1;
 
@@ -587,7 +595,13 @@ void __launch_bounds__(decode_page_headers_block_size)
         page_info[index_out] = bs->page;
       }
       num_values = shuffle(num_values);
+      // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+      // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
       warp.sync();
+#else
+      __syncwarp();
+#endif
     }
     if (lane_id == 0) {
       chunks[chunk].num_data_pages = data_page_count;

@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -141,7 +141,15 @@ __device__ size_type delta_page_string_size(page_state_s* s, cg::thread_block co
       }
 
       if (warp.thread_rank() == 0) { db->setup_next_mini_block(true); }
+      // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+      // which is a heavyweight system-wide memory fence. For warp-level coordination after thread-0
+      // updates decoder state, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier)
+      // and provides significantly better performance.
+#ifndef __HIP_PLATFORM_AMD__
       warp.sync();
+#else
+      __syncwarp();
+#endif
     }
 
     // get sum for warp.

@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -656,7 +656,15 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
           auto const src_idx = sp + skipped_leaf_values;
           *offptr            = prefix_db->value_at(src_idx) + suffix_db->value_at(src_idx);
         }
+        // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+        // which is a heavyweight system-wide memory fence. For warp-level coordination after device
+        // memory writes, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and
+        // provides significantly better performance.
+#ifndef __HIP_PLATFORM_AMD__
         warp.sync();
+#else
+        __syncwarp();
+#endif
       }
 
       if (warp.thread_rank() == 0) { s->src_pos = src_pos + batch_size; }
@@ -865,7 +873,13 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
             reinterpret_cast<size_type*>(nesting_info_base[leaf_level_index].data_out) + dst_pos;
           *offptr = db->value_at(sp + skipped_leaf_values);
         }
+        // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+        // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
         warp.sync();
+#else
+        __syncwarp();
+#endif
       }
 
       if (warp.thread_rank() == 0) { s->src_pos = src_pos + batch_size; }
