@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -162,7 +162,16 @@ CUDF_KERNEL void multi_contains_kernel(column_device_view const d_strings,
       thrust::uninitialized_fill(thrust::seq, begin, begin + tile_size, d_target.empty());
     }
   }
-  tile.sync();
+  // Optimization: use __syncwarp() on AMD when tile equals full wavefront
+  if constexpr (tile_size == cudf::detail::warp_size) {
+#ifdef __HIP_PLATFORM_AMD__
+    __syncwarp();
+#else
+    tile.sync();
+#endif
+  } else {
+    tile.sync();
+  }
 
   auto const last_ptr = d_first_bytes + unique_count;
   for (size_type str_byte_idx = lane_idx; str_byte_idx < d_str.size_bytes();
@@ -200,7 +209,16 @@ CUDF_KERNEL void multi_contains_kernel(column_device_view const d_strings,
   }
 
   if constexpr (tile_size > 1) {
-    tile.sync();
+    // Optimization: use __syncwarp() on AMD when tile equals full wavefront
+    if constexpr (tile_size == cudf::detail::warp_size) {
+#ifdef __HIP_PLATFORM_AMD__
+      __syncwarp();
+#else
+      tile.sync();
+#endif
+    } else {
+      tile.sync();
+    }
     // reduce the bools for each target to store in the result
     for (auto target_idx = lane_idx; target_idx < num_targets; target_idx += tile_size) {
       auto const begin = bools + (target_idx * tile_size);
