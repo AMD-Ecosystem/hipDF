@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -384,7 +384,15 @@ CUDF_KERNEL void character_ngram_hash_kernel(cudf::column_device_view const d_st
       if (left == 0) { hash = hasher(cudf::string_view(itr, bytes)); }
     }
     hvs[threadIdx.x] = hash;  // store hash into shared memory
+    // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+    // which is a heavyweight system-wide memory fence. For shared memory operations within a warp,
+    // __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and provides
+    // significantly better performance with no correctness impact.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
     if (lane_idx == 0) {
       // copy valid hash values into d_hashes
       auto const hashes = &hvs[threadIdx.x];
@@ -393,7 +401,13 @@ CUDF_KERNEL void character_ngram_hash_kernel(cudf::column_device_view const d_st
           return h != 0;
         });
     }
+    // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+    // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
     itr += cudf::detail::warp_size;
   }
 }
