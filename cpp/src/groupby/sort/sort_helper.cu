@@ -172,48 +172,57 @@ sort_groupby_helper::index_vector const& sort_groupby_helper::group_offsets(
     auto const row_eq = permuted_row_equality_comparator(d_key_equal, sorted_order);
     auto const ufn    = cudf::detail::unique_copy_fn<decltype(itr), decltype(row_eq)>{
       itr, duplicate_keep_option::KEEP_FIRST, row_eq, size - 1};
-// <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
-//     thrust::transform(rmm::exec_policy(stream), itr, itr + size, result.begin(), ufn);
-//
-//     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-//     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-//     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-//     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-//     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-//     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-//     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-//     result_end = thrust::copy_if(rmm::exec_policy(stream),
-//                                 itr,
-//                                 itr + size,
-//                                 result.begin(),
-//                                 group_offsets->begin(),
-//                                 thrust::identity{});
-// #else
-//     result_end = thrust::copy_if(rmm::exec_policy(stream),
+// <<<<<<< OLD CODE from e8cde5608a (0cd3f9f933) - COMMENTED OUT
+// // <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
+// //     thrust::transform(rmm::exec_policy(stream), itr, itr + size, result.begin(), ufn);
+// //
+// //     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
+// //     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+// //     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+// //     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+// //     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+// //     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+// // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+// //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
+// //     result_end = thrust::copy_if(rmm::exec_policy(stream),
+// //                                 itr,
+// //                                 itr + size,
+// //                                 result.begin(),
+// //                                 group_offsets->begin(),
+// //                                 thrust::identity{});
+// // #else
+// //     result_end = thrust::copy_if(rmm::exec_policy(stream),
+// // =======
+//     thrust::transform(rmm::exec_policy_nosync(stream), itr, itr + size, result.begin(), ufn);
+// // <<<<<<< OLD CODE from 38596580c6 (a33439aa56) - COMMENTED OUT
+// //     result_end = thrust::copy_if(rmm::exec_policy_nosync(stream),
+// // // >>>>>>> END NEW CODE (820f9f7c3f)
+// //                                  itr,
+// //                                  itr + size,
+// //                                  result.begin(),
+// //                                  group_offsets->begin(),
+// //                                  cuda::std::identity{});
+// // #endif
+// // =======
 // =======
-    thrust::transform(rmm::exec_policy_nosync(stream), itr, itr + size, result.begin(), ufn);
-// <<<<<<< OLD CODE from 38596580c6 (a33439aa56) - COMMENTED OUT
-//     result_end = thrust::copy_if(rmm::exec_policy_nosync(stream),
-// // >>>>>>> END NEW CODE (820f9f7c3f)
-//                                  itr,
-//                                  itr + size,
-//                                  result.begin(),
-//                                  group_offsets->begin(),
-//                                  cuda::std::identity{});
-// #endif
-// =======
+    thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                      itr,
+                      itr + size,
+                      result.begin(),
+                      ufn);
+// >>>>>>> END NEW CODE (0cd3f9f933)
     result_end = cudf::detail::copy_if(
       itr, itr + size, result.begin(), group_offsets->begin(), cuda::std::identity{}, stream);
 // >>>>>>> END NEW CODE (a33439aa56)
   } else {
     auto const d_key_equal = comparator.equal_to<false>(
       cudf::nullate::DYNAMIC{cudf::has_nested_nulls(_keys)}, null_equality::EQUAL);
-    result_end = thrust::unique_copy(rmm::exec_policy_nosync(stream),
-                                     cuda::counting_iterator<size_type>{0},
-                                     cuda::counting_iterator<size_type>{size},
-                                     group_offsets->begin(),
-                                     permuted_row_equality_comparator(d_key_equal, sorted_order));
+    result_end =
+      thrust::unique_copy(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                          cuda::counting_iterator<size_type>{0},
+                          cuda::counting_iterator<size_type>{size},
+                          group_offsets->begin(),
+                          permuted_row_equality_comparator(d_key_equal, sorted_order));
   }
 
   auto const num_groups = cuda::std::distance(group_offsets->begin(), result_end);
