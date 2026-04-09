@@ -17,7 +17,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -304,7 +304,15 @@ CUDF_KERNEL void token_counts_fn(cudf::column_device_view const d_strings,
     }
     count = ((begin + ch_size) == end);
   }
+  // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+  // which is a heavyweight system-wide memory fence. For warp-level coordination before collective
+  // operations, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and provides
+  // significantly better performance with no correctness impact.
+#ifndef __HIP_PLATFORM_AMD__
   warp.sync();
+#else
+  __syncwarp();
+#endif
 
   for (auto itr = d_output + lane_idx + 1; itr < d_output_end; itr += cudf::detail::warp_size) {
     // add one if at the edge of a token or if at the string's end
@@ -314,7 +322,13 @@ CUDF_KERNEL void token_counts_fn(cudf::column_device_view const d_strings,
       count += (itr + 1 == d_output_end);
     }
   }
+  // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+  // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
   warp.sync();
+#else
+  __syncwarp();
+#endif
 
   // add up the counts from the other threads to compute the total token count for this string
   auto const total_count = cg::reduce(warp, count, cg::plus<cudf::size_type>{});
