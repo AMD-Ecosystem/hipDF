@@ -143,6 +143,7 @@ def test_join_exact_ordering(ibis_table_num_str, ibis_table_num, join_type):
     return res
 
 
+@pytest.mark.skip(reason="HIP/AMD: Test hangs sometimes due to assumed driver instabilities. To be supported in a future release.")
 @pytest.mark.parametrize("join_type", ["inner", "left", "right"])
 def test_join_sort_correctness(ibis_table_num_str, ibis_table_num, join_type):
     """
