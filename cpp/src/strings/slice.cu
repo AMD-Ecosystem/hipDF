@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -162,7 +162,15 @@ CUDF_KERNEL void substring_from_kernel(column_device_view const d_strings,
     itr += cudf::detail::warp_size;
   }
 
+  // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+  // which is a heavyweight system-wide memory fence. For warp reduction operations,
+  // __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and provides
+  // significantly better performance with no correctness impact.
+#ifndef __HIP_PLATFORM_AMD__
   warp.sync();
+#else
+  __syncwarp();
+#endif
 
   if (warp.thread_rank() == 0) {
     if (start >= char_count) {
