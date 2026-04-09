@@ -15,7 +15,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -328,7 +328,15 @@ __device__ cuda::std::pair<int, int> decode_dictionary_indices(
       is_literal    = run & 1;
       __threadfence_block();
     }
+    // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+    // which is a heavyweight system-wide memory fence. After __threadfence_block(), we only need
+    // execution barrier before shuffle operations. __syncwarp() provides this with wavefront-scoped
+    // fence + execution barrier, offering significantly better performance.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
     is_literal = shuffle(is_literal);
     batch_len  = shuffle(batch_len);
 
@@ -442,7 +450,13 @@ inline __device__ int decode_rle_booleans(
       __threadfence_block();
     }
 
+    // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+    // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
     is_literal = shuffle(is_literal);
     batch_len  = shuffle(batch_len);
 
@@ -1002,7 +1016,13 @@ __device__ void gpuDecodeLevels(
     }
     gpuDecodeStream<level_t, rolling_buf_size>(
       def, s, cur_leaf_count, warp.thread_rank(), level_type::DEFINITION);
+    // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+    // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
 
     // because the rep and def streams are encoded separately, we cannot request an exact
     // # of values to be decoded at once. we can only process the lowest # of decoded rep/def
@@ -1016,7 +1036,13 @@ __device__ void gpuDecodeLevels(
     gpuUpdateValidityOffsetsAndRowIndices<level_t, state_buf, rolling_buf_size>(
       actual_leaf_count, s, sb, rep, def, warp.thread_rank());
     cur_leaf_count = actual_leaf_count + warp.size();
+    // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+    // with significantly better performance on AMD GPUs.
+#ifndef __HIP_PLATFORM_AMD__
     warp.sync();
+#else
+    __syncwarp();
+#endif
   }
 }
 
