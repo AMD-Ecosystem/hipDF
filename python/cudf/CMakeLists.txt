@@ -53,6 +53,26 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(IS_DIRECTORY "/opt/rocm")
+  list(APPEND CMAKE_PREFIX_PATH "/opt/rocm")
+
+  # libhipcxx is intentionally installed under a non-standard rapids subdirectory
+  # (lib64/rapids/cmake/libhipcxx/) to avoid header include path conflicts with other
+  # packages. CMake's standard prefix search doesn't reach this path, so add it to
+  # CMAKE_PREFIX_PATH. Without this, the transitive dependency chain
+  # cudf -> hipCCL -> libhipcxx fails to resolve.
+  foreach(_libdir lib64 lib)
+    if(IS_DIRECTORY "/opt/rocm/${_libdir}/rapids/cmake")
+      list(APPEND CMAKE_PREFIX_PATH "/opt/rocm/${_libdir}/rapids/cmake")
+      break()
+    endif()
+  endforeach()
+  unset(_libdir)
+else()
+  message(WARNING "/opt/rocm not found. ROCm transitive dependencies (libhipcxx, rocthrust, etc.) "
+                  "may not be discoverable, which will likely cause build failures.")
+endif()
+
 find_package(cudf "${RAPIDS_VERSION}" REQUIRED)
 
 include(rapids-cython-core)
