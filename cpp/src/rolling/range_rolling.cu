@@ -59,6 +59,8 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/device/device_segmented_reduce.hpp>
+#include <rocprim/device/device_segmented_reduce_config.hpp>
+#include <rocprim/device/detail/device_config_helper.hpp>
 #else
 #include <cub/device/device_segmented_reduce.cuh>
 #endif
@@ -78,7 +80,6 @@ rmm::device_uvector<cudf::size_type> nulls_per_group(column_view const& orderby,
   CUDF_FUNC_RANGE();
   auto d_orderby        = column_device_view::create(orderby, stream);
   auto const num_groups = offsets.size() - 1;
-  std::size_t bytes{0};
   auto is_null_it = cudf::detail::make_counting_transform_iterator(
     cudf::size_type{0},
     cuda::proclaim_return_type<size_type>(
@@ -86,23 +87,70 @@ rmm::device_uvector<cudf::size_type> nulls_per_group(column_view const& orderby,
         return static_cast<size_type>(orderby.is_null_nocheck(i));
       }));
   rmm::device_uvector<cudf::size_type> null_counts{num_groups, stream};
-  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
-                                                   bytes,
-                                                   is_null_it,
-                                                   null_counts.begin(),
-                                                   num_groups,
-                                                   offsets.begin(),
-                                                   offsets.begin() + 1,
-                                                   stream.value()));
-  auto tmp = rmm::device_buffer(bytes, stream);
-  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(tmp.data(),
-                                                   bytes,
-                                                   is_null_it,
-                                                   null_counts.begin(),
-                                                   num_groups,
-                                                   offsets.begin(),
-                                                   offsets.begin() + 1,
-                                                   stream.value()));
+
+  // TODO(HIP/AMD): Batching workaround for kernel launch config overflow. ROCM-21548
+  // hipCUB uint32_t overflow workaround: batch if num_segments × block_size > 2^32
+  // rocPRIM DeviceSegmentedReduce uses block_size=256 for all types and architectures
+  // See /opt/rocm/include/rocprim/device/detail/config/device_segmented_reduce.hpp
+  // All reduce_config<> instantiations use BlockSize=256 as first template parameter
+  //
+  // WARNING: If rocPRIM changes the default block size in future versions,
+  // this constant must be updated accordingly. Verify by checking:
+  // grep -A1 "reduce_config<" /opt/rocm/include/rocprim/device/detail/config/device_segmented_reduce.hpp
+  constexpr size_t ROCPRIM_BLOCK_SIZE = 256;
+
+  // Maximum segments per batch to avoid uint32_t overflow: 2^32 / block_size
+  constexpr size_t MAX_SEGMENTS_PER_BATCH = (UINT32_MAX / ROCPRIM_BLOCK_SIZE);
+
+  if (num_groups <= MAX_SEGMENTS_PER_BATCH) {
+    // Single batch: no overflow risk
+    std::size_t bytes{0};
+    CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
+                                                     bytes,
+                                                     is_null_it,
+                                                     null_counts.begin(),
+                                                     num_groups,
+                                                     offsets.begin(),
+                                                     offsets.begin() + 1,
+                                                     stream.value()));
+    auto tmp = rmm::device_buffer(bytes, stream);
+    CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(tmp.data(),
+                                                     bytes,
+                                                     is_null_it,
+                                                     null_counts.begin(),
+                                                     num_groups,
+                                                     offsets.begin(),
+                                                     offsets.begin() + 1,
+                                                     stream.value()));
+  } else {
+    // Multiple batches to avoid uint32_t overflow
+    for (size_t batch_offset = 0; batch_offset < num_groups; batch_offset += MAX_SEGMENTS_PER_BATCH) {
+      auto batch_size = std::min(MAX_SEGMENTS_PER_BATCH, num_groups - batch_offset);
+
+      std::size_t bytes{0};
+      CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(
+        nullptr,
+        bytes,
+        is_null_it,
+        null_counts.begin() + batch_offset,
+        batch_size,
+        offsets.begin() + batch_offset,
+        offsets.begin() + batch_offset + 1,
+        stream.value()));
+
+      auto tmp = rmm::device_buffer(bytes, stream);
+      CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(
+        tmp.data(),
+        bytes,
+        is_null_it,
+        null_counts.begin() + batch_offset,
+        batch_size,
+        offsets.begin() + batch_offset,
+        offsets.begin() + batch_offset + 1,
+        stream.value()));
+    }
+  }
+
   return null_counts;
 }
 
