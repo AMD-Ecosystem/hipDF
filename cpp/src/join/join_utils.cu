@@ -52,13 +52,17 @@ VectorPair get_trivial_left_join_indices(table_view const& left,
                                          rmm::device_async_resource_ref mr)
 {
   auto left_indices = std::make_unique<rmm::device_uvector<size_type>>(left.num_rows(), stream, mr);
-  thrust::sequence(rmm::exec_policy_nosync(stream), left_indices->begin(), left_indices->end(), 0);
+  thrust::sequence(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                   left_indices->begin(),
+                   left_indices->end(),
+                   0);
   auto right_indices =
     std::make_unique<rmm::device_uvector<size_type>>(left.num_rows(), stream, mr);
-  thrust::uninitialized_fill(rmm::exec_policy_nosync(stream),
-                             right_indices->begin(),
-                             right_indices->end(),
-                             cudf::JoinNoMatch);
+  thrust::uninitialized_fill(
+    rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+    right_indices->begin(),
+    right_indices->end(),
+    cudf::JoinNoMatch);
   return std::pair(std::move(left_indices), std::move(right_indices));
 }
 
@@ -76,11 +80,11 @@ VectorPair concatenate_vector_pairs(VectorPair& a, VectorPair& b, rmm::cuda_stre
   auto original_size = a.first->size();
   a.first->resize(a.first->size() + b.first->size(), stream);
   a.second->resize(a.second->size() + b.second->size(), stream);
-  thrust::copy(rmm::exec_policy_nosync(stream),
+  thrust::copy(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                b.first->begin(),
                b.first->end(),
                a.first->begin() + original_size);
-  thrust::copy(rmm::exec_policy_nosync(stream),
+  thrust::copy(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                b.second->begin(),
                b.second->end(),
                a.second->begin() + original_size);
@@ -106,7 +110,7 @@ VectorPair get_left_join_indices_complement(
   // right_indices will be cudf::JoinNoMatch, i.e. `cuda::std::numeric_limits<size_type>::min()`.
   // This if path should produce exactly the same result as the else path but will be faster.
   if (left_table_row_count == 0) {
-    thrust::sequence(rmm::exec_policy_nosync(stream),
+    thrust::sequence(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                      right_indices_complement->begin(),
                      right_indices_complement->end(),
                      0);
@@ -114,17 +118,18 @@ VectorPair get_left_join_indices_complement(
     // Assume all the indices in invalid_index_map are invalid
     auto invalid_index_map =
       std::make_unique<rmm::device_uvector<size_type>>(right_table_row_count, stream);
-    thrust::uninitialized_fill(rmm::exec_policy_nosync(stream),
-                               invalid_index_map->begin(),
-                               invalid_index_map->end(),
-                               int32_t{1});
+    thrust::uninitialized_fill(
+      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+      invalid_index_map->begin(),
+      invalid_index_map->end(),
+      int32_t{1});
 
     // Functor to check for index validity since left joins can create invalid indices
     valid_range<size_type> valid(0, right_table_row_count);
 
     // invalid_index_map[index_ptr[i]] = 0 for i = 0 to right_table_row_count
     // Thus specifying that those locations are valid
-    thrust::scatter_if(rmm::exec_policy_nosync(stream),
+    thrust::scatter_if(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                        cuda::make_constant_iterator(0),
                        cuda::make_constant_iterator(0) + right_indices->size(),
                        right_indices->begin(),      // Index locations
@@ -135,49 +140,61 @@ VectorPair get_left_join_indices_complement(
     size_type end_counter   = static_cast<size_type>(right_table_row_count);
 
     // Create list of indices that have been marked as invalid
-// <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
-//     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-//     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-//     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-//     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-//     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-//     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-//     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-//     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
-//                                               thrust::make_counting_iterator(begin_counter),
-//                                               thrust::make_counting_iterator(end_counter),
+// <<<<<<< OLD CODE from 842ab4d885 (43f2f2dac5) - COMMENTED OUT
+// // <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
+// //     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
+// //     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+// //     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+// //     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+// //     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+// //     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+// // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+// //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
+// //     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
+// //                                               thrust::make_counting_iterator(begin_counter),
+// //                                               thrust::make_counting_iterator(end_counter),
+// //                                               invalid_index_map->begin(),
+// //                                               right_indices_complement->begin(),
+// //                                               thrust::identity<size_type>()) -
+// //                               right_indices_complement->begin();
+// //     right_indices_complement->resize(indices_count, stream);
+// // #else
+// //     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
+// // =======
+//     size_type indices_count = thrust::copy_if(rmm::exec_policy_nosync(stream),
+// // <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
+// // // >>>>>>> END NEW CODE (820f9f7c3f)
+// //                                               thrust::make_counting_iterator(begin_counter),
+// //                                               thrust::make_counting_iterator(end_counter),
+// // =======
+//                                               cuda::counting_iterator{begin_counter},
+//                                               cuda::counting_iterator{end_counter},
+// // >>>>>>> END NEW CODE (4b19041ca0)
 //                                               invalid_index_map->begin(),
 //                                               right_indices_complement->begin(),
-//                                               thrust::identity<size_type>()) -
+//                                               cuda::std::identity{}) -
 //                               right_indices_complement->begin();
-//     right_indices_complement->resize(indices_count, stream);
-// #else
-//     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
 // =======
-    size_type indices_count = thrust::copy_if(rmm::exec_policy_nosync(stream),
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (820f9f7c3f)
-//                                               thrust::make_counting_iterator(begin_counter),
-//                                               thrust::make_counting_iterator(end_counter),
-// =======
-                                              cuda::counting_iterator{begin_counter},
-                                              cuda::counting_iterator{end_counter},
-// >>>>>>> END NEW CODE (4b19041ca0)
-                                              invalid_index_map->begin(),
-                                              right_indices_complement->begin(),
-                                              cuda::std::identity{}) -
-                              right_indices_complement->begin();
+    size_type indices_count =
+      thrust::copy_if(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                      cuda::counting_iterator{begin_counter},
+                      cuda::counting_iterator{end_counter},
+                      invalid_index_map->begin(),
+                      right_indices_complement->begin(),
+                      cuda::std::identity{}) -
+      right_indices_complement->begin();
+// >>>>>>> END NEW CODE (43f2f2dac5)
     right_indices_complement->resize(indices_count, stream);
 #endif
   }
 
   auto left_invalid_indices =
     std::make_unique<rmm::device_uvector<size_type>>(right_indices_complement->size(), stream);
-  thrust::uninitialized_fill(rmm::exec_policy_nosync(stream),
-                             left_invalid_indices->begin(),
-                             left_invalid_indices->end(),
-                             cudf::JoinNoMatch);
+  thrust::uninitialized_fill(
+    rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+    left_invalid_indices->begin(),
+    left_invalid_indices->end(),
+    cudf::JoinNoMatch);
 
   return std::pair(std::move(left_invalid_indices), std::move(right_indices_complement));
 }
