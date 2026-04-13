@@ -29,6 +29,7 @@
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
+#include <cudf_test/iterator_utilities.hpp>
 #include <cudf_test/table_utilities.hpp>
 #include <cudf_test/type_list_utilities.hpp>
 #include <cudf_test/type_lists.hpp>
@@ -694,7 +695,7 @@ void split_empty_output_strings_column_value(SplitFunc Split,
 template <typename SplitFunc, typename CompareFunc>
 void split_null_input_strings_column_value(SplitFunc Split, CompareFunc Compare)
 {
-  auto no_valids = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return false; });
+  auto no_valids = cudf::test::iterators::all_nulls();
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
@@ -2026,11 +2027,11 @@ TEST_F(ContiguousSplitTableCornerCases, MixedColumnTypes)
 
   std::vector<std::unique_ptr<cudf::column>> cols;
 
-  auto iter0 = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return (i); });
+  auto iter0 = cuda::counting_iterator{0};
   auto c0    = cudf::test::fixed_width_column_wrapper<int>(iter0, iter0 + 10, valids);
   cols.push_back(c0.release());
 
-  auto iter1 = cudf::detail::make_counting_transform_iterator(10, [](auto i) { return (i); });
+  auto iter1 = cuda::counting_iterator{10};
   auto c1    = cudf::test::fixed_width_column_wrapper<int>(iter1, iter1 + 10, valids);
   cols.push_back(c1.release());
 
@@ -2040,7 +2041,7 @@ TEST_F(ContiguousSplitTableCornerCases, MixedColumnTypes)
   auto c3 = cudf::test::strings_column_wrapper(strings[1].begin(), strings[1].end(), valids);
   cols.push_back(c3.release());
 
-  auto iter4 = cudf::detail::make_counting_transform_iterator(20, [](auto i) { return (i); });
+  auto iter4 = cuda::counting_iterator{20};
   auto c4    = cudf::test::fixed_width_column_wrapper<int>(iter4, iter4 + 10, valids);
   cols.push_back(c4.release());
 
@@ -2075,7 +2076,7 @@ TEST_F(ContiguousSplitTableCornerCases, MixedColumnTypesChunked)
 
   std::vector<std::unique_ptr<cudf::column>> cols;
 
-  auto iter0 = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return (i); });
+  auto iter0 = cuda::counting_iterator{0};
   auto c0    = cudf::test::fixed_width_column_wrapper<int>(iter0, iter0 + num_rows, valids);
   cols.push_back(c0.release());
 
@@ -2107,7 +2108,7 @@ TEST_F(ContiguousSplitTableCornerCases, MixedColumnTypesSingleRowChunked)
 
   std::vector<std::unique_ptr<cudf::column>> cols;
 
-  auto iter0 = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return (i); });
+  auto iter0 = cuda::counting_iterator{0};
   auto c0    = cudf::test::fixed_width_column_wrapper<int32_t>(iter0, iter0 + num_rows, valids);
   cols.push_back(c0.release());
 
