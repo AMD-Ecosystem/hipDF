@@ -27,11 +27,11 @@ Installing hipDF
 You can install hipDF via AMD PyPI, which is recommended for end users, or build
 and install it from source as described in :doc:`Building hipDF from source <BUILD>`.
 
-Requirements
-------------
+See :ref:`hipDF-support` for information regarding supported operating systems, ROCm versions,
+and AMD GPUs before installing hipDF.
 
-System requirements can be found in :doc:`hipDF supported environments, features, and interfaces <hipDF-support>`,
-including supported GPU architectures.
+Prerequisites
+-------------
 
 The following ROCm components must be installed:
 

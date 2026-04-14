@@ -32,6 +32,9 @@ script carefully to adapt the environment variables for your installation.
 The following provides details on building the C++ components, running tests and benchmarks, and for building
 the full hipDF installation including the Python layer. End users should see the :doc:`Installation instructions <INSTALL>`.
 
+See :ref:`hipDF-support` for information regarding supported operating systems, ROCm versions,
+and AMD GPUs before building and installing hipDF.
+
 Build procedure for the C++ components
 ---------------------------------------
 
