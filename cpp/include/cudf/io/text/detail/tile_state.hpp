@@ -95,7 +95,7 @@ struct scan_tile_state_view {
     // otherwise appears re-ordered before the loading of the atomic flag in line 92,
     // thus resulting in the return of an invalid prefix.
     // See: internal issue 71
-    __threadfence();
+    __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "agent");
 
     if (status == scan_tile_status::partial) {
       return hipcub::ThreadLoad<hipcub::LOAD_CG>(tile_partial + offset);
