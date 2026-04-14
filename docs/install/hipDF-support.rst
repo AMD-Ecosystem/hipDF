@@ -28,25 +28,27 @@
 .. _hipDF-support:
 
 *******************************************************
-hipDF supported environments, features, and interfaces
+System requirements
 *******************************************************
 
-hipDF requires ROCm 7.2.1 running on a `ROCm-supported operating system <https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.1/reference/system-requirements.html#supported-operating-systems>`__. Using Ubuntu 24.04 or later is recommended.
-See `ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
-for installation instructions.
+This topic lists the system requirements for using hipDF.
 
-hipDF is supported on gfx90a, gfx942, and gfx950.
+* ROCm version: `7.2.0 <https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.0/>`__ or `7.2.1 <https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.1/>`__
+* Operating Systems: Ubuntu 24.04 and 22.04  
 
-hipDF only supports features from cuDF 25.10. Support is limited to C++ and Python interfaces.
-A Java interface is not supported.
+.. note::
 
-hipDF does not support:
+   Building hipDF from source files requires GCC 13 or later, which is not delivered as part of Ubuntu 22.04 by default. You must install it manually. 
+* AMD Instinct GPUs: 
 
-* zstd compression
-* GPU direct storage (KvikIO, cuFile)
-* rocTX tracing
-* Per-thread default streams (PTDS)
-* Integration with Dask hipDF or Dask HIP
-* Interoperability with Polars
-* Integration with third-party packages cuML, cuGraph, ibis, and stumpy
-* The ``hipstreamz`` and ``hipdf_kafka`` Python packages
+  - MI350X / MI355X (GPU target gfx950) 
+  - MI300A / MI300X (GPU target gfx942) 
+  - MI250X / MI250 / MI210 (GPU target gfx90a) 
+
+* Python versions: 3.10, 3.11, 3.12, 3.13
+
+Conda virtual environment
+-------------------------
+
+The steps in this guide require a Conda installation.
+A minimal free version of Conda is `Miniforge <https://conda-forge.org/download/>`__.

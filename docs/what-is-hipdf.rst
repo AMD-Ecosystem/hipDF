@@ -34,7 +34,8 @@ What is hipDF?
 In addition to containing the necessary tools to build powerful new data processing applications,
 hipDF enables you to easily port your existing Pandas and cuDF workloads to AMD GPUs. hipDF
 is aligned with and is API-compatible with RAPIDS® cuDF 25.10, allowing for workloads to be
-transitioned to AMD devices without hipification.
+transitioned to AMD devices without hipification. Support is limited to C++ and Python interfaces.
+A Java interface is not supported.
 
 hipDF v3.0.0 includes the following features:
 
@@ -58,3 +59,13 @@ hipDF v3.0.0 includes the following features:
 * hipDF supports a wide range of input and output file formats, allowing you to read data from various
   sources and save data to your preferred format. The supported formats include CSV, Text, JSON, Parquet, ORC, HDF5,
   Feather, and Avro.
+
+hipDF does not support:
+
+* zstd compression (zstd decompression is supported)
+* GPU direct storage (KvikIO, cuFile)
+* rocTX tracing
+* Per-thread default streams (PTDS)
+* Interoperability with Polars
+* Integration with third-party packages cuML, cuGraph, ibis, and stumpy
+* The ``hipstreamz`` and ``hipdf_kafka`` Python packages
