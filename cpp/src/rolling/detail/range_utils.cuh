@@ -479,7 +479,7 @@ struct range_window_clamper {
                         mutable_column_view& result,
                         rmm::cuda_stream_view stream) const
   {
-    thrust::copy_n(rmm::exec_policy_nosync(stream),
+    thrust::copy_n(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                    cudf::detail::make_counting_transform_iterator(
                      0, unbounded_distance_functor{grouping, direction}),
                    size,
@@ -495,7 +495,7 @@ struct range_window_clamper {
                           mutable_column_view& result,
                           rmm::cuda_stream_view stream) const
   {
-    thrust::copy_n(rmm::exec_policy_nosync(stream),
+    thrust::copy_n(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                    cudf::detail::make_counting_transform_iterator(
                      0, current_row_distance_functor{grouping, direction, order, begin}),
                    size,
@@ -512,7 +512,7 @@ struct range_window_clamper {
                       mutable_column_view& result,
                       rmm::cuda_stream_view stream) const
   {
-    thrust::copy_n(rmm::exec_policy_nosync(stream),
+    thrust::copy_n(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                    cudf::detail::make_counting_transform_iterator(
                      0,
                      bounded_distance_functor<Grouping, OrderbyT, DeltaT, WindowType>{
