@@ -433,18 +433,22 @@ TYPED_TEST(TypedStructColumnWrapperTest, ListOfStructOfList)
 {
   using namespace cudf::test;
 
-  auto list_col = lists_column_wrapper<TypeParam, int32_t>{
-    {{0}, {1}, {}, {3}, {4}, {5, 5}, {6}, {}, {8}, {9}},
-    cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; })};
+  auto list_col =
+    lists_column_wrapper<TypeParam, int32_t>{{{0}, {1}, {}, {3}, {4}, {5, 5}, {6}, {}, {8}, {9}},
+                                             cudf::test::iterators::nulls_at_multiples_of(2)};
 
   // TODO: Struct<List> cannot be compared with expect_columns_equal(),
   // if the struct has null values. After lists support "equivalence"
   // comparisons, the structs column needs to be modified to add nulls.
   auto struct_of_lists_col = structs_column_wrapper{{list_col}}.release();
 
-  auto list_of_struct_of_list_validity =
-    cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
-  // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
+// <<<<<<< OLD CODE from 1c7ce632ea (230c18ad04) - COMMENTED OUT
+//   auto list_of_struct_of_list_validity =
+//     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
+//   // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
+// =======
+  auto list_of_struct_of_list_validity = cudf::test::iterators::nulls_at_multiples_of(3);
+// >>>>>>> END NEW CODE (230c18ad04)
   auto [null_mask, null_count] =
     cudf::test::detail::make_null_mask(list_of_struct_of_list_validity, list_of_struct_of_list_validity + 5);
   auto list_of_struct_of_list =
@@ -458,8 +462,7 @@ TYPED_TEST(TypedStructColumnWrapperTest, ListOfStructOfList)
   // Compare with expected values.
 
   auto expected_level0_list = lists_column_wrapper<TypeParam, int32_t>{
-    {{}, {3}, {}, {5, 5}, {}, {9}},
-    cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; })};
+    {{}, {3}, {}, {5, 5}, {}, {9}}, cudf::test::iterators::nulls_at_multiples_of(2)};
 
   auto expected_level2_struct = structs_column_wrapper{{expected_level0_list}}.release();
 
@@ -485,8 +488,7 @@ TYPED_TEST(TypedStructColumnWrapperTest, StructOfListOfStruct)
   using namespace cudf::test;
 
   auto ints_col = fixed_width_column_wrapper<TypeParam, int32_t>{
-    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-    cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; })};
+    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, cudf::test::iterators::nulls_at_multiples_of(2)};
 
   auto structs_col =
     structs_column_wrapper{
@@ -494,10 +496,15 @@ TYPED_TEST(TypedStructColumnWrapperTest, StructOfListOfStruct)
     }
       .release();
 
-  auto list_validity =
-    cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
-    // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
-  auto [null_mask, null_count] = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
+// <<<<<<< OLD CODE from 1c7ce632ea (230c18ad04) - COMMENTED OUT
+//   auto list_validity =
+//     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
+//     // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
+//   auto [null_mask, null_count] = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
+// =======
+  auto list_validity           = cudf::test::iterators::nulls_at_multiples_of(3);
+  auto [null_mask, null_count] = detail::make_null_mask(list_validity, list_validity + 5);
+// >>>>>>> END NEW CODE (230c18ad04)
 
   auto lists_col =
     cudf::make_lists_column(5,

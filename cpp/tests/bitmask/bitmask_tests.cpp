@@ -591,8 +591,7 @@ TEST_F(MergeBitmaskTest, TestBitmaskAnd)
   EXPECT_EQ(result2_null_count, gold_null_count);
   EXPECT_EQ(result3_null_count, gold_null_count);
 
-  auto odd_indices =
-    cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; });
+  auto odd_indices = cudf::test::iterators::nulls_at_multiples_of(2);
   auto odd =
     std::get<0>(cudf::test::detail::make_null_mask(odd_indices, odd_indices + input2.num_rows()));
 
@@ -631,8 +630,7 @@ TEST_F(MergeBitmaskTest, TestSegmentedBitmaskAndSingleSegment)
     EXPECT_EQ(result_null_count.size(), 1);
     EXPECT_EQ(result_masks.size(), 1);
     EXPECT_EQ(result_null_count[0], 3);
-    auto odd_indices =
-      cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; });
+    auto odd_indices = cudf::test::iterators::nulls_at_multiples_of(2);
     auto const odd =
       std::get<0>(cudf::test::detail::make_null_mask(odd_indices, odd_indices + num_rows));
     CUDF_TEST_EXPECT_EQUAL_BUFFERS(
@@ -647,8 +645,7 @@ TEST_F(MergeBitmaskTest, TestSegmentedBitmaskAndSingleSegment)
     EXPECT_EQ(result_null_count.size(), 1);
     EXPECT_EQ(result_masks.size(), 1);
     EXPECT_EQ(result_null_count[0], 3);
-    auto odd_indices =
-      cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; });
+    auto odd_indices = cudf::test::iterators::nulls_at_multiples_of(2);
     auto const odd =
       std::get<0>(cudf::test::detail::make_null_mask(odd_indices, odd_indices + num_rows));
     CUDF_TEST_EXPECT_EQUAL_BUFFERS(
@@ -689,8 +686,7 @@ TEST_F(MergeBitmaskTest, TestSegmentedBitmaskAndMultipleSegments)
     EXPECT_EQ(result_masks.size(), 2);
     EXPECT_EQ(result_null_count[0], 3);
     EXPECT_EQ(result_null_count[1], 0);
-    auto odd_indices =
-      cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2; });
+    auto odd_indices = cudf::test::iterators::nulls_at_multiples_of(2);
     auto const odd =
       std::get<0>(cudf::test::detail::make_null_mask(odd_indices, odd_indices + num_rows));
     CUDF_TEST_EXPECT_EQUAL_BUFFERS(
