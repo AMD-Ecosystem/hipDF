@@ -53,7 +53,8 @@ set(RAPIDS_CMAKE_MODULE_PATH
 )
 if(NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
   list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
-  # NOTE(HIP/AMD): needed to set rapids-cmake-dir variable
+  # NOTE(HIP/AMD): Set rapids-cmake-dir variable
+  set(rapids-cmake-dir "${RAPIDS_CMAKE_MODULE_PATH}")
   include(rapids-cmake)
   return()
 endif()
