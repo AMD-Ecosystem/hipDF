@@ -50,7 +50,11 @@
 #include <cudf_test/column_wrapper.hpp>
 #include <cudf_test/iterator_utilities.hpp>
 #include <cudf_test/random.hpp>
-#include <cudf/utilities/jit_amd_utilities.hpp>
+// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
+// #include <cudf/utilities/jit_amd_utilities.hpp>
+// =======
+#include <cudf_test/table_utilities.hpp>
+// >>>>>>> END NEW CODE (5410620c91)
 #include <cudf_test/type_lists.hpp>
 
 #include <cudf/types.hpp>
@@ -283,67 +287,115 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
   std::string const cuda =
     "__device__ inline void f(int* output,int input){*output = input*input - input;}";
 
-  // c = a * a - a
-  std::string amd_llvm_ir =
-    R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i32 noundef %1) #2 {
-  %3 = alloca ptr, align 8, addrspace(5)
-  %4 = alloca i32, align 4, addrspace(5)
-  %5 = addrspacecast ptr addrspace(5) %3 to ptr
-  %6 = addrspacecast ptr addrspace(5) %4 to ptr
-  store ptr %0, ptr %5, align 8, !tbaa !6
-  store i32 %1, ptr %6, align 4, !tbaa !11
-  %7 = load i32, ptr %6, align 4, !tbaa !11
-  %8 = load i32, ptr %6, align 4, !tbaa !11
-  %9 = mul nsw i32 %7, %8
-  %10 = load i32, ptr %6, align 4, !tbaa !11
-  %11 = sub nsw i32 %9, %10
-  %12 = load ptr, ptr %5, align 8, !tbaa !6
-  store i32 %11, ptr %12, align 4, !tbaa !11
-  ret void
-}
-
-attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
-attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-
-!llvm.module.flags = !{!0, !1, !2, !3}
-!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
-!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
-
-!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
-!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
-!2 = !{i32 1, !"wchar_size", i32 4}
-!3 = !{i32 8, !"PIC Level", i32 2}
-!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
-!5 = !{i32 2, i32 0}
-!6 = !{!7, !7, i64 0}
-!7 = !{!"p1 int", !8, i64 0}
-!8 = !{!"any pointer", !9, i64 0}
-!9 = !{!"omnipotent char", !10, i64 0}
-!10 = !{!"Simple C++ TBAA"}
-!11 = !{!12, !12, i64 0}
-!12 = !{!"int", !9, i64 0}
-    )'''";
-
+// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
+//   // c = a * a - a
+//   std::string amd_llvm_ir =
+//     R"'''(
+// define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i32 noundef %1) #2 {
+//   %3 = alloca ptr, align 8, addrspace(5)
+//   %4 = alloca i32, align 4, addrspace(5)
+//   %5 = addrspacecast ptr addrspace(5) %3 to ptr
+//   %6 = addrspacecast ptr addrspace(5) %4 to ptr
+//   store ptr %0, ptr %5, align 8, !tbaa !6
+//   store i32 %1, ptr %6, align 4, !tbaa !11
+//   %7 = load i32, ptr %6, align 4, !tbaa !11
+//   %8 = load i32, ptr %6, align 4, !tbaa !11
+//   %9 = mul nsw i32 %7, %8
+//   %10 = load i32, ptr %6, align 4, !tbaa !11
+//   %11 = sub nsw i32 %9, %10
+//   %12 = load ptr, ptr %5, align 8, !tbaa !6
+//   store i32 %11, ptr %12, align 4, !tbaa !11
+//   ret void
+// }
+//
+// attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+// attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+// attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+//
+// !llvm.module.flags = !{!0, !1, !2, !3}
+// !llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+// !opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+//
+// !0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+// !1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+// !2 = !{i32 1, !"wchar_size", i32 4}
+// !3 = !{i32 8, !"PIC Level", i32 2}
+// !4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+// !5 = !{i32 2, i32 0}
+// !6 = !{!7, !7, i64 0}
+// !7 = !{!"p1 int", !8, i64 0}
+// !8 = !{!"any pointer", !9, i64 0}
+// !9 = !{!"omnipotent char", !10, i64 0}
+// !10 = !{!"Simple C++ TBAA"}
+// !11 = !{!12, !12, i64 0}
+// !12 = !{!"int", !9, i64 0}
+//     )'''";
+//
+// =======
+  // Generated from NUMBA, using:
+  //
+  // ```py
+  //
+  // from numba import cuda, int32
+  // from numba.cuda import compile_ptx_for_current_device
+  //
+  // # Define a CUDA device function
+  //
+  // @cuda.jit(device=True)
+  // def op(a):
+  //         return a * a - a
+  //
+  // # Define argument types for the function
+  // arg_types = (int32, )
+  //
+  // # Compile the device function as relocatable
+  // ptx, _ = cuda.compile_ptx_for_current_device(op, arg_types, device=True)
+  //
+  //
+  // # Print the PTX code
+  // print("Relocatable PTX Code:")
+  // print(ptx)
+  //
+  //
+  // ```
+  //
+// >>>>>>> END NEW CODE (5410620c91)
   std::string const ptx =
     R"***(
-.func _Z1fPii(
-        .param .b64 _Z1fPii_param_0,
-        .param .b32 _Z1fPii_param_1
+//
+// Generated by NVIDIA NVVM Compiler
+//
+// Compiler Build ID: CL-37061995
+// Cuda compilation tools, release 13.1, V13.1.115
+// Based on NVVM 7.0.1
+//
+
+.version 9.1
+.target sm_86
+.address_size 64
+
+	// .globl	_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi
+.common .global .align 8 .u64 _ZN08NumbaEnv8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi;
+
+.visible .func  (.param .b32 func_retval0) _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi(
+	.param .b64 _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_0,
+	.param .b32 _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_1
 )
 {
-        .reg .b32       %r<4>;
-        .reg .b64       %rd<3>;
+	.reg .b32 	%r<3>;
+	.reg .b64 	%rd<5>;
 
 
-        ld.param.u64    %rd1, [_Z1fPii_param_0];
-        ld.param.u32    %r1, [_Z1fPii_param_1];
-        cvta.to.global.u64      %rd2, %rd1;
-        mul.lo.s32      %r2, %r1, %r1;
-        sub.s32         %r3, %r2, %r1;
-        st.global.u32   [%rd2], %r3;
-        ret;
+	ld.param.u64 	%rd1, [_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_0];
+	ld.param.u32 	%r1, [_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_1];
+	cvt.s64.s32 	%rd2, %r1;
+	mul.wide.s32 	%rd3, %r1, %r1;
+	sub.s64 	%rd4, %rd3, %rd2;
+	st.u64 	[%rd1], %rd4;
+	mov.u32 	%r2, 0;
+	st.param.b32 	[func_retval0+0], %r2;
+	ret;
+
 }
 )***";
 
@@ -379,93 +431,149 @@ __device__ inline void f(
 }
 )***";
 
-  // LLVM IR equivalent to cuda UDF
-  std::string amd_llvm_ir =
-    R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i8 noundef signext %1) #2 {
-  %3 = alloca ptr, align 8, addrspace(5)
-  %4 = alloca i8, align 1, addrspace(5)
-  %5 = addrspacecast ptr addrspace(5) %3 to ptr
-  %6 = addrspacecast ptr addrspace(5) %4 to ptr
-  store ptr %0, ptr %5, align 8, !tbaa !6
-  store i8 %1, ptr %6, align 1, !tbaa !11
-  %7 = load i8, ptr %6, align 1, !tbaa !11
-  %8 = sext i8 %7 to i32
-  %9 = icmp sgt i32 %8, 96
-  br i1 %9, label %10, label %20
-
-10:                                               ; preds = %2
-  %11 = load i8, ptr %6, align 1, !tbaa !11
-  %12 = sext i8 %11 to i32
-  %13 = icmp slt i32 %12, 123
-  br i1 %13, label %14, label %20
-
-14:                                               ; preds = %10
-  %15 = load i8, ptr %6, align 1, !tbaa !11
-  %16 = sext i8 %15 to i32
-  %17 = sub nsw i32 %16, 32
-  %18 = trunc i32 %17 to i8
-  %19 = load ptr, ptr %5, align 8, !tbaa !6
-  store i8 %18, ptr %19, align 1, !tbaa !11
-  br label %23
-
-20:                                               ; preds = %10, %2
-  %21 = load i8, ptr %6, align 1, !tbaa !11
-  %22 = load ptr, ptr %5, align 8, !tbaa !6
-  store i8 %21, ptr %22, align 1, !tbaa !11
-  br label %23
-
-23:                                               ; preds = %20, %14
-  ret void
-}
-
-attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
-attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-
-!llvm.module.flags = !{!0, !1, !2, !3}
-!llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
-!opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
-
-!0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
-!1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
-!2 = !{i32 1, !"wchar_size", i32 4}
-!3 = !{i32 8, !"PIC Level", i32 2}
-!4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
-!5 = !{i32 2, i32 0}
-!6 = !{!7, !7, i64 0}
-!7 = !{!"p1 omnipotent char", !8, i64 0}
-!8 = !{!"any pointer", !9, i64 0}
-!9 = !{!"omnipotent char", !10, i64 0}
-!10 = !{!"Simple C++ TBAA"}
-!11 = !{!9, !9, i64 0}
-    )'''";
-
+// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
+//   // LLVM IR equivalent to cuda UDF
+//   std::string amd_llvm_ir =
+//     R"'''(
+// define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr noundef %0, i8 noundef signext %1) #2 {
+//   %3 = alloca ptr, align 8, addrspace(5)
+//   %4 = alloca i8, align 1, addrspace(5)
+//   %5 = addrspacecast ptr addrspace(5) %3 to ptr
+//   %6 = addrspacecast ptr addrspace(5) %4 to ptr
+//   store ptr %0, ptr %5, align 8, !tbaa !6
+//   store i8 %1, ptr %6, align 1, !tbaa !11
+//   %7 = load i8, ptr %6, align 1, !tbaa !11
+//   %8 = sext i8 %7 to i32
+//   %9 = icmp sgt i32 %8, 96
+//   br i1 %9, label %10, label %20
+//
+// 10:                                               ; preds = %2
+//   %11 = load i8, ptr %6, align 1, !tbaa !11
+//   %12 = sext i8 %11 to i32
+//   %13 = icmp slt i32 %12, 123
+//   br i1 %13, label %14, label %20
+//
+// 14:                                               ; preds = %10
+//   %15 = load i8, ptr %6, align 1, !tbaa !11
+//   %16 = sext i8 %15 to i32
+//   %17 = sub nsw i32 %16, 32
+//   %18 = trunc i32 %17 to i8
+//   %19 = load ptr, ptr %5, align 8, !tbaa !6
+//   store i8 %18, ptr %19, align 1, !tbaa !11
+//   br label %23
+//
+// 20:                                               ; preds = %10, %2
+//   %21 = load i8, ptr %6, align 1, !tbaa !11
+//   %22 = load ptr, ptr %5, align 8, !tbaa !6
+//   store i8 %21, ptr %22, align 1, !tbaa !11
+//   br label %23
+//
+// 23:                                               ; preds = %20, %14
+//   ret void
+// }
+//
+// attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+// attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) }
+// attributes #2 = { convergent mustprogress noinline nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+//
+// !llvm.module.flags = !{!0, !1, !2, !3}
+// !llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4}
+// !opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+//
+// !0 = !{i32 1, !"amdhsa_code_object_version", i32 600}
+// !1 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+// !2 = !{i32 1, !"wchar_size", i32 4}
+// !3 = !{i32 8, !"PIC Level", i32 2}
+// !4 = !{!"AMD clang version 20.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.1.0 25425 1b0eada6b0ee93e2e694c8c146d23fca90bc11c5)"}
+// !5 = !{i32 2, i32 0}
+// !6 = !{!7, !7, i64 0}
+// !7 = !{!"p1 omnipotent char", !8, i64 0}
+// !8 = !{!"any pointer", !9, i64 0}
+// !9 = !{!"omnipotent char", !10, i64 0}
+// !10 = !{!"Simple C++ TBAA"}
+// !11 = !{!9, !9, i64 0}
+//     )'''";
+//
+// =======
+  // Generated from NUMBA, using:
+  //
+  // ```py
+  //
+  // from numba import cuda, int8
+  // from numba.cuda import compile_ptx_for_current_device
+  //
+  // # Define a CUDA device function
+  //
+  // @cuda.jit(device=True)
+  // def op(a):
+  //         return (a - 32) if (a > 96 and a < 123) else a
+  //
+  // # Define argument types for the function
+  // arg_types = (int8, )
+  //
+  // # Compile the device function as relocatable
+  // ptx, _ = cuda.compile_ptx_for_current_device(op, arg_types, device=True)
+  //
+  //
+  // # Print the PTX code
+  // print("Relocatable PTX Code:")
+  // print(ptx)
+  //
+  //
+  // ```
+  //
+// >>>>>>> END NEW CODE (5410620c91)
   std::string const ptx =
     R"***(
-.func _Z1fPcc(
-        .param .b64 _Z1fPcc_param_0,
-        .param .b32 _Z1fPcc_param_1
+//
+// Generated by NVIDIA NVVM Compiler
+//
+// Compiler Build ID: CL-37061995
+// Cuda compilation tools, release 13.1, V13.1.115
+// Based on NVVM 7.0.1
+//
+
+.version 9.1
+.target sm_86
+.address_size 64
+
+	// .globl	_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa
+.common .global .align 8 .u64 _ZN08NumbaEnv8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa;
+
+.visible .func  (.param .b32 func_retval0) _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa(
+	.param .b64 _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa_param_0,
+	.param .b32 _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa_param_1
 )
 {
-        .reg .pred      %p<2>;
-        .reg .b16       %rs<6>;
-        .reg .b32       %r<3>;
-        .reg .b64       %rd<3>;
+	.reg .pred 	%p<2>;
+	.reg .b16 	%rs<4>;
+	.reg .b32 	%r<2>;
+	.reg .b64 	%rd<5>;
 
 
-        ld.param.u64    %rd1, [_Z1fPcc_param_0];
-        cvta.to.global.u64      %rd2, %rd1;
-        ld.param.s8     %rs1, [_Z1fPcc_param_1];
-        add.s16         %rs2, %rs1, -97;
-        and.b16         %rs3, %rs2, 255;
-        setp.lt.u16     %p1, %rs3, 26;
-        cvt.u32.u16     %r1, %rs1;
-        add.s32         %r2, %r1, 224;
-        cvt.u16.u32     %rs4, %r2;
-        selp.b16        %rs5, %rs4, %rs1, %p1;
-        st.global.u8    [%rd2], %rs5;
-        ret;
+	ld.param.u64 	%rd2, [_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa_param_0];
+	ld.param.u8 	%rs1, [_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEa_param_1];
+	add.s16 	%rs2, %rs1, -97;
+	and.b16  	%rs3, %rs2, 255;
+	setp.lt.u16 	%p1, %rs3, 26;
+	cvt.u64.u16 	%rd3, %rs1;
+	cvt.s64.s8 	%rd1, %rd3;
+	@%p1 bra 	$L__BB0_2;
+	bra.uni 	$L__BB0_1;
+
+$L__BB0_2:
+	add.s64 	%rd4, %rd1, -32;
+	st.u64 	[%rd2], %rd4;
+	bra.uni 	$L__BB0_3;
+
+$L__BB0_1:
+	st.u64 	[%rd2], %rd1;
+
+$L__BB0_3:
+	mov.u32 	%r1, 0;
+	st.param.b32 	[func_retval0+0], %r1;
+	ret;
+
 }
 )***";
 
@@ -843,6 +951,93 @@ TEST_F(StringOperationTest, Output)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected_empty, result_empty->view());
 }
 
+TEST_F(StringOperationTest, OutputOffsetted)
+{
+  auto a = cudf::test::strings_column_wrapper{"x", "xx", "xxx", "xxxx", "xxxxx", "xxxxxx"};
+  auto b = cudf::test::strings_column_wrapper{"aa", "bb", "cc", "dd", "ee", "ff"};
+  auto c = cudf::test::strings_column_wrapper{"1", "2", "3", "4", "5", "6"};
+
+  std::string cuda = R"***(
+    __device__ void concat(cuda::std::span<char> * out, cudf::string_view a, cudf::string_view b, cudf::string_view c){
+      auto iter = out->data();
+      memcpy(iter, a.data(), a.size_bytes());
+      iter += a.size_bytes();
+      memcpy(iter, b.data(), b.size_bytes());
+      iter += b.size_bytes();
+      memcpy(iter, c.data(), c.size_bytes());
+    }
+    )***";
+
+  auto offsets = cudf::test::fixed_width_column_wrapper<int32_t>{0, 4, 9, 15, 22, 30, 39}.release();
+  std::vector<std::unique_ptr<cudf::column>> strings_offsets;
+  strings_offsets.push_back(std::move(offsets));
+  auto expected = cudf::test::strings_column_wrapper{
+    "xaa1", "xxbb2", "xxxcc3", "xxxxdd4", "xxxxxee5", "xxxxxxff6"};
+  cudf::transform_input inputs[]   = {a, b, c};
+  cudf::transform_output outputs[] = {cudf::data_type(cudf::type_id::STRING)};
+  auto result                      = cudf::multi_transform(cuda,
+                                      cudf::udf_source_type::CUDA,
+                                      cudf::null_aware::NO,
+                                      std::nullopt,
+                                      inputs,
+                                      outputs,
+                                      std::move(strings_offsets),
+                                      std::nullopt);
+
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->get_column(0));
+}
+
+TEST_F(StringOperationTest, OutputOffsettedMixed)
+{
+  auto a = cudf::test::strings_column_wrapper{"x", "xx", "xxx", "xxxx", "xxxxx", "xxxxxx"};
+  auto b = cudf::test::strings_column_wrapper{"aa", "bb", "cc", "dd", "ee", "ff"};
+  auto c = cudf::test::strings_column_wrapper{"1", "2", "3", "4", "5", "67"};
+
+  std::string cuda = R"***(
+    __device__ void concat(int32_t * ab_size, cuda::std::span<char> * out, bool * is_odd, cudf::string_view a, cudf::string_view b, cudf::string_view c){
+      auto iter = out->data();
+      auto begin = iter;
+      memcpy(iter, a.data(), a.size_bytes());
+      iter += a.size_bytes();
+      memcpy(iter, b.data(), b.size_bytes());
+      iter += b.size_bytes();
+      memcpy(iter, c.data(), c.size_bytes());
+      iter += c.size_bytes();
+      auto out_size = static_cast<int32_t>(iter - begin);
+      *is_odd = (out_size % 2) == 1;
+      *ab_size = static_cast<int32_t>(a.size_bytes() + b.size_bytes());
+    }
+    )***";
+
+  auto offsets = cudf::test::fixed_width_column_wrapper<int32_t>{0, 4, 9, 15, 22, 30, 40}.release();
+  std::vector<std::unique_ptr<cudf::column>> strings_offsets;
+
+  strings_offsets.push_back(nullptr);
+  strings_offsets.push_back(std::move(offsets));
+  strings_offsets.push_back(nullptr);
+
+  auto expected_is_odd =
+    cudf::test::fixed_width_column_wrapper<bool>{false, true, false, true, false, false};
+  auto expected_strings = cudf::test::strings_column_wrapper{
+    "xaa1", "xxbb2", "xxxcc3", "xxxxdd4", "xxxxxee5", "xxxxxxff67"};
+  auto expected_sizes = cudf::test::fixed_width_column_wrapper<int32_t>{3, 4, 5, 6, 7, 8};
+  auto expected       = cudf::table_view({expected_sizes, expected_strings, expected_is_odd});
+  cudf::transform_input inputs[]   = {a, b, c};
+  cudf::transform_output outputs[] = {{cudf::data_type(cudf::type_id::INT32)},
+                                      {cudf::data_type(cudf::type_id::STRING)},
+                                      {cudf::data_type(cudf::type_id::BOOL8)}};
+  auto result                      = cudf::multi_transform(cuda,
+                                      cudf::udf_source_type::CUDA,
+                                      cudf::null_aware::NO,
+                                      std::nullopt,
+                                      inputs,
+                                      outputs,
+                                      std::move(strings_offsets),
+                                      std::nullopt);
+
+  CUDF_TEST_EXPECT_TABLES_EQUAL(expected, result->view());
+}
+
 TEST_F(StringOperationTest, StringConcat)
 {
   auto first_name = cudf::test::strings_column_wrapper{
@@ -920,6 +1115,69 @@ TEST_F(StringOperationTest, EmptyInput)
   result                             = cudf::transform_extended(
     str_inputs, rtn_str, cudf::data_type(cudf::type_id::STRING), cudf::udf_source_type::CUDA);
   EXPECT_EQ(0, result->size());
+}
+
+TEST_F(StringOperationTest, MultiOutput)
+{
+  auto a = cudf::test::strings_column_wrapper{
+    "415 555 1234", "212 867 5309", "214 947 5689", "712 312 1863", "777 214 9063", "964 123 2934"};
+  auto expected_area_code =
+    cudf::test::strings_column_wrapper{"415", "212", "214", "712", "777", "964"};
+  auto expected_prefix =
+    cudf::test::strings_column_wrapper{"555", "867", "947", "312", "214", "123"};
+  auto expected_line_number =
+    cudf::test::strings_column_wrapper{"1234", "5309", "5689", "1863", "9063", "2934"};
+
+  auto expected = cudf::table_view({expected_area_code, expected_prefix, expected_line_number});
+
+  std::string cuda = R"***(
+__device__ void capture_group(cudf::string_view* area_code,
+                              cudf::string_view* prefix,
+                              cudf::string_view* line_number,
+                              cudf::string_view input) {
+    auto seek = [] (char const*& iter, char const* end, char c) {
+        while (iter != end && *iter != c) {
+            iter++;
+        }
+    };
+    auto* iter = input.data();
+    auto* end = iter + input.size_bytes();
+    auto* area_code_begin = iter;
+    seek(iter, end, ' ');
+    auto* area_code_end = iter;
+    iter++;
+    auto* prefix_begin = iter;
+    seek(iter, end, ' ');
+    auto* prefix_end = iter;
+    iter++;
+    auto* line_number_begin = iter;
+    seek(iter, end, ' ');
+    auto* line_number_end = iter;
+    *area_code = cudf::string_view{
+        area_code_begin,
+        static_cast<cudf::size_type>(area_code_end - area_code_begin)};
+    *prefix = cudf::string_view{
+        prefix_begin, static_cast<cudf::size_type>(prefix_end - prefix_begin)};
+    *line_number = cudf::string_view{
+        line_number_begin,
+        static_cast<cudf::size_type>(line_number_end - line_number_begin)};
+}
+    )***";
+
+  cudf::transform_input inputs[]   = {a};
+  cudf::transform_output outputs[] = {{.type = cudf::data_type(cudf::type_id::STRING)},
+                                      {.type = cudf::data_type(cudf::type_id::STRING)},
+                                      {.type = cudf::data_type(cudf::type_id::STRING)}};
+  auto result                      = cudf::multi_transform(cuda,
+                                      cudf::udf_source_type::CUDA,
+                                      cudf::null_aware::NO,
+                                      std::nullopt,
+                                      inputs,
+                                      outputs,
+                                                           {},
+                                      std::nullopt);
+
+  CUDF_TEST_EXPECT_TABLES_EQUAL(expected, result->view());
 }
 
 struct NullTest : public cudf::test::BaseFixture {

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -28,12 +28,17 @@
 
 #include "cudf/cuda_runtime.h"
 #include <cudf/types.hpp>
+
+#ifndef __CUDACC_RTC__
+
 #include <cudf/utilities/default_stream.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
 
 #include <hipcub/hipcub.hpp>
 #include <cuda/std/type_traits>
+
+#endif
 
 namespace cudf {
 namespace detail {
@@ -51,6 +56,8 @@ static constexpr size_type warp_size{32};
 #else
 static constexpr size_type warp_size{32};
 #endif
+
+#ifndef __CUDACC_RTC__
 
 /**
  * @brief Performs a sum reduction of values from the same lane across all
@@ -116,6 +123,8 @@ void device_single_thread(Functor functor, rmm::cuda_stream_view stream)
 {
   single_thread_kernel<<<1, 1, 0, stream.value()>>>(functor);
 }
+
+#endif
 
 }  // namespace detail
 }  // namespace cudf

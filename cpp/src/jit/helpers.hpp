@@ -43,8 +43,11 @@
 // >>>>>>> END NEW CODE (442af46486)
 #include <jit/cache.hpp>
 #include <jit/span.cuh>
-// >>>>>>> END NEW CODE (d4e12e2fee)
-#include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
+// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
+// // >>>>>>> END NEW CODE (d4e12e2fee)
+// #include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
+// =======
+// >>>>>>> END NEW CODE (5410620c91)
 
 #include <algorithm>
 #include <span>
@@ -62,13 +65,6 @@ get_transform_base_column(std::vector<column_view> const& inputs);
 
 size_type get_projection_size(
   std::span<std::variant<column_view, scalar_column_view> const> inputs);
-
-struct input_reflection {
-  std::string type_name;
-  bool is_scalar = false;
-
-  [[nodiscard]] std::string accessor(int32_t index) const;
-};
 
 std::map<uint32_t, std::string> build_ptx_params(std::span<std::string const> output_typenames,
                                                  std::span<std::string const> input_typenames,
@@ -110,19 +106,13 @@ column_views_to_device(std::span<ColumnView const> views,
   return std::make_tuple(std::move(handles), std::move(device_array));
 }
 
-std::vector<std::string> output_type_names(std::span<mutable_column_view const> views);
-
 std::vector<std::string> input_type_names(
   std::span<std::variant<column_view, scalar_column_view> const> views);
 
-input_reflection reflect_input(std::variant<column_view, scalar_column_view> const& input);
-
-std::vector<input_reflection> reflect_inputs(
-  std::span<std::variant<column_view, scalar_column_view> const> inputs);
-
 jitify2::Kernel get_udf_kernel(jitify2::PreprocessedProgramData const& preprocessed_program_data,
                                std::string const& kernel_name,
-                               std::string const& cuda_source);
+                               std::string const& cuda_source,
+                               std::vector<std::string> const& extra_options = {});
 
 }  // namespace jit
 }  // namespace cudf

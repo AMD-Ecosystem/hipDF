@@ -73,46 +73,115 @@ public class ColumnVectorTest extends CudfTestBase {
   static final double NEGATIVE_DOUBLE_NAN_UPPER_RANGE = Double.longBitsToDouble(0xffffffffffffffffL);
 
   // c = a * a - a
-  static String llvmir =
-  " ; Function Attrs: convergent mustprogress noinline nounwind \n"+
-  " define hidden void @f(ptr noundef %output, i32 noundef %input) #2 { \n"+
-  " entry: \n"+
-  "   %output.addr = alloca ptr, align 8, addrspace(5) \n"+
-  "   %input.addr = alloca i32, align 4, addrspace(5) \n"+
-  "   %output.addr.ascast = addrspacecast ptr addrspace(5) %output.addr to ptr \n"+
-  "   %input.addr.ascast = addrspacecast ptr addrspace(5) %input.addr to ptr \n"+
-  "   store ptr %output, ptr %output.addr.ascast, align 8, !tbaa !6 \n"+
-  "   store i32 %input, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
-  "   %0 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
-  "   %1 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
-  "   %mul = mul nsw i32 %0, %1 \n"+
-  "   %2 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
-  "   %sub = sub nsw i32 %mul, %2 \n"+
-  "   %3 = load ptr, ptr %output.addr.ascast, align 8, !tbaa !6 \n"+
-  "   store i32 %sub, ptr %3, align 4, !tbaa !10 \n"+
-  "   ret void \n"+
-  " } \n"+
-  "  \n"+
-  " attributes #0 = { convergent mustprogress noreturn nounwind \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"gfx90a\" \"target-features\"=\"+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64\" } \n"+
-  " attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) } \n"+
-  " attributes #2 = { convergent mustprogress noinline nounwind \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"gfx90a\" \"target-features\"=\"+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64\" } \n"+
-  "  \n"+
-  " !llvm.module.flags = !{!0, !1, !2, !3} \n"+
-  " !llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4} \n"+
-  " !opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5} \n"+
-  "  \n"+
-  " !0 = !{i32 1, !\"amdgpu_code_object_version\", i32 600} \n"+
-  " !1 = !{i32 1, !\"amdgpu_printf_kind\", !\"hostcall\"} \n"+
-  " !2 = !{i32 1, !\"wchar_size\", i32 4} \n"+
-  " !3 = !{i32 8, !\"PIC Level\", i32 2} \n"+
-  " !4 = !{!\"clang version 18.0.0git\"} \n"+
-  " !5 = !{i32 2, i32 0} \n"+
-  " !6 = !{!7, !7, i64 0} \n"+
-  " !7 = !{!\"any pointer\", !8, i64 0} \n"+
-  " !8 = !{!\"omnipotent char\", !9, i64 0} \n"+
-  " !9 = !{!\"Simple C++ TBAA\"} \n"+
-  " !10 = !{!11, !11, i64 0} \n" +
-  " !11 = !{!\"int\", !8, i64 0}";
+// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
+//   static String llvmir =
+//   " ; Function Attrs: convergent mustprogress noinline nounwind \n"+
+//   " define hidden void @f(ptr noundef %output, i32 noundef %input) #2 { \n"+
+//   " entry: \n"+
+//   "   %output.addr = alloca ptr, align 8, addrspace(5) \n"+
+//   "   %input.addr = alloca i32, align 4, addrspace(5) \n"+
+//   "   %output.addr.ascast = addrspacecast ptr addrspace(5) %output.addr to ptr \n"+
+//   "   %input.addr.ascast = addrspacecast ptr addrspace(5) %input.addr to ptr \n"+
+//   "   store ptr %output, ptr %output.addr.ascast, align 8, !tbaa !6 \n"+
+//   "   store i32 %input, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+//   "   %0 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+//   "   %1 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+//   "   %mul = mul nsw i32 %0, %1 \n"+
+//   "   %2 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+//   "   %sub = sub nsw i32 %mul, %2 \n"+
+//   "   %3 = load ptr, ptr %output.addr.ascast, align 8, !tbaa !6 \n"+
+//   "   store i32 %sub, ptr %3, align 4, !tbaa !10 \n"+
+//   "   ret void \n"+
+//   " } \n"+
+//   "  \n"+
+//   " attributes #0 = { convergent mustprogress noreturn nounwind \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"gfx90a\" \"target-features\"=\"+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64\" } \n"+
+//   " attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) } \n"+
+//   " attributes #2 = { convergent mustprogress noinline nounwind \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"gfx90a\" \"target-features\"=\"+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64\" } \n"+
+//   "  \n"+
+//   " !llvm.module.flags = !{!0, !1, !2, !3} \n"+
+//   " !llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4} \n"+
+//   " !opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5} \n"+
+//   "  \n"+
+//   " !0 = !{i32 1, !\"amdgpu_code_object_version\", i32 600} \n"+
+//   " !1 = !{i32 1, !\"amdgpu_printf_kind\", !\"hostcall\"} \n"+
+//   " !2 = !{i32 1, !\"wchar_size\", i32 4} \n"+
+//   " !3 = !{i32 8, !\"PIC Level\", i32 2} \n"+
+//   " !4 = !{!\"clang version 18.0.0git\"} \n"+
+//   " !5 = !{i32 2, i32 0} \n"+
+//   " !6 = !{!7, !7, i64 0} \n"+
+//   " !7 = !{!\"any pointer\", !8, i64 0} \n"+
+//   " !8 = !{!\"omnipotent char\", !9, i64 0} \n"+
+//   " !9 = !{!\"Simple C++ TBAA\"} \n"+
+//   " !10 = !{!11, !11, i64 0} \n" +
+//   " !11 = !{!\"int\", !8, i64 0}";
+// =======
+  // Generated from NUMBA, using:
+  //
+  // ```py
+  //
+  // from numba import cuda, int32
+  // from numba.cuda import compile_ptx_for_current_device
+  //
+  // # Define a CUDA device function
+  //
+  // @cuda.jit(device=True)
+  // def op(a):
+  //         return a * a - a
+  //
+  // # Define argument types for the function
+  // arg_types = (int32, )
+  //
+  // # Compile the device function as relocatable
+  // ptx, _ = cuda.compile_ptx_for_current_device(op, arg_types, device=True)
+  //
+  //
+  // # Print the PTX code
+  // print("Relocatable PTX Code:")
+  // print(ptx)
+  //
+  //
+  // ```
+  //
+  static String ptx = "//\n" +
+      "// Generated by NVIDIA NVVM Compiler\n" +
+      "// Compiler Build ID: CL-37061995\n" +
+      "// Cuda compilation tools, release 13.1, V13.1.115\n" +
+      "// Based on NVVM 7.0.1\n" +
+      "//\n" +
+      "// Compiler Build ID: CL-37061995\n" +
+      "// Cuda compilation tools, release 13.1, V13.1.115\n" +
+      "// Based on NVVM 7.0.1\n" +
+      "//\n" +
+      "\n" +
+      ".version 9.1\n" +
+      ".target sm_86\n" +
+      ".address_size 64\n" +
+      "\n" +
+      "	// .globl	_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi\n" +
+      ".common .global .align 8 .u64 _ZN08NumbaEnv8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi;\n" +
+      "\n" +
+      "\n" +
+      ".visible .func  (.param .b32 func_retval0) _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi(\n" +
+      "	.param .b64 _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_0,\n" +
+      "	.param .b32 _ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_1\n" +
+      ")\n" +
+      "{\n" +
+      "	.reg .b32 	%r<3>;\n" +
+      "	.reg .b64 	%rd<5>;\n" +
+      "\n" +
+      "\n" +
+      "	ld.param.u64 	%rd1, [_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_0];\n" +
+      "	ld.param.u32 	%r1, [_ZN8__main__2opB2v1B96cw51cXTLSUwv1sCUt9Ww0FEw09RRQPKiLTj0gIGIFp_2b2oLQFEYYkHSQB1OQAk0Bynm21OizQ1K0UoIGvDpQE8oxrNQE_3dEi_param_1];\n" +
+      "	cvt.s64.s32 	%rd2, %r1;\n" +
+      "	mul.wide.s32 	%rd3, %r1, %r1;\n" +
+      "	sub.s64 	%rd4, %rd3, %rd2;\n" +
+      "	st.u64 	[%rd1], %rd4;\n" +
+      "	mov.u32 	%r2, 0;\n" +
+      "	st.param.b32 	[func_retval0+0], %r2;\n" +
+      "	ret;\n" +
+      "\n" +
+      "}\n";
+// >>>>>>> END NEW CODE (5410620c91)
 
   static String cuda = "__device__ inline void f(" +
       "int* output," +
