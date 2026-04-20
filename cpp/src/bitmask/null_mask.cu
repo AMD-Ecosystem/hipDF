@@ -41,7 +41,6 @@
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_buffer.hpp>
-#include <rmm/mr/device_memory_resource.hpp>
 
 // <<<<<<< OLD CODE from d3130b6773 (9a0bddb746) - COMMENTED OUT
 // #include <hip/hip_cooperative_groups.h>

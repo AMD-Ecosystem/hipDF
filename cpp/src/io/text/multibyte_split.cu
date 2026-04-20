@@ -49,7 +49,6 @@
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
-#include <rmm/mr/device_memory_resource.hpp>
 
 #include <hipcub/block/block_load.hpp>
 #include <hipcub/block/block_scan.hpp>
