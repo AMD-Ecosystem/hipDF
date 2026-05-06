@@ -161,7 +161,12 @@ option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS
 )
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
-if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
+# <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
+# if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
+# =======
+
+if(NOT BUILD_SHARED_LIBS)
+# >>>>>>> END NEW CODE (ae612df9af)
   set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
 
@@ -1796,13 +1801,16 @@ endif()
 
 # * build cudf_identify_stream_usage --------------------------------------------------------------
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
-  if(GPU_STATIC_RUNTIME)
-    message(
-      FATAL_ERROR
-        "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
-    )
-  endif()
-
+# <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
+#   if(GPU_STATIC_RUNTIME)
+#     message(
+#       FATAL_ERROR
+#         "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
+#     )
+#   endif()
+#
+# =======
+# >>>>>>> END NEW CODE (ae612df9af)
   # Libraries for stream-related testing. We build the library twice, one with STREAM_MODE_TESTING
   # on and one with it set to off. Each test will then be configured to use the appropriate library
   # depending via ctest and whether it has been updated to expose public stream APIs.
@@ -1816,6 +1824,9 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       )
     endif()
 
+    set(sanitizer_relative_genex
+        "$<PATH:RELATIVE_PATH,$<TARGET_FILE_DIR:CUDA::sanitizer>,$<TARGET_FILE_DIR:CUDA::cudart>>"
+    )
     set_target_properties(
       ${_tgt}
       PROPERTIES # set target compile options
@@ -1823,13 +1834,17 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
                  CXX_STANDARD_REQUIRED ON
                  POSITION_INDEPENDENT_CODE ON
                  BUILD_RPATH "\$ORIGIN"
-                 INSTALL_RPATH "\$ORIGIN"
+                 INSTALL_RPATH "\$ORIGIN;\$ORIGIN/${sanitizer_relative_genex}"
     )
     target_compile_options(
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+# <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
+#     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+# =======
+    target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm CUDA::sanitizer)
+# >>>>>>> END NEW CODE (ae612df9af)
 
     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
     add_library(cudf::${_tgt} ALIAS ${_tgt})
