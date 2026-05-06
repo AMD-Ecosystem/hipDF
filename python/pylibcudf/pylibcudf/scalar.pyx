@@ -79,6 +79,7 @@ from rmm.pylibrmm.memory_resource cimport (
     get_current_device_resource,
 )
 from rmm.pylibrmm.stream cimport Stream
+from cuda.bindings.cyruntime cimport cudaStream_t
 
 from .column cimport Column
 from .traits cimport is_floating_point
@@ -188,10 +189,11 @@ cdef class Scalar:
         """The type of data in the column."""
         return self._data_type
 
-    cpdef bool is_valid(self, Stream stream = None):
+    cpdef bool is_valid(self, object stream = None):
         """True if the scalar is valid, false if not"""
-        stream = _get_stream(stream)
-        return self.get().is_valid(stream.view())
+        cdef Stream _stream = _get_stream(stream)
+        cdef cudaStream_t _cs = _stream.view().value()
+        return self.get().is_valid(_cs)
 
     def to_arrow(
         self,
@@ -217,7 +219,13 @@ cdef class Scalar:
 # >>>>>>> END NEW CODE (ac2754a04b)
         # Note that metadata for scalars is primarily important for preserving
         # information on nested types since names are otherwise irrelevant.
-        return Column.from_scalar(self, 1, c_stream).to_arrow(metadata=metadata)[0]
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#         return Column.from_scalar(self, 1, c_stream).to_arrow(metadata=metadata)[0]
+# =======
+        cdef Stream _stream = _get_stream(stream)
+        cdef cudaStream_t _cs = _stream.view().value()
+        return Column.from_scalar(self, 1, _stream).to_arrow(metadata=metadata)[0]
+# >>>>>>> END NEW CODE (640bfee89e)
 
     @staticmethod
     def from_arrow(
@@ -246,7 +254,7 @@ cdef class Scalar:
         return _from_arrow(pa_val, dtype, stream)
 
     @staticmethod
-    cdef Scalar empty_like(Column column, Stream stream, DeviceMemoryResource mr):
+    cdef Scalar empty_like(Column column, object stream, DeviceMemoryResource mr):
         """Construct a null scalar with the same type as column.
 
         Parameters
@@ -262,14 +270,21 @@ cdef class Scalar:
         -------
         New empty (null) scalar of the given type.
         """
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         cdef Stream c_stream = _get_stream(stream)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         cdef Stream c_stream = _get_stream(stream)
+# #         return Scalar.from_libcudf(
+# #             move(make_empty_scalar_like(column.view(), c_stream.view()))
+# # =======
 #         return Scalar.from_libcudf(
-#             move(make_empty_scalar_like(column.view(), c_stream.view()))
+#             move(make_empty_scalar_like(column.view(), stream.view(), mr.get_mr()))
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
+        cdef Stream _stream = <Stream>stream
+        cdef cudaStream_t _cs = _stream.view().value()
         return Scalar.from_libcudf(
-            move(make_empty_scalar_like(column.view(), stream.view(), mr.get_mr()))
-# >>>>>>> END NEW CODE (ac2754a04b)
+            move(make_empty_scalar_like(column.view(), _cs, mr.get_mr()))
+# >>>>>>> END NEW CODE (640bfee89e)
         )
 
     @staticmethod
@@ -313,9 +328,10 @@ cdef class Scalar:
         Scalar
             New pylibcudf.Scalar
         """
-        stream = _get_stream(stream)
+        cdef Stream _stream = _get_stream(stream)
+        cdef cudaStream_t _cs = _stream.view().value()
         mr = _get_memory_resource(mr)
-        return _from_py(py_val, dtype, stream, mr)
+        return _from_py(py_val, dtype, _stream, mr)
 
     @classmethod
     def from_numpy(
@@ -341,9 +357,10 @@ cdef class Scalar:
         Scalar
             New pylibcudf.Scalar
         """
-        stream = _get_stream(stream)
+        cdef Stream _stream = _get_stream(stream)
+        cdef cudaStream_t _cs = _stream.view().value()
         mr = _get_memory_resource(mr)
-        return _from_numpy(np_val, stream, mr)
+        return _from_numpy(np_val, _stream, mr)
 
     def to_py(self, stream: Stream | None = None):
         """
@@ -359,39 +376,40 @@ cdef class Scalar:
         Python scalar
             A Python scalar associated with the type of the Scalar.
         """
-        stream = _get_stream(stream)
+        cdef Stream _stream = _get_stream(stream)
+        cdef cudaStream_t _cs = _stream.view().value()
         if not self.is_valid(stream):
             return None
 
         cdef type_id tid = self.type().id()
         cdef const scalar* slr = self.c_obj.get()
         if tid == type_id.BOOL8:
-            return (<numeric_scalar[cbool]*>slr).value(stream.view())
+            return (<numeric_scalar[cbool]*>slr).value(_cs)
         elif tid == type_id.STRING:
-            return (<string_scalar*>slr).to_string(stream.view()).decode()
+            return (<string_scalar*>slr).to_string(_cs).decode()
         elif tid == type_id.FLOAT32:
-            return (<numeric_scalar[float]*>slr).value(stream.view())
+            return (<numeric_scalar[float]*>slr).value(_cs)
         elif tid == type_id.FLOAT64:
-            return (<numeric_scalar[double]*>slr).value(stream.view())
+            return (<numeric_scalar[double]*>slr).value(_cs)
         elif tid == type_id.INT8:
-            return (<numeric_scalar[int8_t]*>slr).value(stream.view())
+            return (<numeric_scalar[int8_t]*>slr).value(_cs)
         elif tid == type_id.INT16:
-            return (<numeric_scalar[int16_t]*>slr).value(stream.view())
+            return (<numeric_scalar[int16_t]*>slr).value(_cs)
         elif tid == type_id.INT32:
-            return (<numeric_scalar[int32_t]*>slr).value(stream.view())
+            return (<numeric_scalar[int32_t]*>slr).value(_cs)
         elif tid == type_id.INT64:
-            return (<numeric_scalar[int64_t]*>slr).value(stream.view())
+            return (<numeric_scalar[int64_t]*>slr).value(_cs)
         elif tid == type_id.UINT8:
-            return (<numeric_scalar[uint8_t]*>slr).value(stream.view())
+            return (<numeric_scalar[uint8_t]*>slr).value(_cs)
         elif tid == type_id.UINT16:
-            return (<numeric_scalar[uint16_t]*>slr).value(stream.view())
+            return (<numeric_scalar[uint16_t]*>slr).value(_cs)
         elif tid == type_id.UINT32:
-            return (<numeric_scalar[uint32_t]*>slr).value(stream.view())
+            return (<numeric_scalar[uint32_t]*>slr).value(_cs)
         elif tid == type_id.UINT64:
-            return (<numeric_scalar[uint64_t]*>slr).value(stream.view())
+            return (<numeric_scalar[uint64_t]*>slr).value(_cs)
         elif tid == type_id.DECIMAL128:
             return decimal.Decimal(
-                (<fixed_point_scalar[decimal128]*>slr).value(stream.view()).value()
+                (<fixed_point_scalar[decimal128]*>slr).value(_cs).value()
             ).scaleb(
                 (<fixed_point_scalar[decimal128]*>slr).type().scale()
             )
@@ -422,6 +440,8 @@ def _from_py(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     cdef DataType c_dtype
     if dtype is None:
         raise ValueError("Must specify a dtype for a None value.")
@@ -435,7 +455,7 @@ def _(
 # =======
     cdef unique_ptr[scalar] c_obj = make_default_constructed_scalar(
         c_dtype.c_obj,
-        stream.view(),
+        _cs,
         mr.get_mr()
 # >>>>>>> END NEW CODE (ac2754a04b)
     )
@@ -456,6 +476,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     cdef unique_ptr[scalar] c_obj
     cdef DataType c_dtype
     if dtype is None:
@@ -473,22 +495,30 @@ def _(
     if tid == type_id.FLOAT32:
         if abs(py_val) > numeric_limits[float].max():
             raise OverflowError(f"{py_val} out of range for FLOAT32 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
-#         (<numeric_scalar[float]*>c_obj.get()).set_value(py_val)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# #         (<numeric_scalar[float]*>c_obj.get()).set_value(py_val)
+# #     elif tid == type_id.FLOAT64:
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+#         (<numeric_scalar[float]*>c_obj.get()).set_value(py_val, stream.view())
 #     elif tid == type_id.FLOAT64:
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[double]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[double]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-        (<numeric_scalar[float]*>c_obj.get()).set_value(py_val, stream.view())
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[float]*>c_obj.get()).set_value(py_val, _cs)
     elif tid == type_id.FLOAT64:
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[double]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[double]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[double]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
     else:
         typ = c_dtype.id()
         raise TypeError(f"Cannot convert float to Scalar with dtype {typ.name}")
@@ -500,6 +530,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     cdef unique_ptr[scalar] c_obj
     cdef DataType c_dtype
     cdef duration_ns c_duration_ns
@@ -510,7 +542,7 @@ def _(
     if dtype is None:
         c_dtype = dtype = DataType(type_id.INT64)
     elif is_floating_point(dtype):
-        return _from_py(float(py_val), dtype, stream, mr)
+        return _from_py(float(py_val), dtype, _stream, mr)
     else:
         c_dtype = <DataType>dtype
 # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
@@ -524,148 +556,192 @@ def _(
             numeric_limits[int8_t].min() <= py_val <= numeric_limits[int8_t].max()
         ):
             raise OverflowError(f"{py_val} out of range for INT8 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[int8_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[int8_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[int8_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[int8_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[int8_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.INT16:
         if not (
             numeric_limits[int16_t].min() <= py_val <= numeric_limits[int16_t].max()
         ):
             raise OverflowError(f"{py_val} out of range for INT16 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[int16_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[int16_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[int16_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[int16_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[int16_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.INT32:
         if not (
             numeric_limits[int32_t].min() <= py_val <= numeric_limits[int32_t].max()
         ):
             raise OverflowError(f"{py_val} out of range for INT32 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[int32_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[int32_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[int32_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[int32_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[int32_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.INT64:
         if not (
             numeric_limits[int64_t].min() <= py_val <= numeric_limits[int64_t].max()
         ):
             raise OverflowError(f"{py_val} out of range for INT64 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[int64_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[int64_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[int64_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[int64_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[int64_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.UINT8:
         if py_val < 0:
             raise ValueError("Cannot assign negative value to UINT8 scalar")
         if py_val > numeric_limits[uint8_t].max():
             raise OverflowError(f"{py_val} out of range for UINT8 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.UINT16:
         if py_val < 0:
             raise ValueError("Cannot assign negative value to UINT16 scalar")
         if py_val > numeric_limits[uint16_t].max():
             raise OverflowError(f"{py_val} out of range for UINT16 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.UINT32:
         if py_val < 0:
             raise ValueError("Cannot assign negative value to UINT32 scalar")
         if py_val > numeric_limits[uint32_t].max():
             raise OverflowError(f"{py_val} out of range for UINT32 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.UINT64:
         if py_val < 0:
             raise ValueError("Cannot assign negative value to UINT64 scalar")
         if py_val > numeric_limits[uint64_t].max():
             raise OverflowError(f"{py_val} out of range for UINT64 scalar")
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_numeric_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
+# # # >>>>>>> END NEW CODE (ac2754a04b)
+# #         (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(py_val)
+# # =======
+#         (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(py_val, stream.view())
+# # >>>>>>> END NEW CODE (bbc640ba83)
 # =======
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# <<<<<<< OLD CODE from b3fc5fe8ad (bbc640ba83) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (ac2754a04b)
-#         (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(py_val)
-# =======
-        (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(py_val, stream.view())
-# >>>>>>> END NEW CODE (bbc640ba83)
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(py_val, _cs)
+# >>>>>>> END NEW CODE (640bfee89e)
 
     elif tid == type_id.BOOL8:
         if py_val not in (0, 1):
             raise ValueError(f"Cannot convert {py_val} to BOOL8 scalar")
-        c_obj = make_numeric_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-        (<numeric_scalar[cbool]*>c_obj.get()).set_value(py_val != 0, stream.view())
+        c_obj = make_numeric_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+        (<numeric_scalar[cbool]*>c_obj.get()).set_value(py_val != 0, _cs)
 
     elif tid == type_id.DURATION_NANOSECONDS:
         if py_val > numeric_limits[int64_t].max():
             raise OverflowError(
                 f"{py_val} nanoseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_ns = duration_ns(<int64_t>py_val)
         (<duration_scalar[duration_ns]*>c_obj.get()).set_value(
-            c_duration_ns, stream.view()
+            c_duration_ns, _cs
         )
 
     elif tid == type_id.DURATION_MICROSECONDS:
@@ -673,14 +749,18 @@ def _(
             raise OverflowError(
                 f"{py_val} microseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_us = duration_us(<int64_t>py_val)
         (<duration_scalar[duration_us]*>c_obj.get()).set_value(
-            c_duration_us, stream.view()
+            c_duration_us, _cs
         )
 
     elif tid == type_id.DURATION_MILLISECONDS:
@@ -688,14 +768,18 @@ def _(
             raise OverflowError(
                 f"{py_val} milliseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_ms = duration_ms(<int64_t>py_val)
         (<duration_scalar[duration_ms]*>c_obj.get()).set_value(
-            c_duration_ms, stream.view()
+            c_duration_ms, _cs
         )
 
     elif tid == type_id.DURATION_SECONDS:
@@ -703,14 +787,18 @@ def _(
             raise OverflowError(
                 f"{py_val} seconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_s = duration_s(<int64_t>py_val)
         (<duration_scalar[duration_s]*>c_obj.get()).set_value(
-            c_duration_s, stream.view()
+            c_duration_s, _cs
         )
 
     elif tid == type_id.DURATION_DAYS:
@@ -718,14 +806,18 @@ def _(
             raise OverflowError(
                 f"{py_val} days out of range for INT32 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_D = duration_D(<int32_t>py_val)
         (<duration_scalar[duration_D]*>c_obj.get()).set_value(
-            c_duration_D, stream.view()
+            c_duration_D, _cs
         )
 
     else:
@@ -745,6 +837,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     if dtype is None:
 # >>>>>>> END NEW CODE (ac2754a04b)
         dtype = DataType(type_id.BOOL8)
@@ -762,11 +856,11 @@ def _(
 # =======
     cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
         (<DataType>dtype).c_obj,
-        stream.view(),
+        _cs,
         mr.get_mr()
 # >>>>>>> END NEW CODE (ac2754a04b)
     )
-    (<numeric_scalar[cbool]*>c_obj.get()).set_value(py_val, stream.view())
+    (<numeric_scalar[cbool]*>c_obj.get()).set_value(py_val, _cs)
     return _new_scalar(move(c_obj), dtype)
 
 
@@ -781,6 +875,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     if dtype is None:
 # >>>>>>> END NEW CODE (ac2754a04b)
         dtype = DataType(type_id.STRING)
@@ -794,7 +890,7 @@ def _(
 #     cdef unique_ptr[scalar] c_obj = make_string_scalar(py_val.encode(), c_stream.view())
 # =======
     cdef unique_ptr[scalar] c_obj = make_string_scalar(
-        py_val.encode(), stream.view(), mr.get_mr()
+        py_val.encode(), _cs, mr.get_mr()
     )
 # >>>>>>> END NEW CODE (ac2754a04b)
     return _new_scalar(move(c_obj), dtype)
@@ -804,6 +900,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     cdef unique_ptr[scalar] c_obj
     cdef duration_us c_duration_us
     cdef duration_ns c_duration_ns
@@ -830,14 +928,18 @@ def _(
             raise OverflowError(
                 f"{total_nanoseconds} nanoseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_ns = duration_ns(<int64_t>total_nanoseconds)
         (<duration_scalar[duration_ns]*>c_obj.get()).set_value(
-            c_duration_ns, stream.view()
+            c_duration_ns, _cs
         )
     elif tid == type_id.DURATION_MICROSECONDS:
         total_microseconds = int(total_seconds * 1_000_000)
@@ -845,14 +947,18 @@ def _(
             raise OverflowError(
                 f"{total_microseconds} microseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_us = duration_us(<int64_t>total_microseconds)
         (<duration_scalar[duration_us]*>c_obj.get()).set_value(
-            c_duration_us, stream.view()
+            c_duration_us, _cs
         )
     elif tid == type_id.DURATION_MILLISECONDS:
         total_milliseconds = int(total_seconds * 1_000)
@@ -860,14 +966,18 @@ def _(
             raise OverflowError(
                 f"{total_milliseconds} milliseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_ms = duration_ms(<int64_t>total_milliseconds)
         (<duration_scalar[duration_ms]*>c_obj.get()).set_value(
-            c_duration_ms, stream.view()
+            c_duration_ms, _cs
         )
     elif tid == type_id.DURATION_SECONDS:
         total_seconds = int(total_seconds)
@@ -875,14 +985,18 @@ def _(
             raise OverflowError(
                 f"{total_seconds} seconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_s = duration_s(<int64_t>total_seconds)
         (<duration_scalar[duration_s]*>c_obj.get()).set_value(
-            c_duration_s, stream.view()
+            c_duration_s, _cs
         )
     elif tid == type_id.DURATION_DAYS:
         total_days = int(total_seconds // 86400)
@@ -890,14 +1004,18 @@ def _(
             raise OverflowError(
                 f"{total_days} days out of range for INT32 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_duration_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_duration_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_duration_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_D = duration_D(<int32_t>total_days)
         (<duration_scalar[duration_D]*>c_obj.get()).set_value(
-            c_duration_D, stream.view()
+            c_duration_D, _cs
         )
     else:
         typ = c_dtype.id()
@@ -909,6 +1027,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     cdef unique_ptr[scalar] c_obj
     cdef duration_us c_duration_us
     cdef duration_ns c_duration_ns
@@ -948,15 +1068,19 @@ def _(
             raise OverflowError(
                 f"{epoch_nanoseconds} nanoseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_timestamp_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_ns = duration_ns(<int64_t>epoch_nanoseconds)
         c_timestamp_ns = timestamp_ns(c_duration_ns)
         (<timestamp_scalar[timestamp_ns]*>c_obj.get()).set_value(
-            c_timestamp_ns, stream.view()
+            c_timestamp_ns, _cs
         )
     elif tid == type_id.TIMESTAMP_MICROSECONDS:
         epoch_microseconds = int(epoch_seconds * 1_000_000)
@@ -964,15 +1088,19 @@ def _(
             raise OverflowError(
                 f"{epoch_microseconds} microseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_timestamp_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_us = duration_us(<int64_t>epoch_microseconds)
         c_timestamp_us = timestamp_us(c_duration_us)
         (<timestamp_scalar[timestamp_us]*>c_obj.get()).set_value(
-            c_timestamp_us, stream.view()
+            c_timestamp_us, _cs
         )
     elif tid == type_id.TIMESTAMP_MILLISECONDS:
         epoch_milliseconds = int(epoch_seconds * 1_000)
@@ -980,15 +1108,19 @@ def _(
             raise OverflowError(
                 f"{epoch_milliseconds} milliseconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_timestamp_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_ms = duration_ms(<int64_t>epoch_milliseconds)
         c_timestamp_ms = timestamp_ms(c_duration_ms)
         (<timestamp_scalar[timestamp_ms]*>c_obj.get()).set_value(
-            c_timestamp_ms, stream.view()
+            c_timestamp_ms, _cs
         )
     elif tid == type_id.TIMESTAMP_SECONDS:
         epoch_seconds = int(epoch_seconds)
@@ -996,15 +1128,19 @@ def _(
             raise OverflowError(
                 f"{epoch_seconds} seconds out of range for INT64 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_timestamp_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_s = duration_s(<int64_t>epoch_seconds)
         c_timestamp_s = timestamp_s(c_duration_s)
         (<timestamp_scalar[timestamp_s]*>c_obj.get()).set_value(
-            c_timestamp_s, stream.view()
+            c_timestamp_s, _cs
         )
     elif tid == type_id.TIMESTAMP_DAYS:
         epoch_days = int(epoch_seconds // 86400)
@@ -1012,15 +1148,19 @@ def _(
             raise OverflowError(
                 f"{epoch_days} days out of range for INT32 limit."
             )
-# <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
-#         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
+# #         c_obj = make_timestamp_scalar(c_dtype.c_obj, c_stream.view())
+# # =======
+#         c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
+# # >>>>>>> END NEW CODE (ac2754a04b)
 # =======
-        c_obj = make_timestamp_scalar(c_dtype.c_obj, stream.view(), mr.get_mr())
-# >>>>>>> END NEW CODE (ac2754a04b)
+        c_obj = make_timestamp_scalar(c_dtype.c_obj, _cs, mr.get_mr())
+# >>>>>>> END NEW CODE (640bfee89e)
         c_duration_D = duration_D(<int32_t>epoch_days)
         c_timestamp_D = timestamp_D(c_duration_D)
         (<timestamp_scalar[timestamp_D]*>c_obj.get()).set_value(
-            c_timestamp_D, stream.view()
+            c_timestamp_D, _cs
         )
     else:
         typ = c_dtype.id()
@@ -1032,6 +1172,8 @@ def _(
 def _(
     py_val, dtype: DataType | None, stream: Stream, mr: DeviceMemoryResource
 ):
+    cdef Stream _stream = stream
+    cdef cudaStream_t _cs = _stream.view().value()
     scale = py_val.as_tuple().exponent
     as_int = int(py_val.scaleb(-scale))
 
@@ -1053,7 +1195,7 @@ def _(
     cdef unique_ptr[scalar] c_obj = make_fixed_point_scalar[decimal128](
         val,
         scale_type(<int32_t>scale),
-        stream.view(),
+        _cs,
         mr.get_mr()
 # >>>>>>> END NEW CODE (ac2754a04b)
     )
@@ -1079,6 +1221,8 @@ if np is not None:
 
     @_from_numpy.register(np.bool_)
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         cdef DataType dtype = DataType(type_id.BOOL8)
 # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
 #         cdef Stream c_stream
@@ -1087,16 +1231,22 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
         cdef cbool c_val = np_val
-        (<numeric_scalar[cbool]*>c_obj.get()).set_value(c_val, stream.view())
+        (<numeric_scalar[cbool]*>c_obj.get()).set_value(c_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
     @_from_numpy.register(np.str_)
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         cdef DataType dtype = DataType(type_id.STRING)
 # <<<<<<< OLD CODE from 63a42572ad (ac2754a04b) - COMMENTED OUT
 #         cdef Stream c_stream
@@ -1107,7 +1257,7 @@ if np is not None:
 # =======
         cdef unique_ptr[scalar] c_obj = make_string_scalar(
             np_val.item().encode(),
-            stream.view(),
+            _cs,
             mr.get_mr()
 # >>>>>>> END NEW CODE (ac2754a04b)
         )
@@ -1123,12 +1273,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.INT8)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[int8_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[int8_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1142,12 +1298,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.INT16)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[int16_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[int16_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1161,12 +1323,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.INT32)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[int32_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[int32_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1180,12 +1348,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.INT64)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[int64_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[int64_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1199,12 +1373,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.UINT8)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[uint8_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1218,12 +1398,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.UINT16)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[uint16_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1237,12 +1423,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.UINT32)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[uint32_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1256,12 +1448,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.UINT64)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[uint64_t]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1275,12 +1473,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.FLOAT32)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[float]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[float]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
@@ -1294,12 +1498,18 @@ if np is not None:
 #             dtype.c_obj, c_stream.view()
 # =======
     def _(np_val, stream: Stream, mr: DeviceMemoryResource):
+        cdef Stream _stream = stream
+        cdef cudaStream_t _cs = _stream.view().value()
         dtype = DataType(type_id.FLOAT64)
         cdef unique_ptr[scalar] c_obj = make_numeric_scalar(
-            dtype.c_obj, stream.view(), mr.get_mr()
-# >>>>>>> END NEW CODE (ac2754a04b)
+# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
+#             dtype.c_obj, stream.view(), mr.get_mr()
+# # >>>>>>> END NEW CODE (ac2754a04b)
+# =======
+            dtype.c_obj, _cs, mr.get_mr()
+# >>>>>>> END NEW CODE (640bfee89e)
         )
-        (<numeric_scalar[double]*>c_obj.get()).set_value(np_val, stream.view())
+        (<numeric_scalar[double]*>c_obj.get()).set_value(np_val, _cs)
         cdef Scalar slr = _new_scalar(move(c_obj), dtype)
         return slr
 
