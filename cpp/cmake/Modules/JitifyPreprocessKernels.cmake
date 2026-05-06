@@ -28,8 +28,13 @@
 add_executable(jitify_preprocess "${JITIFY_INCLUDE_DIR}/jitify2_preprocess.cpp")
 
 target_compile_definitions(jitify_preprocess PRIVATE "_FILE_OFFSET_BITS=64")
-rapids_hip_set_runtime(jitify_preprocess USE_STATIC ${GPU_STATIC_RUNTIME})
-target_link_libraries(jitify_preprocess PUBLIC hip::host ${CMAKE_DL_LIBS})
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+# rapids_hip_set_runtime(jitify_preprocess USE_STATIC ${GPU_STATIC_RUNTIME})
+# target_link_libraries(jitify_preprocess PUBLIC hip::host ${CMAKE_DL_LIBS})
+# =======
+rapids_cuda_set_runtime(jitify_preprocess USE_STATIC ON)
+target_link_libraries(jitify_preprocess PUBLIC ${CMAKE_DL_LIBS})
+# >>>>>>> END NEW CODE (10e5073a31)
 
 # Take a list of files to JIT-compile and run them through jitify_preprocess.
 function(jit_preprocess_files)

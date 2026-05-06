@@ -149,16 +149,23 @@ option(
 option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated declarations." OFF)
 # Option to enable line info in CUDA/HIP device compilation to allow introspection when profiling /
 # memchecking
-option(GPU_ENABLE_LINEINFO "Generate line-number information for GPU device code." OFF)
-handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
-option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
-# cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
-option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
-handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
-option(BUILD_ASAN "Whether to build with address sanitization" OFF)
-option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS
-       "Enable workarounds for potential compiler bugs in specific code places" ON
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+# option(GPU_ENABLE_LINEINFO "Generate line-number information for GPU device code." OFF)
+# handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
+# option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
+# # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
+# option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
+# handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
+# option(BUILD_ASAN "Whether to build with address sanitization" OFF)
+# option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS
+#        "Enable workarounds for potential compiler bugs in specific code places" ON
+# )
+# =======
+option(CUDA_ENABLE_LINEINFO
+       "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler)" OFF
 )
+option(CUDA_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all CUDA compilation" ON)
+# >>>>>>> END NEW CODE (10e5073a31)
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 # <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
@@ -261,7 +268,10 @@ message(
   VERBOSE
   "CUDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
 )
-message(VERBOSE "CUDF: Statically link the CUDA runtime: ${GPU_STATIC_RUNTIME}")
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+# message(VERBOSE "CUDF: Statically link the CUDA runtime: ${GPU_STATIC_RUNTIME}")
+# =======
+# >>>>>>> END NEW CODE (10e5073a31)
 message(VERBOSE
         "CUDF: Build with remote IO (e.g. AWS S3) support through KvikIO: ${CUDF_KVIKIO_REMOTE_IO}"
 )
@@ -1680,7 +1690,11 @@ if(TARGET conda_env)
   target_link_libraries(cudf PRIVATE conda_env)
 endif()
 
-rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+# rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
+# =======
+rapids_cuda_set_runtime(cudf USE_STATIC ON)
+# >>>>>>> END NEW CODE (10e5073a31)
 
 # NOTE(HIP/AMD): Control section ordering to avoid relocation errors 
 file(
@@ -1727,12 +1741,16 @@ if(CUDF_BUILD_TESTUTIL)
     PUBLIC cudf
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
-  rapids_hip_set_runtime(cudftest_default_stream USE_STATIC ${GPU_STATIC_RUNTIME})
-
-  target_include_directories(
-    cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
-  )
-  target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+#   rapids_hip_set_runtime(cudftest_default_stream USE_STATIC ${GPU_STATIC_RUNTIME})
+#
+#   target_include_directories(
+#     cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
+#   )
+#   target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
+# =======
+  rapids_cuda_set_runtime(cudftest_default_stream USE_STATIC ON)
+# >>>>>>> END NEW CODE (10e5073a31)
 
   add_library(cudf::cudftest_default_stream ALIAS cudftest_default_stream)
 
@@ -1754,7 +1772,11 @@ if(CUDF_BUILD_TESTUTIL)
     cudftestutil INTERFACE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
                            "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
   )
-  rapids_hip_set_runtime(cudftestutil USE_STATIC ${GPU_STATIC_RUNTIME})
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+#   rapids_hip_set_runtime(cudftestutil USE_STATIC ${GPU_STATIC_RUNTIME})
+# =======
+  rapids_cuda_set_runtime(cudftestutil USE_STATIC ON)
+# >>>>>>> END NEW CODE (10e5073a31)
   add_library(cudf::cudftestutil ALIAS cudftestutil)
 
   add_library(cudftestutil_impl INTERFACE)
@@ -1825,7 +1847,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
     endif()
 
     set(sanitizer_relative_genex
-        "$<PATH:RELATIVE_PATH,$<TARGET_FILE_DIR:CUDA::sanitizer>,$<TARGET_FILE_DIR:CUDA::cudart>>"
+        "$<PATH:RELATIVE_PATH,$<TARGET_FILE_DIR:CUDA::sanitizer>,$<TARGET_FILE_DIR:CUDA::cudart_static>>"
     )
     set_target_properties(
       ${_tgt}
@@ -1840,13 +1862,19 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-# <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
-#     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
+# # <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
+# #     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+# # =======
+#     target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm CUDA::sanitizer)
+# # >>>>>>> END NEW CODE (ae612df9af)
+#
+#     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
 # =======
-    target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm CUDA::sanitizer)
-# >>>>>>> END NEW CODE (ae612df9af)
+    target_link_libraries(${_tgt} PUBLIC CUDA::cudart_static rmm::rmm CUDA::sanitizer)
 
-    rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
+    rapids_cuda_set_runtime(${_tgt} USE_STATIC ON)
+# >>>>>>> END NEW CODE (10e5073a31)
     add_library(cudf::${_tgt} ALIAS ${_tgt})
 
     if("${_mode}" STREQUAL "testing")
