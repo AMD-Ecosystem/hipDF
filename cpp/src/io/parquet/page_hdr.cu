@@ -148,8 +148,8 @@ inline __device__ int32_t get_i32(byte_stream_s* bs)
  */
 __device__ void skip_struct_field(byte_stream_s* bs, int field_type)
 {
-  int struct_depth = 0;
-  int rep_cnt      = 0;
+  uint32_t struct_depth = 0;
+  uint32_t rep_cnt      = 0;
 
   do {
     if (rep_cnt != 0) {
@@ -176,7 +176,7 @@ __device__ void skip_struct_field(byte_stream_s* bs, int field_type)
       case FieldType::LIST:
       case FieldType::SET: {  // NOTE: skipping a list of lists is not handled
         auto const c = getb(bs);
-        int n        = c >> 4;
+        uint32_t n   = c >> 4;
         if (n == 0xf) { n = get_u32(bs); }
         field_type = c & 0xf;
         if (static_cast<FieldType>(field_type) == FieldType::STRUCT) {
@@ -589,7 +589,6 @@ void __launch_bounds__(decode_page_headers_block_size)
   auto const block = cg::this_thread_block();
   auto const warp  = cg::tiled_partition<cudf::detail::warp_size>(block);
 
-  auto const lane_id = warp.thread_rank();
   auto const warp_id = warp.meta_group_rank();
 // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
 //   // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
@@ -607,36 +606,40 @@ void __launch_bounds__(decode_page_headers_block_size)
 
   auto const bs = &bs_g[warp_id];
 
-  if (lane_id == 0) {
+  cg::invoke_one(warp, [&] {
     if (chunk_idx < num_chunks) { bs->ck = chunks[chunk_idx]; }
     error[warp_id] = 0;
-  }
+  });
   block.sync();
 
   if (chunk_idx < num_chunks) {
-    if (lane_id == 0) {
+    cg::invoke_one(warp, [&] {
       bs->base = bs->cur      = bs->ck.compressed_data;
       bs->end                 = bs->base + bs->ck.compressed_size;
       bs->page.chunk_idx      = chunk_idx;
       bs->page.src_col_schema = bs->ck.src_col_schema;
       zero_out_page_header_info(bs);
-    }
-// <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-//     num_values    = bs->ck.num_values;
-//     page_info     = chunk_pages ? chunk_pages[chunk].pages : nullptr;
-//     max_num_pages = page_info ? (bs->ck.num_data_pages + bs->ck.num_dict_pages) : 0;
-//     values_found  = 0;
-//     // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
-//     // which is a heavyweight system-wide memory fence. For warp-level coordination after thread-0
-//     // initialization, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and
-//     // provides significantly better performance.
-// #ifndef __HIP_PLATFORM_AMD__
-//     warp.sync();
-// #else
-//     __syncwarp();
-// #endif
-//     while (values_found < num_values && bs->cur < bs->end) {
+// <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
+//     }
+// // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
+// //     num_values    = bs->ck.num_values;
+// //     page_info     = chunk_pages ? chunk_pages[chunk].pages : nullptr;
+// //     max_num_pages = page_info ? (bs->ck.num_data_pages + bs->ck.num_dict_pages) : 0;
+// //     values_found  = 0;
+// //     // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
+// //     // which is a heavyweight system-wide memory fence. For warp-level coordination after thread-0
+// //     // initialization, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and
+// //     // provides significantly better performance.
+// // #ifndef __HIP_PLATFORM_AMD__
+// //     warp.sync();
+// // #else
+// //     __syncwarp();
+// // #endif
+// //     while (values_found < num_values && bs->cur < bs->end) {
+// // =======
 // =======
+    });
+// >>>>>>> END NEW CODE (d1aae33394)
     size_t const num_values        = bs->ck.num_values;
     size_t values_found            = 0;
     uint32_t data_page_count       = 0;
@@ -650,7 +653,7 @@ void __launch_bounds__(decode_page_headers_block_size)
 // >>>>>>> END NEW CODE (bc42a0c110)
       int index_out = -1;
 
-      if (lane_id == 0) {
+      cg::invoke_one(warp, [&] {
         // this computation is only valid for flat schemas. for nested schemas,
         // they will be recomputed in the preprocess step by examining repetition and
         // definition levels
@@ -663,7 +666,7 @@ void __launch_bounds__(decode_page_headers_block_size)
         bs->page.num_nulls                         = 0;
         bs->page.lvl_bytes[level_type::DEFINITION] = 0;
         bs->page.lvl_bytes[level_type::REPETITION] = 0;
-        if (parse_page_header_fn{}(bs) and bs->page.compressed_page_size >= 0) {
+        if (parse_page_header_fn{}(bs) and bs->page.compressed_page_size > 0) {
           if (not is_supported_encoding(bs->page.encoding)) {
             error[warp_id] |=
               static_cast<kernel_error::value_type>(decode_error::UNSUPPORTED_ENCODING);
@@ -711,11 +714,13 @@ void __launch_bounds__(decode_page_headers_block_size)
           bs->cur = bs->end;
         }
         if (index_out >= 0 and index_out < max_num_pages) { page_info[index_out] = bs->page; }
-      }
+      });
       values_found = shuffle(values_found);
       warp.sync();
     }
-    if (lane_id == 0 and error[warp_id] != 0) { set_error(error[warp_id], error_code); }
+    cg::invoke_one(warp, [&] {
+      if (error[warp_id] != 0) { set_error(error[warp_id], error_code); }
+    });
   }
 }
 
@@ -734,7 +739,6 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
   auto const block = cg::this_thread_block();
   auto const warp  = cg::tiled_partition<cudf::detail::warp_size>(block);
 
-  auto const lane_id = warp.thread_rank();
   auto const warp_id = warp.meta_group_rank();
   auto const chunk_idx =
     static_cast<cudf::size_type>((cg::this_grid().block_rank() * num_warps_per_block) + warp_id);
@@ -745,25 +749,25 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
 
   auto const bs = &bs_g[warp_id];
 
-  if (lane_id == 0) {
+  cg::invoke_one(warp, [&] {
     if (chunk_idx < num_chunks) { bs->ck = chunks[chunk_idx]; }
     error[warp_id] = 0;
-  }
+  });
   block.sync();
 
   if (chunk_idx < num_chunks) {
-    if (lane_id == 0) {
+    cg::invoke_one(warp, [&] {
       bs->base = bs->cur = bs->ck.compressed_data;
       bs->end            = bs->base + bs->ck.compressed_size;
-    }
+    });
     size_t const num_values        = bs->ck.num_values;
     size_t values_found            = 0;
     uint32_t data_page_count       = 0;
     uint32_t dictionary_page_count = 0;
     warp.sync();
     while (values_found < num_values and bs->cur < bs->end) {
-      if (lane_id == 0) {
-        if (parse_page_header_fn{}(bs) and bs->page.compressed_page_size >= 0) {
+      cg::invoke_one(warp, [&] {
+        if (parse_page_header_fn{}(bs) and bs->page.compressed_page_size > 0) {
           if (not is_supported_encoding(bs->page.encoding)) {
             error[warp_id] |=
               static_cast<kernel_error::value_type>(decode_error::UNSUPPORTED_ENCODING);
@@ -794,13 +798,17 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
             static_cast<kernel_error::value_type>(decode_error::INVALID_PAGE_HEADER);
           bs->cur = bs->end;
         }
-      }
-// <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-//       num_values = shuffle(num_values);
-//       // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
-//       // with significantly better performance on AMD GPUs.
-// #ifndef __HIP_PLATFORM_AMD__
+// <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
+//       }
+// // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
+// //       num_values = shuffle(num_values);
+// //       // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
+// //       // with significantly better performance on AMD GPUs.
+// // #ifndef __HIP_PLATFORM_AMD__
+// // =======
 // =======
+      });
+// >>>>>>> END NEW CODE (d1aae33394)
       values_found = shuffle(values_found);
 // >>>>>>> END NEW CODE (bc42a0c110)
       warp.sync();
@@ -808,11 +816,11 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
       __syncwarp();
 #endif
     }
-    if (lane_id == 0) {
+    cg::invoke_one(warp, [&] {
       chunks[chunk_idx].num_data_pages = data_page_count;
       chunks[chunk_idx].num_dict_pages = dictionary_page_count;
       if (error[warp_id] != 0) { set_error(error[warp_id], error_code); }
-    }
+    });
   }
 }
 
@@ -864,8 +872,9 @@ struct decode_page_headers_with_pgidx_fn {
     // bs.page.chunk_row not computed here and will be filled in later by
     // `fill_in_page_info()`.
 
-    if (not parse_page_header_fn{}(&bs) or bs.page.compressed_page_size < 0) {
-      set_error(static_cast<kernel_error::value_type>(decode_error::UNSUPPORTED_ENCODING),
+    // Parsed page must be valid and not empty
+    if (not parse_page_header_fn{}(&bs) or bs.page.compressed_page_size <= 0) {
+      set_error(static_cast<kernel_error::value_type>(decode_error::INVALID_PAGE_HEADER),
                 error_code);
       return;
     }
@@ -914,57 +923,74 @@ struct decode_page_headers_with_pgidx_fn {
  * @param[in] num_chunks Number of column chunks
  */
 CUDF_KERNEL void __launch_bounds__(build_string_dict_index_block_size)
-  build_string_dictionary_index_kernel(ColumnChunkDesc* chunks, int32_t num_chunks)
+  build_string_dictionary_index_kernel(ColumnChunkDesc* chunks,
+                                       int32_t num_chunks,
+                                       kernel_error::pointer error_code)
 {
   auto constexpr num_warps_per_block = build_string_dict_index_block_size / cudf::detail::warp_size;
   //__shared__ ColumnChunkDesc chunk_g[num_warps_per_block];
   extern __shared__ ColumnChunkDesc chunk_g[];
 
-  auto const block  = cg::this_thread_block();
-  auto const warp   = cg::tiled_partition<cudf::detail::warp_size>(block);
-  int const lane_id = warp.thread_rank();
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
-  int const chunk   = (blockIdx.x * num_warps_per_block) + warp.meta_group_rank();
+// <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
+//   auto const block  = cg::this_thread_block();
+//   auto const warp   = cg::tiled_partition<cudf::detail::warp_size>(block);
+//   int const lane_id = warp.thread_rank();
+//   // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+//   // currently missing in HIP cooperative groups
+//   int const chunk   = (blockIdx.x * num_warps_per_block) + warp.meta_group_rank();
+// =======
+  auto const block = cg::this_thread_block();
+  auto const warp  = cg::tiled_partition<cudf::detail::warp_size>(block);
+  int const chunk  = (cg::this_grid().block_rank() * num_warps_per_block) + warp.meta_group_rank();
+// >>>>>>> END NEW CODE (d1aae33394)
   ColumnChunkDesc* const ck = &chunk_g[warp.meta_group_rank()];
-  if (chunk < num_chunks and lane_id == 0) *ck = chunks[chunk];
+  cg::invoke_one(warp, [&] {
+    if (chunk < num_chunks) { *ck = chunks[chunk]; }
+  });
   block.sync();
 
   if (chunk >= num_chunks) { return; }
-  if (!lane_id && ck->num_dict_pages > 0 && ck->str_dict_index) {
-    // Data type to describe a string
-    string_index_pair* dict_index = ck->str_dict_index;
-    uint8_t const* dict           = ck->dict_page->page_data;
-    int dict_size                 = ck->dict_page->uncompressed_page_size;
-    int num_entries               = ck->dict_page->num_input_values;
-    int pos = 0, cur = 0;
-    for (int i = 0; i < num_entries; i++) {
-      int len = 0;
-      if (ck->physical_type == Type::FIXED_LEN_BYTE_ARRAY) {
-        if (cur + ck->type_length <= dict_size) {
-          len = ck->type_length;
-          pos = cur;
-          cur += len;
-        } else {
-          cur = dict_size;
-        }
-      } else {
-        if (cur + 4 <= dict_size) {
-          len =
-            dict[cur + 0] | (dict[cur + 1] << 8) | (dict[cur + 2] << 16) | (dict[cur + 3] << 24);
-          if (len >= 0 && cur + 4 + len <= dict_size) {
-            pos = cur + 4;
-            cur = pos + len;
+  cg::invoke_one(warp, [&] {
+    if (ck->num_dict_pages > 0 && ck->str_dict_index) {
+      // Data type to describe a string
+      string_index_pair* dict_index = ck->str_dict_index;
+      uint8_t const* dict           = ck->dict_page->page_data;
+      int const dict_size           = ck->dict_page->uncompressed_page_size;
+      int32_t const num_entries     = ck->dict_page->num_input_values;
+      if (num_entries < 0 or dict_size < 0) {
+        set_error(static_cast<kernel_error::value_type>(decode_error::INVALID_DICT_WIDTH),
+                  error_code);
+        return;
+      }
+      int pos = 0, cur = 0;
+      for (int i = 0; i < num_entries; i++) {
+        int len = 0;
+        if (ck->physical_type == Type::FIXED_LEN_BYTE_ARRAY) {
+          if (cur + ck->type_length <= dict_size) {
+            len = ck->type_length;
+            pos = cur;
+            cur += len;
           } else {
             cur = dict_size;
           }
+        } else {
+          if (cur + 4 <= dict_size) {
+            len =
+              dict[cur + 0] | (dict[cur + 1] << 8) | (dict[cur + 2] << 16) | (dict[cur + 3] << 24);
+            if (len >= 0 && cur + 4 + len <= dict_size) {
+              pos = cur + 4;
+              cur = pos + len;
+            } else {
+              cur = dict_size;
+            }
+          }
         }
+        // TODO: Could store 8 entries in shared mem, then do a single warp-wide store
+        dict_index[i].first  = reinterpret_cast<char const*>(dict + pos);
+        dict_index[i].second = len;
       }
-      // TODO: Could store 8 entries in shared mem, then do a single warp-wide store
-      dict_index[i].first  = reinterpret_cast<char const*>(dict + pos);
-      dict_index[i].second = len;
     }
-  }
+  });
 }
 
 }  // namespace
@@ -1030,6 +1056,7 @@ void decode_page_headers_with_pgidx(cudf::device_span<ColumnChunkDesc const> chu
 
 void build_string_dictionary_index(ColumnChunkDesc* chunks,
                                    int32_t num_chunks,
+                                   kernel_error::pointer error_code,
                                    rmm::cuda_stream_view stream)
 {
   static_assert(
@@ -1042,7 +1069,12 @@ void build_string_dictionary_index(ColumnChunkDesc* chunks,
   dim3 dim_block(build_string_dict_index_block_size, 1);
   dim3 dim_grid(num_blocks, 1);
 
-  build_string_dictionary_index_kernel<<<dim_grid, dim_block, sizeof(ColumnChunkDesc) * num_warps_per_block, stream.value()>>>(chunks, num_chunks);
+// <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
+//   build_string_dictionary_index_kernel<<<dim_grid, dim_block, sizeof(ColumnChunkDesc) * num_warps_per_block, stream.value()>>>(chunks, num_chunks);
+// =======
+  build_string_dictionary_index_kernel<<<dim_grid, dim_block, 0, stream.value()>>>(
+    chunks, num_chunks, error_code);
+// >>>>>>> END NEW CODE (d1aae33394)
 }
 
 }  // namespace cudf::io::parquet::detail
