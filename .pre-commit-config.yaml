@@ -369,5 +369,13 @@ repos:
     hooks:
       - id: shellcheck
         args: ["--severity=warning"]
+# <<<<<<< OLD CODE from 9eea7a834a (f1a6182868) - COMMENTED OUT
+# =======
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.24.1
+    hooks:
+      - id: zizmor
+
+# >>>>>>> END NEW CODE (f1a6182868)
 default_language_version:
       python: python3
