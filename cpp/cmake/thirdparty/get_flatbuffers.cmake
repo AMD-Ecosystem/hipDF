@@ -25,8 +25,7 @@
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Use CPM to find or clone flatbuffers
-function(find_and_configure_flatbuffers VERSION)
-  set(_exclude_from_all EXCLUDE_FROM_ALL ${BUILD_SHARED_LIBS})
+function(find_and_configure_flatbuffers VERSION EXCLUDE_FROM_ALL)
 
   rapids_cpm_find(
     flatbuffers ${VERSION}
@@ -34,12 +33,17 @@ function(find_and_configure_flatbuffers VERSION)
     CPM_ARGS
     GIT_REPOSITORY https://github.com/google/flatbuffers.git
     GIT_TAG v${VERSION}
-    GIT_SHALLOW TRUE ${_exclude_from_all}
-# <<<<<<< OLD CODE from 54c26f49ee (6b9741aaf8) - COMMENTED OUT
-#     OPTIONS
-#       "FLATBUFFERS_BUILD_TESTS OFF" # NOTE(HIP/AMD): This ensures that ctest will not try to run the
-#                                     # flatbuffer tests which are not built per default.
+# <<<<<<< OLD CODE from d1a32812a5 (2fcbb520ea) - COMMENTED OUT
+#     GIT_SHALLOW TRUE ${_exclude_from_all}
+# # <<<<<<< OLD CODE from 54c26f49ee (6b9741aaf8) - COMMENTED OUT
+# #     OPTIONS
+# #       "FLATBUFFERS_BUILD_TESTS OFF" # NOTE(HIP/AMD): This ensures that ctest will not try to run the
+# #                                     # flatbuffer tests which are not built per default.
+# # =======
 # =======
+    GIT_SHALLOW TRUE
+    EXCLUDE_FROM_ALL ${EXCLUDE_FROM_ALL}
+# >>>>>>> END NEW CODE (2fcbb520ea)
     OPTIONS "FLATBUFFERS_BUILD_TESTS OFF"
 # >>>>>>> END NEW CODE (6b9741aaf8)
   )
@@ -50,4 +54,4 @@ function(find_and_configure_flatbuffers VERSION)
 
 endfunction()
 
-find_and_configure_flatbuffers(24.3.25)
+find_and_configure_flatbuffers(24.3.25 ${CUDF_EXCLUDE_DEPS_FROM_ALL})
