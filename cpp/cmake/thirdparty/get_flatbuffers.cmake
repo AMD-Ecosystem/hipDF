@@ -48,6 +48,7 @@ function(find_and_configure_flatbuffers VERSION EXCLUDE_FROM_ALL)
 # >>>>>>> END NEW CODE (6b9741aaf8)
   )
 
+  include("${rapids-cmake-dir}/export/find_package_root.cmake")
   rapids_export_find_package_root(
     BUILD flatbuffers "${flatbuffers_BINARY_DIR}" EXPORT_SET cudf-exports
   )
