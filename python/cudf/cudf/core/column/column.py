@@ -2939,6 +2939,21 @@ class ColumnBase(Serializable, BinaryOperand, Reducible):
                 aggregation.make_aggregation(op, kwargs).plc_obj,
                 dtype_to_pylibcudf_type(col_dtype),
             )
+            # Fast path: for plain numeric/boolean scalars skip the
+            # 1-element-column round trip (~3 extra kernel launches + 1 D2H
+            # per call). Only the decimal/interval paths need column-level
+            # type-metadata fixup.
+            is_decimal = plc_scalar.type().id() in {
+                plc.TypeId.DECIMAL128,
+                plc.TypeId.DECIMAL64,
+                plc.TypeId.DECIMAL32,
+            }
+            if (
+                not is_decimal
+                and not isinstance(col_dtype, IntervalDtype)
+                and getattr(col_dtype, "kind", None) in {"i", "u", "f", "b"}
+            ):
+                return plc_scalar.to_py()
             # Hook for subclasses (e.g., DecimalBaseColumn adjusts precision)
             col_dtype = col._adjust_reduce_result_dtype(
                 op, col_dtype, plc_scalar
