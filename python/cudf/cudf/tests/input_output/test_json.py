@@ -89,6 +89,12 @@ def gdf_writer_types(request):
 @pytest.mark.parametrize("compression", ["bz2", "gzip", "zip", "zstd", None])
 @pytest.mark.parametrize("orient", ["columns", "records", "table", "split"])
 def test_json_reader(index, compression, orient, pdf, tmp_path):
+    # hipdf only supports zstd decompression, not compression. The writer side
+    # of this test relies on pandas writing zstd, which additionally requires
+    # the optional `zstandard` package. Skip the zstd parametrization rather
+    # than fail with a misleading ImportError.
+    if compression == "zstd":
+        pytest.skip("hipdf does not support zstd compression (decomp only)")
     skip_reason = f"{index=} is not valid with {orient=}"
     if index is False and orient != "split":
         pytest.skip(skip_reason)
@@ -1439,6 +1445,10 @@ def test_chunked_json_reader():
 # compression formats limited to those supported by both reader and writer
 @pytest.mark.parametrize("compression", ["gzip", "snappy", "zstd"])
 def test_roundtrip_compression(compression, tmp_path):
+    # hipdf only supports zstd decompression, not compression; the to_json
+    # half of this roundtrip would fail. Skip zstd here.
+    if compression == "zstd":
+        pytest.skip("hipdf does not support zstd compression (decomp only)")
     expected = cudf.DataFrame({"a": [1], "b": ["2"]})
     fle = BytesIO()
     expected.to_json(fle, engine="cudf", compression=compression)
