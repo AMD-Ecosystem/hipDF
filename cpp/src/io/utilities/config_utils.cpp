@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2021-2025, NVIDIA CORPORATION.
+ * SPDX-FileCopyrightText: Copyright (c) 2021-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
 // MIT License
@@ -24,9 +24,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "getenv_or.hpp"
-
 #include <cudf/detail/utilities/cuda.hpp>
+#include <cudf/detail/utilities/getenv_or.hpp>
 #include <cudf/io/config_utils.hpp>
 #include <cudf/utilities/error.hpp>
 
@@ -53,7 +52,7 @@ void set_up_kvikio()
     auto const compat_mode = kvikio::getenv_or("KVIKIO_COMPAT_MODE", kvikio::CompatMode::ON);
     kvikio::defaults::set_compat_mode(compat_mode);
 
-    auto const nthreads = getenv_or<unsigned int>("KVIKIO_NTHREADS", 4u);
+    auto const nthreads = cudf::detail::getenv_or<unsigned int>("KVIKIO_NTHREADS", 4u);
     kvikio::defaults::set_thread_pool_nthreads(nthreads);
   });
 #endif
@@ -74,16 +73,21 @@ enum class usage_policy : uint8_t { OFF, STABLE, ALWAYS };
  */
 [[nodiscard]] usage_policy get_env_policy()
 {
-  auto const env_val = getenv_or<std::string>("LIBCUDF_NVCOMP_POLICY", "STABLE");
-  if (env_val == "OFF") {
-#if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
-    // NOTE(HIP/AMD): hipDF requires nvcomp for compression/decompression support.
-    // LIBCUDF_NVCOMP_POLICY=OFF is not supported on HIP/AMD platforms.
-    CUDF_FAIL("LIBCUDF_NVCOMP_POLICY=OFF is not supported on hipDF. "
-              "nvcomp is required for compression/decompression on HIP/AMD platforms.");
-#endif
-    return usage_policy::OFF;
-  }
+// <<<<<<< OLD CODE from de6a7d7986 (bbecf7d9bf) - COMMENTED OUT
+//   auto const env_val = getenv_or<std::string>("LIBCUDF_NVCOMP_POLICY", "STABLE");
+//   if (env_val == "OFF") {
+// #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+//     // NOTE(HIP/AMD): hipDF requires nvcomp for compression/decompression support.
+//     // LIBCUDF_NVCOMP_POLICY=OFF is not supported on HIP/AMD platforms.
+//     CUDF_FAIL("LIBCUDF_NVCOMP_POLICY=OFF is not supported on hipDF. "
+//               "nvcomp is required for compression/decompression on HIP/AMD platforms.");
+// #endif
+//     return usage_policy::OFF;
+//   }
+// =======
+  auto const env_val = cudf::detail::getenv_or<std::string>("LIBCUDF_NVCOMP_POLICY", "STABLE");
+  if (env_val == "OFF") return usage_policy::OFF;
+// >>>>>>> END NEW CODE (bbecf7d9bf)
   if (env_val == "STABLE") return usage_policy::STABLE;
   if (env_val == "ALWAYS") return usage_policy::ALWAYS;
   CUDF_FAIL("Invalid LIBCUDF_NVCOMP_POLICY value: " + env_val);

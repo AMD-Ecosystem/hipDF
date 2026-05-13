@@ -24,9 +24,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "getenv_or.hpp"
-
 #include <cudf/detail/utilities/cuda_memcpy.hpp>
+#include <cudf/detail/utilities/getenv_or.hpp>
 #include <cudf/detail/utilities/stream_pool.hpp>
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/io/config_utils.hpp>
@@ -639,7 +638,7 @@ std::unique_ptr<datasource> datasource::create(std::string const& filepath,
                                                size_t max_size_estimate)
 {
   auto const use_memory_mapping = [] {
-    auto const policy = getenv_or("LIBCUDF_MMAP_ENABLED", std::string{"OFF"});
+    auto const policy = cudf::detail::getenv_or("LIBCUDF_MMAP_ENABLED", std::string{"OFF"});
 
     if (policy == "ON") { return true; }
     if (policy == "OFF") { return false; }

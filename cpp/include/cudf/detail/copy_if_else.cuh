@@ -42,7 +42,6 @@
 
 namespace cudf {
 namespace detail {
-namespace {  // anonymous
 
 template <size_type block_size,
           typename T,
@@ -113,8 +112,6 @@ __launch_bounds__(block_size) CUDF_KERNEL
     }
   }
 }
-
-}  // anonymous namespace
 
 /**
  * @brief Returns a new column, where each element is selected from either of two input ranges based

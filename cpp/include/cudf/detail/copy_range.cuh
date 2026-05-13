@@ -49,7 +49,7 @@
 
 #include <memory>
 
-namespace {
+namespace cudf::detail {
 template <cudf::size_type block_size,
           typename SourceValueIterator,
           typename SourceValidityIterator,
@@ -120,10 +120,6 @@ CUDF_KERNEL void copy_range_kernel(SourceValueIterator source_value_begin,
   }
 }
 
-}  // namespace
-
-namespace cudf {
-namespace detail {
 /**
  * @brief Internal API to copy a range of values from source iterators to a
  * target column.
@@ -222,5 +218,4 @@ std::unique_ptr<column> copy_range(column_view const& source,
                                    rmm::cuda_stream_view stream,
                                    rmm::device_async_resource_ref mr);
 
-}  // namespace detail
-}  // namespace cudf
+}  // namespace cudf::detail

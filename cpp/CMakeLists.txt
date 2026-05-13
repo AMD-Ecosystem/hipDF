@@ -1125,6 +1125,7 @@ add_library(
   src/utilities/cuda.cpp
   src/utilities/cuda_memcpy.cu
   src/utilities/default_stream.cpp
+  src/utilities/getenv_or.cpp
   src/utilities/grid_1d.cu
   src/utilities/host_memory.cpp
   src/utilities/jit_amd_utilities.cpp
