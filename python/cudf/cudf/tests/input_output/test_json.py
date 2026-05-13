@@ -2,6 +2,7 @@
 
 import copy
 import gzip
+import importlib.util
 import os
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -20,6 +21,11 @@ from cudf.testing._utils import (
     TIMEDELTA_TYPES,
     expect_warning_if,
 )
+
+# pandas implements zstd JSON (de)compression via the optional `zstandard`
+# python package; checked here so individual tests can skip zstd cases only
+# when the package is unavailable (hipdf itself decomps zstd natively).
+_HAS_ZSTANDARD = importlib.util.find_spec("zstandard") is not None
 
 
 @pytest.fixture(params=["auto", "cudf", "pandas"])
@@ -89,12 +95,14 @@ def gdf_writer_types(request):
 @pytest.mark.parametrize("compression", ["bz2", "gzip", "zip", "zstd", None])
 @pytest.mark.parametrize("orient", ["columns", "records", "table", "split"])
 def test_json_reader(index, compression, orient, pdf, tmp_path):
-    # hipdf only supports zstd decompression, not compression. The writer side
-    # of this test relies on pandas writing zstd, which additionally requires
-    # the optional `zstandard` package. Skip the zstd parametrization rather
-    # than fail with a misleading ImportError.
-    if compression == "zstd":
-        pytest.skip("hipdf does not support zstd compression (decomp only)")
+    # The pandas writer/reader used in this test handles zstd via the optional
+    # `zstandard` python package. hipdf itself can decompress zstd natively
+    # (via hipComp), so only skip the zstd parametrization when `zstandard`
+    # is unavailable; otherwise the test can run end-to-end.
+    if compression == "zstd" and not _HAS_ZSTANDARD:
+        pytest.skip(
+            "zstd compression requires the optional `zstandard` package"
+        )
     skip_reason = f"{index=} is not valid with {orient=}"
     if index is False and orient != "split":
         pytest.skip(skip_reason)
