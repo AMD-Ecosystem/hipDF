@@ -3254,19 +3254,21 @@ class Union(IR):
 class HConcat(IR):
     """Concatenate dataframes horizontally."""
 
-    __slots__ = ("should_broadcast",)
-    _non_child = ("schema", "should_broadcast")
-    _n_non_child_args = 2
+    __slots__ = ("should_broadcast", "strict")
+    _non_child = ("schema", "should_broadcast", "strict")
+    _n_non_child_args = 3
 
     def __init__(
         self,
         schema: Schema,
         should_broadcast: bool,  # noqa: FBT001
+        strict: bool,  # noqa: FBT001
         *children: IR,
     ):
         self.schema = schema
         self.should_broadcast = should_broadcast
-        self._non_child_args = (schema, should_broadcast)
+        self.strict = strict
+        self._non_child_args = (schema, should_broadcast, strict)
         self.children = children
 
     @staticmethod
@@ -3309,6 +3311,7 @@ class HConcat(IR):
         cls,
         schema: Schema,
         should_broadcast: bool,  # noqa: FBT001
+        strict: bool,  # noqa: FBT001
         *dfs: DataFrame,
         context: IRExecutionContext,
     ) -> DataFrame:
@@ -3326,6 +3329,13 @@ class HConcat(IR):
                 result = DataFrame(ordered, stream=stream)
             else:
                 max_rows = max(df.num_rows for df in dfs)
+                if strict and any(df.num_rows != max_rows for df in dfs):
+                    heights = [df.num_rows for df in dfs]
+                    msg = (
+                        f"cannot concat DataFrames horizontally"
+                        f" with strict=True: height mismatch {heights}"
+                    )
+                    raise pl.exceptions.ShapeError(msg)
                 # Horizontal concatenation extends shorter tables with nulls
                 result = DataFrame(
                     itertools.chain.from_iterable(
