@@ -630,19 +630,28 @@ struct PdaSymbolToSymbolGroupId {
     // escape, comma, colon or whitespace characters.
     auto constexpr newline    = '\n';
     auto constexpr whitespace = ' ';
+    // Cast to unsigned char first so high-bit bytes (>= 0x80) are not sign-extended to negative
+    // int32_t values, which would underflow the min() clamp used as the lookup index.
     auto const symbol_position =
       symbol == delimiter
         ? static_cast<int32_t>(newline)
-        : (symbol == newline ? static_cast<int32_t>(whitespace) : static_cast<int32_t>(symbol));
-    // NOTE(HIP/AMD): It is possible that for some characters (e.g., ʒ), the cast to int32_t is negative.
-    // In CUDA, For such cases, the negative index into array tos_sg_to_pda_sgid return always 0 (luck?).
-    // We need this check and set symbol_grid to 0 for such cases.
-    PdaSymbolGroupIdT symbol_gid;
-    auto sgid_lookup_idx = min(static_cast<int32_t>(symbol_position), pda_sgid_lookup_size - 1);
-    if(sgid_lookup_idx < 0)
-      symbol_gid = 0;
-    else
-      symbol_gid = tos_sg_to_pda_sgid[sgid_lookup_idx];
+// <<<<<<< OLD CODE from dc53cd8c22 (ff3934630e) - COMMENTED OUT
+//         : (symbol == newline ? static_cast<int32_t>(whitespace) : static_cast<int32_t>(symbol));
+//     // NOTE(HIP/AMD): It is possible that for some characters (e.g., ʒ), the cast to int32_t is negative.
+//     // In CUDA, For such cases, the negative index into array tos_sg_to_pda_sgid return always 0 (luck?).
+//     // We need this check and set symbol_grid to 0 for such cases.
+//     PdaSymbolGroupIdT symbol_gid;
+//     auto sgid_lookup_idx = min(static_cast<int32_t>(symbol_position), pda_sgid_lookup_size - 1);
+//     if(sgid_lookup_idx < 0)
+//       symbol_gid = 0;
+//     else
+//       symbol_gid = tos_sg_to_pda_sgid[sgid_lookup_idx];
+// =======
+        : (symbol == newline ? static_cast<int32_t>(whitespace)
+                             : static_cast<int32_t>(static_cast<unsigned char>(symbol)));
+    PdaSymbolGroupIdT symbol_gid =
+      tos_sg_to_pda_sgid[min(symbol_position, pda_sgid_lookup_size - 1)];
+// >>>>>>> END NEW CODE (ff3934630e)
     return stack_idx * static_cast<PdaSymbolGroupIdT>(symbol_group_id::NUM_PDA_INPUT_SGS) +
            symbol_gid;
   }
