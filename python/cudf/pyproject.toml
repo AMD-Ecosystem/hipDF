@@ -59,12 +59,16 @@ dependencies = [
 #     #: HIP/AMD: we build 'cupy' from source
 # =======
     "cuda-python>=13.0.1,<14.0",
-# <<<<<<< OLD CODE from 4e56e419c6 (662dc43897) - COMMENTED OUT
-#     "cupy-cuda13x>=13.6.0",
-# # >>>>>>> END NEW CODE (fce3d155f1)
+# <<<<<<< OLD CODE from 046769a77e (f0bc7e9dcf) - COMMENTED OUT
+# # <<<<<<< OLD CODE from 4e56e419c6 (662dc43897) - COMMENTED OUT
+# #     "cupy-cuda13x>=13.6.0",
+# # # >>>>>>> END NEW CODE (fce3d155f1)
+# # =======
+#     "cupy-cuda13x>=13.6.0,!=14.0.0",
+# # >>>>>>> END NEW CODE (662dc43897)
 # =======
-    "cupy-cuda13x>=13.6.0,!=14.0.0",
-# >>>>>>> END NEW CODE (662dc43897)
+    "cupy-cuda13x>=13.6.0,!=14.0.0,!=14.1.0",
+# >>>>>>> END NEW CODE (f0bc7e9dcf)
     "fsspec>=0.6.0",
 # <<<<<<< OLD CODE from 46d2c08ec9 (d8db1df927) - COMMENTED OUT
 # # <<<<<<< OLD CODE from 3ee95b1bc8 (54690c919f) - COMMENTED OUT
