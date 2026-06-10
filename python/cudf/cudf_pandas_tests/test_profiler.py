@@ -18,6 +18,12 @@ import pandas as pd
 from cudf.core._compat import PANDAS_CURRENT_SUPPORTED_VERSION, PANDAS_VERSION
 
 
+@pytest.mark.skip(
+    reason="Flaky on ROCm: intermittently hangs (normally completes in <1s "
+    "but occasionally never finishes), tripping the per-test timeout and "
+    "stalling the job. Skipped until root-caused. See "
+    "https://github.com/AMD-AIOSS/hipDF/issues/446"
+)
 @pytest.mark.skipif(
     PANDAS_VERSION < PANDAS_CURRENT_SUPPORTED_VERSION,
     reason="function names change across versions of pandas, so making sure it only runs on latest version of pandas",
