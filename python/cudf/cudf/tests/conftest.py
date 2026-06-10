@@ -27,6 +27,7 @@ import math
 import operator
 import os
 import pathlib
+import sys
 import zoneinfo
 
 import cupy as cp
@@ -70,6 +71,56 @@ def pytest_sessionfinish(session, exitstatus):
         del os.environ["_CUDF_TEST_ROOT"]
     except KeyError:
         pass
+
+    # Stash the exit status so it can be propagated by pytest_unconfigure when
+    # we need to short-circuit interpreter shutdown (see _rocm_smi_loaded).
+    session.config._hipdf_exitstatus = int(exitstatus)
+
+
+def _rocm_smi_loaded():
+    """Return True if the legacy ROCm SMI library is mapped in this process.
+
+    NOTE(HIP/AMD): PyTorch's ``libtorch_hip.so`` links the deprecated
+    ``librocm_smi64.so`` and calls ``rsmi_init``. When that library is loaded
+    after the rest of the ROCm stack (which uses the newer ``libamd_smi.so``),
+    its static ``std::map<amd::smi::DevInfoTypes, const char *>`` destructor
+    runs from ``__run_exit_handlers`` and double-frees, aborting the process
+    with "double free or corruption (!prev)" *after* all tests have passed.
+    See ``test_cuda_array_interface_pytorch`` for the trigger.
+
+    Full analysis and minimal reproducers: see issue #442.
+    (NOTE: reproduce with LD_PRELOAD unset; preloading librocm_smi64 makes a
+    bare ``import torch`` abort on its own, masking the import-order behaviour.)
+    """
+    # ROCm, librocm_smi64.so and PyTorch-ROCm builds only exist on Linux, so
+    # this bug cannot occur elsewhere. The detection relies on Linux procfs;
+    # on any other platform (or a container without /proc) we report "not
+    # loaded" and let normal interpreter shutdown proceed.
+    if not sys.platform.startswith("linux"):
+        return False
+    try:
+        with open("/proc/self/maps") as maps:
+            return any("librocm_smi64.so" in line for line in maps)
+    except OSError:
+        return False
+
+
+def pytest_unconfigure(config):
+    """Avoid the ROCm SMI teardown double-free abort.
+
+    This is the very last pytest hook, so the terminal summary and any
+    reporting plugins have already run. If the buggy ``librocm_smi64`` library
+    is mapped, bypass the C/C++ static destructors (which would otherwise
+    abort with SIGABRT) by calling ``os._exit`` while preserving the real
+    pytest exit status. Normal runs (no torch / no ROCm SMI) are untouched.
+    """
+    if not _rocm_smi_loaded():
+        return
+
+    exitstatus = getattr(config, "_hipdf_exitstatus", 0)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(exitstatus)
 
 
 @pytest.fixture(params=[32, 64])
