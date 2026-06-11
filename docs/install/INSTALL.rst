@@ -55,11 +55,11 @@ Packaged versions of hipDF and its dependencies are distributed via
 `AMD PyPI <https://pypi.amd.com/rocm-7.2.1/simple>`__. This section discusses how to install
 hipDF via this package index.
 
-Create and activate a Conda environment with Python 3.12 as shown below:
+Create and activate a Conda environment with a compatible Python version, such as 3.11 or 3.12 as shown below. For more information on compatible Python versions, see :ref:`hipDF-support`.
 
 .. code-block:: bash
 
-   conda create --name hipdf python=3.12
+   conda create --name hipdf python=3.12 #Specify your Python version
    conda activate hipdf
 
 hipDF can then be installed into this environment using pip and the AMD PyPI URL:
