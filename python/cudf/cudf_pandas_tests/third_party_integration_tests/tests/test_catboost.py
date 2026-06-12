@@ -101,6 +101,12 @@ def test_catboost_with_pool_and_numpy(regression_data):
     return predictions
 
 
+@pytest.mark.skip(
+    reason="Flaky on ROCm: intermittently hangs (CPU-bound spin in a "
+    "managed-memory GPU op after an earlier cudf.pandas subprocess fork), "
+    "tripping the per-test timeout and stalling the job. Skipped until "
+    "root-caused. See https://github.com/AMD-AIOSS/hipDF/issues/446"
+)
 def test_catboost_with_categorical_features():
     data = {
         "feat_int_dtype": rng.standard_normal(1000),
