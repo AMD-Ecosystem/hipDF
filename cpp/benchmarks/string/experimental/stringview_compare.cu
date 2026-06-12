@@ -44,15 +44,9 @@
 #include <hipcub/device/device_merge_sort.hpp>
 #else
 #include <cub/device/device_merge_sort.cuh>
-// <<<<<<< OLD CODE from 181cd92f4c (6764de76ae) - COMMENTED OUT
-// #endif
-// =======
+#endif
 #include <cuda/functional>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (6764de76ae)
-// =======
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/count.h>
 #include <thrust/for_each.h>
 #include <thrust/gather.h>

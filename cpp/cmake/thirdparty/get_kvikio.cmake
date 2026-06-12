@@ -39,18 +39,6 @@ function(find_and_configure_kvikio VERSION)
             "BUILD_SHARED_LIBS OFF"
   )
 
-# <<<<<<< OLD CODE from ead9ec6eb8 (745233f175) - COMMENTED OUT
-#   if(KvikIO_BINARY_DIR)
-#     include("${rapids-cmake-dir}/export/find_package_root.cmake")
-#     rapids_export_find_package_root(
-#       BUILD KvikIO "${KvikIO_BINARY_DIR}"
-#       EXPORT_SET cudf-exports
-#       CONDITION KvikIO_BINARY_DIR
-#     )
-#   endif()
-#
-# =======
-# >>>>>>> END NEW CODE (745233f175)
 endfunction()
 
 set(KVIKIO_MIN_VERSION_cudf "${CUDF_VERSION_MAJOR}.${CUDF_VERSION_MINOR}")

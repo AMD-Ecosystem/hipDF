@@ -318,18 +318,13 @@ target_link_libraries(
 #   cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic
 #   linking
 
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-# if(CUDA_STATIC_RUNTIME)
-#   # Tell CMake what CUDA language runtime to use
-#   set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Static)
-# else()
-#   # Tell CMake what CUDA language runtime to use
-#   set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
-#   set_target_properties(hipcomp::hipcomp PROPERTIES HIP_RUNTIME_LIBRARY Shared)
-# endif()
-# =======
 set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Static)
-# >>>>>>> END NEW CODE (10e5073a31)
+
+# HIP analogue of CUDA_RUNTIME_LIBRARY for the hipcomp dependency. Forcing cudfjni to Static above
+# does not affect the hipcomp::hipcomp target, which must use the shared HIP runtime.
+if(TARGET hipcomp::hipcomp)
+  set_target_properties(hipcomp::hipcomp PROPERTIES HIP_RUNTIME_LIBRARY Shared)
+endif()
 
 # Dynamically build and link hipcomp
 

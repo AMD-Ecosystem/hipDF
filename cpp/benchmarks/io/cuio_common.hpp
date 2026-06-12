@@ -51,17 +51,6 @@ std::string random_file_in_dir(std::string const& dir_path);
  */
 class cuio_source_sink_pair {
  public:
-// <<<<<<< OLD CODE from 049d30de02 (b6d37df4a2) - COMMENTED OUT
-//   cuio_source_sink_pair(io_type type);
-//   ~cuio_source_sink_pair()
-//   {
-//     // delete the temporary file
-//     std::remove(file_name.c_str());
-//   }
-//   // move constructor
-//   cuio_source_sink_pair(cuio_source_sink_pair&& ss)            = default;
-//   //cuio_source_sink_pair& operator=(cuio_source_sink_pair&& ss) = default;
-// =======
   cuio_source_sink_pair(io_type type_param);
   ~cuio_source_sink_pair();
 
@@ -88,7 +77,6 @@ class cuio_source_sink_pair {
 
   cuio_source_sink_pair(cuio_source_sink_pair const&)            = delete;
   cuio_source_sink_pair& operator=(cuio_source_sink_pair const&) = delete;
-// >>>>>>> END NEW CODE (b6d37df4a2)
 
   /**
    * @brief Created a source info of the set type

@@ -72,13 +72,9 @@ class split_device_span {
   {
   }
 
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-//   // NOTE(HIP/AMD): Needs to be __host__ __device__, therefore
-//   // __device__ was removed, as the function is then only __device__ on HIP.
-//   [[nodiscard]] constexpr reference operator[](size_type i) const
-// =======
-  [[nodiscard]] CUDF_HOST_DEVICE constexpr reference operator[](size_type i) const
-// >>>>>>> END NEW CODE (2d6106360e)
+  // NOTE(HIP/AMD): Needs to be __host__ __device__, therefore
+  // __device__ was removed, as the function is then only __device__ on HIP.
+  [[nodiscard]] constexpr reference operator[](size_type i) const
   {
     return i < _head.size() ? _head[i] : _tail[i - _head.size()];
   }

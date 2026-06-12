@@ -59,27 +59,21 @@ constexpr int max_delta_mini_block_size = 64;
 // batch of size `values_per_mb`. The largest value for values_per_miniblock among the
 // major writers seems to be 64, so 2 * 64 should be good. We save the first value separately
 // since it is not encoded in the first mini-block.
-// <<<<<<< OLD CODE from 7ecdfa2315 (f36a615114) - COMMENTED OUT
-//
-// // we decode one mini-block at a time. max mini-block size seen is 64.
-// // NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
-// // gpuDecodeLevels typically decodes more values per run
-// // due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
-// // (with batch size 32).
-// // Some buffer space is needed to avoid that the rolling buffer
-// // wraps around and overwrites values that haven't been consumed
-// // yet (by the output warp/wavefront) which would result in failing decoding.
-// //TODO(HIP/AMD): Revisit this size.
-// #if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32)
-// constexpr int delta_rolling_buf_size = 4 * max_delta_mini_block_size;
-// #else
-// constexpr int delta_rolling_buf_size = 2 * max_delta_mini_block_size;
-// #endif
-// =======
 // The extra 1 is for the first value, from the block header. It's not stored in the buffer, but it
 // still impacts buffer indexing and we need to account for it to avoid race conditions.
+// NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
+// gpuDecodeLevels typically decodes more values per run
+// due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
+// (with batch size 32).
+// Some buffer space is needed to avoid that the rolling buffer
+// wraps around and overwrites values that haven't been consumed
+// yet (by the output warp/wavefront) which would result in failing decoding.
+// TODO(HIP/AMD): Revisit this size.
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32)
+constexpr int delta_rolling_buf_size = (4 * max_delta_mini_block_size) + 1;
+#else
 constexpr int delta_rolling_buf_size = (2 * max_delta_mini_block_size) + 1;
-// >>>>>>> END NEW CODE (f36a615114)
+#endif
 
 /**
  * @brief Read a ULEB128 varint integer

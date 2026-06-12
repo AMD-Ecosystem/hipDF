@@ -35,7 +35,12 @@ namespace cudf::io::parquet::detail {
     units = cudf::timestamp_ns::period::den;
   }
 
-  if (units and units != clock_rate) {
+  // NOTE(HIP/AMD): clock_rate can be 0 when the user does not specify a timestamp type in
+  // parquet_reader_options (i.e., options.get_timestamp_type().id() == type_id::EMPTY). In this
+  // case, timestamps are read in their native Parquet format without conversion. The check
+  // "clock_rate and" prevents division by zero (UB) and correctly returns scale=0, meaning no
+  // scaling is performed. This guard is exercised by the dictionary_page_filter.cu device path.
+  if (units and clock_rate and units != clock_rate) {
     return (clock_rate < units) ? -(units / clock_rate) : (clock_rate / units);
   }
 

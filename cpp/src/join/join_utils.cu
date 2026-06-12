@@ -121,79 +121,10 @@ VectorPair finalize_full_join(VectorPair&& indices,
                      0);
     thrust::uninitialized_fill(
       rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-// <<<<<<< OLD CODE from 857435871d (1a9b0efc1a) - COMMENTED OUT
-//       invalid_index_map->begin(),
-//       invalid_index_map->end(),
-//       int32_t{1});
-//
-//     // Functor to check for index validity since left joins can create invalid indices
-//     valid_range<size_type> valid(0, right_table_row_count);
-//
-//     // invalid_index_map[index_ptr[i]] = 0 for i = 0 to right_table_row_count
-//     // Thus specifying that those locations are valid
-//     thrust::scatter_if(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-//                        cuda::make_constant_iterator(0),
-//                        cuda::make_constant_iterator(0) + right_indices->size(),
-//                        right_indices->begin(),      // Index locations
-//                        right_indices->begin(),      // Stencil - Check if index location is valid
-//                        invalid_index_map->begin(),  // Output indices
-//                        valid);                      // Stencil Predicate
-//     size_type begin_counter = static_cast<size_type>(0);
-//     size_type end_counter   = static_cast<size_type>(right_table_row_count);
-//
-//     // Create list of indices that have been marked as invalid
-// // <<<<<<< OLD CODE from 842ab4d885 (43f2f2dac5) - COMMENTED OUT
-// // // <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
-// // //     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-// // //     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-// // //     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-// // //     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-// // //     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-// // //     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// // // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-// // //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-// // //     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
-// // //                                               thrust::make_counting_iterator(begin_counter),
-// // //                                               thrust::make_counting_iterator(end_counter),
-// // //                                               invalid_index_map->begin(),
-// // //                                               right_indices_complement->begin(),
-// // //                                               thrust::identity<size_type>()) -
-// // //                               right_indices_complement->begin();
-// // //     right_indices_complement->resize(indices_count, stream);
-// // // #else
-// // //     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
-// // // =======
-// //     size_type indices_count = thrust::copy_if(rmm::exec_policy_nosync(stream),
-// // // <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // // // >>>>>>> END NEW CODE (820f9f7c3f)
-// // //                                               thrust::make_counting_iterator(begin_counter),
-// // //                                               thrust::make_counting_iterator(end_counter),
-// // // =======
-// //                                               cuda::counting_iterator{begin_counter},
-// //                                               cuda::counting_iterator{end_counter},
-// // // >>>>>>> END NEW CODE (4b19041ca0)
-// //                                               invalid_index_map->begin(),
-// //                                               right_indices_complement->begin(),
-// //                                               cuda::std::identity{}) -
-// //                               right_indices_complement->begin();
-// // =======
-//     size_type indices_count =
-//       thrust::copy_if(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-//                       cuda::counting_iterator{begin_counter},
-//                       cuda::counting_iterator{end_counter},
-//                       invalid_index_map->begin(),
-//                       right_indices_complement->begin(),
-//                       cuda::std::identity{}) -
-//       right_indices_complement->begin();
-// // >>>>>>> END NEW CODE (43f2f2dac5)
-//     right_indices_complement->resize(indices_count, stream);
-// #endif
-// =======
       left_out->begin() + match_total,
       left_out->end(),
       cudf::JoinNoMatch);
     return std::pair(std::move(left_out), std::move(right_out));
-// >>>>>>> END NEW CODE (1a9b0efc1a)
   }
 
   if (right_table_num_rows == 0) { return std::pair(std::move(left_out), std::move(right_out)); }

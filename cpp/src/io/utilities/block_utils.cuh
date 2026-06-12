@@ -25,13 +25,6 @@
 // SOFTWARE.
 
 #pragma once
-// <<<<<<< OLD CODE from 24cfff7e23 (21cd733d12) - COMMENTED OUT
-// #include <cstdint>
-// #include <cudf/cuda_runtime.h>
-// #include <cudf/cuda_runtime_api.h>
-// #include <cudf/types.hpp>
-// #include <hip/hip_cooperative_groups.h>
-// =======
 #include <cudf/detail/utilities/cuda.cuh>
 
 #include <cooperative_groups.h>
@@ -39,7 +32,6 @@
 #include <cuda/std/cstdint>
 #include <cuda/std/cstring>
 
-// >>>>>>> END NEW CODE (21cd733d12)
 namespace cudf {
 namespace io {
 
@@ -55,98 +47,15 @@ inline __device__ T shuffle_xor(T var, uint32_t delta)
   return __shfl_xor_sync((uint64_t) LANE_MASK_ALL, var, delta); // NOTE(HIP/AMD): See SWDEV-490930
 }
 
-// <<<<<<< OLD CODE from 24cfff7e23 (21cd733d12) - COMMENTED OUT
-// inline __device__ void syncwarp() {
-//   __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
-//   __builtin_amdgcn_wave_barrier();
-//   __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
-//
-// }
-//
-// inline __device__ bitmask_type ballot(int pred) { return __ballot_sync((uint64_t) LANE_MASK_ALL, pred); } // NOTE(HIP/AMD): See SWDEV-490930
-//
-// // Warp reduction helpers
-// template <typename T>
-// inline __device__ T WarpReduceOr2(T acc)
-// {
-//   return acc | shuffle_xor(acc, 1);
-// }
-// template <typename T>
-// inline __device__ T WarpReduceOr4(T acc)
-// {
-//   acc = WarpReduceOr2(acc);
-//   return acc | shuffle_xor(acc, 2);
-// }
-// template <typename T>
-// inline __device__ T WarpReduceOr8(T acc)
-// {
-//   acc = WarpReduceOr4(acc);
-//   return acc | shuffle_xor(acc, 4);
-// }
-// template <typename T>
-// inline __device__ T WarpReduceOr16(T acc)
-// {
-//   acc = WarpReduceOr8(acc);
-//   return acc | shuffle_xor(acc, 8);
-// }
-// template <typename T>
-// inline __device__ T WarpReduceOr32(T acc)
-// {
-//   acc = WarpReduceOr16(acc);
-//   return acc | shuffle_xor(acc, 16);
-// }
-//
-// template <typename T>
-// inline __device__ T WarpReduceOr64(T acc)
-// {
-//   acc = WarpReduceOr32(acc);
-//   return acc | shuffle_xor(acc, 32);
-// }
-//
-//
-// template <typename T>
-// inline __device__ T WarpReducePos2(T pos, uint32_t t)
-// {
-//   T tmp = shuffle(pos, t & 0x1e);
-//   pos += (t & 1) ? tmp : 0;
-//   return pos;
-// }
-// template <typename T>
-// inline __device__ T WarpReducePos4(T pos, uint32_t t)
-// {
-//   T tmp;
-//   pos = WarpReducePos2(pos, t);
-//   tmp = shuffle(pos, (t & 0x1c) | 1);
-//   pos += (t & 2) ? tmp : 0;
-//   return pos;
-// }
-// template <typename T>
-// inline __device__ T WarpReducePos8(T pos, uint32_t t)
-// {
-//   T tmp;
-//   pos = WarpReducePos4(pos, t);
-//   tmp = shuffle(pos, (t & 0x18) | 3);
-//   pos += (t & 4) ? tmp : 0;
-//   return pos;
-// }
-// template <typename T>
-// inline __device__ T WarpReducePos16(T pos, uint32_t t)
-// {
-//   T tmp;
-//   pos = WarpReducePos8(pos, t);
-//   tmp = shuffle(pos, (t & 0x10) | 7);
-//   pos += (t & 8) ? tmp : 0;
-//   return pos;
-// }
-// template <typename T>
-// inline __device__ T WarpReducePos32(T pos, uint32_t t)
-// =======
-inline __device__ uint32_t ballot(int pred) { return __ballot_sync(~0, pred); }
+// NOTE(HIP/AMD): See SWDEV-490930
+inline __device__ bitmask_type ballot(int pred)
+{
+  return __ballot_sync((uint64_t)LANE_MASK_ALL, pred);
+}
 
 // Warp reduction helpers
 template <cudf::size_type size, typename T>
 inline __device__ T warp_reduce_or(T acc)
-// >>>>>>> END NEW CODE (21cd733d12)
 {
   static_assert(size >= 1 and size <= cudf::detail::warp_size and (size & (size - 1)) == 0,
                 "Size must be a power of 2 and less than or equal to the warp size");

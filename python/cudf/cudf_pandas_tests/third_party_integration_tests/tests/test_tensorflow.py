@@ -1,62 +1,51 @@
 # SPDX-FileCopyrightText: Copyright (c) 2023-2025, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
-# <<<<<<< OLD CODE from fe27ad545a (5089ce9144) - COMMENTED OUT
-# # MIT License
-# #
-# # Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
-# #
-# # Permission is hereby granted, free of charge, to any person obtaining a copy
-# # of this software and associated documentation files (the "Software"), to deal
-# # in the Software without restriction, including without limitation the rights
-# # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# # copies of the Software, and to permit persons to whom the Software is
-# # furnished to do so, subject to the following conditions:
-# #
-# # The above copyright notice and this permission notice shall be included in all
-# # copies or substantial portions of the Software.
-# #
-# # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# # SOFTWARE.
+# MIT License
 #
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
-# # Skip the entire file if running on the HIP AMD port with Python 3.11 or 3.13
-# import sys
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# import pytest
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-# import cudf
-#
-# if getattr(cudf, "__is_hip_amd_port__", False) and sys.version_info[:2] in [
-#     (3, 11),
-#     (3, 13),
-# ]:
-#     pytest.skip(
-#         "TensorFlow is not available on ROCm/HIP for Python 3.11 and 3.13",
-#         allow_module_level=True,
-#     )
-#
-# import numpy as np
-# import pandas as pd
-# import tensorflow as tf
-# =======
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import sys
 import warnings
 
 import numpy as np
 import pandas as pd
 import pytest
 
+import cudf
+
+# Skip the entire file if running on the HIP AMD port with Python 3.11 or 3.13
+if getattr(cudf, "__is_hip_amd_port__", False) and sys.version_info[:2] in [
+    (3, 11),
+    (3, 13),
+]:
+    pytest.skip(
+        "TensorFlow is not available on ROCm/HIP for Python 3.11 and 3.13",
+        allow_module_level=True,
+    )
+
 with warnings.catch_warnings():
     # Silence a warning from numpy on keras import
     warnings.filterwarnings("ignore", category=FutureWarning)
     import tensorflow as tf
-
-# >>>>>>> END NEW CODE (5089ce9144)
 
 SHUFFLE_BUFFER = 500
 BATCH_SIZE = 2

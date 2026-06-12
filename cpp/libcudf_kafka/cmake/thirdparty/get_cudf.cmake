@@ -31,35 +31,9 @@ function(find_and_configure_cudf VERSION)
     cudf ${VERSION}
     BUILD_EXPORT_SET cudf_kafka-exports
     INSTALL_EXPORT_SET cudf_kafka-exports
-# <<<<<<< OLD CODE from d26f0baa9a (7cd540eb83) - COMMENTED OUT
-#     CPM_ARGS # : GIT_REPOSITORY https://github.com/rapidsai/cudf.git : GIT_TAG branch-${major_minor}
-#     GIT_REPOSITORY https://github.com/ROCm/hipdf.git
-#     GIT_TAG dev
-# =======
-    CPM_ARGS
-    GIT_REPOSITORY https://github.com/rapidsai/cudf.git
-# <<<<<<< OLD CODE from 27bf05e749 (2903d6b1dd) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 8f98ec802e (4694b55cdf) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from d605b0d7db (2c127c3e2d) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from 023d224c0e (ae5cd415a4) - COMMENTED OUT
-# # # # # <<<<<<< OLD CODE from 58083a4ae1 (24679d11e8) - COMMENTED OUT
-# # # # #     GIT_TAG main
-# # # # # # >>>>>>> END NEW CODE (7cd540eb83)
-# # # # # =======
-# # # #     GIT_TAG release/25.12
-# # # # # >>>>>>> END NEW CODE (24679d11e8)
-# # # # =======
-# # #     GIT_TAG main
-# # # # >>>>>>> END NEW CODE (ae5cd415a4)
-# # # =======
-# #     GIT_TAG release/26.02
-# # # >>>>>>> END NEW CODE (2c127c3e2d)
-# # =======
-#     GIT_TAG main
-# # >>>>>>> END NEW CODE (4694b55cdf)
-# =======
-    GIT_TAG "${RAPIDS_BRANCH}"
-# >>>>>>> END NEW CODE (2903d6b1dd)
+    CPM_ARGS # : GIT_REPOSITORY https://github.com/rapidsai/cudf.git : GIT_TAG "${RAPIDS_BRANCH}"
+    GIT_REPOSITORY https://github.com/ROCm/hipdf.git
+    GIT_TAG dev
     GIT_SHALLOW TRUE SOURCE_SUBDIR cpp
     OPTIONS "BUILD_TESTS OFF" "BUILD_BENCHMARKS OFF"
   )

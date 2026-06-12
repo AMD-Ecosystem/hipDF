@@ -59,13 +59,9 @@ constexpr int delta_preproc_block_size = 128;
 // NOTE(HIP/AMD): Need one wavefront for gpuComputeDeltaLengthPageStringSizes
 #ifdef CUDF_USE_WARPSIZE_32
 constexpr int delta_length_block_size  = 32;
-// <<<<<<< OLD CODE from 71072c8cff (b13f0c3a87) - COMMENTED OUT
-// #else
-// constexpr int delta_length_block_size  = 64;
-// #endif
-// constexpr int preproc_buf_size         = LEVEL_DECODE_BUF_SIZE;
-// =======
-// >>>>>>> END NEW CODE (b13f0c3a87)
+#else
+constexpr int delta_length_block_size  = 64;
+#endif
 
 /**
  * @brief Compute the start and end page value bounds for this page
@@ -994,23 +990,11 @@ void compute_page_string_sizes_pass1(cudf::detail::hostdevice_span<PageInfo> pag
   dim3 const dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
-// <<<<<<< OLD CODE from 0d2d7680e0 (c4f73b46d9) - COMMENTED OUT
-//     compute_string_page_bounds_kernel<uint8_t>
-//       <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
-//   } else {
-//     compute_string_page_bounds_kernel<uint16_t>
-//       <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
-// =======
     compute_string_page_bounds_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, page_mask, min_row, num_rows, all_rows);
   } else {
     compute_string_page_bounds_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
-// <<<<<<< OLD CODE from 929ac51935 (d71ca42e83) - COMMENTED OUT
-//       pages.device_ptr(), chunks, min_row, num_rows, all_rows);
-// // >>>>>>> END NEW CODE (c4f73b46d9)
-// =======
       pages.device_ptr(), chunks, page_mask, min_row, num_rows, all_rows);
-// >>>>>>> END NEW CODE (d71ca42e83)
   }
 
   // kernel mask may contain other kernels we don't need to count
@@ -1033,21 +1017,8 @@ void compute_page_string_sizes_pass1(cudf::detail::hostdevice_span<PageInfo> pag
       pages.device_ptr(), chunks, page_mask, min_row, num_rows);
   }
   if (BitAnd(kernel_mask, STRINGS_MASK_NON_DELTA) != 0) {
-// <<<<<<< OLD CODE from 3496a56b7a (d2726246d1) - COMMENTED OUT
-//     compute_page_string_sizes_kernel<<<dim_grid, dim_block, sizeof(page_state_s), streams[s_idx++].value()>>>(
-//       pages.device_ptr(), chunks, page_mask, min_row, num_rows);
-// =======
     compute_page_string_sizes_kernel<<<dim_grid, dim_block, 0, streams[s_idx++].value()>>>(
-// <<<<<<< OLD CODE from 6a260fb29d (1f7445a9ff) - COMMENTED OUT
-// // <<<<<<< OLD CODE from e508af78d1 (0065784cbb) - COMMENTED OUT
-// //       pages.device_ptr(), chunks, page_mask, page_string_offset_indices, min_row, num_rows);
-// // // >>>>>>> END NEW CODE (d2726246d1)
-// // =======
-//       pages.device_ptr(), chunks, page_mask, min_row, num_rows);
-// // >>>>>>> END NEW CODE (0065784cbb)
-// =======
       pages.device_ptr(), chunks, page_mask, page_string_offset_indices, min_row, num_rows);
-// >>>>>>> END NEW CODE (1f7445a9ff)
   }
 
   // synchronize the streams

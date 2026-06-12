@@ -626,14 +626,8 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
         using ErrorReduce = hipcub::BlockReduce<bool, BLOCK_SIZE>;
         __shared__ typename ErrorReduce::TempStorage temp_storage_error;
         __shared__ bool error_reduced;
-// <<<<<<< OLD CODE from 3ae625f402 (b8cd6d4944) - COMMENTED OUT
-//         // NOTE(HIP/AMD): Only thread 0 delivers correct result and should write shared memory location
-//         bool error_reduced_local = ErrorReduce(temp_storage_error).Sum(error);  // TODO use hipcub::LogicalOR.
-//         if(lane==0)
-//           error_reduced = error_reduced_local;
-// =======
-        auto berr = ErrorReduce(temp_storage_error).Sum(error);  // TODO use cub::LogicalOR.
-// >>>>>>> END NEW CODE (b8cd6d4944)
+        // NOTE(HIP/AMD): Only thread 0 delivers correct result and should write shared memory location
+        auto berr = ErrorReduce(temp_storage_error).Sum(error);  // TODO use hipcub::LogicalOR.
         // only valid in thread0, so shared memory is used for broadcast.
         if (lane == 0) error_reduced = berr;
         __syncthreads();

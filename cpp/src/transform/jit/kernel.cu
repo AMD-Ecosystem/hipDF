@@ -38,15 +38,10 @@
 #include <cuda/std/tuple>
 #include <cuda/std/utility>
 
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-// #include <cudf/detail/jit/accessors.cuh>
-// #include <cudf/detail/jit/span.cuh>
-// =======
 #include <jit/column_accessor.cuh>
 #include <jit/column_device_view_wrappers.cuh>
 #include <jit/sync.cuh>
 #include <jit/type_list.cuh>
-// >>>>>>> END NEW CODE (5410620c91)
 
 #pragma nv_hdrstop  // The above headers are used by the kernel below and need to be included before
                     // it. Each UDF will have a different operation-udf.hpp generated for it, so we

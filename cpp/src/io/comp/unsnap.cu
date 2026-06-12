@@ -368,21 +368,14 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
             b[t].offset        = ofs;
             ofs += blen;  // for correct out-of-range detection below
           }
-// <<<<<<< OLD CODE from fe730f1d22 (818fbf20f3) - COMMENTED OUT
-//           blen           = warp_reduce_pos<cudf::detail::warp_size>(blen, t);
-//           bytes_left     = shuffle(bytes_left);
-//           dst_pos        = shuffle(dst_pos);
-//           short_sym_mask = __FFS(ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen)));
-// =======
           blen       = warp_reduce_pos<cudf::detail::warp_size>(blen, t);
           bytes_left = shuffle(bytes_left);
           dst_pos    = shuffle(dst_pos);
           // If `is_copy_offset_bad`, truncate the batch at the first lane with a malformed copy
           // element (offset == 0) so warp 2 never runs it; the scalar slow path below then re-reads
           // it, breaks, and the kernel reports FAILURE.
-          short_sym_mask = __ffs(
+          short_sym_mask = __FFS(
             ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen) || is_copy_offset_bad));
-// >>>>>>> END NEW CODE (818fbf20f3)
           if (short_sym_mask != 0) { batch_len = min(batch_len, short_sym_mask - 1); }
           if (batch_len != 0) {
             blen = shuffle(blen, batch_len - 1);
@@ -427,19 +420,12 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
               b[batch_len + t].offset = ofs;
               ofs += blen;  // for correct out-of-range detection below
             }
-// <<<<<<< OLD CODE from fe730f1d22 (818fbf20f3) - COMMENTED OUT
-//             blen           = warp_reduce_pos<cudf::detail::warp_size>(blen, t);
-//             bytes_left     = shuffle(bytes_left);
-//             dst_pos        = shuffle(dst_pos);
-//             short_sym_mask = __FFS(ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen)));
-// =======
             blen       = warp_reduce_pos<cudf::detail::warp_size>(blen, t);
             bytes_left = shuffle(bytes_left);
             dst_pos    = shuffle(dst_pos);
             // See comment in the fast-path block above for `is_copy_offset_bad`.
-            short_sym_mask = __ffs(
+            short_sym_mask = __FFS(
               ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen) || is_copy_offset_bad));
-// >>>>>>> END NEW CODE (818fbf20f3)
             if (short_sym_mask != 0) { batch_add = min(batch_add, short_sym_mask - 1); }
             if (batch_add != 0) {
               blen = shuffle(blen, batch_add - 1);
@@ -768,13 +754,8 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
 {
   dim3 dim_block(4 * cudf::detail::warp_size, 1);           // 4 warps per stream, 1 stream per block
   dim3 dim_grid(inputs.size(), 1);  // TODO: Check max grid dimensions vs max expected count
-// <<<<<<< OLD CODE from 7d6e760b4b (6f6611145f) - COMMENTED OUT
-//   unsnap_kernel<4 * cudf::detail::warp_size><<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
-// =======
-
-  unsnap_kernel_no_racecheck<128>
-    <<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
-// >>>>>>> END NEW CODE (6f6611145f)
+  unsnap_kernel_no_racecheck<4 * cudf::detail::warp_size>
+    <<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
 }
 
 __global__ void get_snappy_uncompressed_size_kernel(

@@ -120,64 +120,6 @@ struct find_index_fn {
   }
 };
 
-// <<<<<<< OLD CODE from aaba8767d9 (36b7ae017b) - COMMENTED OUT
-// struct find_insert_index_fn {
-//   template <typename Element>
-//   std::unique_ptr<scalar> operator()(dictionary_column_view const& input,
-//                                      scalar const& key,
-//                                      rmm::cuda_stream_view stream,
-//                                      rmm::device_async_resource_ref mr) const
-//     requires(not std::is_same_v<Element, dictionary32> and
-//              not std::is_same_v<Element, list_view> and not std::is_same_v<Element, struct_view>)
-//   {
-//     if (!key.is_valid(stream)) {
-//       return type_dispatcher(input.indices().type(), dispatch_scalar_index{}, 0, false, stream, mr);
-//     }
-//     CUDF_EXPECTS(cudf::have_same_types(input.parent(), key),
-//                  "search key type must match dictionary keys type",
-//                  cudf::data_type_error);
-//
-//     using ScalarType = cudf::scalar_type_t<Element>;
-//     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
-//     auto keys_view   = column_device_view::create(input.keys(), stream);
-// // <<<<<<< OLD CODE from 731b692185 (7a23356b40) - COMMENTED OUT
-// // // <<<<<<< OLD CODE from ae65a9466f (820f9f7c3f) - COMMENTED OUT
-// // //     auto iter        = thrust::lower_bound(
-// // //       rmm::exec_policy(stream),
-// // //       keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
-// // // =======
-// //     auto iter        = thrust::lower_bound(rmm::exec_policy_nosync(stream),
-// //                                     keys_view->begin<Element>(),
-// //                                     keys_view->end<Element>(),
-// //                                     find_key);
-// // // >>>>>>> END NEW CODE (820f9f7c3f)
-// // =======
-//     auto const begin = keys_view->begin<Element>();
-//     auto iter =
-//       thrust::find(rmm::exec_policy_nosync(stream), begin, begin + keys_view->size(), find_key);
-// // >>>>>>> END NEW CODE (7a23356b40)
-//     return type_dispatcher(input.indices().type(),
-//                            dispatch_scalar_index{},
-//                            cuda::std::distance(begin, iter),
-//                            true,
-//                            stream,
-//                            mr);
-//   }
-//
-//   template <typename Element>
-//   std::unique_ptr<scalar> operator()(dictionary_column_view const&,
-//                                      scalar const&,
-//                                      rmm::cuda_stream_view,
-//                                      rmm::device_async_resource_ref) const
-//     requires(std::is_same_v<Element, dictionary32> or std::is_same_v<Element, list_view> or
-//              std::is_same_v<Element, struct_view>)
-//   {
-//     CUDF_FAIL("dictionary, list_view, and struct_view columns cannot be the keys for a dictionary");
-//   }
-// };
-//
-// =======
-// >>>>>>> END NEW CODE (36b7ae017b)
 }  // namespace
 
 std::unique_ptr<scalar> get_index(dictionary_column_view const& dictionary,

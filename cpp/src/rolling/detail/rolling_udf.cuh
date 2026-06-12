@@ -80,10 +80,11 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
     udf_agg._output_type, input.size(), cudf::mask_state::UNINITIALIZED, stream, mr);
 
   auto output_view = output->mutable_view();
-  rmm::device_scalar<size_type> device_valid_count{0, stream};
+  cudf::detail::device_scalar<size_type> device_valid_count{
+    0, stream, cudf::get_current_device_resource_ref()};
 
   std::string cuda_source;
-  std::string parsed_udf_llvm_ir;
+  [[maybe_unused]] std::string parsed_udf_llvm_ir;
 
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
@@ -115,22 +116,8 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
     default: CUDF_FAIL("Unsupported UDF type.");
   }
 
-// <<<<<<< OLD CODE from 95848036cc (decfac207a) - COMMENTED OUT
-// =======
-  std::unique_ptr<column> output = make_numeric_column(
-    udf_agg._output_type, input.size(), cudf::mask_state::UNINITIALIZED, stream, mr);
-
-  auto output_view = output->mutable_view();
-  cudf::detail::device_scalar<size_type> device_valid_count{
-    0, stream, cudf::get_current_device_resource_ref()};
-// >>>>>>> END NEW CODE (decfac207a)
-
-// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-//   //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
-//   std::string kernel_name =
-// =======
+  //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_reflection =
-// >>>>>>> END NEW CODE (d4e12e2fee)
     jitify2::reflection::Template("cudf::rolling::jit::gpu_rolling_new")  //
       .instantiate(cudf::type_to_name(input.type()),  // list of template arguments
                    cudf::type_to_name(output->type()),
@@ -138,35 +125,10 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
-// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-//   std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-//   jitify2::Kernel kernel;
-//
-//   if(udf_agg.kind==aggregation::Kind::PTX) {
-//     // CAUTION(HIP/AMD): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
-//     if constexpr(HIP_PLATFORM_AMD) {
-//       kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-//         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir);
-//     }
-//     else {
-//       kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-//         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
-//     }
-//   }
-//   else {
-//     kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-//        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {});
-//   }
-//
-//   kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                                         // for CUDA's jitify.
-//         ->launch(input.size(),
-//               cudf::jit::get_data_ptr(input),
-// =======
   cudf::jit::get_udf_kernel(*rolling_jit_kernel_cu_jit, kernel_reflection, cuda_source)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
     ->launch(input.size(),
              cudf::jit::get_data_ptr(input),
-// >>>>>>> END NEW CODE (d4e12e2fee)
              input.null_mask(),
              cudf::jit::get_data_ptr(output_view),
              output_view.null_mask(),

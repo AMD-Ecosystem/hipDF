@@ -234,33 +234,10 @@ template std::vector<uint64_t> random_values<uint64_t>(size_t size);
 void read_footer(std::unique_ptr<cudf::io::datasource> const& source,
                  cudf::io::parquet::FileMetaData* file_meta_data)
 {
-// <<<<<<< OLD CODE from 9e16001bc1 (10fcf2e124) - COMMENTED OUT
-//   using namespace cudf::io::parquet;
-//   constexpr auto header_len = sizeof(file_header_s);
-//   constexpr auto ender_len  = sizeof(file_ender_s);
-//
-//   auto const len           = source->size();
-//   auto const header_buffer = source->host_read(0, header_len);
-//   auto const header        = reinterpret_cast<file_header_s const*>(header_buffer->data());
-//   auto const ender_buffer  = source->host_read(len - ender_len, ender_len);
-//   auto const ender         = reinterpret_cast<file_ender_s const*>(ender_buffer->data());
-//
-//   // checks for valid header, footer, and file length
-//   ASSERT_GT(len, header_len + ender_len);
-//   ASSERT_TRUE(header->magic == cudf::io::parquet::detail::parquet_magic && ender->magic == cudf::io::parquet::detail::parquet_magic);
-//   ASSERT_TRUE(ender->footer_len != 0 && ender->footer_len <= (len - header_len - ender_len));
-//
-//   // parquet files end with 4-byte footer_length and 4-byte magic == "PAR1"
-//   // seek backwards from the end of the file (footer_length + 8 bytes of ender)
-//   auto const footer_buffer =
-//     source->host_read(len - ender->footer_len - ender_len, ender->footer_len);
-//   cudf::io::parquet::detail::CompactProtocolReader cp(footer_buffer->data(), ender->footer_len);
-// =======
   // parquet files end with 4-byte footer_length and 4-byte magic == "PAR1"
   // seek backwards from the end of the file (footer_length + 8 bytes of ender)
   auto const footer_buffer = cudf::io::parquet::fetch_footer_to_host(*source);
   cudf::io::parquet::detail::CompactProtocolReader cp(footer_buffer->data(), footer_buffer->size());
-// >>>>>>> END NEW CODE (10fcf2e124)
 
   cp.read(file_meta_data);
 }

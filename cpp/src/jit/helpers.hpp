@@ -33,21 +33,10 @@
 #include <cudf/detail/utilities/cuda_memcpy.hpp>
 #include <cudf/detail/utilities/vector_factories.hpp>
 
-// <<<<<<< OLD CODE from 59b8f88be1 (442af46486) - COMMENTED OUT
-// // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-// // #include <cudf/detail/jit/span.cuh>
-// // =======
-// =======
 #include <thrust/iterator/transform_iterator.h>
 
-// >>>>>>> END NEW CODE (442af46486)
 #include <jit/cache.hpp>
 #include <jit/span.cuh>
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (d4e12e2fee)
-// #include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
-// =======
-// >>>>>>> END NEW CODE (5410620c91)
 
 #include <algorithm>
 #include <span>

@@ -40,16 +40,9 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// // #include <cuda/std/array>
-// // =======
-// =======
 #include <cuda/iterator>
 #include <cuda/std/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/utility>
-// >>>>>>> END NEW CODE (261b12adc2)
 #include <thrust/binary_search.h>
 #include <thrust/transform.h>
 

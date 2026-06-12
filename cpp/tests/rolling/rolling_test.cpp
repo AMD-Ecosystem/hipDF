@@ -1452,11 +1452,9 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-// <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
-//     cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
-// =======
-    cudf::udf_source_type::PTX, this->ptx_func, cudf::data_type{cudf::type_id::INT64});
-// >>>>>>> END NEW CODE (924d3073fb)
+    cudf::udf_source_type::PTX,
+    cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func,
+    cudf::data_type{cudf::type_id::INT64});
 
   output = cudf::rolling_window(input, 2, 2, 4, *ptx_udf_agg);
 
@@ -1483,15 +1481,9 @@ TEST_F(RollingTestUdf, DynamicWindow)
 
    // TODO(HIP/AMD): We need __host__ here to fix a template instantiation compiler error from rocthrust.
   auto start =
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-//     cudf::detail::make_counting_transform_iterator(0, [size] __host__ __device__(cudf::size_type row) {
-//       return std::accumulate(thrust::make_counting_iterator(std::max(0, row - (row % 2 + 2) + 1)),
-//                              thrust::make_counting_iterator(std::min(size, row + (row % 2) + 1)),
-// =======
-    cudf::detail::make_counting_transform_iterator(0, [size] __device__(cudf::size_type row) {
+    cudf::detail::make_counting_transform_iterator(0, [size] __host__ __device__(cudf::size_type row) {
       return std::accumulate(cuda::counting_iterator{std::max(0, row - (row % 2 + 2) + 1)},
                              cuda::counting_iterator{std::min(size, row + (row % 2) + 1)},
-// >>>>>>> END NEW CODE (4b19041ca0)
                              0);
     });
 
@@ -1510,12 +1502,10 @@ TEST_F(RollingTestUdf, DynamicWindow)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-// <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
-//     cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
-// =======
-    cudf::udf_source_type::PTX, this->ptx_func, cudf::data_type{cudf::type_id::INT64});
+    cudf::udf_source_type::PTX,
+    cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func,
+    cudf::data_type{cudf::type_id::INT64});
 
-// >>>>>>> END NEW CODE (924d3073fb)
   output = cudf::rolling_window(input, preceding, following, 2, *ptx_udf_agg);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);

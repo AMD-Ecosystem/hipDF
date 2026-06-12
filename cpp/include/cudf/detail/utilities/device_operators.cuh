@@ -156,20 +156,15 @@ struct DeviceCount {
  */
 struct DeviceMin {
   template <typename T>
-// <<<<<<< OLD CODE from 04752fd1fa (48875c8147) - COMMENTED OUT
-//   CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
-//     -> decltype(cudf::detail::min(lhs, rhs))
-// =======
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(numeric::detail::min(lhs, rhs))
     requires(cudf::is_fixed_width<T>())
-// >>>>>>> END NEW CODE (48875c8147)
   {
     return numeric::detail::min(lhs, rhs);
   }
 
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(cudf::detail::min(lhs, rhs))
     requires(not cudf::is_fixed_width<T>())
   {
@@ -219,20 +214,15 @@ struct DeviceMin {
  */
 struct DeviceMax {
   template <typename T>
-// <<<<<<< OLD CODE from 04752fd1fa (48875c8147) - COMMENTED OUT
-//   CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
-//     -> decltype(cudf::detail::max(lhs, rhs))
-// =======
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(numeric::detail::max(lhs, rhs))
     requires(cudf::is_fixed_width<T>())
-// >>>>>>> END NEW CODE (48875c8147)
   {
     return numeric::detail::max(lhs, rhs);
   }
 
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(cudf::detail::max(lhs, rhs))
     requires(not cudf::is_fixed_width<T>())
   {

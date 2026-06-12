@@ -33,19 +33,11 @@ function(find_and_configure_flatbuffers VERSION EXCLUDE_FROM_ALL)
     CPM_ARGS
     GIT_REPOSITORY https://github.com/google/flatbuffers.git
     GIT_TAG v${VERSION}
-# <<<<<<< OLD CODE from d1a32812a5 (2fcbb520ea) - COMMENTED OUT
-#     GIT_SHALLOW TRUE ${_exclude_from_all}
-# # <<<<<<< OLD CODE from 54c26f49ee (6b9741aaf8) - COMMENTED OUT
-# #     OPTIONS
-# #       "FLATBUFFERS_BUILD_TESTS OFF" # NOTE(HIP/AMD): This ensures that ctest will not try to run the
-# #                                     # flatbuffer tests which are not built per default.
-# # =======
-# =======
     GIT_SHALLOW TRUE
     EXCLUDE_FROM_ALL ${EXCLUDE_FROM_ALL}
-# >>>>>>> END NEW CODE (2fcbb520ea)
-    OPTIONS "FLATBUFFERS_BUILD_TESTS OFF"
-# >>>>>>> END NEW CODE (6b9741aaf8)
+    OPTIONS
+      "FLATBUFFERS_BUILD_TESTS OFF" # NOTE(HIP/AMD): This ensures that ctest will not try to run the
+                                    # flatbuffer tests which are not built per default.
   )
 
   include("${rapids-cmake-dir}/export/find_package_root.cmake")

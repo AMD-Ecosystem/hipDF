@@ -73,11 +73,7 @@ THE SOFTWARE.
 #include "io/utilities/block_utils.cuh"
 
 #include <cudf/detail/utilities/cuda.hpp>
-// <<<<<<< OLD CODE from f806865c64 (c74aea08ab) - COMMENTED OUT
-// #include <cudf/detail/utilities/cuda.cuh>
-// =======
 #include <cudf/detail/utilities/cuda_memcpy.hpp>
-// >>>>>>> END NEW CODE (c74aea08ab)
 #include <cudf/utilities/error.hpp>
 
 #include <rmm/cuda_stream_view.hpp>

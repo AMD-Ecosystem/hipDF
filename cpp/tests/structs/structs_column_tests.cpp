@@ -442,13 +442,8 @@ TYPED_TEST(TypedStructColumnWrapperTest, ListOfStructOfList)
   // comparisons, the structs column needs to be modified to add nulls.
   auto struct_of_lists_col = structs_column_wrapper{{list_col}}.release();
 
-// <<<<<<< OLD CODE from 1c7ce632ea (230c18ad04) - COMMENTED OUT
-//   auto list_of_struct_of_list_validity =
-//     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
-//   // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
-// =======
   auto list_of_struct_of_list_validity = cudf::test::iterators::nulls_at_multiples_of(3);
-// >>>>>>> END NEW CODE (230c18ad04)
+  // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
   auto [null_mask, null_count] =
     cudf::test::detail::make_null_mask(list_of_struct_of_list_validity, list_of_struct_of_list_validity + 5);
   auto list_of_struct_of_list =
@@ -496,15 +491,9 @@ TYPED_TEST(TypedStructColumnWrapperTest, StructOfListOfStruct)
     }
       .release();
 
-// <<<<<<< OLD CODE from 1c7ce632ea (230c18ad04) - COMMENTED OUT
-//   auto list_validity =
-//     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
-//     // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
-//   auto [null_mask, null_count] = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
-// =======
-  auto list_validity           = cudf::test::iterators::nulls_at_multiples_of(3);
-  auto [null_mask, null_count] = detail::make_null_mask(list_validity, list_validity + 5);
-// >>>>>>> END NEW CODE (230c18ad04)
+  auto list_validity = cudf::test::iterators::nulls_at_multiples_of(3);
+  // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
+  auto [null_mask, null_count] = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
 
   auto lists_col =
     cudf::make_lists_column(5,

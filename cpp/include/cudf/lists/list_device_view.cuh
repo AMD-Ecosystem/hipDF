@@ -32,17 +32,9 @@
 #include <cudf/lists/lists_column_device_view.cuh>
 #include <cudf/types.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// =======
 
 #include <cuda/iterator>
 #include <cuda/std/utility>
-#include <cuda_runtime.h>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (261b12adc2)
-// #include <thrust/iterator/counting_iterator.h>
-// =======
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/iterator/transform_iterator.h>
 
 namespace CUDF_EXPORT cudf {
@@ -294,11 +286,7 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-//     __host__ __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
-// =======
     __device__ inline cuda::std::pair<T, bool> operator()(cudf::size_type i) const
-// >>>>>>> END NEW CODE (261b12adc2)
     {
       return {list.element<T>(i), !list.is_null(i)};
     }
@@ -337,11 +325,7 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-//     __host__ __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
-// =======
     __device__ inline cuda::std::pair<rep_type, bool> operator()(cudf::size_type i) const
-// >>>>>>> END NEW CODE (261b12adc2)
     {
       return {get_rep<T>(i), !list.is_null(i)};
     }

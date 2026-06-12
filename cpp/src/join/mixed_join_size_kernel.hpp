@@ -36,14 +36,6 @@
 #include <cudf/utilities/span.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
-// <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-// #include <rmm/resource_ref.hpp>
-//
-// #include <hip/hip_cooperative_groups.h>
-// #include <hipcub/hipcub.hpp>
-// #include <thrust/iterator/discard_iterator.h>
-// =======
-// >>>>>>> END NEW CODE (ede7e3524b)
 
 #include <cuco/pair.cuh>
 #include <cuda/std/utility>

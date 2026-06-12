@@ -435,11 +435,6 @@ TEST(HostDeviceSpanTest, CanSendToDevice)
 
   original_message.host_to_device_async(stream);
 
-// <<<<<<< OLD CODE from 6ed051a5d2 (49e37def79) - COMMENTED OUT
-//   char d_message[12];
-//   (void)cudaMemcpy(d_message, message.device_ptr(), 11, cudaMemcpyDefault);
-//   d_message[11] = '\0';
-// =======
   std::string got_message(original_message.size(), '\0');
   cudaMemcpyAsync(got_message.data(),
                   original_message.device_ptr(),
@@ -447,7 +442,6 @@ TEST(HostDeviceSpanTest, CanSendToDevice)
                   cudaMemcpyDefault,
                   stream.value());
   stream.synchronize();
-// >>>>>>> END NEW CODE (49e37def79)
 
   EXPECT_EQ(got_message, hello_world_message);
 }

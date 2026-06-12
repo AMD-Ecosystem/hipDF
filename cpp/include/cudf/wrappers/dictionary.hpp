@@ -28,12 +28,9 @@
 
 #include <cudf/types.hpp>
 
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-// #include <cudf/cuda_runtime.h>
-// =======
+#include <cudf/cuda_runtime.h>
+
 #include <cuda/std/limits>
-#include <cuda_runtime.h>
-// >>>>>>> END NEW CODE (2d6106360e)
 
 /**
  * @file

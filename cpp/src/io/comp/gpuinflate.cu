@@ -70,17 +70,11 @@ Mark Adler    madler@alumni.caltech.edu
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// // #include <hipcub/hipcub.hpp>
-// //
-// // =======
-// =======
 #include <cuda/std/algorithm>
 #include <cuda/std/cmath>
-// >>>>>>> END NEW CODE (2d6106360e)
 #include <cuda/std/tuple>
-// >>>>>>> END NEW CODE (261b12adc2)
+
+#include <hipcub/hipcub.hpp>
 #include <thrust/gather.h>
 #include <thrust/sequence.h>
 #include <thrust/sort.h>

@@ -158,13 +158,10 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 )***";
 
   auto data_init = [](cudf::size_type row) { return row % 3; };
-// <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
-//   test_udf<float>(cuda, data_init, 500, false);
-//   test_udf<float>(cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, data_init, 500, true);
-// =======
   test_udf<float>(cuda, data_init, 500, cudf::udf_source_type::CUDA);
-  test_udf<float>(ptx, data_init, 500, cudf::udf_source_type::PTX);
-// >>>>>>> END NEW CODE (924d3073fb)
+  // On AMD, PTX cannot be JIT-compiled; substitute the equivalent AMD LLVM IR.
+  test_udf<float>(
+    cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, data_init, 500, cudf::udf_source_type::PTX);
 }
 
 TEST_F(TransformTest, ComputeColumn)

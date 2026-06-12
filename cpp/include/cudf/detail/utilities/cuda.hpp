@@ -42,21 +42,19 @@ namespace detail {
 cudf::size_type num_multiprocessors();
 
 /**
-// <<<<<<< OLD CODE from 6ed051a5d2 (49e37def79) - COMMENTED OUT
-//  * @brief Get the maximum number of available shared memory per multiprocessor
-//  * on the device in bytes.
-//  */
-// cudf::size_type max_shared_mem_per_multiprocessor();
-//
-// /**
-//  * @brief Get the maximum number of threads per multiprocessor.
-//  */
-// cudf::size_type max_threads_per_multiprocessor();
-// =======
  * @brief Check if the current device has integrated memory.
  */
 [[nodiscard]] bool has_integrated_memory();
-// >>>>>>> END NEW CODE (49e37def79)
+
+/**
+ * @brief Get the maximum amount of shared memory per multiprocessor on the device
+ */
+cudf::size_type max_shared_mem_per_multiprocessor();
+
+/**
+ * @brief Get the maximum number of threads per multiprocessor on the device
+ */
+cudf::size_type max_threads_per_multiprocessor();
 
 /**
  * @brief Get the number of elements that can be processed per thread.

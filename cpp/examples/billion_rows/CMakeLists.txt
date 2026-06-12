@@ -53,38 +53,16 @@ add_library(groupby_results OBJECT groupby_results.cpp)
 target_link_libraries(groupby_results PRIVATE cudf::cudf)
 target_compile_features(groupby_results PRIVATE cxx_std_20)
 
-# <<<<<<< OLD CODE from 830085513b (43aecf4696) - COMMENTED OUT
-# add_executable(brc brc.cpp)
-# # TODO(HIP/AMD): Re-enable once nvtx equivalent is available
-# target_link_libraries(brc PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>)
-# # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
-# target_compile_features(brc PRIVATE cxx_std_20)
-# install(TARGETS brc DESTINATION bin/examples/libcudf/billion_rows)
-#
-# add_executable(brc_chunks brc_chunks.cpp)
-# # TODO(HIP/AMD): Re-enable once nvtx equivalent is available
-# target_link_libraries(brc_chunks PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>)
-# # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
-# target_compile_features(brc_chunks PRIVATE cxx_std_20)
-# install(TARGETS brc_chunks DESTINATION bin/examples/libcudf/billion_rows)
-#
-# add_executable(brc_pipeline brc_pipeline.cpp)
-# # TODO(HIP/AMD): Re-enable once nvtx equivalent is available
-# target_link_libraries(brc_pipeline PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>)
-# target_link_libraries(brc_pipeline PRIVATE Threads::Threads)
-# # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
-# target_compile_features(brc_pipeline PRIVATE cxx_std_20)
-# install(TARGETS brc_pipeline DESTINATION bin/examples/libcudf/billion_rows)
-# =======
 # Creates a billion rows example executable and installs it.
 #
 # Arguments: target_name  - Name of the CMake target and resulting executable source_file  - Source
 # file to compile for the example
 function(add_billion_rows_example target_name source_file)
   add_executable(${target_name} ${source_file})
+  # TODO(HIP/AMD): Re-enable nvtx once an nvtx equivalent is available
   target_link_libraries(
-    ${target_name} PRIVATE cudf::cudf $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>
-                           $<TARGET_OBJECTS:groupby_results>
+    ${target_name} PRIVATE cudf::cudf $<TARGET_OBJECTS:groupby_results>
+    # $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>
   )
   target_compile_features(${target_name} PRIVATE cxx_std_20)
   install(TARGETS ${target_name} DESTINATION bin/examples/libcudf/billion_rows)
@@ -93,4 +71,4 @@ endfunction()
 add_billion_rows_example(brc brc.cpp)
 add_billion_rows_example(brc_chunks brc_chunks.cpp)
 add_billion_rows_example(brc_pipeline brc_pipeline.cpp)
-# >>>>>>> END NEW CODE (43aecf4696)
+target_link_libraries(brc_pipeline PRIVATE Threads::Threads)

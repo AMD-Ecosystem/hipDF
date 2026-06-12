@@ -64,15 +64,6 @@ void auto_set_device(JNIEnv* env)
   }
 }
 
-// <<<<<<< OLD CODE from 8793d8ef01 (bca86b2e09) - COMMENTED OUT
-// /** Fills all the bytes in the buffer 'buf' with 'value'. */
-// void device_memset_async(JNIEnv *env, rmm::device_buffer &buf, char value) {
-//   cudaError_t cuda_status = cudaMemsetAsync((void *)buf.data(), value, buf.size());
-//   jni_cuda_check(env, cuda_status);
-// }
-//
-// =======
-// >>>>>>> END NEW CODE (bca86b2e09)
 }  // namespace jni
 }  // namespace cudf
 

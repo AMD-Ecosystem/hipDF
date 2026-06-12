@@ -46,13 +46,8 @@ target_compile_options(
 
 target_link_libraries(
   cudf_datagen
-# <<<<<<< OLD CODE from ec4b7f9689 (b4e0cf93c0) - COMMENTED OUT
-#   PUBLIC GTest::gmock GTest::gtest benchmark::benchmark nvbench::nvbench Threads::Threads cudf
-#          cudf::cudftestutil $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>
-# =======
   PUBLIC GTest::gmock GTest::gtest nvbench::nvbench Threads::Threads cudf cudf::cudftestutil
          nvtx3::nvtx3-cpp
-# >>>>>>> END NEW CODE (b4e0cf93c0)
   PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
 )
 

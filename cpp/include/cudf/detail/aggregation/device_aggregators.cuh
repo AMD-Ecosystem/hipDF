@@ -174,16 +174,15 @@ struct update_target_element<Source, aggregation::SUM_WITH_OVERFLOW> {
     auto const old_sum =
       cudf::detail::atomic_add(&sum_column.element<DeviceType>(target_index), source_value);
 
-// <<<<<<< OLD CODE from eedacf8f7f (ebbb674d63) - COMMENTED OUT
-//     // Early exit if overflow is already set to avoid unnecessary overflow checking
-// #if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
-//     // NOTE(HIP/AMD): Workaround: libhipcxx 2.7.0 does not yet support cuda::atomic_ref on bool type.
-//     // Use __hip_atomic_load directly for atomic read on HIP platform.
-//     if (__hip_atomic_load(overflow_column.data<bool>() + target_index, __ATOMIC_RELAXED, __HIP_MEMORY_SCOPE_AGENT)) { return; }
-// #else
-// =======
     // Early exit if overflow is already set
-// >>>>>>> END NEW CODE (ebbb674d63)
+#if defined(CCCL_VERSION) && CCCL_VERSION <= 2007000
+    // NOTE(HIP/AMD): Workaround: libhipcxx 2.7.0 does not yet support cuda::atomic_ref on bool type.
+    // Use __hip_atomic_load directly for atomic read on HIP platform.
+    if (__hip_atomic_load(
+          overflow_column.data<bool>() + target_index, __ATOMIC_RELAXED, __HIP_MEMORY_SCOPE_AGENT)) {
+      return;
+    }
+#else
     auto bool_ref = cuda::atomic_ref<bool, cuda::thread_scope_device>{
       *(overflow_column.data<bool>() + target_index)};
     if (bool_ref.load(cuda::memory_order_relaxed)) { return; }

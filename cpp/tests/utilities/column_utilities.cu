@@ -562,26 +562,22 @@ struct column_comparator_impl {
       ComparatorType(
         *d_lhs_row_indices, *d_rhs_row_indices, fp_ulps, device_comparator, *d_lhs, *d_rhs));
 
-// <<<<<<< OLD CODE from 8ecada029b (e11a5eb8b9) - COMMENTED OUT
-//     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-//     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-//     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-//     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-//     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-//     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-//     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-//     auto diff_iter = thrust::copy_if(rmm::exec_policy(cudf::test::get_default_stream()),
-//                                      input_iter,
-//                                      input_iter + lhs_row_indices.size(),
-//                                      diff_map.begin(),
-//                                      differences.begin(),
-//                                      thrust::identity{});
-// #else
-//     auto diff_iter = thrust::copy_if(rmm::exec_policy(cudf::test::get_default_stream()),
-// =======
+    // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
+    // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
+    // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
+    // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
+    // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
+    // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
+#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
+    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
     auto diff_iter = thrust::copy_if(rmm::exec_policy_nosync(cudf::test::get_default_stream()),
-// >>>>>>> END NEW CODE (e11a5eb8b9)
+                                     input_iter,
+                                     input_iter + lhs_row_indices.size(),
+                                     diff_map.begin(),
+                                     differences.begin(),
+                                     thrust::identity{});
+#else
+    auto diff_iter = thrust::copy_if(rmm::exec_policy_nosync(cudf::test::get_default_stream()),
                                      input_iter,
                                      input_iter + lhs_row_indices.size(),
                                      diff_map.begin(),

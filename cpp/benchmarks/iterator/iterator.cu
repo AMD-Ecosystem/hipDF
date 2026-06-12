@@ -34,12 +34,8 @@
 
 #include <rmm/device_uvector.hpp>
 
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #include <hipcub/device/device_reduce.hpp>
-// =======
-#include <cub/device/device_reduce.cuh>
+#include <hipcub/device/device_reduce.hpp>
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/reduce.h>

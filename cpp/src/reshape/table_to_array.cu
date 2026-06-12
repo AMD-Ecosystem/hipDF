@@ -46,12 +46,8 @@
 #include <cub/device/device_memcpy.cuh>
 #endif
 #include <cuda/functional>
-// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
-// #include <cudf/cuda_runtime.h>
-// =======
 #include <cuda/iterator>
-#include <cuda_runtime.h>
-// >>>>>>> END NEW CODE (c4e8151cb0)
+#include <cudf/cuda_runtime.h>
 #include <thrust/device_vector.h>
 #include <thrust/iterator/transform_iterator.h>
 

@@ -50,19 +50,12 @@ project(
   LANGUAGES C CXX HIP
 )
 
-# <<<<<<< OLD CODE from 6ef54fbfb1 (ed6d472027) - COMMENTED OUT
-# # NOTE(HIP/AMD): required for rocThrust
-# if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*clang\\+\\+")
-#    OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+")
-# )
-#   message(
-#     FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers."
-# =======
-if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.2)
+# NOTE(HIP/AMD): required for rocThrust
+if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*clang\\+\\+")
+   OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+")
+)
   message(
-    FATAL_ERROR
-      "libcudf requires CUDA Toolkit 12.2+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
-# >>>>>>> END NEW CODE (ed6d472027)
+    FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers."
   )
 endif()
 
@@ -119,11 +112,7 @@ rapids_cmake_write_version_file(include/cudf/version_config.hpp)
 option(USE_NVTX "Build with NVTX support" OFF)
 handle_unsupported_cmake_option("USE_NVTX" FALSE)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
-# <<<<<<< OLD CODE from ec4b7f9689 (b4e0cf93c0) - COMMENTED OUT
-# option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
-# =======
-option(BUILD_BENCHMARKS "Configure CMake to build benchmarks" OFF)
-# >>>>>>> END NEW CODE (b4e0cf93c0)
+option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(CUDF_USE_WARPSIZE_32
@@ -132,12 +121,6 @@ option(CUDF_USE_WARPSIZE_32
 mark_as_advanced(CUDF_USE_WARPSIZE_32)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
-# <<<<<<< OLD CODE from ead9ec6eb8 (745233f175) - COMMENTED OUT
-# option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" OFF)
-# handle_unsupported_cmake_option("CUDF_USE_PROPRIETARY_NVCOMP" TRUE)
-# option(CUDF_EXPORT_NVCOMP "Export NVCOMP as a dependency" ON)
-# =======
-# >>>>>>> END NEW CODE (745233f175)
 option(CUDF_LARGE_STRINGS_DISABLED "Build with large string support disabled" OFF)
 mark_as_advanced(CUDF_LARGE_STRINGS_DISABLED)
 option(
@@ -149,23 +132,16 @@ option(
 option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated declarations." OFF)
 # Option to enable line info in CUDA/HIP device compilation to allow introspection when profiling /
 # memchecking
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-# option(GPU_ENABLE_LINEINFO "Generate line-number information for GPU device code." OFF)
-# handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
-# option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
-# # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
-# option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
-# handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
-# option(BUILD_ASAN "Whether to build with address sanitization" OFF)
-# option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS
-#        "Enable workarounds for potential compiler bugs in specific code places" ON
-# )
-# =======
-option(CUDA_ENABLE_LINEINFO
-       "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler)" OFF
+option(GPU_ENABLE_LINEINFO "Generate line-number information for GPU device code." OFF)
+handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
+option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
+# cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
+option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
+handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
+option(BUILD_ASAN "Whether to build with address sanitization" OFF)
+option(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS
+       "Enable workarounds for potential compiler bugs in specific code places" ON
 )
-option(CUDA_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all CUDA compilation" ON)
-# >>>>>>> END NEW CODE (10e5073a31)
 
 # CUDF_BUILD_STATIC_DEPS should almost never be set to OFF since there is no reason to prefer
 # building shared libraries for dependencies under normal circumstances. FORCE is a necessary
@@ -194,12 +170,7 @@ else()
 endif()
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
-# <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
-# if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
-# =======
-
-if(NOT BUILD_SHARED_LIBS)
-# >>>>>>> END NEW CODE (ae612df9af)
+if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
   set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
 
@@ -294,10 +265,7 @@ message(
   VERBOSE
   "CUDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
 )
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-# message(VERBOSE "CUDF: Statically link the CUDA runtime: ${GPU_STATIC_RUNTIME}")
-# =======
-# >>>>>>> END NEW CODE (10e5073a31)
+message(VERBOSE "CUDF: Statically link the CUDA runtime: ${GPU_STATIC_RUNTIME}")
 message(VERBOSE
         "CUDF: Build with remote IO (e.g. AWS S3) support through KvikIO: ${CUDF_KVIKIO_REMOTE_IO}"
 )
@@ -1777,25 +1745,9 @@ endif()
 # Specify the target module library dependencies
 target_link_libraries(
   cudf
-# <<<<<<< OLD CODE from d1a32812a5 (2fcbb520ea) - COMMENTED OUT
-#   PUBLIC CCCL::CCCL rapids_logger::rapids_logger rmm::rmm $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
-# # <<<<<<< OLD CODE from 0e32e8f0f2 (414c67b1f6) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 0a4f390a35 (17c9f8b781) - COMMENTED OUT
-# # #   PRIVATE $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
-# # #           $<TARGET_NAME_IF_EXISTS:kvikio::kvikio> nanoarrow zstd
-# # # =======
-# #   PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> cuco::cuco ZLIB::ZLIB nvcomp::nvcomp
-# #           kvikio::kvikio nanoarrow::nanoarrow zstd
-# # # >>>>>>> END NEW CODE (17c9f8b781)
-# # =======
-#   PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> $<BUILD_LOCAL_INTERFACE:cuco::cuco> ZLIB::ZLIB
-#           nvcomp::nvcomp kvikio::kvikio nanoarrow::nanoarrow zstd
-# # >>>>>>> END NEW CODE (414c67b1f6)
-# =======
   PUBLIC CCCL::CCCL $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
   PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> $<BUILD_LOCAL_INTERFACE:cuco::cuco> ZLIB::ZLIB
           ${CUDF_nvcomp_TARGET} kvikio::kvikio ${CUDF_nanoarrow_TARGET} zstd
-# >>>>>>> END NEW CODE (2fcbb520ea)
 )
 
 # When building a shared libcudf with static deps, we absorb them via whole-archive linking so that
@@ -1879,11 +1831,7 @@ if(TARGET conda_env)
   target_link_libraries(cudf PRIVATE conda_env)
 endif()
 
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-# rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
-# =======
-rapids_cuda_set_runtime(cudf USE_STATIC ON)
-# >>>>>>> END NEW CODE (10e5073a31)
+rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
 # NOTE(HIP/AMD): Control section ordering to avoid relocation errors 
 file(
@@ -1930,16 +1878,12 @@ if(CUDF_BUILD_TESTUTIL)
     PUBLIC cudf
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-#   rapids_hip_set_runtime(cudftest_default_stream USE_STATIC ${GPU_STATIC_RUNTIME})
-#
-#   target_include_directories(
-#     cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
-#   )
-#   target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
-# =======
-  rapids_cuda_set_runtime(cudftest_default_stream USE_STATIC ON)
-# >>>>>>> END NEW CODE (10e5073a31)
+  rapids_hip_set_runtime(cudftest_default_stream USE_STATIC ${GPU_STATIC_RUNTIME})
+
+  target_include_directories(
+    cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
+  )
+  target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
 
   add_library(cudf::cudftest_default_stream ALIAS cudftest_default_stream)
 
@@ -1961,11 +1905,7 @@ if(CUDF_BUILD_TESTUTIL)
     cudftestutil INTERFACE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
                            "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
   )
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-#   rapids_hip_set_runtime(cudftestutil USE_STATIC ${GPU_STATIC_RUNTIME})
-# =======
-  rapids_cuda_set_runtime(cudftestutil USE_STATIC ON)
-# >>>>>>> END NEW CODE (10e5073a31)
+  rapids_hip_set_runtime(cudftestutil USE_STATIC ${GPU_STATIC_RUNTIME})
   add_library(cudf::cudftestutil ALIAS cudftestutil)
 
   add_library(cudftestutil_impl INTERFACE)
@@ -2012,16 +1952,13 @@ endif()
 
 # * build cudf_identify_stream_usage --------------------------------------------------------------
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
-# <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
-#   if(GPU_STATIC_RUNTIME)
-#     message(
-#       FATAL_ERROR
-#         "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
-#     )
-#   endif()
-#
-# =======
-# >>>>>>> END NEW CODE (ae612df9af)
+  if(GPU_STATIC_RUNTIME)
+    message(
+      FATAL_ERROR
+        "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
+    )
+  endif()
+
   # Libraries for stream-related testing. We build the library twice, one with STREAM_MODE_TESTING
   # on and one with it set to off. Each test will then be configured to use the appropriate library
   # depending via ctest and whether it has been updated to expose public stream APIs.
@@ -2035,35 +1972,20 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       )
     endif()
 
-    set(sanitizer_relative_genex
-        "$<PATH:RELATIVE_PATH,$<TARGET_FILE_DIR:CUDA::sanitizer>,$<TARGET_FILE_DIR:CUDA::cudart_static>>"
-    )
     set_target_properties(
       ${_tgt}
       PROPERTIES # set target compile options
                  CXX_STANDARD 20
                  CXX_STANDARD_REQUIRED ON
                  POSITION_INDEPENDENT_CODE ON
-                 BUILD_RPATH "\$ORIGIN"
-                 INSTALL_RPATH "\$ORIGIN;\$ORIGIN/${sanitizer_relative_genex}"
     )
     target_compile_options(
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ceec78c909 (ae612df9af) - COMMENTED OUT
-# #     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
-# # =======
-#     target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm CUDA::sanitizer)
-# # >>>>>>> END NEW CODE (ae612df9af)
-#
-#     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
-# =======
-    target_link_libraries(${_tgt} PUBLIC CUDA::cudart_static rmm::rmm CUDA::sanitizer)
+    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
 
-    rapids_cuda_set_runtime(${_tgt} USE_STATIC ON)
-# >>>>>>> END NEW CODE (10e5073a31)
+    rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
     add_library(cudf::${_tgt} ALIAS ${_tgt})
 
     if("${_mode}" STREQUAL "testing")
@@ -2134,11 +2056,10 @@ install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf ${CUDF_SOURCE_DIR}/include/cud
                   ${CUDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# <<<<<<< OLD CODE from d1a32812a5 (2fcbb520ea) - COMMENTED OUT
-# install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf/hip_extensions
-#         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-# )
-# =======
+install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf/hip_extensions
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
 # In standalone DSO mode, rmm and rapids_logger are absorbed into libcudf via whole-archive. Their
 # headers are still needed by consumers, so install them manually.
 if(NOT CUDF_INSTALL_LIBRARY_DEPS)
@@ -2159,7 +2080,6 @@ if(NOT CUDF_INSTALL_LIBRARY_DEPS)
     install(DIRECTORY ${nvtx3_SOURCE_DIR}/include/nvtx3 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
   endif()
 endif()
-# >>>>>>> END NEW CODE (2fcbb520ea)
 
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
   install(

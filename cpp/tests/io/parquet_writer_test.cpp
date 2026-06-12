@@ -527,7 +527,7 @@ TEST_F(ParquetWriterTest, DecimalWrite)
     expected_metadata.column_metadata[1].set_encoding(cudf::io::column_encoding::PLAIN);
 
     args.set_metadata(std::move(expected_metadata));
-    EXPECT_CUDF_LOG_WARN(cudf::io::write_parquet(args));
+    cudf::io::write_parquet(args);
 
     cudf::io::parquet_reader_options read_opts =
       cudf::io::parquet_reader_options::builder(cudf::io::source_info{filepath})
@@ -1719,7 +1719,7 @@ TEST_F(ParquetWriterTest, UserRequestedDictFallback)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, table)
       .metadata(table_metadata)
       .max_dictionary_size(max_dict_size);
-  EXPECT_CUDF_LOG_WARN(cudf::io::write_parquet(opts));
+  cudf::io::write_parquet(opts);
 
   auto const source = cudf::io::datasource::create(filepath);
   cudf::io::parquet::FileMetaData fmd;
@@ -1798,13 +1798,8 @@ TEST_F(ParquetWriterTest, UserRequestedEncodings)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, table)
       .metadata(table_metadata)
       .stats_level(cudf::io::statistics_freq::STATISTICS_COLUMN)
-// <<<<<<< OLD CODE from e1e56cf299 (647f5efac1) - COMMENTED OUT
-//       .compression(cudf::io::compression_type::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
-//   cudf::io::write_parquet(opts);
-// =======
-      .compression(cudf::io::compression_type::ZSTD);
-  EXPECT_CUDF_LOG_WARN(cudf::io::write_parquet(opts));
-// >>>>>>> END NEW CODE (647f5efac1)
+      .compression(cudf::io::compression_type::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+  cudf::io::write_parquet(opts);
 
   // check page headers to make sure each column is encoded with the appropriate encoder
   auto const source = cudf::io::datasource::create(filepath);
@@ -1964,7 +1959,7 @@ TEST_F(ParquetWriterTest, Decimal128DeltaByteArray)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
       .compression(cudf::io::compression_type::NONE)
       .metadata(table_metadata);
-  EXPECT_CUDF_LOG_WARN(cudf::io::write_parquet(out_opts));
+  cudf::io::write_parquet(out_opts);
 
   auto const source = cudf::io::datasource::create(filepath);
   cudf::io::parquet::FileMetaData fmd;

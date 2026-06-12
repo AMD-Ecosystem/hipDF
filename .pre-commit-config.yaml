@@ -1,47 +1,36 @@
 # SPDX-FileCopyrightText: Copyright (c) 2019-2026, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
-# <<<<<<< OLD CODE from e8e64d7345 (8703367b4e) - COMMENTED OUT
-# # MIT License
-# #
-# # Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
-# #
-# # Permission is hereby granted, free of charge, to any person obtaining a copy
-# # of this software and associated documentation files (the "Software"), to deal
-# # in the Software without restriction, including without limitation the rights
-# # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# # copies of the Software, and to permit persons to whom the Software is
-# # furnished to do so, subject to the following conditions:
-# #
-# # The above copyright notice and this permission notice shall be included in all
-# # copies or substantial portions of the Software.
-# #
-# # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# # SOFTWARE.
+# MIT License
 #
-# # ci:
-# #   autofix_commit_msg: "[pre-commit.ci] auto code formatting"
-# #   autofix_prs: false
-# #   autoupdate_branch: ""
-# #   autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
-# #   autoupdate_schedule: quarterly
-# #   skip: ["verify-alpha-spec", "amd-copyright"]
-# #   submodules: false
-# =======
-ci:
-  autofix_commit_msg: "[pre-commit.ci] auto code formatting"
-  autofix_prs: false
-  autoupdate_branch: ""
-  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
-  autoupdate_schedule: quarterly
-  skip: ["mypy", "verify-alpha-spec"]
-  submodules: false
-# >>>>>>> END NEW CODE (8703367b4e)
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# ci:
+#   autofix_commit_msg: "[pre-commit.ci] auto code formatting"
+#   autofix_prs: false
+#   autoupdate_branch: ""
+#   autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+#   autoupdate_schedule: quarterly
+#   skip: ["mypy", "verify-alpha-spec", "amd-copyright"]
+#   submodules: false
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -252,142 +241,121 @@ repos:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
-# <<<<<<< OLD CODE from 1ae25e5356 (cf41006673) - COMMENTED OUT
-#   # - repo: https://github.com/rapidsai/pre-commit-hooks
-#   #   rev: v0.7.0
-#   #   hooks:
-#   #     - id: verify-copyright
-#   #       exclude: |
-#   #         (?x)^(
-#   #           cpp/include/cudf_test/cxxopts[.]hpp$|
-#   #           cpp/src/io/parquet/ipc/Message_generated[.]h$|
-#   #           cpp/src/io/parquet/ipc/Schema_generated[.]h$
-#   #         )
-#   #     - id: verify-alpha-spec
-#   #     - id: verify-codeowners
-#   #       args: [--fix, --project-prefix=cudf]
-#   # - repo: https://github.com/rapidsai/dependency-file-generator
-#   #   rev: v1.20.0
-#   #   hooks:
-#   #     - id: rapids-dependency-file-generator
-#   #       args: ["--clean", "--warn-all", "--strict"]
-# =======
-  - repo: https://github.com/rapidsai/pre-commit-hooks
-    rev: v1.4.1
-    hooks:
-      - id: verify-copyright
-        name: verify-copyright-cudf
-        args: [--fix, --spdx]
-        files: |
-          (?x)
-            [.](cmake|cpp|cu|cuh|h|hpp|sh|pxd|py|pyx|pyi|rs|java|bat)$|
-            CMakeLists[.]txt$|
-            CMakeLists_standalone[.]txt$|
-            meta[.]yaml$|
-            pyproject[.]toml$|
-            setup[.]cfg$|
-            ^cpp/src/text/detail/codepoint_metadata[.]ah$|
-            ^cpp/src/strings/regex/regex[.]inl$|
-            ^cpp/src/io/parquet/ipc/schema/.*[.]fbs$|
-            ^java/pom[.]xml$|
-            ^java/buildscripts/build-info$|
-            ^java/ci/Dockerfile[.]rocky$|
-            recipe[.]yaml$|
-            dependencies[.]yaml$|
-            pytest[.]ini$|
-            ^[.]pre-commit-config[.]yaml$|
-            Makefile$
-        # TODO: Remove FindCUDAToolkit once we require CMake 4.4
-        exclude: |
-          (?x)^(
-            cpp/include/cudf_test/cxxopts[.]hpp$|
-            cpp/src/io/parquet/ipc/Message_generated[.]h$|
-            cpp/src/io/parquet/ipc/Schema_generated[.]h$|
-            cpp/src/io/comp/brotli_dict[.]cpp$|
-            cpp/src/io/comp/brotli_dict[.]hpp$|
-            cpp/src/io/comp/brotli_tables[.]hpp$|
-            cpp/src/io/comp/debrotli[.]cu$|
-            cpp/src/io/comp/cpu_unbz2[.]cpp$|
-            cpp/src/io/comp/unbz2[.]hpp$|
-            cpp/src/io/comp/gpuinflate[.]cu$|
-            cpp/src/io/utilities/base64_utilities[.]cpp$|
-            cpp/src/io/utilities/base64_utilities[.]hpp$|
-            cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
-          )
-      - id: verify-copyright
-        name: verify-copyright-brotli
-        args: [--fix, --spdx, "--spdx-license-identifier=Apache-2.0 AND MIT"]
-        files: |
-          (?x)^(
-            cpp/src/io/comp/brotli_dict[.]cpp$|
-            cpp/src/io/comp/brotli_dict[.]hpp$|
-            cpp/src/io/comp/brotli_tables[.]hpp$|
-            cpp/src/io/comp/debrotli[.]cu$
-          )
-      - id: verify-copyright
-        name: verify-copyright-bzip2
-        args: [--fix, --spdx, "--spdx-license-identifier=Apache-2.0 AND bzip2-1.0.6"]
-        files: |
-          (?x)^(
-            cpp/src/io/comp/cpu_unbz2[.]cpp$|
-            cpp/src/io/comp/unbz2[.]hpp$
-          )
-      - id: verify-copyright
-        name: verify-copyright-zlib
-        args: [--fix, --spdx, "--spdx-license-identifier=Apache-2.0 AND Zlib"]
-        files: |
-          (?x)^(
-            cpp/src/io/comp/gpuinflate[.]cu$|
-            cpp/src/io/utilities/base64_utilities[.]cpp$|
-            cpp/src/io/utilities/base64_utilities[.]hpp$
-          )
-      - id: verify-copyright
-        name: verify-copyright-cxxopts
-        args: [--fix, --spdx, "--spdx-license-identifier=MIT"]
-        files: |
-          (?x)^(
-            cpp/include/cudf_test/cxxopts[.]hpp$
-          )
-      - id: verify-alpha-spec
-      - id: verify-codeowners
-        args: [--fix, --project-prefix=cudf]
-      - id: verify-hardcoded-version
-        exclude: |
-          (?x)
-            (^|/)devcontainer[.]json$|
-            (^|/)dependencies[.]yaml$|
-            ^[.]github/(workflows|ISSUE_TEMPLATE)/|
-            (^|/)pom[.]xml$|
-            ^[.]pre-commit-config[.]yaml$|
-            ^conda/environments/|
-            RAPIDS_BRANCH$|
-            [.](md|rst|avro|parquet|png|orc|gz|pkl|sas7bdat)$|
-            ^python/cudf/cudf/tests|
-            ^python/cudf/cudf/VERSION$
-      - id: verify-pyproject-license
-        # ignore the top-level pyproject.toml, which doesn't
-        # have or need a [project] table
-        exclude: |
-          (?x)
-            ^pyproject[.]toml$
-  - repo: https://github.com/rapidsai/dependency-file-generator
-    rev: v1.20.2
-    hooks:
-      - id: rapids-dependency-file-generator
-        args: ["--clean", "--warn-all", "--strict"]
-# >>>>>>> END NEW CODE (cf41006673)
+  # NOTE(HIP/AMD): rapidsai verify-copyright is disabled because hipDF source files
+  # carry AMD MIT copyright modifications that the upstream copyright checker rejects.
+  # Copyright verification is handled by the local `amd-copyright` hook above instead.
+  # - repo: https://github.com/rapidsai/pre-commit-hooks
+  #   rev: v1.4.1
+  #   hooks:
+  #     - id: verify-copyright
+  #       name: verify-copyright-cudf
+  #       args: [--fix, --spdx]
+  #       files: |
+  #         (?x)
+  #           [.](cmake|cpp|cu|cuh|h|hpp|sh|pxd|py|pyx|pyi|rs|java|bat)$|
+  #           CMakeLists[.]txt$|
+  #           CMakeLists_standalone[.]txt$|
+  #           meta[.]yaml$|
+  #           pyproject[.]toml$|
+  #           setup[.]cfg$|
+  #           ^cpp/src/text/detail/codepoint_metadata[.]ah$|
+  #           ^cpp/src/strings/regex/regex[.]inl$|
+  #           ^cpp/src/io/parquet/ipc/schema/.*[.]fbs$|
+  #           ^java/pom[.]xml$|
+  #           ^java/buildscripts/build-info$|
+  #           ^java/ci/Dockerfile[.]rocky$|
+  #           recipe[.]yaml$|
+  #           dependencies[.]yaml$|
+  #           pytest[.]ini$|
+  #           ^[.]pre-commit-config[.]yaml$|
+  #           Makefile$
+  #       # TODO: Remove FindCUDAToolkit once we require CMake 4.4
+  #       exclude: |
+  #         (?x)^(
+  #           cpp/include/cudf_test/cxxopts[.]hpp$|
+  #           cpp/src/io/parquet/ipc/Message_generated[.]h$|
+  #           cpp/src/io/parquet/ipc/Schema_generated[.]h$|
+  #           cpp/src/io/comp/brotli_dict[.]cpp$|
+  #           cpp/src/io/comp/brotli_dict[.]hpp$|
+  #           cpp/src/io/comp/brotli_tables[.]hpp$|
+  #           cpp/src/io/comp/debrotli[.]cu$|
+  #           cpp/src/io/comp/cpu_unbz2[.]cpp$|
+  #           cpp/src/io/comp/unbz2[.]hpp$|
+  #           cpp/src/io/comp/gpuinflate[.]cu$|
+  #           cpp/src/io/utilities/base64_utilities[.]cpp$|
+  #           cpp/src/io/utilities/base64_utilities[.]hpp$|
+  #           cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
+  #         )
+  #     - id: verify-copyright
+  #       name: verify-copyright-brotli
+  #       args: [--fix, --spdx, "--spdx-license-identifier=Apache-2.0 AND MIT"]
+  #       files: |
+  #         (?x)^(
+  #           cpp/src/io/comp/brotli_dict[.]cpp$|
+  #           cpp/src/io/comp/brotli_dict[.]hpp$|
+  #           cpp/src/io/comp/brotli_tables[.]hpp$|
+  #           cpp/src/io/comp/debrotli[.]cu$
+  #         )
+  #     - id: verify-copyright
+  #       name: verify-copyright-bzip2
+  #       args: [--fix, --spdx, "--spdx-license-identifier=Apache-2.0 AND bzip2-1.0.6"]
+  #       files: |
+  #         (?x)^(
+  #           cpp/src/io/comp/cpu_unbz2[.]cpp$|
+  #           cpp/src/io/comp/unbz2[.]hpp$
+  #         )
+  #     - id: verify-copyright
+  #       name: verify-copyright-zlib
+  #       args: [--fix, --spdx, "--spdx-license-identifier=Apache-2.0 AND Zlib"]
+  #       files: |
+  #         (?x)^(
+  #           cpp/src/io/comp/gpuinflate[.]cu$|
+  #           cpp/src/io/utilities/base64_utilities[.]cpp$|
+  #           cpp/src/io/utilities/base64_utilities[.]hpp$
+  #         )
+  #     - id: verify-copyright
+  #       name: verify-copyright-cxxopts
+  #       args: [--fix, --spdx, "--spdx-license-identifier=MIT"]
+  #       files: |
+  #         (?x)^(
+  #           cpp/include/cudf_test/cxxopts[.]hpp$
+  #         )
+  #     - id: verify-alpha-spec
+  #     - id: verify-codeowners
+  #       args: [--fix, --project-prefix=cudf]
+  #     - id: verify-hardcoded-version
+  #       exclude: |
+  #         (?x)
+  #           (^|/)devcontainer[.]json$|
+  #           (^|/)dependencies[.]yaml$|
+  #           ^[.]github/(workflows|ISSUE_TEMPLATE)/|
+  #           (^|/)pom[.]xml$|
+  #           ^[.]pre-commit-config[.]yaml$|
+  #           ^conda/environments/|
+  #           RAPIDS_BRANCH$|
+  #           [.](md|rst|avro|parquet|png|orc|gz|pkl|sas7bdat)$|
+  #           ^python/cudf/cudf/tests|
+  #           ^python/cudf/cudf/VERSION$
+  #     - id: verify-pyproject-license
+  #       # ignore the top-level pyproject.toml, which doesn't
+  #       # have or need a [project] table
+  #       exclude: |
+  #         (?x)
+  #           ^pyproject[.]toml$
+  # - repo: https://github.com/rapidsai/dependency-file-generator
+  #   rev: v1.20.2
+  #   hooks:
+  #     - id: rapids-dependency-file-generator
+  #       args: ["--clean", "--warn-all", "--strict"]
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
         args: ["--severity=warning"]
-# <<<<<<< OLD CODE from 9eea7a834a (f1a6182868) - COMMENTED OUT
-# =======
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.24.1
     hooks:
       - id: zizmor
 
-# >>>>>>> END NEW CODE (f1a6182868)
 default_language_version:
       python: python3

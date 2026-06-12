@@ -32,12 +32,8 @@
 #include <cudf/detail/utilities/cuda.cuh>
 #include <rmm/cuda_stream_view.hpp>
 
-// <<<<<<< OLD CODE from 43bd0b08d3 (17533d4db9) - COMMENTED OUT
-// #include <hipcub/hipcub.hpp>
-// =======
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
-// >>>>>>> END NEW CODE (17533d4db9)
 
 namespace cudf::io::orc::detail {
 

@@ -46,24 +46,20 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
-// #include <hip/hip_cooperative_groups.h>
-// //#include <cooperative_groups/reduce.h>
-// //TODO(HIP/AMD): This is a temporary workaround for
-// // the missing cg::reduce APIs in HIP's cooperative groups.
-// #include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
-// #include <hip/amd_detail/amd_warp_sync_functions.h>
-//
-// =======
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+//#include <cooperative_groups/reduce.h>
+//TODO(HIP/AMD): This is a temporary workaround for
+// the missing cg::reduce APIs in HIP's cooperative groups.
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <hip/amd_detail/amd_warp_sync_functions.h>
+#else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
+#endif
 #include <cuda/iterator>
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (c4e8151cb0)
-// =======
 #include <cuda/std/algorithm>
 #include <cuda/std/limits>
-// >>>>>>> END NEW CODE (2d6106360e)
 #include <cuda/std/utility>
 #include <thrust/transform.h>
 

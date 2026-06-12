@@ -1309,12 +1309,8 @@ TYPED_TEST(RowGroupFilteringWithDictTest, FilterFewLiteralsTyped)
   // Specifying SNAPPY compression to explicitly test decompression of dictionary pages
   /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead. */
   auto const buffer =
-// <<<<<<< OLD CODE from 5aeed34bdd (cf3ee797ce) - COMMENTED OUT
-//     std::get<1>(create_parquet_with_stats<T, num_concat>(100, cudf::io::compression_type::SNAPPY));
-// =======
     std::get<1>(create_parquet_with_stats<T, num_concat, is_constant_strings, is_nullable>(
-      100, cudf::io::compression_type::ZSTD));
-// >>>>>>> END NEW CODE (cf3ee797ce)
+      100, cudf::io::compression_type::SNAPPY));
 
   // For string tests use `col2` containing constant "0100" and for temporal types use `col1`
   // containing low cardinality descending values. For all other types use `col0`

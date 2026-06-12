@@ -42,11 +42,8 @@
 #include <rocprim/types/tuple.hpp>
 #else
 #include <cub/device/device_radix_sort.cuh>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #endif
-// =======
+#endif
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/sequence.h>
 #include <thrust/transform.h>

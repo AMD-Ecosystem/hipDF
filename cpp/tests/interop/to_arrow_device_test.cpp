@@ -269,24 +269,10 @@ struct BaseArrowFixture : public cudf::test::BaseFixture {
                               ArrowArray const* expected,
                               ArrowArray const* actual)
   {
-// <<<<<<< OLD CODE from 7d9229ce89 (75be900cb6) - COMMENTED OUT
-//     std::vector<uint8_t> actual_bytes;
-//     std::vector<uint8_t> expected_bytes;
-//     expected_bytes.resize(nbytes);
-//     actual_bytes.resize(nbytes);
-//
-//     // synchronous copies so we don't have to worry about async weirdness
-//     CUDF_CUDA_TRY(cudaMemcpy(
-//       expected_bytes.data(), expected->buffers[buffer_idx], nbytes, cudaMemcpyDeviceToHost));
-//     CUDF_CUDA_TRY(cudaMemcpy(actual_bytes.data(), actual->buffers[buffer_idx], nbytes, cudaMemcpyDeviceToHost));
-//
-//     ASSERT_EQ(expected_bytes, actual_bytes);
-// =======
     auto const dt       = cudf::data_type{cudf::type_id::UINT8};
     auto actual_bytes   = cudf::column_view(dt, nbytes, actual->buffers[buffer_idx], nullptr, 0);
     auto expected_bytes = cudf::column_view(dt, nbytes, expected->buffers[buffer_idx], nullptr, 0);
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(actual_bytes, expected_bytes);
-// >>>>>>> END NEW CODE (75be900cb6)
   }
 
   void compare_arrays(ArrowSchema const* schema,

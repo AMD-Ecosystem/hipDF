@@ -42,14 +42,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_buffer.hpp>
 
-// <<<<<<< OLD CODE from d3130b6773 (9a0bddb746) - COMMENTED OUT
-// #include <hip/hip_cooperative_groups.h>
-// #include <hipcub/hipcub.hpp>
-// =======
-#include <cooperative_groups.h>
-#include <cooperative_groups/reduce.h>
-#include <cub/cub.cuh>
-// >>>>>>> END NEW CODE (9a0bddb746)
+#include <hip/hip_cooperative_groups.h>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 #include <thrust/execution_policy.h>
 #include <thrust/tabulate.h>
@@ -180,14 +174,10 @@ CUDF_KERNEL void set_null_masks_kernel(cudf::device_span<bitmask_type*> destinat
                                        cudf::device_span<bool const> valids,
                                        cudf::device_span<size_type const> numbers_of_mask_words)
 {
-// <<<<<<< OLD CODE from d3130b6773 (9a0bddb746) - COMMENTED OUT
-//   // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-//   // currently missing in HIP cooperative groups
-//   auto const bitmask_idx = blockIdx.x;
-// =======
-  namespace cg           = cooperative_groups;
-  auto const bitmask_idx = cg::this_grid().block_rank();
-// >>>>>>> END NEW CODE (9a0bddb746)
+  namespace cg = cooperative_groups;
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  auto const bitmask_idx = blockIdx.x;
   // Return early if nothing to do
   if (begin_bits[bitmask_idx] == end_bits[bitmask_idx]) { return; }
   set_null_mask_impl<cg::thread_block, MODE>(destinations[bitmask_idx],

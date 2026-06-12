@@ -45,16 +45,9 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from 24cfff7e23 (21cd733d12) - COMMENTED OUT
-// #include <hipcub/hipcub.hpp>
-// =======
 #include <cooperative_groups.h>
-#include <cub/cub.cuh>
-// <<<<<<< OLD CODE from 489b45b2f6 (683861603a) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (21cd733d12)
-// =======
+#include <hipcub/hipcub.hpp>
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (683861603a)
 #include <cuda/std/chrono>
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
@@ -2552,12 +2545,7 @@ CUDF_KERNEL void __launch_bounds__(decide_compression_block_size)
   namespace cg = cooperative_groups;
 
   __shared__ __align__(8) EncColumnChunk ck_g[decide_compression_warps_in_block];
-// <<<<<<< OLD CODE from ecb3212990 (8e4e1b76d0) - COMMENTED OUT
-//   __shared__ __align__(4) unsigned int compression_error[decide_compression_warps_in_block];
-//   using warp_reduce = hipcub::WarpReduce<uint32_t>;
-// =======
-  using warp_reduce = cub::WarpReduce<uint32_t>;
-// >>>>>>> END NEW CODE (8e4e1b76d0)
+  using warp_reduce = hipcub::WarpReduce<uint32_t>;
   __shared__ typename warp_reduce::TempStorage temp_storage[decide_compression_warps_in_block][2];
 
   auto const block    = cg::this_thread_block();

@@ -1,36 +1,27 @@
-# <<<<<<< OLD CODE from b0136ad397 (06071e51a8) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 1ae25e5356 (cf41006673) - COMMENTED OUT
-# # # Copyright (c) 2021-2025, NVIDIA CORPORATION.
-# #
-# # # MIT License
-# # #
-# # # Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
-# # #
-# # # Permission is hereby granted, free of charge, to any person obtaining a copy
-# # # of this software and associated documentation files (the "Software"), to deal
-# # # in the Software without restriction, including without limitation the rights
-# # # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# # # copies of the Software, and to permit persons to whom the Software is
-# # # furnished to do so, subject to the following conditions:
-# # #
-# # # The above copyright notice and this permission notice shall be included in all
-# # # copies or substantial portions of the Software.
-# # #
-# # # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# # # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# # # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# # # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# # # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# # # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# # # SOFTWARE.
-# #
-# # =======
-# # SPDX-FileCopyrightText: Copyright (c) 2021-2025, NVIDIA CORPORATION.
-# =======
-# SPDX-FileCopyrightText: Copyright (c) 2021-2026, NVIDIA CORPORATION.
-# >>>>>>> END NEW CODE (06071e51a8)
-# SPDX-License-Identifier: Apache-2.0
-# >>>>>>> END NEW CODE (cf41006673)
+# Copyright (c) 2021-2026, NVIDIA CORPORATION.
+
+# MIT License
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Base class for Frame types that have an index."""
 
 from __future__ import annotations
@@ -414,19 +405,9 @@ class IndexedFrame(Frame):
         Akin to cudf.DataFrame(...).loc[:, labels]
         """
         return self._from_data(
-# <<<<<<< OLD CODE from b8250c6b12 (293c12e818) - COMMENTED OUT
-# # <<<<<<< OLD CODE from a63150f8d7 (8ce6cc0d12) - COMMENTED OUT
-# #             self._data.select_by_label(labels),
-# #             index=self.index,
-# #             attrs=self.attrs,
-# # =======
-#             self._data.select_by_label(labels), index=self.index
-# # >>>>>>> END NEW CODE (8ce6cc0d12)
-# =======
             self._data.select_by_label(labels),
             index=self.index,
             attrs=self.attrs,
-# >>>>>>> END NEW CODE (293c12e818)
         )
 
     @_performance_tracking

@@ -48,14 +48,10 @@ namespace cudf::groupby::detail {
 namespace {
 
 template <typename Source>
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-// // NOTE(HIP/AMD): __host__ is necessary because this function is called in a requires clause
-// // during constraint checking at compile-time, which happens on the host. HIP requires explicit
-// // __host__ qualification for constexpr functions used in compile-time contexts.
-// __host__ __device__ constexpr bool is_m2_supported()
-// =======
-constexpr bool is_m2_supported()
-// >>>>>>> END NEW CODE (2d6106360e)
+// NOTE(HIP/AMD): __host__ is necessary because this function is called in a requires clause
+// during constraint checking at compile-time, which happens on the host. HIP requires explicit
+// __host__ qualification for constexpr functions used in compile-time contexts.
+__host__ __device__ constexpr bool is_m2_supported()
 {
   return is_numeric<Source>() && !is_fixed_point<Source>();
 }

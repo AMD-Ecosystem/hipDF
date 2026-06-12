@@ -32,12 +32,8 @@
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/detail/utilities/integer_utils.hpp>
 
-// <<<<<<< OLD CODE from 43bd0b08d3 (17533d4db9) - COMMENTED OUT
-// #include <hipcub/hipcub.hpp>
-// =======
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
-// >>>>>>> END NEW CODE (17533d4db9)
 #include <cuda/std/limits>
 #include <cuda/std/type_traits>
 

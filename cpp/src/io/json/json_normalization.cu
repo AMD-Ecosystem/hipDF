@@ -391,13 +391,8 @@ std::
 
   {
     // cub device batched copy
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-//     size_t temp_storage_bytes = 0;
-//     CUDF_CUDA_TRY(hipcub::DeviceCopy::Batched(nullptr,
-// =======
     std::size_t temp_storage_bytes = 0;
-    cub::DeviceCopy::Batched(nullptr,
-// >>>>>>> END NEW CODE (4b19041ca0)
+    CUDF_CUDA_TRY(hipcub::DeviceCopy::Batched(nullptr,
                              temp_storage_bytes,
                              input_it,
                              output_it,

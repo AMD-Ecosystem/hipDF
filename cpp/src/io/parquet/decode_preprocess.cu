@@ -57,164 +57,6 @@ constexpr int level_decode_block_size = 128;
 using unused_state_buf = page_state_buffers_s<0, 0, 0>;
 
 /**
-// <<<<<<< OLD CODE from 0d2d7680e0 (c4f73b46d9) - COMMENTED OUT
-//  * @brief Calculate string bytes for DELTA_LENGTH_BYTE_ARRAY encoded pages
-//  *
-//  * Operates at thread block level. Result is valid only on thread 0.
-//  *
-//  * @param s The local page info
-//  * @param block Thread block cooperative group
-//  */
-// __device__ size_type delta_length_page_string_size(page_state_s* s, cg::thread_block const& block)
-// {
-//   if (block.thread_rank() == 0) {
-//     // find the beginning of char data
-//     delta_binary_decoder string_lengths;
-//     auto const* string_start = string_lengths.find_end_of_block(s->data_start, s->data_end);
-//     // distance is size of string data
-//     return static_cast<size_type>(cuda::std::distance(string_start, s->data_end));
-//   }
-//   return 0;
-// }
-//
-// /**
-//  * @brief Calculate string bytes for DELTA_BYTE_ARRAY encoded pages
-//  *
-//  * Operates at thread block level of size preprocess_block_size.
-//  *
-//  * @param s The local page info
-//  * @param block Thread block cooperative group
-//  */
-// __device__ size_type delta_page_string_size(page_state_s* s, cg::thread_block const& block)
-// {
-//   using WarpReduce = hipcub::WarpReduce<uleb128_t>;
-//   __shared__ typename WarpReduce::TempStorage temp_storage[2];
-//
-//   __shared__ __align__(16) delta_binary_decoder prefixes;
-//   __shared__ __align__(16) delta_binary_decoder suffixes;
-//
-//   auto const warp = cg::tiled_partition<cudf::detail::warp_size>(block);
-//
-//   if (block.thread_rank() == 0) {
-//     auto const* suffix_start = prefixes.find_end_of_block(s->data_start, s->data_end);
-//     suffixes.init_binary_block(suffix_start, s->data_end);
-//   }
-//   block.sync();
-//
-//   // two warps will traverse the prefixes and suffixes and sum them up
-//   auto const db = warp.meta_group_rank() == 0   ? &prefixes
-//                   : warp.meta_group_rank() == 1 ? &suffixes
-//                                                 : nullptr;
-//
-//   size_t total_bytes = 0;
-//   if (db != nullptr) {
-//     // initialize with first value (which is stored in last_value)
-//     if (warp.thread_rank() == 0) { total_bytes = db->last_value; }
-//
-//     uleb128_t lane_sum = 0;
-//     while (db->current_value_idx < db->num_encoded_values(true)) {
-//       // calculate values for current mini-block
-//       db->calc_mini_block_values(warp.thread_rank());
-//
-//       // get per lane sum for mini-block
-//       for (uint32_t i = 0; i < db->values_per_mb; i += warp.size()) {
-//         uint32_t const idx = db->current_value_idx + i + warp.thread_rank();
-//         // NOTE(HIP/AMD): We ensure here that only values_per_mb threads access db->value[]
-//         if (idx < db->value_count && warp.thread_rank() < db->values_per_mb) {
-//           lane_sum += db->value[rolling_index<delta_rolling_buf_size>(idx)];
-//         }
-//       }
-//
-//       if (warp.thread_rank() == 0) { db->setup_next_mini_block(true); }
-//       // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
-//       // which is a heavyweight system-wide memory fence. For warp-level coordination after thread-0
-//       // updates decoder state, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier)
-//       // and provides significantly better performance.
-// #ifndef __HIP_PLATFORM_AMD__
-//       warp.sync();
-// #else
-//       __syncwarp();
-// #endif
-//     }
-//
-//     // get sum for warp.
-//     // note: warp_sum will only be valid on lane 0.
-//     auto const warp_sum = WarpReduce(temp_storage[warp.meta_group_rank()]).Sum(lane_sum);
-//
-//     if (warp.thread_rank() == 0) { total_bytes += warp_sum; }
-//   }
-//   block.sync();
-//
-//   // now sum up total_bytes from the two warps. result is only valid on thread 0.
-//   auto const final_bytes =
-//     cudf::detail::single_lane_block_sum_reduce<preprocess_block_size, 0>(total_bytes);
-//
-//   return static_cast<size_type>(final_bytes);
-// }
-//
-// /**
-//  * @brief Calculate the number of string bytes in the page.
-//  *
-//  * This function expects the dictionary position to be at 0 and will traverse
-//  * the entire thing (for plain and dictionary encoding).
-//  *
-//  * Operates at thread block level of size preprocess_block_size. Result is only
-//  * valid on thread 0.
-//  *
-//  * @param s The local page info
-//  * @param block Thread block cooperative group
-//  *
-//  * @return The number of string bytes in the page
-//  */
-// __device__ size_type decode_total_page_string_size(page_state_s* s, cg::thread_block const& block)
-// {
-//   auto const warp      = cg::tiled_partition<cudf::detail::warp_size>(block);
-//   size_type target_pos = s->num_input_values;
-//   size_type str_len    = 0;
-//   switch (s->page.encoding) {
-//     case Encoding::PLAIN_DICTIONARY:
-//     case Encoding::RLE_DICTIONARY:
-//       // Use warp 0 to decode dictionary indices and return the new target position
-//       if (warp.meta_group_rank() == 0 && s->dict_base) {
-//         auto const [new_target_pos, len] =
-//           decode_dictionary_indices<is_calc_sizes_only::YES, unused_state_buf>(
-//             s, nullptr, target_pos, warp);
-//         target_pos = new_target_pos;
-//         str_len    = len;
-//       }
-//       break;
-//
-//     case Encoding::PLAIN:
-//       // For V2 headers, we know how many values are present, so can skip an expensive scan.
-//       if ((s->page.flags & PAGEINFO_FLAGS_V2) != 0) {
-//         auto const num_values = s->page.num_input_values - s->page.num_nulls;
-//         str_len               = s->dict_size - sizeof(int) * num_values;
-//       }
-//       // For V1, the choice is an overestimate (s->dict_size), or an exact number that's
-//       // expensive to compute. For now we're going with the latter.
-//       else {
-//         str_len = initialize_string_descriptors<is_calc_sizes_only::YES, unused_state_buf>(
-//           s, nullptr, target_pos, block);
-//       }
-//       break;
-//
-//     case Encoding::DELTA_LENGTH_BYTE_ARRAY:
-//       str_len = delta_length_page_string_size(s, block);
-//       break;
-//
-//     case Encoding::DELTA_BYTE_ARRAY: str_len = delta_page_string_size(s, block); break;
-//
-//     default:
-//       // not a valid string encoding, so just return 0
-//       break;
-//   }
-//   if (!block.thread_rank()) { s->dict_pos = target_pos; }
-//   return str_len;
-// }
-//
-// /**
-// =======
-// >>>>>>> END NEW CODE (c4f73b46d9)
  * @brief Update output column sizes for every nesting level based on a batch
  * of incoming decoded definition and repetition level values.
  *
@@ -578,7 +420,9 @@ CUDF_KERNEL void __launch_bounds__(level_decode_block_size)
 
   page_state_s* const s = &state_g;
   auto const block      = cg::this_thread_block();
-  int const page_idx    = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  int const page_idx    = blockIdx.x;
   int const t           = block.thread_rank();
   PageInfo* pp          = &pages[page_idx];
 
@@ -671,23 +515,11 @@ void compute_page_sizes(cudf::detail::hostdevice_span<PageInfo> pages,
   // If uses_custom_row_bounds is set to true, we have to do a second pass later that "trims"
   // the starting and ending read values to account for these bounds.
   if (level_type_size == 1) {
-// <<<<<<< OLD CODE from 0d2d7680e0 (c4f73b46d9) - COMMENTED OUT
-//     compute_page_sizes_kernel<uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
-//       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows, compute_string_sizes);
-//   } else {
-//     compute_page_sizes_kernel<uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
-//       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows, compute_string_sizes);
-// =======
     compute_page_sizes_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, page_mask, min_row, num_rows, compute_num_rows);
   } else {
     compute_page_sizes_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
-// <<<<<<< OLD CODE from 929ac51935 (d71ca42e83) - COMMENTED OUT
-//       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows);
-// // >>>>>>> END NEW CODE (c4f73b46d9)
-// =======
       pages.device_ptr(), chunks, page_mask, min_row, num_rows, compute_num_rows);
-// >>>>>>> END NEW CODE (d71ca42e83)
   }
 }
 

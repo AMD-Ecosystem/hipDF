@@ -45,12 +45,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #include <cuda/std/cmath>
-//
-// =======
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
+#include <cuda/std/cmath>
 #include <thrust/transform.h>
 
 namespace cudf {

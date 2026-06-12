@@ -43,12 +43,8 @@
 #include <rmm/device_uvector.hpp>
 
 #include <cuda/atomic>
-// <<<<<<< OLD CODE from 33f707a7fb (ce56938877) - COMMENTED OUT
-// #include <cudf/cuda_runtime.h>
-// =======
 #include <cuda/std/optional>
-#include <cuda_runtime.h>
-// >>>>>>> END NEW CODE (ce56938877)
+#include <cudf/cuda_runtime.h>
 
 #include <type_traits>
 #include <utility>

@@ -1152,11 +1152,8 @@ TEST_F(ParquetChunkedReaderTest, TestChunkedReadNullCount)
 }
 
 namespace {
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// constexpr size_t input_limit_expected_file_count = 3; // TODO(HIP/AMD): // TODO(HIP/AMD): Increase to 4 when ZSTD is available
-// =======
-constexpr std::size_t input_limit_expected_file_count = 4;
-// >>>>>>> END NEW CODE (4b19041ca0)
+// TODO(HIP/AMD): Increase to 4 when ZSTD is available
+constexpr std::size_t input_limit_expected_file_count = 3;
 
 std::vector<std::string> input_limit_get_test_names(std::string const& base_filename)
 {
@@ -2228,11 +2225,7 @@ INSTANTIATE_TEST_CASE_P(Host,
                         ParquetChunkedDecompressionTest,
                         ::testing::Combine(::testing::Values("HOST"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-// <<<<<<< OLD CODE from ff25136660 (d4a7e274af) - COMMENTED OUT
-//                                                              cudf::io::compression_type::SNAPPY)));
-// =======
-                                                             cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::ZSTD)));
+                                                             cudf::io::compression_type::SNAPPY)));
 
 TEST_F(ParquetChunkedReaderTest, ReadStringsWithRowBounds)
 {
@@ -2289,4 +2282,3 @@ TEST_F(ParquetChunkedReaderTest, ReadStringsWithRowBounds)
   EXPECT_GT(num_chunks, 1);
   CUDF_TEST_EXPECT_TABLES_EQUAL(expected[0], chunked_result->view());
 }
-// >>>>>>> END NEW CODE (d4a7e274af)

@@ -32,13 +32,8 @@ from threading import RLock
 from typing import TYPE_CHECKING, Any, Literal, Self
 
 import numpy
-# <<<<<<< OLD CODE from 4ba5c9b26c (d728df239b) - COMMENTED OUT
-#
-# #: import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
-# from typing_extensions import Self
-# =======
-import nvtx
-# >>>>>>> END NEW CODE (d728df239b)
+
+#: import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 
 import rmm
 
@@ -49,12 +44,10 @@ from cudf.core.buffer.buffer import (
     host_memory_allocation,
 )
 from cudf.core.buffer.string import format_bytes
-# <<<<<<< OLD CODE from cdb3d8e9c1 (6737645b3f) - COMMENTED OUT
-# from cudf.utils.performance_tracking import _get_color_for_nvtx, nvtx
-# =======
 from cudf.options import get_option
-from cudf.utils.performance_tracking import _get_color_for_nvtx
-# >>>>>>> END NEW CODE (6737645b3f)
+
+#: NOTE(HIP/AMD): we use the mock nvtx class from performance_tracking instead (2/2)
+from cudf.utils.performance_tracking import _get_color_for_nvtx, nvtx
 
 if TYPE_CHECKING:
     from cudf.core.buffer.spill_manager import SpillManager

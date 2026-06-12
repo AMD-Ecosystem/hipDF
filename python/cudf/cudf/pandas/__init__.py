@@ -26,11 +26,8 @@
 import os
 import warnings
 
-# <<<<<<< OLD CODE from fd8b49279d (7d059cc671) - COMMENTED OUT
-# from hip import hip
-# =======
 from cuda.bindings import runtime
-# >>>>>>> END NEW CODE (7d059cc671)
+from hip import hip
 
 import pylibcudf
 import rmm.mr
@@ -173,13 +170,6 @@ def install():
             initial_pool_size=free_memory,
         )
     elif rmm_mode == "async":
-# <<<<<<< OLD CODE from 7bbc557c2c (2254349f6b) - COMMENTED OUT
-#         new_mr = rmm.mr.CudaAsyncMemoryResource(initial_pool_size=free_memory)
-#     elif rmm_mode == "managed":
-#         managed_mr = rmm.mr.ManagedMemoryResource()
-#         if use_prefetch_adaptor:
-#             new_mr = rmm.mr.PrefetchResourceAdaptor(managed_mr)
-# =======
         new_mr = rmm.mr.CudaAsyncMemoryResource()
     elif "managed" in rmm_mode:
         if not managed_memory_is_supported:
@@ -188,28 +178,26 @@ def install():
                 f"requested {rmm_mode=} is invalid."
             )
         if rmm_mode == "managed":
-            new_mr = rmm.mr.PrefetchResourceAdaptor(
-                rmm.mr.ManagedMemoryResource()
-            )
+            # TODO(HIP/AMD): only wrap in a PrefetchResourceAdaptor when
+            # prefetching is supported (disabled on MI300A and RDNA archs).
+            managed_mr = rmm.mr.ManagedMemoryResource()
+            if use_prefetch_adaptor:
+                new_mr = rmm.mr.PrefetchResourceAdaptor(managed_mr)
+            else:
+                new_mr = managed_mr
         elif rmm_mode == "managed_pool":
-            new_mr = rmm.mr.PrefetchResourceAdaptor(
-                rmm.mr.PoolMemoryResource(
-                    rmm.mr.ManagedMemoryResource(),
-                    initial_pool_size=free_memory,
-                )
+            # TODO(HIP/AMD): only wrap in a PrefetchResourceAdaptor when
+            # prefetching is supported (disabled on MI300A and RDNA archs).
+            pool_mr = rmm.mr.PoolMemoryResource(
+                rmm.mr.ManagedMemoryResource(),
+                initial_pool_size=free_memory,
             )
-# >>>>>>> END NEW CODE (2254349f6b)
+            if use_prefetch_adaptor:
+                new_mr = rmm.mr.PrefetchResourceAdaptor(pool_mr)
+            else:
+                new_mr = pool_mr
         else:
-            new_mr = managed_mr
-    elif rmm_mode == "managed_pool":
-        pool_mr = rmm.mr.PoolMemoryResource(
-            rmm.mr.ManagedMemoryResource(),
-            initial_pool_size=free_memory,
-        )
-        if use_prefetch_adaptor:
-            new_mr = rmm.mr.PrefetchResourceAdaptor(pool_mr)
-        else:
-            new_mr = pool_mr
+            raise ValueError(f"Unsupported {rmm_mode=}")
     elif rmm_mode != "cuda":
         raise ValueError(f"Unsupported {rmm_mode=}")
 

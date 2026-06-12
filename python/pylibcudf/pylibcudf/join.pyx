@@ -327,24 +327,10 @@ cpdef Table cross_join(
     mr = _get_memory_resource(mr)
 
     with nogil:
-# <<<<<<< OLD CODE from aab8177639 (86f2536f6e) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 4a6f2b5688 (87b9c41539) - COMMENTED OUT
-# #         result = cpp_join.cross_join(
-# #             left.view(), right.view(), stream.view(), mr.get_mr()
-# #         )
-# # =======
-#         result = cpp_join.cross_join(left.view(), right.view(), stream.view())
-# # >>>>>>> END NEW CODE (87b9c41539)
-# =======
         result = cpp_join.cross_join(
             left.view(), right.view(), _cs, mr.get_mr()
         )
-# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (86f2536f6e)
-#     return Table.from_libcudf(move(result), stream, mr)
-# =======
     return Table.from_libcudf(move(result), _stream, mr)
-# >>>>>>> END NEW CODE (640bfee89e)
 
 
 cpdef tuple conditional_inner_join(

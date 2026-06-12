@@ -35,12 +35,9 @@
 #include <cudf/detail/valid_if.cuh>
 #include <cudf/null_mask.hpp>
 #include <cudf/stream_compaction.hpp>
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-// #include <cudf/utilities/jit_amd_utilities.hpp>
-// =======
 #include <cudf/strings/detail/strings_column_factories.cuh>
 #include <cudf/strings/detail/utilities.hpp>
-// >>>>>>> END NEW CODE (5410620c91)
+#include <cudf/utilities/jit_amd_utilities.hpp>
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
@@ -85,84 +82,7 @@ struct fixed_width_column {
       make_fixed_width_column(type, size, std::move(null_mask), null_count, stream, mr)};
   }
 
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 59b8f88be1 (442af46486) - COMMENTED OUT
-// // // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-// // // jitify2::Kernel get_kernel(std::string const& kernel_name,
-// // //                            std::string const& cuda_source,
-// // //                            std::string const* llvm_ir = nullptr)
-// // // {
-// // // // <<<<<<< OLD CODE from dd0d19a1f1 (df596fd490) - COMMENTED OUT
-// // // //   const std::string arch_flag = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-// // // //   if (llvm_ir != nullptr && HIP_PLATFORM_AMD) {
-// // // //     return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-// // // //       .get_kernel(kernel_name,
-// // // //                   {},
-// // // //                   {{"cudf/detail/operation-udf.hpp", cuda_source}},
-// // // //                   {arch_flag},
-// // // //                   {},
-// // // //                   llvm_ir);
-// // // //   } else {
-// // // //     return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-// // // //       .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {arch_flag});
-// // // //   }
-// // // // =======
-// // //   CUDF_FUNC_RANGE();
-// // //   return cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-// // //     .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, {"-arch=sm_."});
-// // // // >>>>>>> END NEW CODE (df596fd490)
-// // // }
-// // //
-// // // =======
-// // // >>>>>>> END NEW CODE (d4e12e2fee)
-// // jitify2::StringVec build_jit_template_params(
-// //   null_aware is_null_aware,
-// //   bool may_evaluate_null,
-// //   bool has_user_data,
-// //   std::vector<std::string> const& span_outputs,
-// //   std::vector<std::string> const& column_outputs,
-// //   std::vector<cudf::jit::input_column_reflection> const& column_inputs)
-// // =======
-// jitify2::StringVec build_jit_template_params(null_aware is_null_aware,
-//                                              bool may_evaluate_null,
-//                                              bool has_user_data,
-//                                              std::span<std::string const> span_outputs,
-//                                              std::span<std::string const> column_outputs,
-//                                              std::span<cudf::jit::input_reflection const> inputs)
-// // >>>>>>> END NEW CODE (442af46486)
-// {
-//   jitify2::StringVec tparams;
-//
-//   tparams.emplace_back(jitify2::reflection::reflect(is_null_aware));
-//   tparams.emplace_back(jitify2::reflection::reflect(may_evaluate_null));
-//   tparams.emplace_back(jitify2::reflection::reflect(has_user_data));
-//
-//   std::transform(cuda::counting_iterator<std::size_t>{0},
-//                  cuda::counting_iterator{span_outputs.size()},
-//                  std::back_inserter(tparams),
-//                  [&](auto i) {
-//                    return jitify2::reflection::Template("cudf::jit::span_accessor")
-//                      .instantiate(span_outputs[i], i);
-//                  });
-//
-//   std::transform(cuda::counting_iterator<std::size_t>{0},
-//                  cuda::counting_iterator{column_outputs.size()},
-//                  std::back_inserter(tparams),
-//                  [&](auto i) {
-//                    return jitify2::reflection::Template("cudf::jit::column_accessor")
-//                      .instantiate(column_outputs[i], i);
-//                  });
-//
-//   std::transform(cuda::counting_iterator<std::size_t>{0},
-//                  cuda::counting_iterator{inputs.size()},
-//                  std::back_inserter(tparams),
-//                  [&](auto i) { return inputs[i].accessor(i); });
-//
-//   return tparams;
-// }
-// =======
   auto mutable_view() const { return mutable_fixed_width_column_view{_col->mutable_view()}; }
-// >>>>>>> END NEW CODE (5410620c91)
 
   void set_null_count(size_type count) { _col->set_null_count(count); }
 
@@ -269,104 +189,51 @@ jitify2::Kernel instantiate(null_aware is_null_aware,
                             std::string const& udf,
                             udf_source_type source_type)
 {
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 59b8f88be1 (442af46486) - COMMENTED OUT
-// //   std::string cuda_source;
-// //   std::string parsed_udf_llvm_ir;
-// //
-// //   if (is_ptx && HIP_PLATFORM_AMD) {
-// //     // NOTE(HIPRTC): This is a workaround for Jitify issue #55
-// //     // For AMD HIP, we need to handle LLVM IR instead of PTX
-// //     auto output_types = cudf::jit::column_type_names(output_columns);
-// //     auto input_types  = cudf::jit::column_type_names(input_columns);
-// //
-// //     cuda_source = "using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;";
-// //     cuda_source += "extern \"C\" __device__ void GENERIC_TRANSFORM_OP(";
-// //
-// //     // Build function signature
-// //     for (size_t i = 0; i < output_types.size(); ++i) {
-// //       if (i > 0) cuda_source += ",";
-// //       cuda_source += output_types[i] + "*";
-// //     }
-// //     if (!input_types.empty()) cuda_source += ",";
-// //     for (size_t i = 0; i < input_types.size(); ++i) {
-// //       if (i > 0) cuda_source += ",";
-// //       cuda_source += input_types[i];
-// //     }
-// //     if (has_user_data) cuda_source += ",void*";
-// //     cuda_source += ");";
-// //
-// //     parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_TRANSFORM_OP");
-// //     parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
-// //
-// //   } else {
-// //     cuda_source =
-// //       is_ptx ? cudf::jit::parse_single_function_ptx(
-// //                  udf,
-// //                  "GENERIC_TRANSFORM_OP",
-// //                  cudf::jit::build_ptx_params(cudf::jit::column_type_names(output_columns),
-// //                                              cudf::jit::column_type_names(input_columns),
-// //                                              has_user_data))
-// //              : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
-// //   }
-// //
-// // // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-// // //   return get_kernel(jitify2::reflection::Template(kernel_name)
-// // //                       .instantiate(build_jit_template_params(
-// // //                         is_null_aware,
-// // //                         may_evaluate_null,
-// // //                         has_user_data,
-// // //                         {},
-// // //                         cudf::jit::column_type_names(output_columns),
-// // //                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
-// // //                     cuda_source,
-// // //                     (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
-// // // =======
-// //   auto kernel_reflection = jitify2::reflection::Template(kernel_name)
-// //                              .instantiate(build_jit_template_params(
-// //                                is_null_aware,
-// //                                may_evaluate_null,
-// //                                has_user_data,
-// //                                {},
-// //                                cudf::jit::column_type_names(output_columns),
-// //                                cudf::jit::reflect_input_columns(base_column_size, input_columns)));
-// // =======
-//   auto output_typenames  = cudf::jit::output_type_names(output_columns);
-//   auto input_typenames   = cudf::jit::input_type_names(inputs);
-//   auto input_reflections = cudf::jit::reflect_inputs(inputs);
-//
-//   auto const cuda_source =
-//     (source_type == cudf::udf_source_type::PTX)
-//       ? cudf::jit::parse_single_function_ptx(
-//           udf,
-//           "GENERIC_TRANSFORM_OP",
-//           cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
-//       : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
-//
-//   auto kernel_reflection =
-//     jitify2::reflection::Template(kernel_name)
-//       .instantiate(build_jit_template_params(
-//         is_null_aware, may_evaluate_null, has_user_data, {}, output_typenames, input_reflections));
-// // >>>>>>> END NEW CODE (442af46486)
-//
-//   return cudf::jit::get_udf_kernel(*transform_jit_kernel_cu_jit, kernel_reflection, cuda_source)
-// // >>>>>>> END NEW CODE (d4e12e2fee)
-//     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value());
-// =======
   CUDF_FUNC_RANGE();
-  auto cuda_source = (source_type == udf_source_type::PTX)
-                       ? jit::parse_single_function_ptx(
-                           udf,
-                           "GENERIC_TRANSFORM_OP",
-                           jit::build_ptx_params(ptx_output_types, ptx_input_types, has_user_data))
-                       : jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
+
+  std::string cuda_source;
+  [[maybe_unused]] std::string parsed_udf_llvm_ir;
+
+  if constexpr (HIP_PLATFORM_AMD) {
+    // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+    // For AMD HIP, we need to handle LLVM IR instead of PTX
+    if (source_type == udf_source_type::PTX) {
+      cuda_source =
+        "using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;";
+      cuda_source += "extern \"C\" __device__ void GENERIC_TRANSFORM_OP(";
+
+      // Build function signature
+      for (size_t i = 0; i < ptx_output_types.size(); ++i) {
+        if (i > 0) cuda_source += ",";
+        cuda_source += ptx_output_types[i] + "*";
+      }
+      if (!ptx_input_types.empty()) cuda_source += ",";
+      for (size_t i = 0; i < ptx_input_types.size(); ++i) {
+        if (i > 0) cuda_source += ",";
+        cuda_source += ptx_input_types[i];
+      }
+      if (has_user_data) cuda_source += ",void*";
+      cuda_source += ");";
+
+      parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_TRANSFORM_OP");
+      parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
+    } else {
+      cuda_source = jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
+    }
+  } else {
+    cuda_source = (source_type == udf_source_type::PTX)
+                    ? jit::parse_single_function_ptx(
+                        udf,
+                        "GENERIC_TRANSFORM_OP",
+                        jit::build_ptx_params(ptx_output_types, ptx_input_types, has_user_data))
+                    : jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
+  }
 
   auto kernel = jitify2::reflection::Template("cudf::jit::transform_kernel")
                   .instantiate(is_null_aware, has_user_data, ins, outs);
 
   return jit::get_udf_kernel(
     *transform_jit_kernel_cu_jit, kernel, cuda_source, {"-restrict", "--dopt=on"});
-// >>>>>>> END NEW CODE (5410620c91)
 }
 
 void launch(jitify2::Kernel const& kernel,
@@ -377,103 +244,9 @@ void launch(jitify2::Kernel const& kernel,
             mutable_column_device_view_core const* output_cols,
             rmm::cuda_stream_view stream)
 {
-// <<<<<<< OLD CODE from dd0d19a1f1 (df596fd490) - COMMENTED OUT
-//   std::string cuda_source;
-//   std::string parsed_udf_llvm_ir;
-//
-//   if (is_ptx && HIP_PLATFORM_AMD) {
-//     // NOTE(HIPRTC): This is a workaround for Jitify issue #55
-//     // For AMD HIP, we need to handle LLVM IR instead of PTX
-//     auto input_types = cudf::jit::column_type_names(input_columns);
-//
-//     cuda_source = "using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;";
-//     cuda_source += "extern \"C\" __device__ void GENERIC_TRANSFORM_OP(";
-//
-//     // Build function signature
-//     for (size_t i = 0; i < span_outputs.size(); ++i) {
-//       if (i > 0) cuda_source += ",";
-//       cuda_source += span_outputs[i] + "*";
-//     }
-//     if (!input_types.empty()) cuda_source += ",";
-//     for (size_t i = 0; i < input_types.size(); ++i) {
-//       if (i > 0) cuda_source += ",";
-//       cuda_source += input_types[i];
-//     }
-//     if (has_user_data) cuda_source += ",void*";
-//     cuda_source += ");";
-//
-//     parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_TRANSFORM_OP");
-//     parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
-//
-//   } else {
-//     cuda_source =
-//       is_ptx ? cudf::jit::parse_single_function_ptx(
-//                  udf,
-//                  "GENERIC_TRANSFORM_OP",
-//                  cudf::jit::build_ptx_params(
-//                    span_outputs, cudf::jit::column_type_names(input_columns), has_user_data))
-//              : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
-//   }
-// =======
   CUDF_FUNC_RANGE();
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-//   auto output_typenames  = span_outputs;
-//   auto input_typenames   = cudf::jit::input_type_names(inputs);
-//   auto input_reflections = cudf::jit::reflect_inputs(inputs);
-//
-//   auto const cuda_source =
-// // <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
-// //     is_ptx ? cudf::jit::parse_single_function_ptx(
-// //                udf,
-// //                "GENERIC_TRANSFORM_OP",
-// //                cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
-// //            : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
-// // // <<<<<<< OLD CODE from 59b8f88be1 (442af46486) - COMMENTED OUT
-// // // // >>>>>>> END NEW CODE (df596fd490)
-// // //
-// // // // <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-// // // //   return get_kernel(jitify2::reflection::Template(kernel_name)
-// // // //                       .instantiate(build_jit_template_params(
-// // // //                         is_null_aware,
-// // // //                         may_evaluate_null,
-// // // //                         has_user_data,
-// // // //                         span_outputs,
-// // // //                         {},
-// // // //                         cudf::jit::reflect_input_columns(base_column_size, input_columns))),
-// // // //                     cuda_source,
-// // // //                     (is_ptx && HIP_PLATFORM_AMD) ? &parsed_udf_llvm_ir : nullptr)
-// // // // =======
-// // //   auto kernel_reflection = jitify2::reflection::Template(kernel_name)
-// // //                              .instantiate(build_jit_template_params(
-// // //                                is_null_aware,
-// // //                                may_evaluate_null,
-// // //                                has_user_data,
-// // //                                span_outputs,
-// // //                                {},
-// // //                                cudf::jit::reflect_input_columns(base_column_size, input_columns)));
-// // // =======
-// // =======
-//     (source_type == cudf::udf_source_type::PTX)
-//       ? cudf::jit::parse_single_function_ptx(
-//           udf,
-//           "GENERIC_TRANSFORM_OP",
-//           cudf::jit::build_ptx_params(output_typenames, input_typenames, has_user_data))
-//       : cudf::jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
-// // >>>>>>> END NEW CODE (924d3073fb)
-//
-//   auto kernel_reflection =
-//     jitify2::reflection::Template(kernel_name)
-//       .instantiate(build_jit_template_params(
-//         is_null_aware, may_evaluate_null, has_user_data, span_outputs, {}, input_reflections));
-// // >>>>>>> END NEW CODE (442af46486)
-//
-//   return cudf::jit::get_udf_kernel(*transform_jit_kernel_cu_jit, kernel_reflection, cuda_source)
-// // >>>>>>> END NEW CODE (d4e12e2fee)
-//     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value());
-// =======
   void* args[] = {&row_size, &stencil, &user_data, &input_cols, &output_cols};
   kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())->launch_raw(args);
-// >>>>>>> END NEW CODE (5410620c91)
 }
 
 std::string reflect_input_element(column_view const& c) { return type_to_name(c.type()); }
@@ -509,16 +282,9 @@ std::string reflect_output_column(string_views_column const&)
   return "cudf::jit::mutable_vector_device_view";
 }
 
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-//   // NOTE(HIP/AMD): Using launch() instead of launch_raw() for compatibility with
-//   // the current jitify-hip on HIP/ROCm.
-//   // TODO(HIP/AMD): Switch back to launch_raw() when supported again.
-//   kernel->launch(args.data());
-// =======
 std::string reflect_output_column(mutable_strings_column const&)
 {
   return "cudf::jit::mutable_strings_column_device_view";
-// >>>>>>> END NEW CODE (5410620c91)
 }
 
 auto reflect(udf_source_type source_type,
@@ -556,12 +322,6 @@ auto reflect(udf_source_type source_type,
   std::vector<std::string> ptx_in_types;
   std::vector<std::string> ptx_out_types;
 
-// <<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-//   // NOTE(HIP/AMD): Using launch() instead of launch_raw() for compatibility with
-//   // the current jitify-hip on HIP/ROCm.
-//   // TODO(HIP/AMD): Switch back to launch_raw() when supported again.
-//   kernel->launch(args.data());
-// =======
   if (source_type == udf_source_type::PTX) {
     for (auto& in : inputs) {
       ptx_in_types.push_back(std::visit([](auto& c) { return reflect_input_element(c); }, in));
@@ -573,7 +333,6 @@ auto reflect(udf_source_type source_type,
   }
 
   return std::make_tuple(ins, outs, ptx_in_types, ptx_out_types);
-// >>>>>>> END NEW CODE (5410620c91)
 }
 
 auto to_args(std::span<input_column_view const> inputs,

@@ -200,22 +200,24 @@ void binary_operation(mutable_column_view& out,
                                                  cudf::type_to_name(rhs.type()),
                                                  std::string("cudf::binops::jit::UserDefinedOp"));
 
-// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-//   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
-//   jitify2::Kernel kernel;
-//   // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
-//   if constexpr(HIP_PLATFORM_AMD) {
-//     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-//       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);
-//   } else {
-//     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-//       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});
-//   }
-//   kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
-// =======
-  cudf::jit::get_udf_kernel(*binaryop_jit_kernel_cu_jit, kernel_reflection, cuda_source)
+  // NOTE(HIP): On AMD the offload architecture must be forwarded explicitly to the JIT
+  // compiler. We route it through get_udf_kernel's extra_options so the gfx offload-arch
+  // is not lost (see fork's architecture_str plumbing).
+  // CAUTION(TODO/HIP): The AMD UDF binaryop path additionally requires the arch-adapted
+  // parsed_llvm_ir (computed above) to be routed into get_udf_kernel. The upstream
+  // get_udf_kernel signature (cpp/src/jit/helpers.hpp) has no LLVM-IR parameter yet, so the
+  // LLVM IR cannot be passed here until that helper is extended for the AMD JIT path. Until
+  // then the AMD UDF binaryop path is incomplete. parsed_llvm_ir is referenced below to
+  // avoid an unused-variable warning.
+  std::vector<std::string> extra_options;
+  if constexpr (HIP_PLATFORM_AMD) {
+    extra_options.emplace_back("--offload-arch=gfx.");
+    (void)parsed_llvm_ir;
+  }
+
+  cudf::jit::get_udf_kernel(
+    *binaryop_jit_kernel_cu_jit, kernel_reflection, cuda_source, extra_options)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
-// >>>>>>> END NEW CODE (d4e12e2fee)
     ->launch(out.size(),
             cudf::jit::get_data_ptr(out),
             cudf::jit::get_data_ptr(lhs),

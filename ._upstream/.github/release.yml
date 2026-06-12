@@ -1,32 +1,3 @@
-# <<<<<<< OLD CODE from 5511e2453d (7700b3c598) - COMMENTED OUT
-# # GitHub Auto-Generated Release Notes Configuration for RAPIDS
-# # This file configures how GitHub automatically generates release notes
-#
-# changelog:
-#   exclude:
-#     labels:
-#       - ignore-for-release
-#       - dependencies
-#     authors:
-#       - rapids-bot[bot]
-#       - dependabot[bot]
-#   categories:
-#     - title: 🚨 Breaking Changes
-#       labels:
-#         - breaking
-#     - title: 🐛 Bug Fixes
-#       labels:
-#         - bug
-#     - title: 📖 Documentation
-#       labels:
-#         - doc
-#     - title: 🚀 New Features
-#       labels:
-#         - feature request
-#     - title: 🛠️ Improvements
-#       labels:
-#         - improvement
-# =======
 # GitHub Auto-Generated Release Notes Configuration for RAPIDS
 # This file configures how GitHub automatically generates release notes
 
@@ -54,4 +25,3 @@ changelog:
     - title: 🛠️ Improvements
       labels:
         - improvement
-# >>>>>>> END NEW CODE (7700b3c598)

@@ -234,15 +234,10 @@ struct nearest_value_centroid_weights {
  * the cumulative weight for a given value index I is simply I+1.
  */
 struct cumulative_scalar_weight_grouped {
-// <<<<<<< OLD CODE from 8e61113a93 (6cea1ee8b4) - COMMENTED OUT
-//   cudf::device_span<size_type const> group_offsets;
-//   CUDF_HOST_DEVICE CUDF_TUPLE_TYPE<size_type, size_type, double> operator()(size_type value_index) const
-// =======
   // Host-device span, as the offsets may reside in either device memory or pinned host memory
   cuda::std::span<size_type const> group_offsets;
-  cuda::std::tuple<size_type, size_type, double> operator()
-    CUDF_HOST_DEVICE(size_type value_index) const
-// >>>>>>> END NEW CODE (6cea1ee8b4)
+  CUDF_HOST_DEVICE CUDF_TUPLE_TYPE<size_type, size_type, double> operator()(
+    size_type value_index) const
   {
     auto const lb =
       thrust::lower_bound(thrust::seq, group_offsets.begin(), group_offsets.end(), value_index) -
@@ -1189,27 +1184,12 @@ struct typed_group_tdigest {
     auto max_col = cudf::make_numeric_column(
       data_type{type_id::FLOAT64}, num_groups, mask_state::UNALLOCATED, stream, mr);
     thrust::transform(
-// <<<<<<< OLD CODE from 0d35e6dd55 (9639104278) - COMMENTED OUT
-//       rmm::exec_policy_nosync(stream),
-// // <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// //       thrust::make_counting_iterator(0),
-// //       thrust::make_counting_iterator(0) + num_groups,
-// // // <<<<<<< OLD CODE from a56bd29a6b (2bac56b3b4) - COMMENTED OUT
-// // //       thrust::make_zip_iterator(CUDF_MAKE_TUPLE(min_col->mutable_view().begin<double>(),
-// // //                                                    max_col->mutable_view().begin<double>())),
-// // //       get_scalar_minmax_grouped<T>{*d_col, group_offsets, group_valid_counts.begin()});
-// // // =======
-// // =======
-// =======
       rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-// >>>>>>> END NEW CODE (9639104278)
       cuda::counting_iterator<cudf::size_type>{0},
       cuda::counting_iterator<cudf::size_type>{0} + num_groups,
-// >>>>>>> END NEW CODE (4b19041ca0)
-      thrust::make_zip_iterator(cuda::std::make_tuple(min_col->mutable_view().begin<double>(),
-                                                      max_col->mutable_view().begin<double>())),
+      thrust::make_zip_iterator(CUDF_MAKE_TUPLE(min_col->mutable_view().begin<double>(),
+                                                max_col->mutable_view().begin<double>())),
       get_scalar_minmax_grouped<T>{*d_col, group_offsets, group_valid_counts.data()});
-// >>>>>>> END NEW CODE (2bac56b3b4)
 
     // for simple input values, the "centroids" all have a weight of 1.
     auto scalar_to_centroid =
@@ -1283,22 +1263,11 @@ struct typed_reduce_tdigest {
     auto max_col = cudf::make_numeric_column(
       data_type{type_id::FLOAT64}, 1, mask_state::UNALLOCATED, stream, mr);
     thrust::transform(
-// <<<<<<< OLD CODE from 0d35e6dd55 (9639104278) - COMMENTED OUT
-//       rmm::exec_policy_nosync(stream),
-// // <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// //       thrust::make_counting_iterator(0),
-// //       thrust::make_counting_iterator(0) + 1,
-// //       thrust::make_zip_iterator(CUDF_MAKE_TUPLE(min_col->mutable_view().begin<double>(),
-// //                              max_col->mutable_view().begin<double>())),
-// // =======
-// =======
       rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-// >>>>>>> END NEW CODE (9639104278)
       cuda::counting_iterator<cudf::size_type>{0},
       cuda::counting_iterator<cudf::size_type>{0} + 1,
-      thrust::make_zip_iterator(cuda::std::make_tuple(min_col->mutable_view().begin<double>(),
-                                                      max_col->mutable_view().begin<double>())),
-// >>>>>>> END NEW CODE (4b19041ca0)
+      thrust::make_zip_iterator(CUDF_MAKE_TUPLE(min_col->mutable_view().begin<double>(),
+                                                max_col->mutable_view().begin<double>())),
       get_scalar_minmax<T>{*d_col, valid_count});
 
     // for simple input values, the "centroids" all have a weight of 1.
@@ -1498,13 +1467,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         min_iter,
                         cuda::make_discard_iterator(),
                         merged_min_col->mutable_view().begin<double>(),
-// <<<<<<< OLD CODE from 43bd0b08d3 (17533d4db9) - COMMENTED OUT
-//                         CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
-//                         cudf::detail::minimum{});
-// =======
-                        cuda::std::equal_to{},  // key equality check
+                        CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
                         cuda::minimum{});
-// >>>>>>> END NEW CODE (17533d4db9)
 
   auto merged_max_col = cudf::make_numeric_column(
     data_type{type_id::FLOAT64}, num_groups, mask_state::UNALLOCATED, stream, mr);
@@ -1518,13 +1482,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         max_iter,
                         cuda::make_discard_iterator(),
                         merged_max_col->mutable_view().begin<double>(),
-// <<<<<<< OLD CODE from 43bd0b08d3 (17533d4db9) - COMMENTED OUT
-//                         CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
-//                         cudf::detail::maximum{});
-// =======
-                        cuda::std::equal_to{},  // key equality check
+                        CUDF_TUPLE_PAIR_PROVIDER::equal_to<>{},  // key equality check
                         cuda::maximum{});
-// >>>>>>> END NEW CODE (17533d4db9)
 
   auto tdigest_offsets = tdv.centroids().offsets();
 

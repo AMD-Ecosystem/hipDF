@@ -32,13 +32,6 @@
 #include <cuda/std/cstddef>
 #include <cuda/std/optional>
 
-// <<<<<<<< OLD CODE from 4fa63a81c6 (5410620c91) - COMMENTED OUT
-// #include <cudf/detail/jit/span.cuh>
-//
-// #include <cstddef>
-//
-// ========
-// >>>>>>>> END NEW CODE (5410620c91)
 namespace cudf {
 namespace jit {
 

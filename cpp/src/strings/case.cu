@@ -58,11 +58,7 @@
 //#include <hip/hip_cooperative_groups/reduce.h>
 #include <cuda/atomic>
 #include <cuda/functional>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #include <cuda/std/array>
-// =======
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/binary_search.h>
 #include <thrust/for_each.h>
 #include <thrust/merge.h>

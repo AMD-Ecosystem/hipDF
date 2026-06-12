@@ -90,14 +90,9 @@ void null_optional_iterator(IteratorTest<T>& testFixture)
                  [](auto s, bool b) { return cuda::std::optional<T>{s}; });
 
   // GPU test for correct null mapping
-// <<<<<<< OLD CODE from c9ff88b312 (821e257cfd) - COMMENTED OUT
-//   testFixture.iterator_test_thrust(
-//     optional_values, d_col->template optional_begin<T>(cudf::nullate::DYNAMIC{true}), host_values.size());
-// =======
   testFixture.iterator_test_thrust(optional_values,
                                    d_col->template optional_begin<T>(cudf::nullate::DYNAMIC{true}),
                                    host_values.size());
-// >>>>>>> END NEW CODE (821e257cfd)
 
   testFixture.iterator_test_thrust(
     optional_values, d_col->template optional_begin<T>(cudf::nullate::YES{}), host_values.size());
@@ -105,14 +100,9 @@ void null_optional_iterator(IteratorTest<T>& testFixture)
     optional_values, d_col->template optional_begin<T>(cudf::nullate::YES{}), host_values.size());
 
   // GPU test for ignoring null mapping
-// <<<<<<< OLD CODE from c9ff88b312 (821e257cfd) - COMMENTED OUT
-//   testFixture.iterator_test_thrust(
-//     value_all_valid, d_col->template optional_begin<T>(cudf::nullate::DYNAMIC{false}), host_values.size());
-// =======
   testFixture.iterator_test_thrust(value_all_valid,
                                    d_col->template optional_begin<T>(cudf::nullate::DYNAMIC{false}),
                                    host_values.size());
-// >>>>>>> END NEW CODE (821e257cfd)
 
   testFixture.iterator_test_thrust(
     value_all_valid, d_col->template optional_begin<T>(cudf::nullate::NO{}), host_values.size());

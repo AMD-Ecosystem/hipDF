@@ -97,16 +97,10 @@ auto reduce_device(InputIterator d_in,
 
   // Allocate temporary storage
   size_t storage_bytes = 0;
-// <<<<<<< OLD CODE from 225e8baba7 (a85ae2631f) - COMMENTED OUT
-//   CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(
-//     nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value()));
-//   auto temp_storage = rmm::device_buffer{storage_bytes, stream};
-// =======
-  cub::DeviceReduce::Reduce(
-    nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(
+    nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value()));
   auto temp_storage =
     rmm::device_buffer{storage_bytes, stream, cudf::get_current_device_resource_ref()};
-// >>>>>>> END NEW CODE (a85ae2631f)
 
   // Run reduction
   CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(temp_storage.data(),
@@ -150,11 +144,7 @@ struct create_minmax {
  */
 template <typename T>
 struct create_minmax_with_nulls {
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-//   __host__ __device__ minmax_pair<T> operator()(thrust::pair<T, bool> i)
-// =======
   __device__ minmax_pair<T> operator()(cuda::std::pair<T, bool> i)
-// >>>>>>> END NEW CODE (261b12adc2)
   {
     return i.second ? minmax_pair<T>{i.first} : minmax_pair<T>{};
   }

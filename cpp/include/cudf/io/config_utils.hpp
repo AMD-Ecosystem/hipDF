@@ -57,24 +57,16 @@ void set_up_kvikio();
 namespace nvcomp_integration {
 
 /**
-// <<<<<<< OLD CODE from 2d2cda6c0d (97f0acabab) - COMMENTED OUT
-//  * @brief Returns true if all nvcomp uses are enabled.
-// =======
  * @brief Returns true if all nvCOMP uses are enabled
  *
  * @return true if all nvCOMP uses are enabled
-// >>>>>>> END NEW CODE (97f0acabab)
  */
 [[nodiscard]] bool is_all_enabled();
 
 /**
-// <<<<<<< OLD CODE from 2d2cda6c0d (97f0acabab) - COMMENTED OUT
-//  * @brief Returns true if stable nvcomp use is enabled.
-// =======
  * @brief Returns true if stable nvCOMP use is enabled
  *
  * @return true true if stable nvCOMP use is enabled
-// >>>>>>> END NEW CODE (97f0acabab)
  */
 [[nodiscard]] bool is_stable_enabled();
 

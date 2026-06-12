@@ -263,14 +263,8 @@ distinct_filtered_join::distinct_filtered_join(cudf::table_view const& build,
 {
 #ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_filtered_join::distinct_filtered_join"};
-// <<<<<<< OLD CODE from bfedc097f8 (0d0a1d6d17) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 04f6cc1081 (982cf632e8) - COMMENTED OUT
-// // #endif
-// // =======
-// // >>>>>>> END NEW CODE (982cf632e8)
-// =======
+#endif
   if (_build.num_rows() == 0) return;
-// >>>>>>> END NEW CODE (0d0a1d6d17)
   // Any mismatch in nullate between probe and build row operators results in UB. Ideally, nullate
   // should be determined by the logical OR of probe nulls and build nulls. However, since we do not
   // know if the probe has nulls apriori, we set nullate::DYNAMIC{true} (in the case of primitive
@@ -323,18 +317,12 @@ std::unique_ptr<rmm::device_uvector<cudf::size_type>> distinct_filtered_join::se
 {
 #ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_filtered_join::semi_anti_join"};
-// <<<<<<< OLD CODE from 04f6cc1081 (982cf632e8) - COMMENTED OUT
-// #endif
-// =======
-// >>>>>>> END NEW CODE (982cf632e8)
+#endif
 
   auto const preprocessed_probe = [&probe, stream] {
     #ifndef NVTX_DISABLE
     cudf::scoped_range range{"distinct_filtered_join::semi_anti_join::preprocessed_probe"};
-// <<<<<<< OLD CODE from 04f6cc1081 (982cf632e8) - COMMENTED OUT
-//     #endif
-// =======
-// >>>>>>> END NEW CODE (982cf632e8)
+    #endif
     return cudf::detail::row::equality::preprocessed_table::create(probe, stream);
   }();
 

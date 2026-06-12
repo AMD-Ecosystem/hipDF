@@ -42,19 +42,6 @@ from cudf.utils.utils import is_na_like
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableSequence, Sequence
 
-# <<<<<<< OLD CODE from d4c72b4b6b (0739891cfe) - COMMENTED OUT
-# # <<<<<<< OLD CODE from dea936b63a (8008d10bed) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# # #     from pylibcudf import Scalar as plc_Scalar
-# # #
-# # # =======
-# # # >>>>>>> END NEW CODE (d53ccf2bb0)
-# # =======
-#     from pylibcudf import Scalar as plc_Scalar
-#
-# # >>>>>>> END NEW CODE (8008d10bed)
-# =======
-# >>>>>>> END NEW CODE (0739891cfe)
     from cudf._typing import (
         ColumnBinaryOperand,
         ColumnLike,

@@ -665,22 +665,7 @@ jobs:
     uses: rapidsai/shared-workflows/.github/workflows/build-in-devcontainer.yaml@release/26.06
     with:
       arch: '["amd64", "arm64"]'
-# <<<<<<< OLD CODE from bf9a61698d (589e2be1d5) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 13c6c172cd (cb56a2cbc5) - COMMENTED OUT
-# #       cuda: '["12.9"]'
-# # =======
-#       cuda: '["13.1"]'
-# # <<<<<<< OLD CODE from cf10a3cff1 (356314872d) - COMMENTED OUT
-# # # >>>>>>> END NEW CODE (cb56a2cbc5)
-# # =======
-# =======
       cuda: '["13.2"]'
-# <<<<<<< OLD CODE from be8772b99a (b1e95613b7) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (589e2be1d5)
-#       python_package_manager: '["conda"]'
-# # >>>>>>> END NEW CODE (356314872d)
-# =======
-# >>>>>>> END NEW CODE (b1e95613b7)
       node_type: "cpu8"
       timeout-minutes: 90
       env: |

@@ -218,11 +218,7 @@ namespace {
 struct string_view_to_pair {
   string_view null_placeholder;
   string_view_to_pair(string_view n) : null_placeholder(n) {}
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-//   __host__ __device__ thrust::pair<char const*, size_type> operator()(string_view const& i)
-// =======
   __device__ cuda::std::pair<char const*, size_type> operator()(string_view const& i)
-// >>>>>>> END NEW CODE (261b12adc2)
   {
     return (i.data() == null_placeholder.data())
              ? cuda::std::pair<char const*, size_type>{nullptr, 0}

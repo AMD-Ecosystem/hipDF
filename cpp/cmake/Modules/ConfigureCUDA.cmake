@@ -28,11 +28,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   list(APPEND CUDF_CXX_FLAGS -Wall -Werror -Wno-unknown-pragmas -Wno-error=deprecated-declarations)
 endif()
 
-# <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-# list(APPEND CUDF_GPU_FLAGS --expt-extended-lambda --expt-relaxed-constexpr)
-# =======
-list(APPEND CUDF_CUDA_FLAGS --expt-extended-lambda)
-# >>>>>>> END NEW CODE (2d6106360e)
+list(APPEND CUDF_GPU_FLAGS --expt-extended-lambda)
 
 # set warnings as errors
 if(GPU_WARNINGS_AS_ERRORS)

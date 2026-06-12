@@ -57,12 +57,8 @@ bool check_nvcomp_output_sizes(std::size_t const* dev_uncompressed_sizes,
 {
 #ifndef NVTX_DISABLE
   NVTX3_FUNC_RANGE_IN(java_domain);
-// <<<<<<< OLD CODE from 8ecada029b (e11a5eb8b9) - COMMENTED OUT
-// #endif
-//   return thrust::equal(rmm::exec_policy(stream),
-// =======
+#endif
   return thrust::equal(rmm::exec_policy_nosync(stream),
-// >>>>>>> END NEW CODE (e11a5eb8b9)
                        dev_uncompressed_sizes,
                        dev_uncompressed_sizes + num_chunks,
                        dev_actual_uncompressed_sizes);

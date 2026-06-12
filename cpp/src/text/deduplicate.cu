@@ -46,11 +46,8 @@
 #include <hipcub/hipcub.hpp>
 #else
 #include <cub/cub.cuh>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #endif
-// =======
+#endif
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
 #include <cuda/std/limits>

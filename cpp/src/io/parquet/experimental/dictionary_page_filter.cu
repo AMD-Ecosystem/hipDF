@@ -212,43 +212,6 @@ __device__ __forceinline__ bool is_error_set(kernel_error::pointer error)
 }
 
 /**
-// <<<<<<< OLD CODE from 19d5dd95a2 (78458d47cf) - COMMENTED OUT
-//  * @brief Helper function to calculate the timestamp scale
-//  *
-//  * @param logical_type Logical type of the column
-//  * @param clock_rate Clock rate of the column
-//  * @return Timestamp scale
-//  */
-// __device__ __forceinline__ int32_t calc_timestamp_scale(LogicalType const& logical_type,
-//                                                         int32_t clock_rate)
-// {
-//   // Note: This function has been extracted from the snippet at:
-//   // https://github.com/rapidsai/cudf/blob/c89c83c00c729a86c56570693b627f31408bc2c9/cpp/src/io/parquet/page_decode.cuh#L1219-L1236
-//
-//   // Adjust for timestamps
-//   auto units = 0;
-//   if (logical_type.is_timestamp_millis()) {
-//     units = cudf::timestamp_ms::period::den;
-//   } else if (logical_type.is_timestamp_micros()) {
-//     units = cudf::timestamp_us::period::den;
-//   } else if (logical_type.is_timestamp_nanos()) {
-//     units = cudf::timestamp_ns::period::den;
-//   }
-//
-//   // NOTE(HIP/AMD): clock_rate can be 0 when user does not specify a timestamp type in parquet_reader_options
-//   // (i.e., options.get_timestamp_type().id() == type_id::EMPTY). In this case, timestamps are read
-//   // in their native Parquet format without conversion. The check "clock_rate and" prevents division
-//   // by zero (UB) and correctly returns scale=0, meaning no scaling is performed.
-//   if (units and clock_rate and units != clock_rate) {
-//     return (clock_rate < units) ? -(units / clock_rate) : (clock_rate / units);
-//   }
-//
-//   return 0;
-// }
-//
-// /**
-// =======
-// >>>>>>> END NEW CODE (78458d47cf)
  * @brief Helper function to get the length of INT32 physical type
  *
  * @param logical_type Logical type of the column
@@ -415,11 +378,7 @@ __device__ T decode_fixed_width_value(PageInfo const& page,
   // NOTE(HIP/AMD): Dereference chunk.logical_type.* directly instead of using .value() to avoid calling __throw_bad_optional_access()
   // which is __host__ only and cannot be called from __device__ code.
   auto const timestamp_scale =
-// <<<<<<< OLD CODE from 19d5dd95a2 (78458d47cf) - COMMENTED OUT
-//     chunk.logical_type.has_value() ? calc_timestamp_scale(*chunk.logical_type, chunk.ts_clock_rate) : int32_t{0};
-// =======
     parquet::detail::calc_timestamp_scale(chunk.logical_type, chunk.ts_clock_rate);
-// >>>>>>> END NEW CODE (78458d47cf)
 
   // FLBA length (0 if not FLBA type)
   auto const flba_length = chunk.type_length;

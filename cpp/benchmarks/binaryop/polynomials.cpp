@@ -77,13 +77,7 @@ static void BM_binaryop_polynomials(nvbench::state& state)
 
   state.exec(nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
     // computes polynomials: (((ax + b)x + c)x + d)x + e... = ax**4 + bx**3 + cx**2 + dx + e....
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//     cudf::scoped_range range{"benchmark_iteration"};
-// #endif
-// =======
     cudf::benchmark::scoped_range range{"benchmark_iteration"};
-// >>>>>>> END NEW CODE (fd4947d8e2)
     rmm::cuda_stream_view stream{launch.get_stream().get_stream()};
     std::vector<std::unique_ptr<cudf::column>> intermediates;
 

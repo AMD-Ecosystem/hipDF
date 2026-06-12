@@ -36,13 +36,8 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/std/optional>
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// #include <cudf/cuda_runtime.h>
-// #include <thrust/pair.h>
-// =======
 #include <cuda/std/utility>
-#include <cuda_runtime.h>
-// >>>>>>> END NEW CODE (261b12adc2)
+#include <cudf/cuda_runtime.h>
 
 #include <functional>
 #include <memory>

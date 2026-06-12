@@ -46,15 +46,9 @@
 #include <hipcub/device/device_merge_sort.hpp>
 #else
 #include <cub/device/device_merge_sort.cuh>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 420b69cec5 (7a145e245c) - COMMENTED OUT
-// // #endif
-// // =======
-// =======
+#endif
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/gather.h>
-// >>>>>>> END NEW CODE (7a145e245c)
 
 namespace cudf {
 namespace detail {

@@ -1,32 +1,29 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
-# <<<<<<< OLD CODE from e5583d0ef8 (af0ef61f28) - COMMENTED OUT
-# # MIT License
-# #
-# # Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
-# #
-# # Permission is hereby granted, free of charge, to any person obtaining a copy
-# # of this software and associated documentation files (the "Software"), to deal
-# # in the Software without restriction, including without limitation the rights
-# # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# # copies of the Software, and to permit persons to whom the Software is
-# # furnished to do so, subject to the following conditions:
-# #
-# # The above copyright notice and this permission notice shall be included in all
-# # copies or substantial portions of the Software.
-# #
-# # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# # SOFTWARE.
+# MIT License
 #
-# =======
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from cpython.buffer cimport PyBuffer_FillInfo
-# >>>>>>> END NEW CODE (af0ef61f28)
 from cython.operator cimport dereference
 from libc.stdint cimport uint8_t
 from libc.stddef cimport size_t
@@ -313,7 +310,7 @@ cdef class ChunkedPack:
         cdef size_t offset = 0
         cdef size_t size
         cdef device_span[uint8_t] d_span = _get_device_span(buf)
-        cdef cudaError_t err = cudaError.cudaSuccess
+        cdef cudaError_t err = cudaError.hipSuccess
         cdef unique_ptr[vector[uint8_t]] h_buf = (
             make_unique[vector[uint8_t]](
                 dereference(self.c_obj).get_total_contiguous_size()
@@ -328,21 +325,12 @@ cdef class ChunkedPack:
                     dereference(h_buf).data() + offset,
                     d_span.data(),
                     size,
-# <<<<<<< OLD CODE from 42fcac286f (640bfee89e) - COMMENTED OUT
-#                     cudaMemcpyKind.hipMemcpyDeviceToHost,
-#                     stream.value(),
-#                 )
-#                 offset += size
-#                 if err != cudaError.hipSuccess:
-#                     stream.synchronize()
-# =======
-                    cudaMemcpyKind.cudaMemcpyDeviceToHost,
+                    cudaMemcpyKind.hipMemcpyDeviceToHost,
                     stream,
                 )
                 offset += size
-                if err != cudaError.cudaSuccess:
+                if err != cudaError.hipSuccess:
                     cudaStreamSynchronize(stream)
-# >>>>>>> END NEW CODE (640bfee89e)
                     raise RuntimeError(
                         f"Memcpy in pack_to_host failed error: {err}"
                     )

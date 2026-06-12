@@ -34,11 +34,9 @@
 #endif
 #include <rmm/cuda_stream_view.hpp>
 
-// <<<<<<< OLD CODE from f806865c64 (c74aea08ab) - COMMENTED OUT
-// #include <fstream>
-// =======
 #include <cuda_runtime_api.h>
-// >>>>>>> END NEW CODE (c74aea08ab)
+
+#include <fstream>
 
 namespace cudf {
 namespace io {

@@ -33,12 +33,10 @@
 
 #include <cudf/detail/utilities/cuda.cuh>
 
-// <<<<<<< OLD CODE from 665bb8c6b7 (dcf1e62c45) - COMMENTED OUT
-// #include <hip/hip_cooperative_groups.h>
-// =======
+#include <hip/hip_cooperative_groups.h>
+
 #include <cooperative_groups.h>
 #include <cuda/std/bit>
-// >>>>>>> END NEW CODE (dcf1e62c45)
 #include <cuda/std/iterator>
 
 namespace cudf::io::parquet::detail {
@@ -331,7 +329,7 @@ __device__ int skip_validity_and_row_indices_nonlist(
     int const is_valid = (t >= batch_size) ? 0 : ((def[value_count + t] >= max_def_level) ? 1 : 0);
 
     // thread and block validity count
-    using block_scan = cub::BlockScan<int, decode_block_size>;
+    using block_scan = hipcub::BlockScan<int, decode_block_size>;
     __shared__ typename block_scan::TempStorage scan_storage;
     int thread_valid_count = 0, block_valid_count = 0;
     block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);
@@ -389,21 +387,14 @@ __device__ int update_validity_and_row_indices_nested(
     int const block_value_count  = batch_size;
 
     // compute our row index, whether we're in row bounds, and validity
-// <<<<<<< OLD CODE from 665bb8c6b7 (dcf1e62c45) - COMMENTED OUT
-//     int const row_index           = thread_value_count + value_count;
-//     int const in_row_bounds       = (row_index >= row_index_lower_bound) && (row_index < last_row);
-//     bitmask_type const in_write_row_bounds = ballot(row_index >= first_row && row_index < last_row);
-//     int const write_start = __FFS(in_write_row_bounds) - 1;  // first bit in the warp to store
-// =======
     // This ASSUMES that s->row_index_lower_bound is always -1!
     // Its purpose is to handle rows than span page boundaries, which only happen for lists.
     int const row_index                     = thread_value_count + value_count;
     int const in_row_bounds                 = (row_index < last_row);
     bool const in_write_row_bounds          = in_row_bounds && (row_index >= first_row);
-    uint32_t const in_write_row_bounds_mask = ballot(in_write_row_bounds);
+    bitmask_type const in_write_row_bounds_mask = ballot(in_write_row_bounds);
     // NOTE: The below CANNOT be std::countr_zero(), because for zero start must be 0 not 32
-    int const write_start = __ffs(in_write_row_bounds_mask) - 1;  // first bit in the warp to store
-// >>>>>>> END NEW CODE (dcf1e62c45)
+    int const write_start = __FFS(in_write_row_bounds_mask) - 1;  // first bit in the warp to store
 
     // iterate by depth
     for (int d_idx = 0; d_idx <= max_depth; d_idx++) {
@@ -432,18 +423,9 @@ __device__ int update_validity_and_row_indices_nested(
           int const vindex     = value_count + thread_value_count;  // absolute input value index
           int const bit_offset = (valid_map_offset + vindex + write_start) -
                                  first_row;  // absolute bit offset into the output validity map
-// <<<<<<< OLD CODE from 665bb8c6b7 (dcf1e62c45) - COMMENTED OUT
-//           int const write_end =
-//             cudf::detail::warp_size - __CLZ(in_write_row_bounds);  // last bit in the warp to store
-// =======
           int const write_end = cudf::detail::warp_size -
-                                __clz(in_write_row_bounds_mask);  // last bit in the warp to store
-// >>>>>>> END NEW CODE (dcf1e62c45)
+                                __CLZ(in_write_row_bounds_mask);  // last bit in the warp to store
           int const bit_count = write_end - write_start;
-// <<<<<<< OLD CODE from 299eb7afc2 (ab667ef84f) - COMMENTED OUT
-//           warp_null_count     = bit_count - __POPC(warp_validity_mask >> write_start);
-// =======
-// >>>>>>> END NEW CODE (ab667ef84f)
 
           store_validity(bit_offset, ni.valid_map, warp_validity_mask >> write_start, bit_count);
         }
@@ -547,35 +529,18 @@ __device__ int update_validity_and_row_indices_flat(
     // at the first value, even if that is before first_row, because we cannot trivially jump to
     // the correct position to start reading. since we are about to write the validity vector
     // here we need to adjust our computed mask to take into account the write row bounds.
-// <<<<<<< OLD CODE from 665bb8c6b7 (dcf1e62c45) - COMMENTED OUT
-//     bitmask_type const in_write_row_bounds = ballot(row_index >= first_row && row_index < last_row);
-//     int const write_start = __FFS(in_write_row_bounds) - 1;  // first bit in the warp to store
-// =======
-    bool const in_write_row_bounds     = in_row_bounds && (row_index >= first_row);
-    int const in_write_row_bounds_mask = ballot(in_write_row_bounds);
+    bool const in_write_row_bounds              = in_row_bounds && (row_index >= first_row);
+    bitmask_type const in_write_row_bounds_mask = ballot(in_write_row_bounds);
     // NOTE: The below CANNOT be std::countr_zero(), because for zero start must be 0 not 32
-    int const write_start = __ffs(in_write_row_bounds_mask) - 1;  // first bit in the warp to store
-// <<<<<<< OLD CODE from 299eb7afc2 (ab667ef84f) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (dcf1e62c45)
-//     int warp_null_count   = 0;
-// =======
-// >>>>>>> END NEW CODE (ab667ef84f)
+    int const write_start = __FFS(in_write_row_bounds_mask) - 1;  // first bit in the warp to store
     // lane 0 from each warp writes out validity
     if ((write_start >= 0) && ((t % cudf::detail::warp_size) == 0)) {
       int const vindex     = value_count + thread_value_count;  // absolute input value index
       int const bit_offset = (valid_map_offset + vindex + write_start) -
                              first_row;  // absolute bit offset into the output validity map
       int const write_end =
-// <<<<<<< OLD CODE from 665bb8c6b7 (dcf1e62c45) - COMMENTED OUT
-//         cudf::detail::warp_size - __CLZ(in_write_row_bounds);  // last bit in the warp to store
-// =======
-        cudf::detail::warp_size - __clz(in_write_row_bounds_mask);  // last bit in the warp to store
-// >>>>>>> END NEW CODE (dcf1e62c45)
+        cudf::detail::warp_size - __CLZ(in_write_row_bounds_mask);  // last bit in the warp to store
       int const bit_count = write_end - write_start;
-// <<<<<<< OLD CODE from 299eb7afc2 (ab667ef84f) - COMMENTED OUT
-//       warp_null_count     = bit_count - __POPC(warp_validity_mask >> write_start);
-// =======
-// >>>>>>> END NEW CODE (ab667ef84f)
 
       store_validity(bit_offset, ni.valid_map, warp_validity_mask >> write_start, bit_count);
     }
@@ -725,17 +690,9 @@ __device__ int update_validity_and_row_indices_lists(int32_t target_value_count,
       // Not all values visited by this block will represent a value at this nesting level.
       // the validity bit for thread t might actually represent output value t-6.
       // the correct position for thread t's bit is thread_value_count.
-// <<<<<<< OLD CODE from 24cfff7e23 (21cd733d12) - COMMENTED OUT
-//       bitmask_type const warp_valid_mask =
-// #if defined(CUDF_USE_WARPSIZE_32)
-//         WarpReduceOr32((uint32_t)is_valid << thread_value_count_within_warp);
-// #else
-//         WarpReduceOr64((uint64_t)is_valid << thread_value_count_within_warp);
-// #endif
-// =======
-      uint32_t const warp_valid_mask = warp_reduce_or<cudf::detail::warp_size>(
-        static_cast<uint32_t>(is_valid) << thread_value_count_within_warp);
-// >>>>>>> END NEW CODE (21cd733d12)
+      // NOTE(HIP/AMD): Use bitmask_type (wide on 64-wide wavefronts) so the mask is not truncated.
+      bitmask_type const warp_valid_mask = warp_reduce_or<cudf::detail::warp_size>(
+        static_cast<bitmask_type>(is_valid) << thread_value_count_within_warp);
       int thread_valid_count, block_valid_count;
       {
         auto thread_mask = (bitmask_type(1) << thread_value_count_within_warp) - 1;
@@ -1068,15 +1025,12 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size_t, 8)
   constexpr int rolling_buf_size    = decode_block_size_t * 2;
   constexpr int rle_run_buffer_size = rle_stream_required_run_buffer_size<decode_block_size_t>();
 
-// <<<<<<< OLD CODE from 98fa09c8dc (8c1e94eb52) - COMMENTED OUT
-//   //__shared__ __align__(16) page_state_s state_g;
-//   extern __shared__ __align__(16) page_state_s state_g[];
-//
-//   constexpr bool use_dict_buffers = has_dict_t || has_bools_t || has_strings_t;
-// =======
-  __shared__ __align__(16) page_state_s state_g;
-  constexpr bool use_dict_buffers = has_dict_t || has_bools_t;
-// >>>>>>> END NEW CODE (8c1e94eb52)
+  // NOTE(HIP/AMD): Use dynamic shared memory for page_state_s. state_g is accessed as an array
+  // (see `s = &state_g[0]` below).
+  //__shared__ __align__(16) page_state_s state_g;
+  extern __shared__ __align__(16) page_state_s state_g[];
+
+  constexpr bool use_dict_buffers = has_dict_t || has_bools_t || has_strings_t;
   using state_buf_t               = page_state_buffers_s<rolling_buf_size,  // size of nz_idx buffer
                                            use_dict_buffers ? rolling_buf_size : 1,
                                                          1>;

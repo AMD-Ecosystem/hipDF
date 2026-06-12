@@ -40,12 +40,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/mr/polymorphic_allocator.hpp>
 
-// <<<<<<< OLD CODE from 135852b730 (e3fe491da6) - COMMENTED OUT
-// #include <hipcub/hipcub.hpp>
-// #include <cuco/static_set.cuh>
-// =======
 #include <cuco/static_multiset.cuh>
-// >>>>>>> END NEW CODE (e3fe491da6)
 
 namespace cudf::detail {
 
@@ -145,48 +140,6 @@ struct expression_equality {
 };
 
 /**
-// <<<<<<< OLD CODE from 135852b730 (e3fe491da6) - COMMENTED OUT
-//  * @brief Equality comparator for cuco::static_set queries.
-//  *
-//  * This equality comparator is designed for use with cuco::static_set's APIs. A
-//  * probe hit indicates that the hashes of the keys are equal, at which point
-//  * this comparator checks whether the keys themselves are equal (using the
-//  * provided equality_probe) and then evaluates the conditional expression
-//  */
-// template <bool has_nulls>
-// struct single_expression_equality : expression_equality<has_nulls> {
-//   using expression_equality<has_nulls>::expression_equality;
-//
-//   __device__ __forceinline__ bool operator()(size_type const left_index,
-//                                              size_type const right_index) const noexcept
-//   {
-//     using cudf::detail::row::lhs_index_type;
-//     using cudf::detail::row::rhs_index_type;
-//
-//     auto output_dest = cudf::ast::detail::value_expression_result<bool, has_nulls>();
-//     // Two levels of checks:
-//     // 1. The contents of the columns involved in the equality condition are equal.
-//     // 2. The predicate evaluated on the relevant columns (already encoded in the evaluator)
-//     // evaluates to true.
-//     // TODO(HIP/AMD): error: non-constant-expression cannot be narrowed from type 'hash_value_type' (aka 'unsigned int') to 'lhs_index_type' in initializer list [-Wc++11-narrowing]
-//     if (this->equality_probe(lhs_index_type{left_index}, rhs_index_type{right_index})) {
-//       // For the AST evaluator, we need to map back to left/right table semantics
-//       auto const left_table_idx  = this->swap_tables ? right_index : left_index;
-//       auto const right_table_idx = this->swap_tables ? left_index : right_index;
-//       this->evaluator.evaluate(output_dest,
-//                                static_cast<size_type>(left_table_idx),
-//                                static_cast<size_type>(right_table_idx),
-//                                0,
-//                                this->thread_intermediate_storage);
-//       return (output_dest.is_valid() && output_dest.value());
-//     }
-//     return false;
-//   }
-// };
-//
-// /**
-// =======
-// >>>>>>> END NEW CODE (e3fe491da6)
  * @brief Equality comparator for cuco::static_multiset queries.
  *
  * This equality comparator is designed for use with cuco::static_multiset's APIs.

@@ -56,113 +56,7 @@
 #include <vector>
 
 namespace CUDF_EXPORT cudf {
-// <<<<<<< OLD CODE from f84fd64ef9 (a012f0bd20) - COMMENTED OUT
-//
-// namespace detail::row::primitive {
-// class row_equality_comparator;  // Forward declaration
-//
-// template <template <typename> class Hash>
-// class row_hasher;  // Forward declaration
-// }  // namespace detail::row::primitive
-//
-// namespace detail {
-//
-// /**
-//  * @brief A map from cudf::type_id to cudf type that excludes LIST and STRUCT types.
-//  *
-//  * To be used with type_dispatcher in place of the default map, when it is required that STRUCT and
-//  * LIST map to void. This is useful when we want to avoid recursion in a functor. For example, in
-//  * element_comparator, we have a specialization for STRUCT but the type_dispatcher in it is only
-//  * used to dispatch to the same functor for non-nested types. Even when we're guaranteed to not have
-//  * non-nested types at that point, the compiler doesn't know this and would try to create recursive
-//  * code which is very slow.
-//  *
-//  * Usage:
-//  * @code
-//  * type_dispatcher<dispatch_nested_to_void>(data_type(), functor{});
-//  * @endcode
-//  */
-// template <cudf::type_id t>
-// struct dispatch_void_if_nested {
-//   /// The type to dispatch to if the type is nested
-//   using type = std::conditional_t<t == type_id::STRUCT or t == type_id::LIST, void, id_to_type<t>>;
-// };
-//
-// namespace row {
-//
-// enum class lhs_index_type : size_type {};
-// enum class rhs_index_type : size_type {};
-//
-// /**
-//  * @brief A counting iterator that uses strongly typed indices bound to tables.
-//  *
-//  * Performing lexicographic or equality comparisons between values in two
-//  * tables requires the use of strongly typed indices. The strong index types
-//  * `lhs_index_type` and `rhs_index_type` ensure that index values are bound to
-//  * the correct table, regardless of the order in which these indices are
-//  * provided to the call operator. This struct and its type aliases
-//  * `lhs_iterator` and `rhs_iterator` provide an interface similar to a counting
-//  * iterator, with strongly typed values to represent the table indices.
-//  *
-//  * @tparam Index The strong index type
-//  */
-// template <typename Index, typename Underlying = std::underlying_type_t<Index>>
-// struct strong_index_iterator : public thrust::iterator_facade<strong_index_iterator<Index>,
-//                                                               Index,
-//                                                               thrust::use_default,
-//                                                               thrust::random_access_traversal_tag,
-//                                                               Index,
-//                                                               Underlying> {
-//   using super_t =
-//     thrust::iterator_adaptor<strong_index_iterator<Index>, Index>;  ///< The base class
-//
-//   /**
-//    * @brief Constructs a strong index iterator
-//    *
-//    * @param n The beginning index
-//    */
-//   explicit constexpr strong_index_iterator(Underlying n) : begin{n} {}
-//
-//   friend class thrust::iterator_core_access;  ///< Allow access to the base class
-//
-//  private:
-//   // NOTE(HIP/AMD): Host annotation is required: thrust::iterator_facade instantiates host-side operators
-//   // (e.g., operator+=/distance) that call these hooks even for device iterators.
-//   __host__ __device__ constexpr void increment() { ++begin; }
-//   __host__ __device__ constexpr void decrement() { --begin; }
-//
-//   __host__ __device__ constexpr void advance(Underlying n) { begin += n; }
-//
-//   __host__  __device__ constexpr bool equal(strong_index_iterator<Index> const& other) const noexcept
-//   {
-//     return begin == other.begin;
-//   }
-//
-//   __host__  __device__ constexpr Index dereference() const noexcept { return static_cast<Index>(begin); }
-//
-//   __host__  __device__ constexpr Underlying distance_to(
-//     strong_index_iterator<Index> const& other) const noexcept
-//   {
-//     return other.begin - begin;
-//   }
-//
-//   Underlying begin{};
-// };
-//
-// /**
-//  * @brief Iterator representing indices into a left-side table.
-//  */
-// using lhs_iterator = strong_index_iterator<lhs_index_type>;
-//
-// /**
-//  * @brief Iterator representing indices into a right-side table.
-//  */
-// using rhs_iterator = strong_index_iterator<rhs_index_type>;
-//
-// namespace lexicographic {
-// =======
 namespace detail::row::lexicographic {
-// >>>>>>> END NEW CODE (a012f0bd20)
 
 /**
  * @brief Computes a weak ordering of two values with special sorting behavior.
@@ -453,17 +347,12 @@ class device_row_comparator {
      * @return Indicates the relationship between the elements in the `lhs` and `rhs` columns, along
      * with the depth at which a null value was encountered.
      */
-// <<<<<<< OLD CODE from f84fd64ef9 (a012f0bd20) - COMMENTED OUT
-//     template <typename Element,
-//               CUDF_ENABLE_IF(cudf::is_relationally_comparable<Element, Element>())>
-// // TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
-// // compiler optimization misbehavior.
-// #if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS) && !defined(NDEBUG)
-//     __attribute__((noinline))
-// #endif
-// =======
     template <typename Element>
-// >>>>>>> END NEW CODE (a012f0bd20)
+// TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
+// compiler optimization misbehavior.
+#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS) && !defined(NDEBUG)
+    __attribute__((noinline))
+#endif
     __device__ cuda::std::pair<cudf::detail::weak_ordering, int> operator()(
       size_type const lhs_element_index, size_type const rhs_element_index) const noexcept
       requires(cudf::is_relationally_comparable<Element, Element>() and

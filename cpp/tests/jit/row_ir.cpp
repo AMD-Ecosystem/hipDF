@@ -270,16 +270,7 @@ TEST_F(RowIRCudaCodeGenTest, AstConversionBasic)
 
   auto column = cudf::test::fixed_width_column_wrapper<int32_t>({69, 69, 69, 69, 69, 69}).release();
 
-// <<<<<<< OLD CODE from 7b5f5a0951 (b789c9caa7) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 1a90935dc5 (05ccfb2bc2) - COMMENTED OUT
-// //   auto expected_iter = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return 69 + 42; });
-// // =======
-//   auto expected_iter =
-//     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return 69 + 42; });
-// // >>>>>>> END NEW CODE (05ccfb2bc2)
-// =======
   auto expected_iter = cuda::constant_iterator{69 + 42};
-// >>>>>>> END NEW CODE (b789c9caa7)
   auto expected =
     cudf::test::fixed_width_column_wrapper<int32_t>(expected_iter, expected_iter + column->size());
 

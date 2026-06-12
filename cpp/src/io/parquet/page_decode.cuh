@@ -271,11 +271,7 @@ template <typename state_buf>
 inline __device__ string_index_pair gpuGetStringData(page_state_s* s, state_buf* sb, int src_pos)
 {
   char const* ptr = nullptr;
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-//   using len_type  = thrust::tuple_element<1, string_index_pair>::type;
-// =======
   using len_type  = cuda::std::tuple_element<1, string_index_pair>::type;
-// >>>>>>> END NEW CODE (2d6106360e)
   len_type len    = 0;
 
   if (s->dict_base) {
@@ -594,108 +590,6 @@ __device__ size_type initialize_string_descriptors(page_state_s* s,
 }
 
 /**
-// <<<<<<< OLD CODE from 71072c8cff (b13f0c3a87) - COMMENTED OUT
-//  * @brief Decode values out of a definition or repetition stream
-//  *
-//  * @param[out] output Level buffer output
-//  * @param[in,out] s Page state input/output
-//  * @param[in] target_count Target count of stream values on output
-//  * @param[in] t Warp0 thread ID (0..31)
-//  * @param[in] lvl The level type we are decoding - DEFINITION or REPETITION
-//  * @tparam level_t Type used to store decoded repetition and definition levels
-//  * @tparam rolling_buf_size Size of the cyclic buffer used to store value data
-//  */
-// template <typename level_t, int rolling_buf_size>
-// __device__ void gpuDecodeStream(
-//   level_t* output, page_state_s* s, int32_t target_count, int t, level_type lvl)
-// {
-//   uint8_t const* cur_def    = s->lvl_start[lvl];
-//   uint8_t const* end        = s->lvl_end;
-//   uint32_t level_run        = s->initial_rle_run[lvl];
-//   int32_t level_val         = s->initial_rle_value[lvl];
-//   int level_bits            = s->col.level_bits[lvl];
-//   int32_t num_input_values  = s->num_input_values;
-//   int32_t value_count       = s->lvl_count[lvl];
-//   int32_t batch_coded_count = 0;
-//
-//   while (s->error == 0 && value_count < target_count && value_count < num_input_values) {
-//     int batch_len;
-//     if (level_run <= 1) {
-//       // Get a new run symbol from the byte stream
-//       int sym_len = 0;
-//       if (!t) {
-//         uint8_t const* cur = cur_def;
-//         if (cur < end) { level_run = get_vlq32(cur, end); }
-//         if (is_repeated_run(level_run)) {
-//           if (cur < end) level_val = cur[0];
-//           cur++;
-//           if (level_bits > 8) {
-//             if (cur < end) level_val |= cur[0] << 8;
-//             cur++;
-//           }
-//         }
-//         // If there are errors, set the error code and continue. The loop will be exited below.
-//         if (cur > end) { s->set_error_code(decode_error::LEVEL_STREAM_OVERRUN); }
-//         if (level_run <= 1) { s->set_error_code(decode_error::INVALID_LEVEL_RUN); }
-//         sym_len = (int32_t)(cur - cur_def);
-//         __threadfence_block();
-//       }
-//       sym_len   = shuffle(sym_len);
-//       level_val = shuffle(level_val);
-//       level_run = shuffle(level_run);
-//       cur_def += sym_len;
-//     }
-//     if (s->error != 0) { break; }
-//
-//     batch_len = min(num_input_values - value_count, cudf::detail::warp_size);
-//     if (is_literal_run(level_run)) {
-//       // Literal run
-//       int batch_len8;
-//       batch_len  = min(batch_len, (level_run >> 1) * 8);
-//       batch_len8 = (batch_len + 7) >> 3;
-//       if (t < batch_len) {
-//         int bitpos         = t * level_bits;
-//         uint8_t const* cur = cur_def + (bitpos >> 3);
-//         bitpos &= 7;
-//         if (cur < end) level_val = cur[0];
-//         cur++;
-//         if (level_bits > 8 - bitpos && cur < end) {
-//           level_val |= cur[0] << 8;
-//           cur++;
-//           if (level_bits > 16 - bitpos && cur < end) level_val |= cur[0] << 16;
-//         }
-//         level_val = (level_val >> bitpos) & ((1 << level_bits) - 1);
-//       }
-//       level_run -= batch_len8 * 2;
-//       cur_def += batch_len8 * level_bits;
-//     } else {
-//       // Repeated value
-//       batch_len = min(batch_len, level_run >> 1);
-//       level_run -= batch_len * 2;
-//     }
-//     if (t < batch_len) {
-//       int idx                                      = value_count + t;
-//       output[rolling_index<rolling_buf_size>(idx)] = level_val;
-//     }
-//     batch_coded_count += batch_len;
-//     value_count += batch_len;
-//   }
-//   // issue #14597
-//   // racecheck reported race between reads at the start of this function and the writes below
-//   __syncwarp();
-//
-//   // update the stream info
-//   if (!t) {
-//     s->lvl_start[lvl]         = cur_def;
-//     s->initial_rle_run[lvl]   = level_run;
-//     s->initial_rle_value[lvl] = level_val;
-//     s->lvl_count[lvl]         = value_count;
-//   }
-// }
-//
-// /**
-// =======
-// >>>>>>> END NEW CODE (b13f0c3a87)
  * @brief Store a validity mask containing value_count bits into the output validity buffer of the
  * page.
  *
@@ -945,15 +839,10 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
           // the validity bit for thread t might actually represent output value t-6. the correct
           // position for thread t's bit is thread_value_count. for cuda 11 we could use
           // __reduce_or_sync(), but until then we have to do a warp reduce.
-// <<<<<<< OLD CODE from 24cfff7e23 (21cd733d12) - COMMENTED OUT
-// #if !defined(CUDF_USE_WARPSIZE_32)
-//           WarpReduceOr64(static_cast<uint64_t>(is_valid) << thread_value_count);
-// #else
-//           WarpReduceOr32(static_cast<uint64_t>(is_valid) << thread_value_count);
-// #endif
-// =======
-          warp_reduce_or<cudf::detail::warp_size>(is_valid << thread_value_count);
-// >>>>>>> END NEW CODE (21cd733d12)
+          // NOTE(HIP/AMD): Use bitmask_type (wide on 64-wide wavefronts) so the mask is not
+          // truncated; is_valid is uint32_t and thread_value_count can be up to 63.
+          warp_reduce_or<cudf::detail::warp_size>(static_cast<bitmask_type>(is_valid)
+                                                  << thread_value_count);
 
       thread_valid_count = __POPC(warp_valid_mask & ((static_cast<bitmask_type>(1) << thread_value_count) - 1));
       warp_valid_count   = __POPC(warp_valid_mask);
@@ -1070,23 +959,6 @@ __device__ void gpuDecodeLevels(
   auto cur_leaf_count = target_leaf_count;
   while (s->error == 0 && s->nz_count < target_leaf_count &&
          s->input_value_count < s->num_input_values) {
-// <<<<<<< OLD CODE from 71072c8cff (b13f0c3a87) - COMMENTED OUT
-//     if (has_repetition) {
-//       gpuDecodeStream<level_t, rolling_buf_size>(
-//         rep, s, cur_leaf_count, warp.thread_rank(), level_type::REPETITION);
-//     }
-//     gpuDecodeStream<level_t, rolling_buf_size>(
-//       def, s, cur_leaf_count, warp.thread_rank(), level_type::DEFINITION);
-//     // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
-//     // with significantly better performance on AMD GPUs.
-// #ifndef __HIP_PLATFORM_AMD__
-//     warp.sync();
-// #else
-//     __syncwarp();
-// #endif
-//
-// =======
-// >>>>>>> END NEW CODE (b13f0c3a87)
     // because the rep and def streams are encoded separately, we cannot request an exact
     // # of values to be decoded at once. we can only process the lowest # of decoded rep/def
     // levels we get.

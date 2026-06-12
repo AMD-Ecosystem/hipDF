@@ -50,11 +50,8 @@
 #else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
-// <<<<<<< OLD CODE from cd0510b1f2 (c4e8151cb0) - COMMENTED OUT
-// #endif
-// =======
+#endif
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (c4e8151cb0)
 #include <thrust/copy.h>
 #include <thrust/count.h>
 #include <thrust/transform.h>

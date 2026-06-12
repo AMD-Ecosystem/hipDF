@@ -40,26 +40,6 @@ cudf::size_type num_multiprocessors()
   return num_sms;
 }
 
-// <<<<<<< OLD CODE from 6ed051a5d2 (49e37def79) - COMMENTED OUT
-// cudf::size_type max_shared_mem_per_multiprocessor()
-// {
-//   int device = 0;
-//   CUDF_CUDA_TRY(cudaGetDevice(&device));
-//   int max_shared_mem_per_sm;
-//   CUDF_CUDA_TRY(cudaDeviceGetAttribute(&max_shared_mem_per_sm,     cudaDevAttrMaxSharedMemoryPerMultiprocessor, device));
-//   return max_shared_mem_per_sm;
-// }
-//
-// cudf::size_type max_threads_per_multiprocessor()
-// {
-//   int device = 0;
-//   CUDF_CUDA_TRY(cudaGetDevice(&device));
-//   int max_threads_per_sm;
-//   CUDF_CUDA_TRY(cudaDeviceGetAttribute(&max_threads_per_sm,
-//                                         cudaDevAttrMaxThreadsPerMultiprocessor,
-//                                         device));
-//   return max_threads_per_sm;
-// =======
 [[nodiscard]] bool has_integrated_memory()
 {
   static auto const cached_result = []() {
@@ -70,7 +50,26 @@ cudf::size_type num_multiprocessors()
     return is_integrated == 1;
   }();
   return cached_result;
-// >>>>>>> END NEW CODE (49e37def79)
+}
+
+cudf::size_type max_shared_mem_per_multiprocessor()
+{
+  int device = 0;
+  CUDF_CUDA_TRY(cudaGetDevice(&device));
+  int max_shared_mem_per_sm;
+  CUDF_CUDA_TRY(cudaDeviceGetAttribute(
+    &max_shared_mem_per_sm, cudaDevAttrMaxSharedMemoryPerMultiprocessor, device));
+  return max_shared_mem_per_sm;
+}
+
+cudf::size_type max_threads_per_multiprocessor()
+{
+  int device = 0;
+  CUDF_CUDA_TRY(cudaGetDevice(&device));
+  int max_threads_per_sm;
+  CUDF_CUDA_TRY(
+    cudaDeviceGetAttribute(&max_threads_per_sm, cudaDevAttrMaxThreadsPerMultiprocessor, device));
+  return max_threads_per_sm;
 }
 
 }  // namespace cudf::detail

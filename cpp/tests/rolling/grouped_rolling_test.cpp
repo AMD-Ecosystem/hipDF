@@ -354,11 +354,7 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                    min_periods,
                    *cuda_udf_agg);
       auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-// <<<<<<< OLD CODE from 6a900b7215 (924d3073fb) - COMMENTED OUT
-//         cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir_func : ptx_func, cudf::data_type{cudf::type_id::INT64});
-// =======
-        cudf::udf_source_type::PTX, ptx_func, cudf::data_type{cudf::type_id::INT64});
-// >>>>>>> END NEW CODE (924d3073fb)
+        cudf::udf_source_type::PTX, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir_func : ptx_func, cudf::data_type{cudf::type_id::INT64});
       run_test_col(keys,
                    input,
                    expected_grouping,

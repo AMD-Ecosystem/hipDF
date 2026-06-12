@@ -44,18 +44,11 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-// #include <hip/hip_cooperative_groups.h>
-// //#include <cooperative_groups/reduce.h>
-// //#include <cooperative_groups/scan.h>
-// #include <hipcub/hipcub.hpp>
-// =======
-#include <cooperative_groups.h>
-#include <cooperative_groups/reduce.h>
-#include <cooperative_groups/scan.h>
-#include <cub/cub.cuh>
+#include <hip/hip_cooperative_groups.h>
+//#include <cooperative_groups/reduce.h>
+//#include <cooperative_groups/scan.h>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/algorithm>
-// >>>>>>> END NEW CODE (2d6106360e)
 
 namespace cudf {
 namespace strings {

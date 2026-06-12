@@ -38,11 +38,7 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/functional>
-// <<<<<<< OLD CODE from dc7eb3bf77 (2d6106360e) - COMMENTED OUT
-// #include <cuda/std/iterator>
-// =======
 #include <cuda/std/utility>
-// >>>>>>> END NEW CODE (2d6106360e)
 #include <thrust/binary_search.h>
 
 namespace cudf::io::parquet::detail {

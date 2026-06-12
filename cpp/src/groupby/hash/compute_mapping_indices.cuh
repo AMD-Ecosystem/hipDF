@@ -95,14 +95,8 @@ __device__ void find_global_mapping(cooperative_groups::thread_block const& bloc
                                     size_type* shared_set_indices,
                                     size_type* global_mapping_indices)
 {
-  // for all unique keys in shared memory hash set, stores their matches in
-// <<<<<<< OLD CODE from b74230c8be (72fd26dd64) - COMMENTED OUT
-//   // global hash set to `global_mapping_index`
-//   for (auto idx = block.thread_rank(); idx < cardinality; idx += block.size()) { // FIXME(HIP/AMD): switch to num_threads() when available
-// =======
   // global hash set to `global_mapping_indices`
   for (auto idx = block.thread_rank(); idx < cardinality; idx += block.num_threads()) {
-// >>>>>>> END NEW CODE (72fd26dd64)
     auto const input_idx = shared_set_indices[idx];
     auto const key_idx   = *global_set.insert_and_find(input_idx).first;
 

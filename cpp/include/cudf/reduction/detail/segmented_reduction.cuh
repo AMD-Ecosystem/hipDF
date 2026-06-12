@@ -34,13 +34,8 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #include <hipcub/device/device_segmented_reduce.hpp>
-// #include <cuda/std/iterator>
-// =======
-#include <cub/device/device_segmented_reduce.cuh>
+#include <hipcub/device/device_segmented_reduce.hpp>
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/transform.h>
 
 namespace cudf {

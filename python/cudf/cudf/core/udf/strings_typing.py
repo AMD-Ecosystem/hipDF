@@ -36,13 +36,10 @@ from numba.cuda.cudadecl import registry as cuda_decl_registry
 # FIXME(HIP/AMD): missing numba-hip mapping?
 from numba.cuda.descriptor import hip_target as cuda_target
 
-# <<<<<<< OLD CODE from b039385e36 (bc14bcaf10) - COMMENTED OUT
-# import rmm
-#
-# from cudf.core.udf.nrt_utils import _USE_NRT
-#
-# =======
-# >>>>>>> END NEW CODE (bc14bcaf10)
+# NOTE(HIP/AMD): NRT may not be available on HIP; import the availability flag
+# used by the managed_udf_string model below.
+from cudf.core.udf.nrt_utils import _USE_NRT
+
 # libcudf size_type
 size_type = types.int32
 

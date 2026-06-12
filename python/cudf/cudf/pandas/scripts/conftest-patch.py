@@ -886,153 +886,14 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/base/test_fillna.py::test_fillna[datetime]",
     "tests/base/test_fillna.py::test_fillna[multi]",
     "tests/base/test_fillna.py::test_fillna[tuples]",
-# <<<<<<< OLD CODE from 6e9e1971cd (d761d12c67) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# # #     "tests/base/test_fillna.py::test_fillna_null[categorical-None]",
-# # #     "tests/base/test_fillna.py::test_fillna_null[categorical-nan]",
-# # # =======
-# #     "tests/base/test_fillna.py::test_fillna_null[categorical-nan]",
-# #     "tests/base/test_fillna.py::test_fillna_null[categorical-None]",
-# # # >>>>>>> END NEW CODE (d53ccf2bb0)
-# # =======
-#     "tests/base/test_fillna.py::test_fillna_null[categorical-None]",
-#     "tests/base/test_fillna.py::test_fillna_null[categorical-nan]",
-# # <<<<<<< OLD CODE from eb2369f0ca (9312756bd5) - COMMENTED OUT
-# # # >>>>>>> END NEW CODE (ee26842c72)
-# #     "tests/base/test_misc.py::test_memory_usage[bool-object]",
-# #     "tests/base/test_misc.py::test_memory_usage[bool-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[bytearray-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[bytes-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[categorical]",
-# #     "tests/base/test_misc.py::test_memory_usage[complex-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[complex128]",
-# #     "tests/base/test_misc.py::test_memory_usage[complex64]",
-# #     "tests/base/test_misc.py::test_memory_usage[datetime-tz]",
-# #     "tests/base/test_misc.py::test_memory_usage[datetime]",
-# #     "tests/base/test_misc.py::test_memory_usage[dict-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[float-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[float16-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[float32-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[float32]",
-# #     "tests/base/test_misc.py::test_memory_usage[float64]",
-# #     "tests/base/test_misc.py::test_memory_usage[frozenset-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[int-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[int16-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[int16]",
-# #     "tests/base/test_misc.py::test_memory_usage[int32-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[int32]",
-# #     "tests/base/test_misc.py::test_memory_usage[int64]",
-# #     "tests/base/test_misc.py::test_memory_usage[int8-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[interval]",
-# #     "tests/base/test_misc.py::test_memory_usage[list-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[memoryview-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[mi-with-dt64tz-level]",
-# #     "tests/base/test_misc.py::test_memory_usage[multi]",
-# #     "tests/base/test_misc.py::test_memory_usage[nullable_float]",
-# #     "tests/base/test_misc.py::test_memory_usage[nullable_int]",
-# #     "tests/base/test_misc.py::test_memory_usage[nullable_uint]",
-# #     "tests/base/test_misc.py::test_memory_usage[object]",
-# #     "tests/base/test_misc.py::test_memory_usage[period]",
-# #     "tests/base/test_misc.py::test_memory_usage[range-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-bool-object-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-categorical-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-complex128-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-complex64-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-datetime-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-datetime-tz-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-float32-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-float64-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-int16-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-int32-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-int64-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-int8-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-interval-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-mi-with-dt64tz-level-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-multi-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-nullable_bool-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-nullable_float-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-nullable_int-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-nullable_uint-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-object-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-period-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-range-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-string-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-string-pyarrow-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-string-python-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-timedelta-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-tuples-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-uint16-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-uint32-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-uint64-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[series-with-uint8-index]",
-# #     "tests/base/test_misc.py::test_memory_usage[set-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[str-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[string-pyarrow]",
-# #     "tests/base/test_misc.py::test_memory_usage[string-python]",
-# #     "tests/base/test_misc.py::test_memory_usage[string]",
-# #     "tests/base/test_misc.py::test_memory_usage[timedelta]",
-# #     "tests/base/test_misc.py::test_memory_usage[tuple-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[uint16-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[uint16]",
-# #     "tests/base/test_misc.py::test_memory_usage[uint32-series]",
-# #     "tests/base/test_misc.py::test_memory_usage[uint32]",
-# #     "tests/base/test_misc.py::test_memory_usage[uint64]",
-# #     "tests/base/test_misc.py::test_memory_usage[uint8-series]",
-# #     "tests/base/test_misc.py::test_memory_usage_components_narrow_series[float16]",
-# # =======
-# # >>>>>>> END NEW CODE (9312756bd5)
-# =======
-# >>>>>>> END NEW CODE (d761d12c67)
     "tests/base/test_misc.py::test_ndarray_compat_properties[multi]",
     "tests/base/test_misc.py::test_ndarray_compat_properties[tuples]",
     "tests/base/test_unique.py::test_unique[multi]",
     "tests/base/test_unique.py::test_unique[tuples]",
-# <<<<<<< OLD CODE from 6e9e1971cd (d761d12c67) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# # #     "tests/base/test_unique.py::test_unique_null[categorical-None]",
-# # #     "tests/base/test_unique.py::test_unique_null[categorical-nan]",
-# # # =======
-# #     "tests/base/test_unique.py::test_unique_null[categorical-nan]",
-# #     "tests/base/test_unique.py::test_unique_null[categorical-None]",
-# #     "tests/base/test_unique.py::test_nunique_null[categorical-nan]",
-# #     "tests/base/test_unique.py::test_nunique_null[categorical-None]",
-# # # >>>>>>> END NEW CODE (d53ccf2bb0)
-# # =======
-#     "tests/base/test_unique.py::test_unique_null[categorical-None]",
-#     "tests/base/test_unique.py::test_unique_null[categorical-nan]",
-# # >>>>>>> END NEW CODE (ee26842c72)
-# =======
-# >>>>>>> END NEW CODE (d761d12c67)
     "tests/base/test_value_counts.py::test_value_counts[multi]",
     "tests/base/test_value_counts.py::test_value_counts[tuples]",
     "tests/base/test_value_counts.py::test_value_counts_bins[index]",
     "tests/base/test_value_counts.py::test_value_counts_bins[series]",
-# <<<<<<< OLD CODE from b7c81f630b (5c7977859b) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 6e9e1971cd (d761d12c67) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from cf1a356509 (9bfb9d4bb0) - COMMENTED OUT
-# # # #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
-# # # #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
-# # # # =======
-# # # # >>>>>>> END NEW CODE (9bfb9d4bb0)
-# # # =======
-# #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-None]",
-# #     "tests/base/test_value_counts.py::test_value_counts_null[categorical-nan]",
-# # # >>>>>>> END NEW CODE (ee26842c72)
-# # =======
-# # >>>>>>> END NEW CODE (d761d12c67)
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ms]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-ns]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-s]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[index-us]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-ms]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-ns]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-s]",
-#     "tests/base/test_value_counts.py::test_value_counts_timedelta64[series-us]",
-# =======
-# >>>>>>> END NEW CODE (5c7977859b)
     "tests/computation/test_eval.py::TestAlignment::test_performance_warning_for_poor_alignment[numexpr-pandas]",
     "tests/computation/test_eval.py::TestAlignment::test_performance_warning_for_poor_alignment[numexpr-python]",
     "tests/computation/test_eval.py::TestEval::test_disallow_python_keywords",
@@ -1548,237 +1409,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/extension/test_arrow.py::TestArrowArray::test_accumulate_series[bool-cummin-True]",
     "tests/extension/test_arrow.py::TestArrowArray::test_accumulate_series[bool-cumprod-False]",
     "tests/extension/test_arrow.py::TestArrowArray::test_accumulate_series[bool-cumprod-True]",
-# <<<<<<< OLD CODE from 5482aa5f9d (b70c6d47c2) - COMMENTED OUT
-# # <<<<<<< OLD CODE from b5ca4e39a7 (2d27779960) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 4ee759c0ad (f2324e18ac) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from 48731c5a92 (f4d13ea051) - COMMENTED OUT
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[decimal128(7, 3)-string[pyarrow]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[decimal128(7, 3)-string[python]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[ms]-string[pyarrow]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[ms]-string[python]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[ns]-string[pyarrow]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[ns]-string[python]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[s]-string[pyarrow]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[s]-string[python]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[us]-string[pyarrow]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[duration[us]-string[python]]",
-# # # # # <<<<<<< OLD CODE from ddb92fa047 (51ed146717) - COMMENTED OUT
-# # # # # # <<<<<<< OLD CODE from 65cf42d517 (467dcc2f81) - COMMENTED OUT
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[decimal128(7, 3)-eq]",
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[decimal128(7, 3)-ge]",
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[decimal128(7, 3)-gt]",
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[decimal128(7, 3)-le]",
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[decimal128(7, 3)-lt]",
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[decimal128(7, 3)-ne]",
-# # # # # # # <<<<<<< OLD CODE from 8a8264a862 (95bf22bfe1) - COMMENTED OUT
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ms]-eq]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ms]-ge]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ms]-gt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ms]-le]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ms]-lt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ms]-ne]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ns]-eq]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ns]-ge]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ns]-gt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ns]-le]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ns]-lt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[ns]-ne]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[s]-eq]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[s]-ge]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[s]-gt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[s]-le]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[s]-lt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[s]-ne]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[us]-eq]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[us]-ge]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[us]-gt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[us]-le]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[us]-lt]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[duration[us]-ne]",
-# # # # # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
-# # # # # # # # # <<<<<<< OLD CODE from f9e905422a (9796918ead) - COMMENTED OUT
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[date64[ms]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[ms, tz=US/Eastern]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[ms, tz=US/Pacific]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[ms, tz=UTC]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[ns, tz=US/Eastern]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[ns, tz=US/Pacific]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[ns, tz=UTC]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[s, tz=US/Eastern]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[s, tz=US/Pacific]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[s, tz=UTC]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[us, tz=US/Eastern]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[us, tz=US/Pacific]]",
-# # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[timestamp[us, tz=UTC]]",
-# # # # # # # # # # <<<<<<< OLD CODE from 0578f6ecb9 (98d134452c) - COMMENTED OUT
-# # # # # # # # # # # <<<<<<< OLD CODE from a63150f8d7 (8ce6cc0d12) - COMMENTED OUT
-# # # # # # # # # # # =======
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[bool--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[bool--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[bool-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[bool-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[bool-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[bool-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[double--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[double--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[double-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[double-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[double-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[double-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ms]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ms]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ms]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ms]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ms]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ms]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ns]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ns]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ns]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ns]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ns]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[ns]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[s]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[s]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[s]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[s]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[s]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[s]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[us]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[us]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[us]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[us]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[us]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[duration[us]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[float--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[float--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[float-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[float-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[float-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[float-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int16--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int16--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int16-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int16-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int16-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int16-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int32--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int32--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int32-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int32-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int32-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int32-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int64--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int64--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int64-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int64-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int64-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int64-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int8--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int8--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int8-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int8-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int8-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[int8-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[string--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[string--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[string-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[string-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[string-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[string-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ms]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ms]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ms]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ms]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ms]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ms]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ns]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ns]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ns]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ns]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ns]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[ns]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[s]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[s]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[s]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[s]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[s]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[s]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[us]--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[us]--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[us]-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[us]-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[us]-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[timestamp[us]-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint16--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint16--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint16-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint16-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint16-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint16-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint32--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint32--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint32-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint32-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint32-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint32-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint64--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint64--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint64-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint64-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint64-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint64-2-indices2-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint8--2-indices0-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint8--2-indices0-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint8-0-indices1-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint8-0-indices1-True]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint8-2-indices2-False]",
-# # # # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_container_shift[uint8-2-indices2-True]",
-# # # # # # # # # # # >>>>>>> END NEW CODE (8ce6cc0d12)
-# # # # # # # # # # =======
-# # # # # # # # # # >>>>>>> END NEW CODE (98d134452c)
-# # # # # # # # # =======
-# # # # # # # # # >>>>>>> END NEW CODE (9796918ead)
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[duration[ms]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[duration[s]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[duration[us]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[ms, tz=US/Eastern]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[ms, tz=US/Pacific]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[ms, tz=UTC]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[ms]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[s, tz=US/Eastern]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[s, tz=US/Pacific]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[s, tz=UTC]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[s]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[us, tz=US/Eastern]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[us, tz=US/Pacific]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[us, tz=UTC]]",
-# # # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_getitem_scalar[timestamp[us]]",
-# # # # # # # # =======
-# # # # # # # # >>>>>>> END NEW CODE (59b6dddcaf)
-# # # # # # # =======
-# # # # # # # >>>>>>> END NEW CODE (95bf22bfe1)
-# # # # # # =======
-# # # # # # >>>>>>> END NEW CODE (467dcc2f81)
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[bool]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[int16]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[int32]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[int64]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[int8]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[uint16]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[uint32]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[uint64]",
-# # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_invert[uint8]",
-# # # # # =======
-# # # # # >>>>>>> END NEW CODE (51ed146717)
-# # # # =======
-# # # # >>>>>>> END NEW CODE (f4d13ea051)
-# # # =======
-# # =======
-#     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[timestamp[s]-string[python]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[timestamp[s]-string[pyarrow]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[timestamp[ms]-string[python]]",
-# =======
-# >>>>>>> END NEW CODE (b70c6d47c2)
     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[timestamp[ms]-string[pyarrow]]",
     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[timestamp[ms]-string[python]]",
     "tests/extension/test_arrow.py::TestArrowArray::test_astype_string[timestamp[ns]-string[pyarrow]]",
@@ -1805,23 +1435,14 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[s]-le]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[s]-lt]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[s]-ne]",
-# <<<<<<< OLD CODE from 5482aa5f9d (b70c6d47c2) - COMMENTED OUT
-#     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[s]-eq]",
-# # >>>>>>> END NEW CODE (2d27779960)
-# =======
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[us]-eq]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[us]-ge]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[us]-gt]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[us]-le]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[us]-lt]",
     "tests/extension/test_arrow.py::TestArrowArray::test_compare_array[timestamp[us]-ne]",
-# <<<<<<< OLD CODE from ae0add6020 (244edde871) - COMMENTED OUT
-# # >>>>>>> END NEW CODE (b70c6d47c2)
-# =======
     "tests/extension/test_arrow.py::TestArrowArray::test_concat_mixed_dtypes[decimal128(7, 3)]",
-# >>>>>>> END NEW CODE (244edde871)
     "tests/extension/test_arrow.py::TestArrowArray::test_groupby_agg_extension[decimal128(7, 3)]",
-# >>>>>>> END NEW CODE (f2324e18ac)
     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_frame[decimal128(7, 3)-mean-False]",
     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_frame[decimal128(7, 3)-median-True]",
     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_frame[decimal128(7, 3)-prod-False]",
@@ -1862,308 +1483,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint64-kurt-True]",
     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint8-kurt-False]",
     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint8-kurt-True]",
-# <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 6a7c7c4b07 (429315a4b3) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from 55e2798a5e (968d14c3ba) - COMMENTED OUT
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[binary]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[bool]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[date32[day]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[date64[ms]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[decimal128(7, 3)]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[double]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[duration[ms]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[duration[ns]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[duration[s]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[duration[us]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[float]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[int16]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[int32]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[int64]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[int8]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[string]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[time32[ms]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[time32[s]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[time64[ns]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[time64[us]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ms, tz=US/Eastern]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ms, tz=US/Pacific]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ms, tz=UTC]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ms]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ns, tz=US/Eastern]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ns, tz=US/Pacific]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ns, tz=UTC]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[ns]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[s, tz=US/Eastern]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[s, tz=US/Pacific]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[s, tz=UTC]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[s]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[us, tz=US/Eastern]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[us, tz=US/Pacific]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[us, tz=UTC]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[timestamp[us]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[uint16]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[uint32]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[uint64]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor[uint8]",
-# # # # <<<<<<< OLD CODE from f9e905422a (9796918ead) - COMMENTED OUT
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[date64[ms]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[ms, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[ms, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[ms, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[ns, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[ns, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[ns, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[s, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[s, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[s, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[us, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[us, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[timestamp[us, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[date64[ms]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[ms, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[ms, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[ms, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[ns, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[ns, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[ns, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[s, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[s, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[s, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[us, tz=US/Eastern]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[us, tz=US/Pacific]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[timestamp[us, tz=UTC]]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_with_index[date64[ms]]",
-# # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # # # # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# # # # # # # <<<<<<< OLD CODE from a63150f8d7 (8ce6cc0d12) - COMMENTED OUT
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[ms]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[ns]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[s]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[us]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[ms]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[ns]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[s]]",
-# # # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[us]]",
-# # # # # # # =======
-# # # # # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[decimal128(7, 3)]",
-# # # # # # # >>>>>>> END NEW CODE (8ce6cc0d12)
-# # # # # # =======
-# # # # # # >>>>>>> END NEW CODE (d53ccf2bb0)
-# # # # # =======
-# # # # =======
-# # # # >>>>>>> END NEW CODE (9796918ead)
-# # # =======
-# # # >>>>>>> END NEW CODE (968d14c3ba)
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[ms]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[ns]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[s]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[us]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[ms]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[ns]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[s]]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[us]]",
-# # # >>>>>>> END NEW CODE (ee26842c72)
-# # =======
-# # >>>>>>> END NEW CODE (429315a4b3)
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[bool]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[decimal128(7, 3)]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[double]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[duration[ms]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[duration[ns]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[duration[s]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[duration[us]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[float]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[int16]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[int32]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[int64]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[int8]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[string]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[timestamp[ms]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[timestamp[ns]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[timestamp[s]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[timestamp[us]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[uint16]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[uint32]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[uint64]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_frame_2d_values[uint8]",
-# # <<<<<<< OLD CODE from c2d0d225ea (5fa6f4a112) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# # # # =======
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[ms]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[ns]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[s]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[duration[us]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[ms]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[ns]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[s]]",
-# # #     "tests/extension/test_arrow.py::TestArrowArray::test_setitem_2d_values[timestamp[us]]",
-# # # # <<<<<<< OLD CODE from 379bdb12ae (f069981b8a) - COMMENTED OUT
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[binary-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[bool-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[bool-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[bool-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[date32[day]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[date64[ms]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[decimal128(7, 3)-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[decimal128(7, 3)-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[decimal128(7, 3)-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[double-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[double-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[double-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[ms]-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[ms]-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[ms]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[ns]-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[ns]-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[ns]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[s]-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[s]-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[s]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[us]-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[us]-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[duration[us]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[float-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[float-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[float-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int16-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int16-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int16-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int32-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int32-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int32-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int64-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int64-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int64-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int8-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int8-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[int8-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[string-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[time32[ms]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[time32[s]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[time64[ns]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[time64[us]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ms, tz=US/Eastern]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ms, tz=US/Pacific]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ms, tz=UTC]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ms]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ns, tz=US/Eastern]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ns, tz=US/Pacific]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ns, tz=UTC]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[ns]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[s, tz=US/Eastern]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[s, tz=US/Pacific]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[s, tz=UTC]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[s]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[us, tz=US/Eastern]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[us, tz=US/Pacific]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[us, tz=UTC]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[timestamp[us]-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint16-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint16-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint16-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint32-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint32-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint32-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint64-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint64-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint64-positive]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint8-absolute]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint8-negative]",
-# # # #     "tests/extension/test_arrow.py::TestArrowArray::test_unary_ufunc_dunder_equivalence[uint8-positive]",
-# # # # # >>>>>>> END NEW CODE (d53ccf2bb0)
-# # # # =======
-# # # # >>>>>>> END NEW CODE (f069981b8a)
-# # # =======
-# # # >>>>>>> END NEW CODE (ee26842c72)
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[bool-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[bool-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[bool-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[bool-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[decimal128(7, 3)-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[decimal128(7, 3)-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[decimal128(7, 3)-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[decimal128(7, 3)-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[double-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[double-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[double-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[double-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ms]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ms]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ms]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ms]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ns]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ns]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ns]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[ns]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[s]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[s]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[s]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[s]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[us]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[us]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[us]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[duration[us]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[float-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[float-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[float-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[float-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int16-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int16-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int16-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int16-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int32-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int32-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int32-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int32-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int64-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int64-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int64-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int64-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int8-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int8-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int8-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[int8-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[string-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[string-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[string-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[string-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ms]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ms]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ms]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ms]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ns]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ns]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ns]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[ns]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[s]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[s]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[s]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[s]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[us]-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[us]-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[us]-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[timestamp[us]-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint16-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint16-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint16-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint16-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint32-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint32-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint32-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint32-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint64-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint64-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint64-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint64-series-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint8-frame-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint8-frame-index3]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint8-series-index2]",
-# #     "tests/extension/test_arrow.py::TestArrowArray::test_unstack[uint8-series-index3]",
-# # =======
-# # >>>>>>> END NEW CODE (5fa6f4a112)
-# =======
-# >>>>>>> END NEW CODE (9a0ca028f6)
     "tests/extension/test_arrow.py::TestLogicalOps::test_kleene_and",
     "tests/extension/test_arrow.py::TestLogicalOps::test_kleene_and_scalar[False-expected3]",
     "tests/extension/test_arrow.py::TestLogicalOps::test_kleene_and_scalar[None-expected0]",
@@ -3126,17 +2445,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/frame/methods/test_tz_localize.py::TestTZLocalize::test_tz_localize_copy_inplace_mutate[DataFrame-True]",
     "tests/frame/methods/test_tz_localize.py::TestTZLocalize::test_tz_localize_copy_inplace_mutate[Series-False]",
     "tests/frame/methods/test_tz_localize.py::TestTZLocalize::test_tz_localize_copy_inplace_mutate[Series-True]",
-# <<<<<<< OLD CODE from 520612ced6 (7bf8eab7bd) - COMMENTED OUT
-#     "tests/frame/methods/test_update.py::TestDataFrameUpdate::test_update_modify_view",
-# # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # =======
-# #     "tests/frame/methods/test_value_counts.py::test_data_frame_value_counts_dropna_false[NAType]",
-# # # >>>>>>> END NEW CODE (ee26842c72)
-# # =======
-# # >>>>>>> END NEW CODE (d142e22536)
-# =======
-# >>>>>>> END NEW CODE (7bf8eab7bd)
     "tests/frame/methods/test_value_counts.py::test_data_frame_value_counts_dropna_false[NoneType]",
     "tests/frame/methods/test_value_counts.py::test_data_frame_value_counts_empty",
     "tests/frame/methods/test_value_counts.py::test_data_frame_value_counts_empty_normalize",
@@ -3758,13 +3066,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/groupby/methods/test_groupby_shift_diff.py::test_shift_periods_freq",
     "tests/groupby/methods/test_nth.py::test_first_last_nth",
     "tests/groupby/methods/test_nth.py::test_first_last_nth_dtypes",
-# <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # =======
-#     "tests/groupby/methods/test_nth.py::test_groupby_last_first_nth_with_none[NAType-nth]",
-# # >>>>>>> END NEW CODE (ee26842c72)
-# =======
-# >>>>>>> END NEW CODE (d142e22536)
     "tests/groupby/methods/test_nth.py::test_groupby_last_first_nth_with_none[NoneType-nth]",
     "tests/groupby/methods/test_nth.py::test_negative_step",
     "tests/groupby/methods/test_nth.py::test_np_ints",
@@ -3908,14 +3209,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/groupby/methods/test_value_counts.py::test_compound[True-False-expected_rows1-expected_count1-expected_group_size1-True-string[pyarrow_numpy]]",
     "tests/groupby/methods/test_value_counts.py::test_compound[True-True-expected_rows2-expected_count2-expected_group_size2-False-string[pyarrow_numpy]]",
     "tests/groupby/methods/test_value_counts.py::test_compound[True-True-expected_rows2-expected_count2-expected_group_size2-True-string[pyarrow_numpy]]",
-# <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # =======
-#     "tests/groupby/methods/test_value_counts.py::test_data_frame_value_counts_dropna[NAType-False-count-False-expected_data1-expected_index1]",
-#     "tests/groupby/methods/test_value_counts.py::test_data_frame_value_counts_dropna[NAType-True-proportion-False-expected_data1-expected_index1]",
-# # >>>>>>> END NEW CODE (ee26842c72)
-# =======
-# >>>>>>> END NEW CODE (d142e22536)
     "tests/groupby/methods/test_value_counts.py::test_data_frame_value_counts_dropna[NoneType-False-count-False-expected_data1-expected_index1]",
     "tests/groupby/methods/test_value_counts.py::test_data_frame_value_counts_dropna[NoneType-True-proportion-False-expected_data1-expected_index1]",
     "tests/groupby/methods/test_value_counts.py::test_dropna_combinations[True-False-expected_rows2-expected_values2]",
@@ -4165,27 +3458,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[cumprod-True-True-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[cumsum-True-False-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[cumsum-True-True-False]",
-# <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-False-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-False-True]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-True-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-True-True]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-False-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-False-True]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-True-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-True-True]",
-# # =======
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-True-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-True-False]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-False-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-False-False]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-True-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-True-False]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-False-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-False-False]",
-# # >>>>>>> END NEW CODE (d53ccf2bb0)
-# =======
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-False-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-False-True]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-False-True-False]",
@@ -4194,7 +3466,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-False-True]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-True-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[diff-True-True-True]",
-# >>>>>>> END NEW CODE (ee26842c72)
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[ngroup-True-False-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[ngroup-True-False-True]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[ngroup-True-True-False]",
@@ -4205,31 +3476,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[pct_change-True-True-True]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[rank-True-False-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[rank-True-True-False]",
-# <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 1190c10dd3 (d53ccf2bb0) - COMMENTED OUT
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-False-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-False-True]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-True-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-True-True]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-False-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-False-True]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-True-False]",
-# #     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-True-True]",
-# # =======
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-True-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-True-False]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-False-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-True-False-False]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-True-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-True-False]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-False-True]",
-#     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-False-False]",
-# # >>>>>>> END NEW CODE (d53ccf2bb0)
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_apply_with_dropna_for_multi_index[dropna_false_no_nan]",
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_apply_with_dropna_for_multi_index[dropna_true_no_nan]",
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_agg[False-tuples1-outputs1]",
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_nan_in_one_group[NoneType-False-tuples1-outputs1]",
-# =======
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-False-False]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-False-True]",
     "tests/groupby/test_groupby_dropna.py::test_categorical_transformers[shift-False-True-False]",
@@ -4242,13 +3488,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/groupby/test_groupby_dropna.py::test_groupby_apply_with_dropna_for_multi_index[dropna_true_no_nan]",
     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_agg[False-tuples1-outputs1]",
     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_nan_in_one_group[NoneType-False-tuples1-outputs1]",
-# <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_nan_in_two_groups[NAType-NAType-False-tuples1-outputs1]",
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_nan_in_two_groups[NAType-NoneType-False-tuples1-outputs1]",
-#     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_nan_in_two_groups[NoneType-NAType-False-tuples1-outputs1]",
-# # >>>>>>> END NEW CODE (ee26842c72)
-# =======
-# >>>>>>> END NEW CODE (d142e22536)
     "tests/groupby/test_groupby_dropna.py::test_groupby_dropna_multi_index_dataframe_nan_in_two_groups[NoneType-NoneType-False-tuples1-outputs1]",
     "tests/groupby/test_groupby_dropna.py::test_null_is_null_for_dtype[False-Decimal-Decimal-None-False]",
     "tests/groupby/test_groupby_dropna.py::test_null_is_null_for_dtype[False-Decimal-Decimal-None-True]",
@@ -4989,15 +4228,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_float64[NoneType-float32]",
     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_float64[NoneType-float64]",
     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_float64[NoneType-float]",
-# <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # =======
-#     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_object[NAType-Decimal]",
-#     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_object[NAType-NAType]",
-#     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_object[NAType-NoneType]",
-# # >>>>>>> END NEW CODE (ee26842c72)
-# =======
-# >>>>>>> END NEW CODE (d142e22536)
     "tests/indexes/test_base.py::TestIndex::test_isin_nan_common_object[NoneType-Decimal]",
     "tests/indexes/test_base.py::TestIndex::test_map_defaultdict",
     "tests/indexes/test_base.py::TestIndex::test_str_attribute_raises[index2]",
@@ -6524,24 +5754,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_join_multi_dtypes[float32-int320]",
     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_join_multi_dtypes[float32-int321]",
     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_bool_dtype[right-expected_data3]",
-# <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # =======
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[inner-U]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[inner-str0]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[inner-str1]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[left-U]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[left-str0]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[left-str1]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[outer-U]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[outer-str0]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[outer-str1]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[right-U]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[right-str0]",
-#     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_ea_with_string[right-str1]",
-# # >>>>>>> END NEW CODE (ee26842c72)
-# =======
-# >>>>>>> END NEW CODE (d142e22536)
     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_empty[False-right-empty]",
     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_empty[True-right-right]",
     "tests/reshape/merge/test_merge.py::TestMergeDtypes::test_merge_incompat_dtypes_are_ok[df1_vals3-df2_vals3]",
@@ -7053,50 +6265,8 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS = {
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint32]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint64]",
     "tests/series/methods/test_astype.py::TestAstype::test_astype_float_to_uint_negatives_raise[float64-uint8]",
-# <<<<<<< OLD CODE from 3653594e3e (ba681397fb) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 88f5f27ae2 (cf69ee3c54) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from c16465222d (47c7e570f9) - COMMENTED OUT
-# # # # <<<<<<< OLD CODE from 7aad2fd0d0 (9a0ca028f6) - COMMENTED OUT
-# # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-# # # # # <<<<<<< OLD CODE from 22802e4a78 (2617fd93c4) - COMMENTED OUT
-# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
-# # # # # # <<<<<<< OLD CODE from 616220f99a (af4ffdd992) - COMMENTED OUT
-# # # # # # # <<<<<<< OLD CODE from a03c95e66c (59b6dddcaf) - COMMENTED OUT
-# # # # # # # # <<<<<<< OLD CODE from 5e2227b430 (d142e22536) - COMMENTED OUT
-# # # # # # # # # <<<<<<< OLD CODE from ffbbd1a3c7 (ee26842c72) - COMMENTED OUT
-# # # # # # # # # =======
-# # # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[value2-<NA>]",
-# # # # # # # # # >>>>>>> END NEW CODE (ee26842c72)
-# # # # # # # # =======
-# # # # # # # # >>>>>>> END NEW CODE (d142e22536)
-# # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_dt64_series_astype_object",
-# # # # # # #     "tests/series/methods/test_astype.py::TestAstype::test_td64_series_astype_object",
-# # # # # # # =======
-# # # # # # # >>>>>>> END NEW CODE (59b6dddcaf)
-# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-None]",
-# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[False-True-foo]",
-# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-None]",
-# # # # # #     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_categorical[True-False-foo]",
-# # # # # # =======
-# # # # # # >>>>>>> END NEW CODE (af4ffdd992)
-# # # # # =======
-# # # # # >>>>>>> END NEW CODE (2617fd93c4)
-# # # # =======
-# # # # >>>>>>> END NEW CODE (9a0ca028f6)
-# # # =======
-# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-# #     "tests/series/methods/test_astype.py::TestAstype::test_astype_str_cast_td64",
-# # # <<<<<<< OLD CODE from 4ee759c0ad (f2324e18ac) - COMMENTED OUT
-# # # # >>>>>>> END NEW CODE (47c7e570f9)
-# # # =======
-# # =======
-# # >>>>>>> END NEW CODE (cf69ee3c54)
-# =======
     "tests/series/methods/test_astype.py::TestAstype::test_astype_from_float_to_str[float32]",
-# >>>>>>> END NEW CODE (ba681397fb)
     "tests/series/methods/test_astype.py::TestAstype::test_astype_to_str_preserves_na[None-None]",
-# >>>>>>> END NEW CODE (f2324e18ac)
     "tests/series/methods/test_astype.py::TestAstypeCategorical::test_astype_categorical_to_other",
     "tests/series/methods/test_astype.py::TestAstypeString::test_astype_string_to_extension_dtype_roundtrip[string[pyarrow]-data1-category]",
     "tests/series/methods/test_astype.py::TestAstypeString::test_astype_string_to_extension_dtype_roundtrip[string[python]-data1-category]",
@@ -8393,69 +7563,6 @@ NODEIDS_THAT_FAIL_WITH_CUDF_PANDAS_WITH_REASON: dict[str, set[str]] = {
 }
 
 NODEIDS_THAT_XPASS_WITH_CUDF_PANDAS = {
-# <<<<<<< OLD CODE from 7a601709ce (05a5e297ee) - COMMENTED OUT
-# # <<<<<<< OLD CODE from 9aa74b2483 (4c2231a032) - COMMENTED OUT
-# # # <<<<<<< OLD CODE from b8250c6b12 (293c12e818) - COMMENTED OUT
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrame-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrame-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrameNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrameNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-Series-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-Series-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-SeriesNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-SeriesNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-float-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-float-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-DataFrame-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-DataFrame-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-DataFrameNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-DataFrameNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-Series-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-Series-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-SeriesNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-SeriesNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-float-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrameNaN-float-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-DataFrame-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-DataFrame-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-DataFrameNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-DataFrameNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-Series-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-Series-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-SeriesNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-SeriesNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-float-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[Series-float-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-DataFrame-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-DataFrame-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-DataFrameNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-DataFrameNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-Series-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-Series-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-SeriesNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-SeriesNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-float-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[SeriesNaN-float-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-DataFrame-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-DataFrame-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-DataFrameNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-DataFrameNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-Series-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-Series-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-SeriesNaN-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-SeriesNaN-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-float-numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_floor_division[float-float-numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_frame_invert[numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_frame_invert[numexpr-python]",
-# # #     "tests/computation/test_eval.py::TestEval::test_series_invert[numexpr-pandas]",
-# # #     "tests/computation/test_eval.py::TestEval::test_series_invert[numexpr-python]",
-# # #     "tests/groupby/test_raises.py::test_groupby_raises_category[by3-False-cumsum-agg]",
-# # #     "tests/indexes/datetimes/test_constructors.py::TestDatetimeIndex::test_dti_constructor_with_non_nano_now_today",
-# # # =======
-# # # >>>>>>> END NEW CODE (293c12e818)
-# # =======
-# =======
     "tests/arrays/string_/test_string.py::test_add_2d[pyarrow]",
     "tests/arrays/string_/test_string.py::test_add_2d[pyarrow_numpy]",
     "tests/arrays/string_/test_string.py::test_add_2d[string=str[pyarrow]]",
@@ -8472,7 +7579,6 @@ NODEIDS_THAT_XPASS_WITH_CUDF_PANDAS = {
     "tests/arrays/string_/test_string.py::test_reduce_missing[pyarrow_numpy-True]",
     "tests/arrays/string_/test_string.py::test_reduce_missing[python-False]",
     "tests/arrays/string_/test_string.py::test_reduce_missing[python-True]",
-# >>>>>>> END NEW CODE (05a5e297ee)
     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrame-numexpr-pandas]",
     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrame-numexpr-python]",
     "tests/computation/test_eval.py::TestEval::test_floor_division[DataFrame-DataFrameNaN-numexpr-pandas]",
@@ -8527,50 +7633,6 @@ NODEIDS_THAT_XPASS_WITH_CUDF_PANDAS = {
     "tests/computation/test_eval.py::TestEval::test_frame_invert[numexpr-python]",
     "tests/computation/test_eval.py::TestEval::test_series_invert[numexpr-pandas]",
     "tests/computation/test_eval.py::TestEval::test_series_invert[numexpr-python]",
-# <<<<<<< OLD CODE from 7a601709ce (05a5e297ee) - COMMENTED OUT
-#     "tests/groupby/test_raises.py::test_groupby_raises_category[by3-False-cumsum-agg]",
-#     "tests/indexes/datetimes/test_constructors.py::TestDatetimeIndex::test_dti_constructor_with_non_nano_now_today",
-# # >>>>>>> END NEW CODE (4c2231a032)
-#     "tests/generic/test_finalize.py::test_categorical_accessor[method0]",
-#     "tests/generic/test_finalize.py::test_categorical_accessor[method1]",
-#     "tests/generic/test_finalize.py::test_categorical_accessor[method2]",
-#     "tests/generic/test_finalize.py::test_categorical_accessor[method4]",
-#     "tests/generic/test_finalize.py::test_categorical_accessor[method7]",
-#     "tests/generic/test_finalize.py::test_categorical_accessor[method8]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_no_data_with_index[date64[ms]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_na_with_index[date64[ms]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_series_constructor_scalar_with_index[date64[ms]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_construct_empty_dataframe[date64[ms]]",
-#     "tests/extension/test_arrow.py::test_mode_dropna_false_mode_na[date64[ms]]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint8-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint16-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint32-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[uint64-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[int8-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[int16-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[int32-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[int64-skew-True]",
-#     "tests/extension/test_arrow.py::TestArrowArray::test_reduce_series_numeric[float-skew-True]",
-#     "tests/io/json/test_readlines.py::test_readjson_unicode[pyarrow]",
-#     "tests/series/methods/test_info.py::test_info_memory_usage_deep_pypy",
-#     "tests/arrays/string_/test_string.py::test_add_2d[pyarrow]",
-#     "tests/arrays/string_/test_string.py::test_add_2d[pyarrow_numpy]",
-#     "tests/arrays/string_/test_string.py::test_add_2d[string=str[pyarrow]]",
-#     "tests/arrays/string_/test_string.py::test_add_2d[string=string[pyarrow]]",
-#     "tests/arrays/string_/test_string.py::test_reduce[pyarrow-False]",
-#     "tests/arrays/string_/test_string.py::test_reduce[pyarrow-True]",
-#     "tests/arrays/string_/test_string.py::test_reduce[pyarrow_numpy-False]",
-#     "tests/arrays/string_/test_string.py::test_reduce[pyarrow_numpy-True]",
-#     "tests/arrays/string_/test_string.py::test_reduce[python-False]",
-#     "tests/arrays/string_/test_string.py::test_reduce[python-True]",
-#     "tests/arrays/string_/test_string.py::test_reduce_missing[pyarrow-False]",
-#     "tests/arrays/string_/test_string.py::test_reduce_missing[pyarrow-True]",
-#     "tests/arrays/string_/test_string.py::test_reduce_missing[pyarrow_numpy-False]",
-#     "tests/arrays/string_/test_string.py::test_reduce_missing[pyarrow_numpy-True]",
-#     "tests/arrays/string_/test_string.py::test_reduce_missing[python-False]",
-#     "tests/arrays/string_/test_string.py::test_reduce_missing[python-True]",
-# =======
-# >>>>>>> END NEW CODE (05a5e297ee)
     "tests/computation/test_eval.py::test_eval_no_support_column_name[Inf]",
     "tests/computation/test_eval.py::test_eval_no_support_column_name[inf]",
     "tests/extension/decimal/test_decimal.py::TestDecimalArray::test_getitem_series_integer_with_missing_raises[integer-array]",

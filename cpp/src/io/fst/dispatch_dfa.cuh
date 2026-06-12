@@ -86,7 +86,7 @@ cudaError_t AliasTemporaries(void* d_temp_storage,
   }
 
   // Check if enough storage provided
-  if (temp_storage_bytes < bytes_needed) { return CubDebug(cudaErrorInvalidValue); }
+  if (temp_storage_bytes < bytes_needed) { return HipcubDebug(cudaErrorInvalidValue); }
 
   // Alias
   d_temp_storage = reinterpret_cast<void*>(
@@ -245,16 +245,10 @@ struct DispatchFSM : DeviceFSMPolicy {
     cudaError_t error;
 
     // Get PTX version
-// <<<<<<< OLD CODE from dc8db64f9d (54fa7338c6) - COMMENTED OUT
-//     int ptx_version;
-//     // NOTE(HIP): HIP does not support PtxVersion
-//     // error = hipcub::PtxVersion(ptx_version);
-//     // if (error != cudaSuccess) return error;
-// =======
     int ptx_version = 0;
-    error           = cub::PtxVersion(ptx_version);
-    if (error != cudaSuccess) return error;
-// >>>>>>> END NEW CODE (54fa7338c6)
+    // NOTE(HIP): HIP does not support PtxVersion
+    // error = hipcub::PtxVersion(ptx_version);
+    // if (error != cudaSuccess) return error;
 
     // Create dispatch functor
     DispatchFSM dispatch(d_temp_storage,
@@ -472,12 +466,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
-// <<<<<<< OLD CODE from dc8db64f9d (54fa7338c6) - COMMENTED OUT
-//     error = hipcub::detail::AliasTemporaries(
-//       d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
-// =======
     error = AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
-// >>>>>>> END NEW CODE (54fa7338c6)
     if (error != cudaSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation

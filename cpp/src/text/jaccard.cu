@@ -46,12 +46,8 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// #include <hipcub/hipcub.hpp>
-// =======
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/functional>
 #include <cuda/std/iterator>
 #include <thrust/binary_search.h>

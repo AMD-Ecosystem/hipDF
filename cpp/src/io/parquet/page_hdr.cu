@@ -40,22 +40,11 @@
 #include <hip/hip_cooperative_groups.h>
 #else
 #include <cooperative_groups.h>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-// // // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-// // // #endif
-// // // =======
-// // #include <thrust/binary_search.h>
-// // // >>>>>>> END NEW CODE (bc42a0c110)
-// // #include <thrust/tuple.h>
-// // =======
-// =======
+#endif
 #include <cuda/iterator>
 #include <cuda/std/iterator>
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <cuda/std/tuple>
 #include <thrust/binary_search.h>
-// >>>>>>> END NEW CODE (261b12adc2)
 
 namespace cudf::io::parquet::detail {
 
@@ -578,32 +567,17 @@ void __launch_bounds__(decode_page_headers_block_size)
                              kernel_error::pointer error_code)
 {
   auto constexpr num_warps_per_block = decode_page_headers_block_size / cudf::detail::warp_size;
-// <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-//   gpuParsePageHeader parse_page_header;
-//   extern __shared__ byte_stream_s bs_g[];
-//
-//   kernel_error::value_type error[num_warps_per_block] = {0};
-// =======
-// >>>>>>> END NEW CODE (bc42a0c110)
 
   auto const block = cg::this_thread_block();
   auto const warp  = cg::tiled_partition<cudf::detail::warp_size>(block);
 
   auto const warp_id = warp.meta_group_rank();
-// <<<<<<< OLD CODE from fb6a473085 (b77685951e) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-// //   // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-// //   // currently missing in HIP cooperative groups
-// //   int const chunk    = (blockIdx.x * num_warps_per_block) + warp_id;
-// //   auto const bs      = &bs_g[warp_id];
-// // =======
-// =======
   auto const lane_id = warp.thread_rank();
-// >>>>>>> END NEW CODE (b77685951e)
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
   auto const chunk_idx =
-    static_cast<cudf::size_type>((cg::this_grid().block_rank() * num_warps_per_block) + warp_id);
+    static_cast<cudf::size_type>((blockIdx.x * num_warps_per_block) + warp_id);
   auto const num_chunks = static_cast<cudf::size_type>(chunks.size());
-// >>>>>>> END NEW CODE (bc42a0c110)
 
   if (chunk_idx >= num_chunks) { return; }
 
@@ -616,102 +590,6 @@ void __launch_bounds__(decode_page_headers_block_size)
     bs->ck         = chunks[chunk_idx];
     error[warp_id] = 0;
   });
-// <<<<<<< OLD CODE from fb6a473085 (b77685951e) - COMMENTED OUT
-//   block.sync();
-//
-//   if (chunk_idx < num_chunks) {
-//     cg::invoke_one(warp, [&] {
-//       bs->base = bs->cur      = bs->ck.compressed_data;
-//       bs->end                 = bs->base + bs->ck.compressed_size;
-//       bs->page.chunk_idx      = chunk_idx;
-//       bs->page.src_col_schema = bs->ck.src_col_schema;
-//       zero_out_page_header_info(bs);
-// // <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
-// //     }
-// // // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-// // //     num_values    = bs->ck.num_values;
-// // //     page_info     = chunk_pages ? chunk_pages[chunk].pages : nullptr;
-// // //     max_num_pages = page_info ? (bs->ck.num_data_pages + bs->ck.num_dict_pages) : 0;
-// // //     values_found  = 0;
-// // //     // NOTE(HIP/AMD): On AMD GPUs, warp.sync() uses __builtin_amdgcn_fence(__ATOMIC_ACQ_REL, "agent")
-// // //     // which is a heavyweight system-wide memory fence. For warp-level coordination after thread-0
-// // //     // initialization, __syncwarp() is sufficient (wavefront-scoped fence + execution barrier) and
-// // //     // provides significantly better performance.
-// // // #ifndef __HIP_PLATFORM_AMD__
-// // //     warp.sync();
-// // // #else
-// // //     __syncwarp();
-// // // #endif
-// // //     while (values_found < num_values && bs->cur < bs->end) {
-// // // =======
-// // =======
-//     });
-// // >>>>>>> END NEW CODE (d1aae33394)
-//     size_t const num_values        = bs->ck.num_values;
-//     size_t values_found            = 0;
-//     uint32_t data_page_count       = 0;
-//     uint32_t dictionary_page_count = 0;
-//     auto* page_info                = chunk_pages[chunk_idx].pages;
-//     auto const max_num_pages       = bs->ck.num_data_pages + bs->ck.num_dict_pages;
-//     auto const num_dict_pages      = bs->ck.num_dict_pages;
-//     warp.sync();
-//
-//     while (values_found < num_values and bs->cur < bs->end) {
-// // >>>>>>> END NEW CODE (bc42a0c110)
-//       int index_out = -1;
-//
-//       cg::invoke_one(warp, [&] {
-//         // this computation is only valid for flat schemas. for nested schemas,
-//         // they will be recomputed in the preprocess step by examining repetition and
-//         // definition levels
-//         bs->page.chunk_row += bs->page.num_rows;
-//         bs->page.num_rows      = 0;
-//         bs->page.flags         = 0;
-//         bs->page.str_bytes     = 0;
-//         bs->page.str_bytes_all = 0;
-//         // zero out V2 info
-//         bs->page.num_nulls                         = 0;
-//         bs->page.lvl_bytes[level_type::DEFINITION] = 0;
-//         bs->page.lvl_bytes[level_type::REPETITION] = 0;
-//         if (parse_page_header_fn{}(bs) and bs->page.compressed_page_size > 0) {
-//           if (not is_supported_encoding(bs->page.encoding)) {
-//             error[warp_id] |=
-//               static_cast<kernel_error::value_type>(decode_error::UNSUPPORTED_ENCODING);
-//           }
-//           switch (bs->page_type) {
-//             case PageType::DATA_PAGE:
-//               index_out = num_dict_pages + data_page_count;
-//               data_page_count++;
-//               // this computation is only valid for flat schemas. for nested schemas,
-//               // they will be recomputed in the preprocess step by examining repetition and
-//               // definition levels
-//               bs->page.num_rows = bs->page.num_input_values;
-//               values_found += bs->page.num_input_values;
-//               break;
-//             case PageType::DATA_PAGE_V2:
-//               index_out = num_dict_pages + data_page_count;
-//               data_page_count++;
-//               bs->page.flags |= PAGEINFO_FLAGS_V2;
-//               values_found += bs->page.num_input_values;
-//               // V2 only uses RLE, so it was removed from the header
-//               bs->page.definition_level_encoding = Encoding::RLE;
-//               bs->page.repetition_level_encoding = Encoding::RLE;
-//               break;
-//             case PageType::DICTIONARY_PAGE:
-//               index_out = dictionary_page_count;
-//               dictionary_page_count++;
-//               bs->page.flags |= PAGEINFO_FLAGS_DICTIONARY;
-//               break;
-//             default:
-//               error[warp_id] |=
-//                 static_cast<kernel_error::value_type>(decode_error::INVALID_PAGE_TYPE);
-//               bs->cur = bs->end;
-//               break;
-//           }
-//           bs->page.page_data = const_cast<uint8_t*>(bs->cur);
-//           bs->cur += bs->page.compressed_page_size;
-//           if (bs->cur > bs->end) {
-// =======
   warp.sync();
 
   cg::invoke_one(warp, [&]() {
@@ -780,7 +658,6 @@ void __launch_bounds__(decode_page_headers_block_size)
             bs->page.flags |= PAGEINFO_FLAGS_DICTIONARY;
             break;
           default:
-// >>>>>>> END NEW CODE (b77685951e)
             error[warp_id] |=
               static_cast<kernel_error::value_type>(decode_error::INVALID_PAGE_TYPE);
             bs->cur = bs->end;
@@ -878,30 +755,10 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
           error[warp_id] |=
             static_cast<kernel_error::value_type>(decode_error::DATA_STREAM_OVERRUN);
         }
-// <<<<<<< OLD CODE from fb6a473085 (b77685951e) - COMMENTED OUT
-// // <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
-// //       }
-// // // <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-// // //       num_values = shuffle(num_values);
-// // //       // NOTE(HIP/AMD): See above comment - __syncwarp() provides sufficient synchronization
-// // //       // with significantly better performance on AMD GPUs.
-// // // #ifndef __HIP_PLATFORM_AMD__
-// // // =======
-// // =======
-//       });
-// // >>>>>>> END NEW CODE (d1aae33394)
-//       values_found = shuffle(values_found);
-// // >>>>>>> END NEW CODE (bc42a0c110)
-//       warp.sync();
-// #else
-//       __syncwarp();
-// #endif
-// =======
       } else {
         error[warp_id] |= static_cast<kernel_error::value_type>(decode_error::INVALID_PAGE_HEADER);
         bs->cur = bs->end;
       }
-// >>>>>>> END NEW CODE (b77685951e)
     }
     values_found = shuffle(values_found);
     warp.sync();
@@ -1017,35 +874,14 @@ CUDF_KERNEL void __launch_bounds__(build_string_dict_index_block_size)
                                        kernel_error::pointer error_code)
 {
   auto constexpr num_warps_per_block = build_string_dict_index_block_size / cudf::detail::warp_size;
-// <<<<<<< OLD CODE from fb6a473085 (b77685951e) - COMMENTED OUT
-//   //__shared__ ColumnChunkDesc chunk_g[num_warps_per_block];
-//   extern __shared__ ColumnChunkDesc chunk_g[];
-//
-// // <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
-// //   auto const block  = cg::this_thread_block();
-// //   auto const warp   = cg::tiled_partition<cudf::detail::warp_size>(block);
-// //   int const lane_id = warp.thread_rank();
-// //   // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-// //   // currently missing in HIP cooperative groups
-// //   int const chunk   = (blockIdx.x * num_warps_per_block) + warp.meta_group_rank();
-// // =======
-//   auto const block = cg::this_thread_block();
-//   auto const warp  = cg::tiled_partition<cudf::detail::warp_size>(block);
-//   int const chunk  = (cg::this_grid().block_rank() * num_warps_per_block) + warp.meta_group_rank();
-// // >>>>>>> END NEW CODE (d1aae33394)
-//   ColumnChunkDesc* const ck = &chunk_g[warp.meta_group_rank()];
-//   cg::invoke_one(warp, [&] {
-//     if (chunk < num_chunks) { *ck = chunks[chunk]; }
-//   });
-//   block.sync();
-// =======
   __shared__ ColumnChunkDesc chunk_g[num_warps_per_block];
 
   auto const block   = cg::this_thread_block();
   auto const warp    = cg::tiled_partition<cudf::detail::warp_size>(block);
   auto const warp_id = warp.meta_group_rank();
-  int const chunk    = (cg::this_grid().block_rank() * num_warps_per_block) + warp_id;
-// >>>>>>> END NEW CODE (b77685951e)
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  int const chunk    = (blockIdx.x * num_warps_per_block) + warp_id;
 
   if (chunk >= num_chunks) { return; }
 
@@ -1131,10 +967,6 @@ void decode_page_headers(cudf::device_span<ColumnChunkDesc const> chunks,
   dim3 dim_block(decode_page_headers_block_size, 1);
   dim3 dim_grid(num_blocks, 1);
 
-// <<<<<<< OLD CODE from 567967a907 (bc42a0c110) - COMMENTED OUT
-//   decode_page_headers_kernel<<<dim_grid, dim_block, sizeof(byte_stream_s) * num_warps_per_block, stream.value()>>>(
-//     chunks, chunk_pages, num_chunks, error_code);
-// =======
   decode_page_headers_kernel<<<dim_grid, dim_block, 0, stream.value()>>>(
     chunks, chunk_pages, error_code);
 }
@@ -1154,7 +986,6 @@ void decode_page_headers_with_pgidx(cudf::device_span<ColumnChunkDesc const> chu
                                                      .page_locations     = page_locations,
                                                      .chunk_page_offsets = chunk_page_offsets,
                                                      .error_code         = error_code});
-// >>>>>>> END NEW CODE (bc42a0c110)
 }
 
 void build_string_dictionary_index(ColumnChunkDesc* chunks,
@@ -1172,12 +1003,8 @@ void build_string_dictionary_index(ColumnChunkDesc* chunks,
   dim3 dim_block(build_string_dict_index_block_size, 1);
   dim3 dim_grid(num_blocks, 1);
 
-// <<<<<<< OLD CODE from cdeaba9e08 (d1aae33394) - COMMENTED OUT
-//   build_string_dictionary_index_kernel<<<dim_grid, dim_block, sizeof(ColumnChunkDesc) * num_warps_per_block, stream.value()>>>(chunks, num_chunks);
-// =======
   build_string_dictionary_index_kernel<<<dim_grid, dim_block, 0, stream.value()>>>(
     chunks, num_chunks, error_code);
-// >>>>>>> END NEW CODE (d1aae33394)
 }
 
 }  // namespace cudf::io::parquet::detail

@@ -157,11 +157,8 @@ CUDF_KERNEL void minhash_seed_kernel(cudf::column_device_view const d_strings,
     if constexpr (std::is_same_v<hash_value_type, uint32_t>) {
       hv = hasher(hash_str);
     } else {
-// <<<<<<< OLD CODE from 0a9b6c48ac (261b12adc2) - COMMENTED OUT
-//       //FIXME(HIP/AMD): Workaround for thrust::get not being applicable
-//       // to cuda::std:array
-// =======
-// >>>>>>> END NEW CODE (261b12adc2)
+      // FIXME(HIP/AMD): Workaround for thrust::get not being applicable
+      // to cuda::std:array
       hv = cuda::std::get<0>(hasher(hash_str));
     }
     // disallowing hash to zero case

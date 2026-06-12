@@ -45,23 +45,11 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-// <<<<<<< OLD CODE from 8fd4e65ec3 (ac8bfb73a5) - COMMENTED OUT
-// #include <hipcub/block/block_scan.hpp>
-// #include <hipcub/device/device_histogram.hpp>
-// =======
-#include <cub/block/block_scan.cuh>
-#include <cub/device/device_histogram.cuh>
+#include <hipcub/block/block_scan.hpp>
+#include <hipcub/device/device_histogram.hpp>
 #include <cuda/atomic>
 #include <cuda/devices>
-// <<<<<<< OLD CODE from 4e42c1cb51 (8924413131) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (ac8bfb73a5)
-// =======
 #include <cuda/iterator>
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // >>>>>>> END NEW CODE (8924413131)
-// #include <thrust/iterator/counting_iterator.h>
-// =======
-// >>>>>>> END NEW CODE (4b19041ca0)
 #include <thrust/scan.h>
 #include <thrust/transform.h>
 
@@ -531,7 +519,7 @@ std::pair<std::unique_ptr<table>, std::vector<size_type>> hash_partition_table_g
                       });
   }
 
-  // Build histogram via cub::DeviceHistogram::HistogramEven.
+  // Build histogram via hipcub::DeviceHistogram::HistogramEven.
   // HistogramEven writes num_partitions bins; the extra element is used by the exclusive scan
   // below to produce the total row count as the last offset. Zero-initialize to avoid UB.
   auto histogram = cudf::detail::make_zeroed_device_uvector_async<size_type>(
@@ -542,25 +530,25 @@ std::pair<std::unique_ptr<table>, std::vector<size_type>> hash_partition_table_g
     auto const upper_level = num_partitions;
 
     std::size_t temp_storage_bytes{};
-    cub::DeviceHistogram::HistogramEven(nullptr,
-                                        temp_storage_bytes,
-                                        row_partition_numbers.data(),
-                                        histogram.data(),
-                                        num_levels,
-                                        lower_level,
-                                        upper_level,
-                                        num_rows,
-                                        stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceHistogram::HistogramEven(nullptr,
+                                                         temp_storage_bytes,
+                                                         row_partition_numbers.data(),
+                                                         histogram.data(),
+                                                         num_levels,
+                                                         lower_level,
+                                                         upper_level,
+                                                         num_rows,
+                                                         stream.value()));
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
-    cub::DeviceHistogram::HistogramEven(temp_storage.data(),
-                                        temp_storage_bytes,
-                                        row_partition_numbers.data(),
-                                        histogram.data(),
-                                        num_levels,
-                                        lower_level,
-                                        upper_level,
-                                        num_rows,
-                                        stream.value());
+    CUDF_CUDA_TRY(hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
+                                                         temp_storage_bytes,
+                                                         row_partition_numbers.data(),
+                                                         histogram.data(),
+                                                         num_levels,
+                                                         lower_level,
+                                                         upper_level,
+                                                         num_rows,
+                                                         stream.value()));
   }
 
   // Exclusive scan on histogram to get partition offsets.

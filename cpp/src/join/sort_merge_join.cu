@@ -3,35 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// <<<<<<< OLD CODE from 085f572bf1 (97de6b4a21) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 8c7f97db05 (686a482582) - COMMENTED OUT
-// // // MIT License
-// // //
-// // // Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
-// // //
-// // // Permission is hereby granted, free of charge, to any person obtaining a copy
-// // // of this software and associated documentation files (the "Software"), to deal
-// // // in the Software without restriction, including without limitation the rights
-// // // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// // // copies of the Software, and to permit persons to whom the Software is
-// // // furnished to do so, subject to the following conditions:
-// // //
-// // // The above copyright notice and this permission notice shall be included in all
-// // // copies or substantial portions of the Software.
-// // //
-// // // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// // // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// // // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// // // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// // // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// // // SOFTWARE.
-// // =======
-// #include "cudf/detail/utilities/vector_factories.hpp"
-// // >>>>>>> END NEW CODE (686a482582)
-// =======
+// MIT License
+//
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "sort_merge_join.hpp"
-// >>>>>>> END NEW CODE (97de6b4a21)
 
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
@@ -295,51 +289,12 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
                    count_matches_it,
                    count_matches_it + larger_numrows);
   rmm::device_uvector<size_type> nonzero_matches(count_matches, stream, temp_mr);
-// <<<<<<< OLD CODE from 8414047bb1 (4b19041ca0) - COMMENTED OUT
-// // <<<<<<< OLD CODE from 5d9cc30a6b (115ec0f260) - COMMENTED OUT
-// // // <<<<<<< OLD CODE from 200637feab (5853dfa03d) - COMMENTED OUT
-// // //     // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-// // //     // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-// // //     // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-// // //     // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-// // //     // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-// // //     // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-// // // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-// // //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-// // //   thrust::copy_if(rmm::exec_policy_nosync(stream),
-// // //                   thrust::counting_iterator(0),
-// // //                   thrust::counting_iterator(0) + larger_numrows,
-// // //                   match_counts->begin(),
-// // //                   nonzero_matches.begin(),
-// // //                   thrust::identity{});
-// // // #else
-// // //   thrust::copy_if(rmm::exec_policy_nosync(stream),
-// // //                   thrust::make_counting_iterator(0),
-// // //                   thrust::make_counting_iterator(larger_numrows),
-// // //                   match_counts->begin(),
-// // //                   nonzero_matches.begin(),
-// // //                   cuda::std::identity{});
-// // // #endif
-// // // =======
-// //   cudf::detail::copy_if(thrust::counting_iterator<size_type>(0),
-// //                         thrust::counting_iterator<size_type>(larger_numrows),
-// //                         match_counts->begin(),
-// //                         nonzero_matches.begin(),
-// //                         cuda::std::identity{},
-// //                         stream);
-// // // >>>>>>> END NEW CODE (5853dfa03d)
-// // =======
-//   cudf::detail::copy_if_async(thrust::counting_iterator<size_type>(0),
-//                               thrust::counting_iterator<size_type>(larger_numrows),
-// =======
   cudf::detail::copy_if_async(cuda::counting_iterator<size_type>{0},
                               cuda::counting_iterator<size_type>{larger_numrows},
-// >>>>>>> END NEW CODE (4b19041ca0)
                               match_counts->begin(),
                               nonzero_matches.begin(),
                               cuda::std::identity{},
                               stream);
-// >>>>>>> END NEW CODE (115ec0f260)
 
   // Use 64-bit prefix sums to handle large output sizes (> INT32_MAX rows)
   // The prefix sums can exceed INT32_MAX even though individual match counts are small
@@ -624,28 +579,7 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
       rmm::device_uvector<int32_t> offsets_subset(offsets.size(), stream, temp_mr);
       rmm::device_uvector<int32_t> child_positions(offsets.size(), stream, temp_mr);
       auto unique_end = thrust::unique_by_key_copy(
-// <<<<<<< OLD CODE from 842ab4d885 (43f2f2dac5) - COMMENTED OUT
-//         rmm::exec_policy_nosync(stream),
-// // <<<<<<< OLD CODE from 33f5858e80 (bf63127284) - COMMENTED OUT
-// //         thrust::reverse_iterator(lcv.offsets_end()),
-// //         thrust::reverse_iterator(lcv.offsets_end()) + offsets.size(),
-// //         thrust::reverse_iterator(thrust::counting_iterator(offsets.size())),
-// //         thrust::reverse_iterator(offsets_subset.end()),
-// //         thrust::reverse_iterator(child_positions.end()));
-// //       // NOTE(HIP/AMD): ROCm 7.2.x and lower has const-correctness issues with cuda::std functions.
-// //       // We conditionally use thrust:: versions for these ROCm versions.
-// // #if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-// //     ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-// //       auto subset_size = thrust::distance(thrust::reverse_iterator(offsets_subset.end()),
-// //                                           thrust::get<0>(unique_end));
-// // #else
-// //       auto subset_size   = cuda::std::distance(thrust::reverse_iterator(offsets_subset.end()),
-// //                                              unique_end.first);
-// // #endif
-// // =======
-// =======
         rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-// >>>>>>> END NEW CODE (43f2f2dac5)
         cuda::std::reverse_iterator(lcv.offsets_end()),
         cuda::std::reverse_iterator(lcv.offsets_end()) + offsets.size(),
         cuda::std::reverse_iterator(cuda::counting_iterator{offsets.size()}),
@@ -653,7 +587,6 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
         cuda::std::reverse_iterator(child_positions.end()));
       auto subset_size   = cuda::std::distance(cuda::std::reverse_iterator(offsets_subset.end()),
                                              cuda::std::get<0>(unique_end));
-// >>>>>>> END NEW CODE (bf63127284)
       auto subset_offset = offsets.size() - subset_size;
 
       auto [reduced_validity_mask, num_nulls] =
@@ -1079,16 +1012,13 @@ sort_merge_join::partitioned_inner_join(cudf::join_partition_context const& cont
 {
 #ifndef NVTX_DISABLE
   cudf::scoped_range range{"sort_merge_join::partitioned_inner_join"};
-// <<<<<<< OLD CODE from 6c43d70472 (6fa5b39f67) - COMMENTED OUT
-// #endif
-// =======
+#endif
 
   // Extract preprocessed_left from the context
   auto const& preprocessed_left =
     static_cast<sort_merge_join_match_context const*>(context.left_table_context.get())
       ->preprocessed_left;
 
-// >>>>>>> END NEW CODE (6fa5b39f67)
   auto const left_partition_start_idx = context.left_start_idx;
   auto const left_partition_end_idx   = context.left_end_idx;
   auto null_processed_table_start_idx = left_partition_start_idx;
@@ -1152,15 +1082,7 @@ sort_merge_join::inner_join(table_view const& left,
                             rmm::cuda_stream_view stream,
                             rmm::device_async_resource_ref mr) const
 {
-// <<<<<<< OLD CODE from 085f572bf1 (97de6b4a21) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{"sort_merge_inner_join"};
-// #endif
-//   cudf::sort_merge_join obj(right_keys, sorted::NO, compare_nulls, stream);
-//   return obj.inner_join(left_keys, sorted::NO, stream, mr);
-// =======
   return _impl->inner_join(left, is_left_sorted, stream, mr);
-// >>>>>>> END NEW CODE (97de6b4a21)
 }
 
 std::pair<std::unique_ptr<rmm::device_uvector<size_type>>,
@@ -1188,15 +1110,7 @@ sort_merge_join::partitioned_inner_join(cudf::join_partition_context const& cont
                                         rmm::cuda_stream_view stream,
                                         rmm::device_async_resource_ref mr) const
 {
-// <<<<<<< OLD CODE from 085f572bf1 (97de6b4a21) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{"merge_inner_join"};
-// #endif
-//   cudf::sort_merge_join obj(right_keys, sorted::YES, compare_nulls, stream);
-//   return obj.inner_join(left_keys, sorted::YES, stream, mr);
-// =======
   return _impl->partitioned_inner_join(context, stream, mr);
-// >>>>>>> END NEW CODE (97de6b4a21)
 }
 
 }  // namespace cudf

@@ -106,13 +106,7 @@ void BM_ast_polynomials(nvbench::state& state)
   state.add_global_memory_writes<key_type>(num_rows);
 
   state.exec(nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//     cudf::scoped_range range{"benchmark_iteration"};
-// #endif
-// =======
     cudf::benchmark::scoped_range range{"benchmark_iteration"};
-// >>>>>>> END NEW CODE (fd4947d8e2)
 
     switch (engine) {
       case engine_type::AST: {

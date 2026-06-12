@@ -37,40 +37,7 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/span.hpp>
 
-// <<<<<<< OLD CODE from 135852b730 (e3fe491da6) - COMMENTED OUT
-// // <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-// // #ifdef __HIP_PLATFORM_AMD__
-// // #include <hip/hip_cooperative_groups.h>
-// // #include <hipcub/hipcub.hpp>
-// // #else
-// // #include <cooperative_groups.h>
-// // #include <cub/cub.cuh>
-// // #endif
-// //
-// // #include <thrust/iterator/discard_iterator.h>
-// //
-// // namespace cudf {
-// // namespace detail {
-// // namespace cg = cooperative_groups;
-// //
-// // template <int block_size, bool has_nulls>
-// // CUDF_KERNEL void __launch_bounds__(block_size)
-// //   compute_mixed_join_output_size(table_device_view left_table,
-// //                                  table_device_view right_table,
-// //                                  table_device_view probe,
-// //                                  table_device_view build,
-// //                                  row_hash const hash_probe,
-// //                                  row_equality const equality_probe,
-// //                                  join_kind const join_type,
-// //                                  cudf::detail::mixed_multimap_type::device_view hash_table_view,
-// //                                  ast::detail::expression_device_view device_expression_data,
-// //                                  bool const swap_tables,
-// //                                  std::size_t* output_size,
-// //                                  cudf::device_span<cudf::size_type> matches_per_row)
-// // =======
-// =======
 #include <cuco/pair.cuh>
-// >>>>>>> END NEW CODE (e3fe491da6)
 #include <cuda/std/utility>
 
 namespace cudf::detail {
@@ -119,7 +86,6 @@ CUDF_KERNEL void __launch_bounds__(DEFAULT_JOIN_BLOCK_SIZE) mixed_join_count(
   cuda::std::pair<hash_value_type, hash_value_type> const* hash_indices,
   ast::detail::expression_device_view device_expression_data,
   cudf::device_span<cudf::size_type> matches_per_row)
-// >>>>>>> END NEW CODE (ede7e3524b)
 {
   // The (required) extern storage of the shared memory array leads to
   // conflicting declarations between different templates. The easiest
@@ -140,14 +106,7 @@ CUDF_KERNEL void __launch_bounds__(DEFAULT_JOIN_BLOCK_SIZE) mixed_join_count(
   auto const evaluator = cudf::ast::detail::expression_evaluator<has_nulls>{
     left_table, right_table, device_expression_data};
 
-// <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-//   // For HIP: create a thread_block_tile<1> from the thread block
-//   // HIP's cg::this_thread() returns a thread_group, but cuco needs thread_block_tile<1>
-//   auto thread_block = cg::this_thread_block();
-//   cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(thread_block);
-// =======
   // Figure out the number of elements for this key.
-// >>>>>>> END NEW CODE (ede7e3524b)
   // TODO: Address asymmetry in operator.
   auto count_equality = pair_expression_equality<has_nulls>{
     evaluator, thread_intermediate_storage, swap_tables, equality_probe};

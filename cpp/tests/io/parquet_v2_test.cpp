@@ -96,12 +96,8 @@ TEST_P(ParquetV2Test, MultiColumn)
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
       .write_v2_headers(is_v2)
-// <<<<<<< OLD CODE from ecb3212990 (8e4e1b76d0) - COMMENTED OUT
-//       .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
-// =======
       .page_level_compression(is_v2)
-      .compression(cudf::io::compression_type::ZSTD)
-// >>>>>>> END NEW CODE (8e4e1b76d0)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .metadata(expected_metadata);
   cudf::io::write_parquet(out_opts);
 
@@ -168,12 +164,8 @@ TEST_P(ParquetV2Test, MultiColumnWithNulls)
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
       .write_v2_headers(is_v2)
-// <<<<<<< OLD CODE from ecb3212990 (8e4e1b76d0) - COMMENTED OUT
-//       .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
-// =======
       .page_level_compression(is_v2)
-      .compression(cudf::io::compression_type::ZSTD)
-// >>>>>>> END NEW CODE (8e4e1b76d0)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .metadata(expected_metadata);
 
   cudf::io::write_parquet(out_opts);
@@ -215,12 +207,8 @@ TEST_P(ParquetV2Test, Strings)
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
       .write_v2_headers(is_v2)
-// <<<<<<< OLD CODE from ecb3212990 (8e4e1b76d0) - COMMENTED OUT
-//       .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
-// =======
       .page_level_compression(is_v2)
-      .compression(cudf::io::compression_type::ZSTD)
-// >>>>>>> END NEW CODE (8e4e1b76d0)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .metadata(expected_metadata);
   cudf::io::write_parquet(out_opts);
 

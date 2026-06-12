@@ -73,21 +73,16 @@ enum class usage_policy : uint8_t { OFF, STABLE, ALWAYS };
  */
 [[nodiscard]] usage_policy get_env_policy()
 {
-// <<<<<<< OLD CODE from de6a7d7986 (bbecf7d9bf) - COMMENTED OUT
-//   auto const env_val = getenv_or<std::string>("LIBCUDF_NVCOMP_POLICY", "STABLE");
-//   if (env_val == "OFF") {
-// #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
-//     // NOTE(HIP/AMD): hipDF requires nvcomp for compression/decompression support.
-//     // LIBCUDF_NVCOMP_POLICY=OFF is not supported on HIP/AMD platforms.
-//     CUDF_FAIL("LIBCUDF_NVCOMP_POLICY=OFF is not supported on hipDF. "
-//               "nvcomp is required for compression/decompression on HIP/AMD platforms.");
-// #endif
-//     return usage_policy::OFF;
-//   }
-// =======
   auto const env_val = cudf::detail::getenv_or<std::string>("LIBCUDF_NVCOMP_POLICY", "STABLE");
-  if (env_val == "OFF") return usage_policy::OFF;
-// >>>>>>> END NEW CODE (bbecf7d9bf)
+  if (env_val == "OFF") {
+#if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+    // NOTE(HIP/AMD): hipDF requires nvcomp for compression/decompression support.
+    // LIBCUDF_NVCOMP_POLICY=OFF is not supported on HIP/AMD platforms.
+    CUDF_FAIL("LIBCUDF_NVCOMP_POLICY=OFF is not supported on hipDF. "
+              "nvcomp is required for compression/decompression on HIP/AMD platforms.");
+#endif
+    return usage_policy::OFF;
+  }
   if (env_val == "STABLE") return usage_policy::STABLE;
   if (env_val == "ALWAYS") return usage_policy::ALWAYS;
   CUDF_FAIL("Invalid LIBCUDF_NVCOMP_POLICY value: " + env_val);

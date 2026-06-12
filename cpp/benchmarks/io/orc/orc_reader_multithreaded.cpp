@@ -114,13 +114,9 @@ void BM_orc_multithreaded_read_common(nvbench::state& state,
   auto mem_stats_logger = cudf::memory_stats_logger();
 
   {
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//     cudf::scoped_range range{("(read) " + label).c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
     cudf::benchmark::scoped_range range{("(read) " + label).c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
     state.exec(nvbench::exec_tag::sync | nvbench::exec_tag::timer,
                [&](nvbench::launch& launch, auto& timer) {
                  auto read_func = [&](int index) {
@@ -150,13 +146,9 @@ void BM_orc_multithreaded_read_common(nvbench::state& state,
 void BM_orc_multithreaded_read_mixed(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_common(
     state, {cudf::type_id::INT32, cudf::type_id::DECIMAL64, cudf::type_id::STRING}, label);
 }
@@ -164,39 +156,27 @@ void BM_orc_multithreaded_read_mixed(nvbench::state& state)
 void BM_orc_multithreaded_read_fixed_width(nvbench::state& state)
 {
   auto label = get_label("fixed width", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_common(state, {cudf::type_id::INT32}, label);
 }
 
 void BM_orc_multithreaded_read_string(nvbench::state& state)
 {
   auto label = get_label("string", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_common(state, {cudf::type_id::STRING}, label);
 }
 
 void BM_orc_multithreaded_read_list(nvbench::state& state)
 {
   auto label = get_label("list", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_common(state, {cudf::type_id::LIST}, label);
 }
 
@@ -221,13 +201,9 @@ void BM_orc_multithreaded_read_chunked_common(nvbench::state& state,
   auto mem_stats_logger = cudf::memory_stats_logger();
 
   {
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-//   #ifndef NVTX_DISABLE
-//     cudf::scoped_range range{("(read) " + label).c_str()};
-//   #endif
-// =======
+#ifndef NVTX_DISABLE
     cudf::benchmark::scoped_range range{("(read) " + label).c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
     std::vector<cudf::io::table_with_metadata> chunks;
     state.exec(nvbench::exec_tag::sync | nvbench::exec_tag::timer,
                [&](nvbench::launch& launch, auto& timer) {
@@ -269,13 +245,9 @@ void BM_orc_multithreaded_read_chunked_common(nvbench::state& state,
 void BM_orc_multithreaded_read_chunked_mixed(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_chunked_common(
     state, {cudf::type_id::INT32, cudf::type_id::DECIMAL64, cudf::type_id::STRING}, label);
 }
@@ -283,39 +255,27 @@ void BM_orc_multithreaded_read_chunked_mixed(nvbench::state& state)
 void BM_orc_multithreaded_read_chunked_fixed_width(nvbench::state& state)
 {
   auto label = get_label("fixed width", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_chunked_common(state, {cudf::type_id::INT32}, label);
 }
 
 void BM_orc_multithreaded_read_chunked_string(nvbench::state& state)
 {
   auto label = get_label("string", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_chunked_common(state, {cudf::type_id::STRING}, label);
 }
 
 void BM_orc_multithreaded_read_chunked_list(nvbench::state& state)
 {
   auto label = get_label("list", state);
-// <<<<<<< OLD CODE from 86164cbb21 (fd4947d8e2) - COMMENTED OUT
-// #ifndef NVTX_DISABLE
-//   cudf::scoped_range range{label.c_str()};
-// #endif
-// =======
+#ifndef NVTX_DISABLE
   cudf::benchmark::scoped_range range{label.c_str()};
-// >>>>>>> END NEW CODE (fd4947d8e2)
+#endif
   BM_orc_multithreaded_read_chunked_common(state, {cudf::type_id::LIST}, label);
 }
 auto const thread_range    = std::vector<nvbench::int64_t>{1, 2, 4, 8};

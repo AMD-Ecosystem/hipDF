@@ -62,56 +62,24 @@ set(CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 
 include(../../cpp/cmake/thirdparty/get_nvcomp.cmake)
 
-# <<<<<<< OLD CODE from 0214b0a419 (ca93d33343) - COMMENTED OUT
-# # NOTE(HIP/AMD): hipcomp is built from source via CPM, not imported as a prebuilt library. The
-# # installation of hipcomp is handled by the main cudf build (add_subdirectory below), so we don't
-# # need to explicitly install it here like nvcomp does in CUDA builds. Just verify the target exists.
-# if(NOT TARGET hipcomp)
-#   message(FATAL_ERROR "hipcomp target not found")
-# =======
-# Install only the specific libnvcomp.so.* library instead of all nvcomp targets
-if(NOT USE_NVCOMP_RUNTIME_WHEEL)
-  if(TARGET nvcomp::nvcomp)
-    get_target_property(is_imported nvcomp::nvcomp IMPORTED)
-    if(is_imported)
-      get_target_property(nvcomp_lib_path nvcomp::nvcomp IMPORTED_LOCATION_RELEASE)
-      # Compute the SOVERSION from the library path
-      get_filename_component(nvcomp_lib_dir ${nvcomp_lib_path} DIRECTORY)
-      get_filename_component(nvcomp_lib_name ${nvcomp_lib_path} NAME)
-      string(REGEX REPLACE "^libnvcomp\\.so\\.([0-9]+).*$" "\\1" nvcomp_soversion_major
-                           ${nvcomp_lib_name}
-      )
-      install(
-        FILES ${nvcomp_lib_path}
-        DESTINATION ${SKBUILD_PLATLIB_DIR}/libcudf/lib64/
-        RENAME libnvcomp.so.${nvcomp_soversion_major}
-      )
-    else()
-      message(FATAL_ERROR "nvcomp target must be imported")
-    endif()
-  else()
-    message(FATAL_ERROR "nvcomp target not found")
-  endif()
-# >>>>>>> END NEW CODE (ca93d33343)
+# NOTE(HIP/AMD): hipcomp is built from source via CPM, not imported as a prebuilt library. The
+# installation of hipcomp is handled by the main cudf build (add_subdirectory below), so we don't
+# need to explicitly install it here like nvcomp does in CUDA builds. Just verify the target exists.
+if(NOT TARGET hipcomp)
+  message(FATAL_ERROR "hipcomp target not found")
 endif()
-# <<<<<<< OLD CODE from f03d37aeb3 (10e5073a31) - COMMENTED OUT
-# set(CUDA_STATIC_RUNTIME OFF) # NOTE(HIP/AMD): Unsupported.
-# =======
-# >>>>>>> END NEW CODE (10e5073a31)
+set(CUDA_STATIC_RUNTIME OFF) # NOTE(HIP/AMD): Unsupported.
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(../../cpp cudf-cpp)
-# <<<<<<< OLD CODE from 0214b0a419 (ca93d33343) - COMMENTED OUT
-#
-# # TODO(HIP/AMD): Enable when hipcomp wheel becomes available
-# if(USE_HIPCOMP_RUNTIME_WHEEL)
-#   set(rpaths "$ORIGIN/../../amd/hipcomp")
-#   set_property(
-#     TARGET cudf
-#     PROPERTY INSTALL_RPATH ${rpaths}
-#     APPEND
-#   )
-# endif()
-# =======
-# >>>>>>> END NEW CODE (ca93d33343)
+
+# TODO(HIP/AMD): Enable when hipcomp wheel becomes available
+if(USE_HIPCOMP_RUNTIME_WHEEL)
+  set(rpaths "$ORIGIN/../../amd/hipcomp")
+  set_property(
+    TARGET cudf
+    PROPERTY INSTALL_RPATH ${rpaths}
+    APPEND
+  )
+endif()

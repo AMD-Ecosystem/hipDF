@@ -40,26 +40,16 @@ else()
   )
 endif()
 
-# <<<<<<< OLD CODE from 27bf05e749 (2903d6b1dd) - COMMENTED OUT
-# set(RAPIDS_CMAKE_MODULE_PATH
-#     $ENV{RAPIDS_CMAKE_MODULE_PATH}
-#     CACHE FILEPATH "Announce that ROCmDS-CMake is available via the provided module path."
-# )
-# if(NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
-#   list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
-#   # NOTE(HIP/AMD): Set rapids-cmake-dir variable
-#   set(rapids-cmake-dir "${RAPIDS_CMAKE_MODULE_PATH}")
-#   include(rapids-cmake)
-#   return()
-# =======
-# Use STRINGS to trim whitespace/newlines
-file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH" RAPIDS_BRANCH)
-if(NOT RAPIDS_BRANCH)
-  message(
-    FATAL_ERROR
-      "Could not determine branch name to use for checking out rapids-cmake. The file \"${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH\" is missing."
-  )
-# >>>>>>> END NEW CODE (2903d6b1dd)
+set(RAPIDS_CMAKE_MODULE_PATH
+    $ENV{RAPIDS_CMAKE_MODULE_PATH}
+    CACHE FILEPATH "Announce that ROCmDS-CMake is available via the provided module path."
+)
+if(NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
+  list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
+  # NOTE(HIP/AMD): Set rapids-cmake-dir variable
+  set(rapids-cmake-dir "${RAPIDS_CMAKE_MODULE_PATH}")
+  include(rapids-cmake)
+  return()
 endif()
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake")
@@ -94,30 +84,19 @@ if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MI
     )
   endif()
 endif()
-# <<<<<<< OLD CODE from 27bf05e749 (2903d6b1dd) - COMMENTED OUT
-#
-# if(DEFINED ENV{RAPIDS_CMAKE_BRANCH})
-#   set(rapids-cmake-branch $ENV{RAPIDS_CMAKE_BRANCH})
-# =======
-if(NOT rapids-cmake-branch)
-  set(rapids-cmake-branch "${RAPIDS_BRANCH}")
-# >>>>>>> END NEW CODE (2903d6b1dd)
+if(DEFINED ENV{RAPIDS_CMAKE_BRANCH})
+  set(rapids-cmake-branch $ENV{RAPIDS_CMAKE_BRANCH})
 endif()
-# <<<<<<< OLD CODE from fae383cb33 (4d4786eced) - COMMENTED OUT
-#
-# set(rapids-cmake-version "${RAPIDS_VERSION_MAJOR_MINOR}")
-# include("${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake")
-# # TODO(HIP/AMD): Ship RAPIDS.cmake with hipDF? # Use STRINGS to trim whitespace/newlines
-# # file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH" _rapids_branch) if(NOT _rapids_branch)
-# # message( FATAL_ERROR "Could not determine branch name to use for checking out rapids-cmake. The
-# # file \"${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH\" is missing." ) endif()
-#
-# # if(NOT rapids-cmake-version) set(rapids-cmake-version "${RAPIDS_VERSION_MAJOR_MINOR}") endif()
-# # if(NOT rapids-cmake-branch) set(rapids-cmake-branch "${_rapids_branch}") endif()
-# # include("${CMAKE_CURRENT_LIST_DIR}/RAPIDS.cmake")
-# =======
-include("${CMAKE_CURRENT_LIST_DIR}/RAPIDS.cmake")
+set(rapids-cmake-version "${RAPIDS_VERSION_MAJOR_MINOR}")
+include("${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake")
+# TODO(HIP/AMD): Ship RAPIDS.cmake with hipDF? # Use STRINGS to trim whitespace/newlines
+# file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH" _rapids_branch) if(NOT _rapids_branch)
+# message( FATAL_ERROR "Could not determine branch name to use for checking out rapids-cmake. The
+# file \"${CMAKE_CURRENT_LIST_DIR}/../RAPIDS_BRANCH\" is missing." ) endif()
+
+# if(NOT rapids-cmake-version) set(rapids-cmake-version "${RAPIDS_VERSION_MAJOR_MINOR}") endif()
+# if(NOT rapids-cmake-branch) set(rapids-cmake-branch "${_rapids_branch}") endif()
+# include("${CMAKE_CURRENT_LIST_DIR}/RAPIDS.cmake")
 
 # Don't use sccache-dist for CMake's compiler tests
 set(ENV{SCCACHE_NO_DIST_COMPILE} "1")
-# >>>>>>> END NEW CODE (4d4786eced)

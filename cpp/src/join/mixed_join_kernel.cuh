@@ -36,24 +36,9 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/span.hpp>
 
-// <<<<<<< OLD CODE from 135852b730 (e3fe491da6) - COMMENTED OUT
-// // <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-// // #ifdef __HIP_PLATFORM_AMD__
-// // #include <hip/hip_cooperative_groups.h>
-// // #include <hipcub/hipcub.hpp>
-// // #else
-// // #include <cooperative_groups.h>
-// // #include <cub/cub.cuh>
-// // #endif
-// // #include <thrust/iterator/discard_iterator.h>
-// //
-// // =======
-// // >>>>>>> END NEW CODE (ede7e3524b)
-// =======
 #include <cuco/pair.cuh>
 #include <cuda/std/utility>
 
-// >>>>>>> END NEW CODE (e3fe491da6)
 namespace cudf {
 namespace detail {
 
@@ -142,42 +127,6 @@ CUDF_KERNEL void __launch_bounds__(DEFAULT_JOIN_BLOCK_SIZE)
   cudf::size_type const right_num_rows = right_table.num_rows();
   auto const outer_num_rows            = (swap_tables ? right_num_rows : left_num_rows);
 
-// <<<<<<< OLD CODE from aab3f56bc1 (ede7e3524b) - COMMENTED OUT
-//   cudf::size_type outer_row_index = threadIdx.x + blockIdx.x * block_size;
-//
-//   auto evaluator = cudf::ast::detail::expression_evaluator<has_nulls>(
-//     left_table, right_table, device_expression_data);
-//
-//   auto const empty_key_sentinel = hash_table_view.get_empty_key_sentinel();
-//   make_pair_function pair_func{hash_probe, empty_key_sentinel};
-//
-//   if (outer_row_index < outer_num_rows) {
-//     // For HIP: create a thread_block_tile<1> from the thread block
-//     // HIP's cg::this_thread() returns a thread_group, but cuco needs thread_block_tile<1>
-//     auto thread_block = cg::this_thread_block();
-//     cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(thread_block);
-//
-//     // Figure out the number of elements for this key.
-//     auto query_pair = pair_func(outer_row_index);
-//     auto equality   = pair_expression_equality<has_nulls>{
-//       evaluator, thread_intermediate_storage, swap_tables, equality_probe};
-//
-//     auto probe_key_begin       = thrust::make_discard_iterator();
-//     auto probe_value_begin     = swap_tables ? join_output_r + join_result_offsets[outer_row_index]
-//                                              : join_output_l + join_result_offsets[outer_row_index];
-//     auto contained_key_begin   = thrust::make_discard_iterator();
-//     auto contained_value_begin = swap_tables ? join_output_l + join_result_offsets[outer_row_index]
-//                                              : join_output_r + join_result_offsets[outer_row_index];
-//
-//     if (join_type == join_kind::LEFT_JOIN || join_type == join_kind::FULL_JOIN) {
-//       hash_table_view.pair_retrieve_outer(this_thread,
-//                                           query_pair,
-//                                           probe_key_begin,
-//                                           probe_value_begin,
-//                                           contained_key_begin,
-//                                           contained_value_begin,
-//                                           equality);
-// =======
   auto const start_idx = cudf::detail::grid_1d::global_thread_id();
   auto const stride    = cudf::detail::grid_1d::grid_stride();
 
@@ -202,7 +151,6 @@ CUDF_KERNEL void __launch_bounds__(DEFAULT_JOIN_BLOCK_SIZE)
         hash_idx,
         swap_tables ? join_output_r + output_offset : join_output_l + output_offset,
         swap_tables ? join_output_l + output_offset : join_output_r + output_offset);
-// >>>>>>> END NEW CODE (ede7e3524b)
     } else {
       retrieve_matches<false>(
         hash_table_storage,

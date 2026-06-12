@@ -28,10 +28,6 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/bit.hpp>
 
-// <<<<<<< OLD CODE from f8aec98e1e (d4e12e2fee) - COMMENTED OUT
-// #include <cudf/detail/rolling/rolling_jit.hpp>
-// #include <cudf/detail/rolling/jit/operation.hpp>
-// =======
 #include <rolling/detail/rolling_jit.hpp>
 
 #pragma nv_hdrstop  // The above headers are used by the kernel below and need to be included before
@@ -59,7 +55,6 @@ struct rolling_udf_cuda {
     return ret;
   }
 };
-// >>>>>>> END NEW CODE (d4e12e2fee)
 
 namespace cudf {
 namespace rolling {
