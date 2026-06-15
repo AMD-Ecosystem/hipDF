@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 from _pytest.stash import StashKey
 
 from cudf.pandas.module_accelerator import disable_module_accelerator
+from cudf.testing._rocm_smi import exit_if_rocm_smi_loaded, stash_exitstatus
 
 file_handle_key = StashKey[BinaryIO]()
 basename_key = StashKey[str]()
@@ -166,7 +167,24 @@ def pytest_pyfunc_call(pyfuncitem: _pytest.python.Function):
     return True
 
 
+def pytest_sessionfinish(session, exitstatus):
+    # Stash the exit status so it can be propagated by pytest_unconfigure when
+    # we need to short-circuit interpreter shutdown (see cudf.testing._rocm_smi).
+    stash_exitstatus(session, exitstatus)
+
+
 def pytest_unconfigure(config):
+    try:
+        _close_result_files(config)
+    finally:
+        # WAR(HIP/AMD): avoid the ROCm SMI teardown double-free abort. Must run
+        # last, after the result files above are closed/merged, because it may
+        # short-circuit interpreter shutdown via os._exit. See
+        # cudf.testing._rocm_smi and issue #442.
+        exit_if_rocm_smi_loaded(config)
+
+
+def _close_result_files(config):
     if config.getoption("--compare"):
         return
     if file_handle_key not in config.stash:
