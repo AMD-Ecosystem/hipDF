@@ -97,12 +97,16 @@ __device__ inline uint64_t rotater64 (const uint64_t a, const int n)
 // HIP funnelshift implementation using shift and rotate
 __device__ inline bitmask_type __m_funnelshift_r(bitmask_type lo, bitmask_type hi, unsigned int shift)
 {
-    shift = shift % warpSize;
-    bitmask_type _lo      = (bitmask_type)lo >> (bitmask_type)shift;
-    bitmask_type _hi      = hi & GENERATE_BITMASK(uint64_t, shift);
-    bitmask_type _r       = _lo | rotater64(_hi, shift);
-
-    return _r;
+    // NOTE(HIP/AMD): mirror CUDA's __funnelshift_r over a single bitmask word. It concatenates
+    // {hi:lo} into a double-width value, right-shifts by (shift mod word-width) and returns the
+    // low word:  result = (lo >> s) | (hi << (W - s))  with W = bits-per-word, s = shift mod W.
+    // The shift MUST be reduced modulo the word width (W is 64 on a wavefront-64 build, 32 with
+    // CUDF_USE_WARPSIZE_32). A previous AMD shim used `% warpSize` (always 64) plus a 64-bit
+    // rotate, which corrupted the result whenever the word width or shift differed from that.
+    constexpr unsigned int word_bits = sizeof(bitmask_type) * CHAR_BIT;
+    shift &= (word_bits - 1);
+    if (shift == 0) { return lo; }
+    return (lo >> shift) | (hi << (word_bits - shift));
 }
 /**
  * @brief Convenience function to get offset word from a bitmask
