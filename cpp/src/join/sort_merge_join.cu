@@ -188,6 +188,13 @@ void batched_copy(InputIts input_iterators,
                   size_type num_ranges,
                   rmm::cuda_stream_view stream)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): rocPRIM's batched DeviceCopy rejects a zero-batch launch with
+  // hipErrorInvalidConfiguration, whereas CUB treats it as a no-op. There is nothing
+  // to copy when num_ranges == 0 (e.g. an empty partition with zero matches), so skip
+  // the launch. See JoinTest.PartitionedInnerJoinWithNulls.
+  if (num_ranges == 0) { return; }
+#endif
   size_t temp_storage_bytes = 0;
   // NOTE(HIP/AMD): hipcub device functions return a nodiscard hipError_t; wrap in CUDF_CUDA_TRY.
   CUDF_CUDA_TRY(cub::DeviceCopy::Batched(nullptr,
