@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_wrapper.hpp>
 
@@ -279,7 +301,10 @@ struct host_udf_segmented_reduction_example : cudf::segmented_reduce_host_udf {
       OutputType init_value;
       cudf::null_policy null_handling;
 
-      cuda::std::tuple<OutputType, cudf::size_type> __device__ operator()(cudf::size_type idx) const
+      // NOTE(HIP/AMD): the output is a thrust::make_zip_iterator whose dereference proxy is
+      // a thrust::tuple; rocThrust cannot assign a cuda::std::tuple to it. Return a
+      // thrust::tuple so the transform output assigns (also accepted by CCCL's thrust zip).
+      thrust::tuple<OutputType, cudf::size_type> __device__ operator()(cudf::size_type idx) const
       {
         auto const start = offsets[idx];
         auto const end   = offsets[idx + 1];

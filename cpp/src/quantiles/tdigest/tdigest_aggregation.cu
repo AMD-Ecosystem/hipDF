@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1058,9 +1058,13 @@ std::unique_ptr<column> compute_tdigests(int delta,
   cudf::mutable_column_view mean_col(*centroid_means);
   cudf::mutable_column_view weight_col(*centroid_weights);
 
-  // reduce the centroids into the clusters
-  auto output = thrust::make_zip_iterator(cuda::std::make_tuple(
-    mean_col.begin<double>(), weight_col.begin<double>(), cuda::make_discard_iterator()));
+  // NOTE(HIP/AMD): the reduced values are `centroid` (a 3-element thrust::tuple of
+  // mean/weight/valid). rocThrust cannot form a reference to `void` for a
+  // cuda::make_discard_iterator() slot inside a zip output, so the validity slot is
+  // written to a throwaway device buffer instead of being discarded.
+  rmm::device_uvector<bool> discarded_valid(cinfo.total_clusters, stream);
+  auto output = thrust::make_zip_iterator(
+    mean_col.begin<double>(), weight_col.begin<double>(), discarded_valid.begin());
 
   auto const num_values = std::distance(centroids_begin, centroids_end);
   thrust::reduce_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),

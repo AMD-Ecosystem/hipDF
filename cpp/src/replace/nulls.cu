@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -291,8 +291,12 @@ std::unique_ptr<cudf::column> replace_nulls_policy_impl(cudf::column_view const&
 {
   auto device_in = cudf::column_device_view::create(input, stream);
   auto index     = cuda::counting_iterator<cudf::size_type>{0};
-  auto valid_it  = cudf::detail::make_validity_iterator(*device_in);
-  auto in_begin  = cuda::make_zip_iterator(cuda::std::make_tuple(index, valid_it));
+  // NOTE(HIP/AMD): build the validity iterator as a CCCL transform_iterator (not the thrust-based
+  // make_validity_iterator) so the resulting cuda::zip_iterator satisfies cuda::std::random_access
+  // and can be advanced with operator+ (rocThrust transform_iterators do not model that concept).
+  auto valid_it =
+    cuda::make_transform_iterator(index, cudf::detail::validity_accessor<true>{*device_in});
+  auto in_begin = cuda::make_zip_iterator(index, valid_it);
 
   rmm::device_uvector<cudf::size_type> gather_map(input.size(), stream);
   auto gm_begin = cuda::make_zip_iterator(

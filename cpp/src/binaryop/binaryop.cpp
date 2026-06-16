@@ -22,7 +22,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -200,23 +200,13 @@ void binary_operation(mutable_column_view& out,
                                                  cudf::type_to_name(rhs.type()),
                                                  std::string("cudf::binops::jit::UserDefinedOp"));
 
-  // NOTE(HIP): On AMD the offload architecture must be forwarded explicitly to the JIT
-  // compiler. We route it through get_udf_kernel's extra_options so the gfx offload-arch
-  // is not lost (see fork's architecture_str plumbing).
-  // CAUTION(TODO/HIP): The AMD UDF binaryop path additionally requires the arch-adapted
-  // parsed_llvm_ir (computed above) to be routed into get_udf_kernel. The upstream
-  // get_udf_kernel signature (cpp/src/jit/helpers.hpp) has no LLVM-IR parameter yet, so the
-  // LLVM IR cannot be passed here until that helper is extended for the AMD JIT path. Until
-  // then the AMD UDF binaryop path is incomplete. parsed_llvm_ir is referenced below to
-  // avoid an unused-variable warning.
-  std::vector<std::string> extra_options;
-  if constexpr (HIP_PLATFORM_AMD) {
-    extra_options.emplace_back("--offload-arch=gfx.");
-    (void)parsed_llvm_ir;
-  }
+  // NOTE(HIP/AMD): get_udf_kernel now emits --offload-arch=gfx. on AMD and links the
+  // arch-adapted LLVM IR (parsed_llvm_ir) as extra bitcode so the UDF binaryop path links.
+  // On NVIDIA parsed_llvm_ir is empty and PTX is used; pass nullptr so behavior is unchanged.
+  std::string const* udf_llvm_ir = HIP_PLATFORM_AMD ? &parsed_llvm_ir : nullptr;
 
   cudf::jit::get_udf_kernel(
-    *binaryop_jit_kernel_cu_jit, kernel_reflection, cuda_source, extra_options)
+    *binaryop_jit_kernel_cu_jit, kernel_reflection, cuda_source, {}, udf_llvm_ir)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
     ->launch(out.size(),
             cudf::jit::get_data_ptr(out),

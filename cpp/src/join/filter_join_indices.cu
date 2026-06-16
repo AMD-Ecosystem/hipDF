@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "filter_join_indices_kernel.cuh"
 
 #include <cudf/ast/detail/expression_parser.hpp>
@@ -27,7 +49,13 @@
 #include <rmm/exec_policy.hpp>
 #include <rmm/mr/polymorphic_allocator.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+// NOTE(HIP/AMD): cuco's headers provide `namespace cub = hipcub`, so cub::DeviceReduce etc.
+// resolve to hipcub. Just include hipcub instead of the unavailable <cub/cub.cuh>.
+#include <hipcub/hipcub.hpp>
+#else
 #include <cub/cub.cuh>
+#endif
 #include <cuco/static_set.cuh>
 #include <cuda/functional>
 #include <cuda/iterator>
@@ -172,9 +200,8 @@ filter_join_indices(cudf::table_view const& left,
     auto [filtered_left_indices, filtered_right_indices] = make_result_vectors(num_valid);
 
     auto input_iter =
-      thrust::make_zip_iterator(cuda::std::tuple{left_indices.begin(), right_indices.begin()});
-    auto output_iter = thrust::make_zip_iterator(
-      cuda::std::tuple{filtered_left_indices->begin(), filtered_right_indices->begin()});
+      thrust::make_zip_iterator(left_indices.begin(), right_indices.begin());
+    auto output_iter = thrust::make_zip_iterator(filtered_left_indices->begin(), filtered_right_indices->begin());
 
     cudf::detail::copy_if_async(
       input_iter,
@@ -229,19 +256,20 @@ filter_join_indices(cudf::table_view const& left,
                                  cuda::proclaim_return_type<std::size_t>(
                                    [] __device__(auto val) -> std::size_t { return val ? 1 : 0; })};
       std::size_t temp_storage_bytes = 0;
-      cub::DeviceReduce::Sum(nullptr,
-                             temp_storage_bytes,
-                             predicate_it,
-                             d_num_valid.data(),
-                             left_indices.size(),
-                             stream.value());
+      // NOTE(HIP/AMD): hipcub DeviceReduce::Sum returns a nodiscard hipError_t; wrap with check.
+      CUDF_CUDA_TRY(cub::DeviceReduce::Sum(nullptr,
+                                           temp_storage_bytes,
+                                           predicate_it,
+                                           d_num_valid.data(),
+                                           left_indices.size(),
+                                           stream.value()));
       rmm::device_buffer temp_storage(temp_storage_bytes, stream);
-      cub::DeviceReduce::Sum(temp_storage.data(),
-                             temp_storage_bytes,
-                             predicate_it,
-                             d_num_valid.data(),
-                             left_indices.size(),
-                             stream.value());
+      CUDF_CUDA_TRY(cub::DeviceReduce::Sum(temp_storage.data(),
+                                           temp_storage_bytes,
+                                           predicate_it,
+                                           d_num_valid.data(),
+                                           left_indices.size(),
+                                           stream.value()));
     }
     auto const num_valid   = d_num_valid.value(stream);
     auto const output_size = num_valid + num_invalid;
@@ -250,9 +278,8 @@ filter_join_indices(cudf::table_view const& left,
     auto [filtered_left_indices, filtered_right_indices] = make_result_vectors(output_size);
     if (num_valid > 0) {
       auto input_iter =
-        thrust::make_zip_iterator(cuda::std::tuple{left_indices.begin(), right_indices.begin()});
-      auto output_iter = thrust::make_zip_iterator(
-        cuda::std::tuple{filtered_left_indices->begin(), filtered_right_indices->begin()});
+        thrust::make_zip_iterator(left_indices.begin(), right_indices.begin());
+      auto output_iter = thrust::make_zip_iterator(filtered_left_indices->begin(), filtered_right_indices->begin());
       auto valid_predicate = [predicate_results_ptr] __device__(auto i) -> bool {
         return predicate_results_ptr[i];
       };
@@ -284,8 +311,16 @@ filter_join_indices(cudf::table_view const& left,
           is_unmatched_idx,
           stream);
       }
+#ifdef __HIP_PLATFORM_AMD__
+      // NOTE(HIP/AMD): hipcub has no DeviceTransform::Fill; use thrust::fill_n.
+      thrust::fill_n(rmm::exec_policy_nosync(stream),
+                     filtered_right_indices->begin() + num_valid,
+                     num_invalid,
+                     JoinNoMatch);
+#else
       cub::DeviceTransform::Fill(
         filtered_right_indices->begin() + num_valid, num_invalid, JoinNoMatch, stream.value());
+#endif
     }
 
     return std::pair{std::move(filtered_left_indices), std::move(filtered_right_indices)};
@@ -316,9 +351,11 @@ filter_join_indices(cudf::table_view const& left,
     thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       cuda::counting_iterator<cudf::size_type>{0},
                       cuda::counting_iterator{static_cast<size_type>(left_indices.size())},
-                      thrust::make_zip_iterator(cuda::std::tuple{filtered_left_indices->begin(),
-                                                                 filtered_right_indices->begin()}),
-                      [=] __device__(size_type i) -> cuda::std::tuple<size_type, size_type> {
+                      thrust::make_zip_iterator(filtered_left_indices->begin(),
+                                                                 filtered_right_indices->begin()),
+                      // NOTE(HIP/AMD): output is a rocThrust zip proxy (thrust::tuple of refs);
+                      // return a thrust::tuple so the proxy assignment resolves.
+                      [=] __device__(size_type i) -> thrust::tuple<size_type, size_type> {
                         auto const left_idx  = left_ptr[i];
                         auto const right_idx = right_ptr[i];
                         // For FULL JOIN: preserve original unmatched rows, nullify right side of
@@ -327,18 +364,18 @@ filter_join_indices(cudf::table_view const& left,
                           (predicate_results_ptr[i] || left_idx == JoinNoMatch) ? right_idx
                                                                                 : JoinNoMatch;
 
-                        return cuda::std::tuple{left_idx, output_right_idx};
+                        return thrust::make_tuple(left_idx, output_right_idx);
                       });
 
     // Step 2: Add secondary pairs for failed matches using stream compaction
     if (failed_matched_count > 0) {
-      auto secondary_iter = thrust::make_zip_iterator(
-        cuda::std::tuple{filtered_left_indices->begin() + left_indices.size(),
-                         filtered_right_indices->begin() + left_indices.size()});
+      auto secondary_iter = thrust::make_zip_iterator(filtered_left_indices->begin() + left_indices.size(),
+                         filtered_right_indices->begin() + left_indices.size());
 
+      // NOTE(HIP/AMD): copy_if_async writes into a rocThrust zip proxy; produce thrust::tuple.
       auto failed_match_iter = cudf::detail::make_counting_transform_iterator(
-        0, [=] __device__(size_type i) -> cuda::std::tuple<size_type, size_type> {
-          return cuda::std::tuple{JoinNoMatch, right_ptr[i]};
+        0, [=] __device__(size_type i) -> thrust::tuple<size_type, size_type> {
+          return thrust::make_tuple(JoinNoMatch, right_ptr[i]);
         });
       cudf::detail::copy_if_async(failed_match_iter,
                                   failed_match_iter + left_indices.size(),

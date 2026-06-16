@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -154,7 +154,10 @@ void codec_stats::add_pages(host_span<ColumnChunkDesc const> chunks,
     0, [&](size_t page_idx) { return page_mask.empty() ? true : page_mask[page_idx]; });
 
   // Zip iterator for iterating over pages and the page mask
-  auto zip_iter = cuda::make_zip_iterator(pages.begin(), page_mask_iter);
+  // NOTE(HIP/AMD): cuda::make_zip_iterator over a thrust::transform_iterator yields a
+  // thrust::zip_iterator whose operator+ the cuda zip iterator overloads don't match;
+  // use thrust::make_zip_iterator so random-access arithmetic (zip_iter + size) works.
+  auto zip_iter = thrust::make_zip_iterator(pages.begin(), page_mask_iter);
 
   std::for_each(zip_iter, zip_iter + pages.size(), [&](auto const& item) {
     auto& [page, is_page_needed] = item;

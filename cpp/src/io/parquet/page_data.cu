@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,8 @@
 
 namespace cudf::io::parquet::detail {
 
-namespace cg = cooperative_groups;
+// NOTE(HIP/AMD): the `cg` alias (HIP-guarded to the hip_cooperative_groups_ext shim) is provided
+// by the included page_decode.cuh; do not redefine it here.
 
 namespace {
 
@@ -555,7 +556,12 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
 }
 
 struct mask_tform {
-  __device__ uint32_t operator()(PageInfo const& p) { return static_cast<uint32_t>(p.kernel_mask); }
+  // NOTE(HIP/AMD): rocprim's transform_iterator invokes the functor through a const object,
+  // so operator() must be const.
+  __device__ uint32_t operator()(PageInfo const& p) const
+  {
+    return static_cast<uint32_t>(p.kernel_mask);
+  }
 };
 
 }  // anonymous namespace

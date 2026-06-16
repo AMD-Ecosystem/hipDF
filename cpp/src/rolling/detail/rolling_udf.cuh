@@ -89,9 +89,13 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
       if constexpr (HIP_PLATFORM_AMD) {
-        // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+        // NOTE(HIPRTC): This is a workaround for Jitify issue #55.
+        // NOTE(HIP/AMD): the kernel (rolling/jit/kernel.cu) calls GENERIC_ROLLING_OP, which is the
+        // UDF function name (udf_agg._function_name == "GENERIC_ROLLING_OP"). The forward
+        // declaration and the linked LLVM IR must use that same name, otherwise HIPRTC fails with
+        // "use of undeclared identifier 'GENERIC_ROLLING_OP'". Mirror the transform PTX path.
         cuda_source = std::string("using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;")
-             + "extern \"C\" __device__ void rolling_udf("
+             + "extern \"C\" __device__ void " + udf_agg._function_name + "("
              + cudf::type_to_name(output->type()) + "*,"
              + "void*, void*, long long, long long, "
              + "const " + cudf::type_to_name(input.type()) + "*,"
@@ -125,7 +129,14 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
-  cudf::jit::get_udf_kernel(*rolling_jit_kernel_cu_jit, kernel_reflection, cuda_source)
+  // NOTE(HIP/AMD): on AMD forward the arch-adapted LLVM IR (only set for the PTX UDF kind)
+  // so it is linked into the rolling kernel as extra bitcode; get_udf_kernel also emits
+  // --offload-arch=gfx. on AMD. On NVIDIA / CUDA-kind UDFs no LLVM IR is passed.
+  std::string const* udf_llvm_ir =
+    (HIP_PLATFORM_AMD && !parsed_udf_llvm_ir.empty()) ? &parsed_udf_llvm_ir : nullptr;
+
+  cudf::jit::get_udf_kernel(
+    *rolling_jit_kernel_cu_jit, kernel_reflection, cuda_source, {}, udf_llvm_ir)
     ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
     ->launch(input.size(),
              cudf::jit::get_data_ptr(input),

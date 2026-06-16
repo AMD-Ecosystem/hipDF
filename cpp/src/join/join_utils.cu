@@ -90,9 +90,11 @@ struct unmatched_flag {
 // Transform a selected (unmatched) right index into a (JoinNoMatch, idx) pair that is stored
 // through a zip iterator over (left_out_tail, right_out_tail).
 struct to_no_match_pair {
-  __device__ cuda::std::tuple<size_type, size_type> operator()(size_type idx) const noexcept
+  // NOTE(HIP/AMD): the transform_output_iterator writes through a rocThrust zip iterator
+  // whose proxy is a thrust::tuple, so return thrust::tuple (not cuda::std::tuple).
+  __device__ thrust::tuple<size_type, size_type> operator()(size_type idx) const noexcept
   {
-    return cuda::std::make_tuple(cudf::JoinNoMatch, idx);
+    return thrust::make_tuple(cudf::JoinNoMatch, idx);
   }
 };
 

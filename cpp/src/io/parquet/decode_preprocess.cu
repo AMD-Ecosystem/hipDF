@@ -46,7 +46,7 @@
 
 namespace cudf::io::parquet::detail {
 
-namespace cg = cooperative_groups;
+// NOTE(HIP/AMD): the `cg` alias is provided (HIP-guarded) by the included page_decode.cuh.
 
 namespace {
 
@@ -416,9 +416,10 @@ CUDF_KERNEL void __launch_bounds__(level_decode_block_size)
                            size_t min_row,
                            size_t num_rows)
 {
-  __shared__ __align__(16) page_state_s state_g;
-
-  page_state_s* const s = &state_g;
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang forbids for __shared__ variables; wrap in hipcub::Uninitialized.
+  __shared__ hipcub::Uninitialized<page_state_s> state_g_storage;
+  page_state_s* const s = &state_g_storage.Alias();
   auto const block      = cg::this_thread_block();
   // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
   // currently missing in HIP cooperative groups

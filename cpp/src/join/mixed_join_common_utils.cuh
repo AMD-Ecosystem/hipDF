@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -194,8 +194,11 @@ struct hash_probe_result {
     cuco::pair<hash_value_type, cudf::size_type> const& probe_key,
     std::size_t probe_idx)
   {
-    auto const* data = hash_table_storage.data();
-    __builtin_assume_aligned(data, 2 * sizeof(cuco::pair<hash_value_type, cudf::size_type>));
+    // NOTE(HIP/AMD): assign the result of __builtin_assume_aligned back to `data`; clang's
+    // const (pure) attribute makes discarding the return value an error under -Werror.
+    auto const* data = static_cast<cuco::pair<hash_value_type, cudf::size_type> const*>(
+      __builtin_assume_aligned(hash_table_storage.data(),
+                               2 * sizeof(cuco::pair<hash_value_type, cudf::size_type>)));
     auto const first  = *(data + probe_idx);
     auto const second = *(data + probe_idx + 1);
 
@@ -263,8 +266,11 @@ struct hash_table_prober {
 
   __device__ __forceinline__ auto get_bucket_slots() const noexcept
   {
-    auto const* data = hash_table_storage_.data();
-    __builtin_assume_aligned(data, 2 * sizeof(cuco::pair<hash_value_type, cudf::size_type>));
+    // NOTE(HIP/AMD): assign __builtin_assume_aligned result back; clang's const(pure) attribute
+    // makes discarding the return value an error under -Werror.
+    auto const* data = static_cast<cuco::pair<hash_value_type, cudf::size_type> const*>(
+      __builtin_assume_aligned(hash_table_storage_.data(),
+                               2 * sizeof(cuco::pair<hash_value_type, cudf::size_type>)));
     auto const first  = *(data + probe_idx_);
     auto const second = *(data + probe_idx_ + 1);
     return cuda::std::pair{first, second};

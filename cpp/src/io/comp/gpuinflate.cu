@@ -1319,8 +1319,9 @@ sorted_codec_parameters sort_tasks(device_span<device_span<uint8_t const> const>
                     thrust::make_zip_iterator(inputs.end(), outputs.end()),
                     costs.begin(),
                     [task_type] __device__(auto const& input_output_pair) {
-                      auto const& input  = cuda::std::get<0>(input_output_pair);
-                      auto const& output = cuda::std::get<1>(input_output_pair);
+                      // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+                      auto const& input  = thrust::get<0>(input_output_pair);
+                      auto const& output = thrust::get<1>(input_output_pair);
                       return cost_model::task_device_cost(input.size(), output.size(), task_type);
                     });
 

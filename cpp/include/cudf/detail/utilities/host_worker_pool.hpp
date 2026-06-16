@@ -3,11 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
+#include <cudf/utilities/error.hpp>
 #include <cudf/utilities/export.hpp>
 
-#include <cuda_runtime.h>
+// NOTE(HIP/AMD): use the cudf cuda_runtime shim instead of the raw <cuda_runtime.h>,
+// which does not exist on the AMD/HIP toolchain (reverse-hipify convention).
+#include <cudf/cuda_runtime.h>
 
 #include <BS_thread_pool.hpp>
 
@@ -73,13 +98,13 @@ class CUDF_EXPORT hierarchical_thread_pool {
     // Capture the submitting thread's CUDA device so worker threads operate on
     // the correct device. Without this, worker threads default to device 0
     int device_id = 0;
-    cudaGetDevice(&device_id);
+    CUDF_CUDA_TRY(cudaGetDevice(&device_id));
 
     return pool_.submit_task([task_ptr, level = level_, device_id]() {
       // Mark this thread as owned by this pool's level (happens once per thread)
       if (thread_pool_level == THREAD_POOL_LEVEL_NONE) { thread_pool_level = level; }
 
-      cudaSetDevice(device_id);
+      CUDF_CUDA_TRY(cudaSetDevice(device_id));
 
       return (*task_ptr)();
     });

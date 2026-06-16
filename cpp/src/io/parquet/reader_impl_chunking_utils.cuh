@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -738,7 +738,7 @@ struct copy_subpass_page {
  * @param num_rows Number of rows to read in the pass
  * @return Number of values to process (0 if page is outside the row range)
  */
-CUDF_HOST_DEVICE [[nodiscard]] inline size_t precompute_page_num_values_in_range(
+[[nodiscard]] CUDF_HOST_DEVICE inline size_t precompute_page_num_values_in_range(
   PageInfo const& page, ColumnChunkDesc const& chunk, size_t skip_rows, size_t num_rows)
 {
   // Check if this page has lists (repetition levels)

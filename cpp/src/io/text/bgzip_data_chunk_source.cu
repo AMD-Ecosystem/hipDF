@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/comp/common.hpp"
 #include "io/comp/decompression.hpp"
 #include "io/text/device_data_chunks.hpp"
@@ -43,17 +65,19 @@ struct bgzip_nvcomp_transform_functor {
   uint8_t const* compressed_ptr;
   uint8_t* decompressed_ptr;
 
-  __device__ cuda::std::tuple<device_span<uint8_t const>, device_span<uint8_t>> operator()(
-    cuda::std::tuple<std::size_t, std::size_t, std::size_t, std::size_t> t)
+  // NOTE(HIP/AMD): both the input and output zip iterators deref to thrust::tuple under
+  // rocThrust, so take a thrust::tuple parameter (with thrust::get) and return thrust::tuple.
+  __device__ thrust::tuple<device_span<uint8_t const>, device_span<uint8_t>> operator()(
+    thrust::tuple<std::size_t, std::size_t, std::size_t, std::size_t> t)
   {
-    auto const compressed_begin   = cuda::std::get<0>(t);
-    auto const compressed_end     = cuda::std::get<1>(t);
-    auto const decompressed_begin = cuda::std::get<2>(t);
-    auto const decompressed_end   = cuda::std::get<3>(t);
-    return cuda::std::make_tuple(device_span<uint8_t const>{compressed_ptr + compressed_begin,
-                                                            compressed_end - compressed_begin},
-                                 device_span<uint8_t>{decompressed_ptr + decompressed_begin,
-                                                      decompressed_end - decompressed_begin});
+    auto const compressed_begin   = thrust::get<0>(t);
+    auto const compressed_end     = thrust::get<1>(t);
+    auto const decompressed_begin = thrust::get<2>(t);
+    auto const decompressed_end   = thrust::get<3>(t);
+    return thrust::make_tuple(device_span<uint8_t const>{compressed_ptr + compressed_begin,
+                                                         compressed_end - compressed_begin},
+                              device_span<uint8_t>{decompressed_ptr + decompressed_begin,
+                                                   decompressed_end - decompressed_begin});
   }
 };
 

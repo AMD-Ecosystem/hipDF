@@ -36,7 +36,7 @@
 #include <thrust/iterator/transform_iterator.h>
 
 #include <jit/cache.hpp>
-#include <jit/span.cuh>
+#include <cudf/detail/jit/span.cuh>
 
 #include <algorithm>
 #include <span>
@@ -98,10 +98,15 @@ column_views_to_device(std::span<ColumnView const> views,
 std::vector<std::string> input_type_names(
   std::span<std::variant<column_view, scalar_column_view> const> views);
 
+// NOTE(HIP/AMD): get_udf_kernel takes an optional arch-adapted LLVM IR (parsed_udf_llvm_ir).
+// On AMD the Numba/PTX UDF path compiles to LLVM IR which must be linked into the kernel as
+// extra bitcode (jitify2 get_kernel's extra_bitcode arg) instead of NVIDIA's PTX; the HIP
+// branch also emits --offload-arch=gfx. instead of -arch=sm_. (see get_udf_kernel in helpers.cpp).
 jitify2::Kernel get_udf_kernel(jitify2::PreprocessedProgramData const& preprocessed_program_data,
                                std::string const& kernel_name,
                                std::string const& cuda_source,
-                               std::vector<std::string> const& extra_options = {});
+                               std::vector<std::string> const& extra_options = {},
+                               std::string const* parsed_udf_llvm_ir         = nullptr);
 
 }  // namespace jit
 }  // namespace cudf

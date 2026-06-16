@@ -40,6 +40,15 @@ function(jit_preprocess_files)
   foreach(inc IN LISTS libhipcxx_raw_includes)
     list(APPEND includes "-I${inc}")
   endforeach()
+  # NOTE(HIP/AMD): JIT kernels pull cudf headers that transitively include rmm
+  # (e.g. cudf/utilities/default_stream.hpp -> rmm/cuda_stream_view.hpp), so rmm's
+  # include dir must be on the jitify-preprocess search path.
+  get_target_property(rmm_raw_includes rmm::rmm INTERFACE_INCLUDE_DIRECTORIES)
+  foreach(inc IN LISTS rmm_raw_includes)
+    if(inc MATCHES "^/")
+      list(APPEND includes "-I${inc}")
+    endif()
+  endforeach()
   foreach(ARG_FILE ${ARG_FILES})
     set(ARG_OUTPUT ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files/${ARG_FILE}.jit.hpp)
     get_filename_component(jit_output_directory "${ARG_OUTPUT}" DIRECTORY)

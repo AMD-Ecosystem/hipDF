@@ -2,6 +2,29 @@
  * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/detail/device_scalar.hpp>
@@ -12,12 +35,25 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/device/device_reduce.hpp>
+#else
 #include <cub/device/device_reduce.cuh>
+#endif
 #include <cuda/iterator>
 #include <cuda/std/functional>
 #include <cuda/stream_ref>
 
 namespace cudf::detail {
+
+// NOTE(HIP/AMD): the classic temporary-storage CUB device APIs used below have
+// identical signatures in hipcub (rocPRIM backend). Alias the DeviceReduce class
+// per platform so the call sites stay platform-agnostic without a global cub=hipcub alias.
+#ifdef __HIP_PLATFORM_AMD__
+using DeviceReduce = hipcub::DeviceReduce;
+#else
+using DeviceReduce = cub::DeviceReduce;
+#endif
 
 /**
  * @brief Helper to reduce a device-accessible iterator using a binary operation
@@ -51,12 +87,30 @@ OutputType reduce(InputIterator begin,
   auto result =
     cudf::detail::device_scalar<OutputType>(stream, cudf::get_current_device_resource_ref());
 
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipcub/rocPRIM DeviceReduce::Reduce does not provide the CCCL
+  // stream-env overload. Use the classic temporary-storage form with an explicit stream.
+  size_t temp_storage_bytes = 0;
+  CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(
+    nullptr, temp_storage_bytes, begin, result.data(), num_items, binary_op, init, stream.value()));
+  rmm::device_buffer d_temp_storage(
+    temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
+  CUDF_CUDA_TRY(hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+                                             temp_storage_bytes,
+                                             begin,
+                                             result.data(),
+                                             num_items,
+                                             binary_op,
+                                             init,
+                                             stream.value()));
+#else
   // Build environment with stream and memory resource for cub::DeviceReduce::Reduce
   auto env = cuda::std::execution::env{
     cuda::std::execution::prop{cuda::get_stream_t{}, cuda::stream_ref{stream.value()}},
     cuda::std::execution::prop{cuda::mr::get_memory_resource_t{},
                                cudf::get_current_device_resource_ref()}};
   CUDF_CUDA_TRY(cub::DeviceReduce::Reduce(begin, result.data(), num_items, binary_op, init, env));
+#endif
 
   // Copy result back to host via pinned memory
   return result.value(stream);
@@ -108,7 +162,7 @@ cuda::std::pair<KeysOutputIterator, ValuesOutputIterator> reduce_by_key(
 
   // First call to get temporary storage size
   size_t temp_storage_bytes = 0;
-  CUDF_CUDA_TRY(cub::DeviceReduce::ReduceByKey(nullptr,
+  CUDF_CUDA_TRY(DeviceReduce::ReduceByKey(nullptr,
                                                temp_storage_bytes,
                                                keys_begin,
                                                keys_output,
@@ -124,7 +178,7 @@ cuda::std::pair<KeysOutputIterator, ValuesOutputIterator> reduce_by_key(
     temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
 
   // Run reduce-by-key
-  CUDF_CUDA_TRY(cub::DeviceReduce::ReduceByKey(d_temp_storage.data(),
+  CUDF_CUDA_TRY(DeviceReduce::ReduceByKey(d_temp_storage.data(),
                                                temp_storage_bytes,
                                                keys_begin,
                                                keys_output,
@@ -165,7 +219,7 @@ void reduce_by_key_async(KeysInputIterator keys_begin,
   auto const num_items = cuda::std::distance(keys_begin, keys_end);
 
   size_t temp_storage_bytes = 0;
-  CUDF_CUDA_TRY(cub::DeviceReduce::ReduceByKey(nullptr,
+  CUDF_CUDA_TRY(DeviceReduce::ReduceByKey(nullptr,
                                                temp_storage_bytes,
                                                keys_begin,
                                                keys_output,
@@ -179,7 +233,7 @@ void reduce_by_key_async(KeysInputIterator keys_begin,
   rmm::device_buffer d_temp_storage(
     temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
 
-  CUDF_CUDA_TRY(cub::DeviceReduce::ReduceByKey(d_temp_storage.data(),
+  CUDF_CUDA_TRY(DeviceReduce::ReduceByKey(d_temp_storage.data(),
                                                temp_storage_bytes,
                                                keys_begin,
                                                keys_output,
@@ -230,7 +284,7 @@ OutputType transform_reduce(InputIterator begin,
     cudf::detail::device_scalar<OutputType>(stream, cudf::get_current_device_resource_ref());
 
   size_t temp_storage_bytes = 0;
-  CUDF_CUDA_TRY(cub::DeviceReduce::TransformReduce(nullptr,
+  CUDF_CUDA_TRY(DeviceReduce::TransformReduce(nullptr,
                                                    temp_storage_bytes,
                                                    begin,
                                                    result.data(),
@@ -242,7 +296,7 @@ OutputType transform_reduce(InputIterator begin,
 
   rmm::device_buffer d_temp_storage(
     temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
-  CUDF_CUDA_TRY(cub::DeviceReduce::TransformReduce(d_temp_storage.data(),
+  CUDF_CUDA_TRY(DeviceReduce::TransformReduce(d_temp_storage.data(),
                                                    temp_storage_bytes,
                                                    begin,
                                                    result.data(),

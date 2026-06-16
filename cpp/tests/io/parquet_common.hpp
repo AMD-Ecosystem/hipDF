@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf_test/base_fixture.hpp>
@@ -17,7 +39,7 @@
 #include <cudf/utilities/memory_resource.hpp>
 
 #include <rmm/cuda_device.hpp>
-#include <rmm/mr/device/cuda_memory_resource.hpp>
+#include <rmm/mr/cuda_memory_resource.hpp>
 
 #include <random>
 #include <type_traits>
@@ -74,23 +96,33 @@ struct ParquetWriterTest : public cudf::test::BaseFixture {};
 
 // Base test fixture for tests
 struct ParquetReaderTest : public cudf::test::BaseFixture {
-  rmm::mr::device_memory_resource* prev_mr_{nullptr};
+  // NOTE(HIP/AMD): migrated to the CCCL MR design (rmm 5.0.0 / hipMM): the current
+  // device resource is referenced/returned as a device_async_resource_ref / any_resource
+  // rather than a raw device_memory_resource*. get_current_device_resource() and the
+  // raw-pointer set_current_device_resource() overloads no longer exist.
+  rmm::device_async_resource_ref prev_mr_{cudf::get_current_device_resource_ref()};
+  bool swapped_mr_{false};
 
   void SetUp() override
   {
     cudf::test::BaseFixture::SetUp();
-    prev_mr_ = cudf::get_current_device_resource();
+    prev_mr_ = cudf::get_current_device_resource_ref();
     auto const [free, total] = rmm::available_device_memory();
     constexpr std::size_t low_mem_threshold = 16ull * 1024 * 1024 * 1024;
     if (free <= low_mem_threshold) {
-      static auto non_pool_mr = std::make_shared<rmm::mr::cuda_memory_resource>();
-      cudf::set_current_device_resource(non_pool_mr.get());
+      static rmm::mr::cuda_memory_resource non_pool_mr{};
+      cudf::set_current_device_resource(
+        cuda::mr::any_resource<cuda::mr::device_accessible>{non_pool_mr});
+      swapped_mr_ = true;
     }
   }
 
   void TearDown() override
   {
-    if (prev_mr_ != nullptr) { cudf::set_current_device_resource(prev_mr_); }
+    if (swapped_mr_) {
+      cudf::set_current_device_resource(
+        cuda::mr::any_resource<cuda::mr::device_accessible>{prev_mr_});
+    }
     cudf::test::BaseFixture::TearDown();
   }
 };

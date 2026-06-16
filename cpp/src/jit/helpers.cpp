@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "helpers.hpp"
 
 #include <cudf/detail/nvtx/ranges.hpp>
@@ -90,29 +112,47 @@ std::vector<std::string> input_type_names(
 jitify2::Kernel get_udf_kernel(jitify2::PreprocessedProgramData const& preprocessed_program_data,
                                std::string const& kernel_name,
                                std::string const& cuda_source,
-                               std::vector<std::string> const& extra_options)
+                               std::vector<std::string> const& extra_options,
+                               std::string const* parsed_udf_llvm_ir)
 {
   CUDF_FUNC_RANGE();
 
-  int runtime_version;
-  CUDF_CUDA_TRY(cudaRuntimeGetVersion(&runtime_version));
-
-  constexpr int min_pch_cuda_version     = 12800;  // CUDA 12.8
-  constexpr int min_minimal_cuda_version = 12800;  // CUDA 12.8
-
   std::vector<std::string> options;
-  options.emplace_back("-arch=sm_.");
 
-  if (runtime_version >= min_minimal_cuda_version) { options.emplace_back("-minimal"); }
+  if constexpr (HIP_PLATFORM_AMD) {
+    // NOTE(HIP/AMD): emit the AMD offload arch instead of NVIDIA's -arch=sm_., and skip the
+    // CUDA-version-gated -minimal/-pch options (and the cudaRuntimeGetVersion query, which
+    // reports the HIP runtime version on AMD and would mis-gate those NVRTC-only flags).
+    options.emplace_back("--offload-arch=gfx.");
+  } else {
+    int runtime_version;
+    CUDF_CUDA_TRY(cudaRuntimeGetVersion(&runtime_version));
 
-  if (runtime_version >= min_pch_cuda_version) { options.emplace_back("-pch"); }
+    constexpr int min_pch_cuda_version     = 12800;  // CUDA 12.8
+    constexpr int min_minimal_cuda_version = 12800;  // CUDA 12.8
+
+    options.emplace_back("-arch=sm_.");
+
+    if (runtime_version >= min_minimal_cuda_version) { options.emplace_back("-minimal"); }
+
+    if (runtime_version >= min_pch_cuda_version) { options.emplace_back("-pch"); }
+  }
 
   for (auto& opt : extra_options) {
     options.push_back(opt);
   }
 
+  // NOTE(HIP/AMD): on AMD the arch-adapted LLVM IR (parsed_udf_llvm_ir) is linked into the
+  // kernel as extra bitcode (jitify2 get_kernel's last argument). CAUTION(HIP/AMD): we assume
+  // the IR has already been compiled for the current arch (must match the kernel program,
+  // otherwise the linker errors). On NVIDIA parsed_udf_llvm_ir is null and PTX is used.
   return cudf::jit::get_program_cache(preprocessed_program_data)
-    .get_kernel(kernel_name, {}, {{"cudf/detail/operation-udf.hpp", cuda_source}}, options);
+    .get_kernel(kernel_name,
+                {},
+                {{"cudf/detail/operation-udf.hpp", cuda_source}},
+                options,
+                {},
+                parsed_udf_llvm_ir);
 }
 
 }  // namespace jit

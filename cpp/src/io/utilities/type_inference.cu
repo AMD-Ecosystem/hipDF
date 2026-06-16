@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 // SOFTWARE.
 
 #include "column_type_histogram.hpp"
+#include "io/utilities/string_parsing.hpp"
 #include "parsing_utils.cuh"
 #include "trie.cuh"
 
@@ -135,8 +136,9 @@ CUDF_KERNEL void infer_column_type_kernel(OptionsView options,
 
   for (auto idx = threadIdx.x + blockDim.x * blockIdx.x; idx < size;
        idx += gridDim.x * blockDim.x) {
-    auto const field_offset = cuda::std::get<0>(*(offset_length_begin + idx));
-    auto const field_len    = cuda::std::get<1>(*(offset_length_begin + idx));
+    // NOTE(HIP/AMD): offset_length_begin derefs to a thrust::tuple on rocThrust; use thrust::get.
+    auto const field_offset = thrust::get<0>(*(offset_length_begin + idx));
+    auto const field_len    = thrust::get<1>(*(offset_length_begin + idx));
     auto const field_begin  = data.data() + field_offset;
 
     if (cudf::detail::serialized_trie_contains(
@@ -269,7 +271,7 @@ cudf::io::column_type_histogram infer_column_type(OptionsView const& options,
 cudf::data_type infer_data_type(
   cudf::io::json_inference_options_view const& options,
   device_span<char const> data,
-  thrust::zip_iterator<cuda::std::tuple<size_type const*, size_type const*>> offset_length_begin,
+  offset_length_iterator offset_length_begin,
   std::size_t const size,
   rmm::cuda_stream_view stream)
 {

@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -116,7 +116,11 @@ class split_device_span_iterator {
 
   split_device_span_iterator() = default;
 
-  CUDF_HOST_DEVICE constexpr split_device_span_iterator(split_device_span<T> span, size_type offset)
+  // NOTE(HIP/AMD): take the span by const reference rather than by value. Under libhipcxx the
+  // by-value parameter made cuda::std::span's range deduction guide recurse into itself
+  // ("__span_compatible_range depends on itself") while checking split_device_span as a range.
+  CUDF_HOST_DEVICE constexpr split_device_span_iterator(split_device_span<T> const& span,
+                                                        size_type offset)
     : _span{span}, _offset{offset}
   {
   }

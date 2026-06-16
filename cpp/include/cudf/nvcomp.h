@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -103,6 +103,12 @@
 #ifndef nvcompBatchedZstdDefaultOpts
 #  define nvcompBatchedZstdDefaultOpts hipcompBatchedZstdDefaultOpts
 #endif
+#ifndef nvcompBatchedGzipDecompressAsync
+#  define nvcompBatchedGzipDecompressAsync hipcompBatchedGzipDecompressAsync
+#endif
+#ifndef nvcompBatchedGzipDecompressGetTempSize
+#  define nvcompBatchedGzipDecompressGetTempSize hipcompBatchedGzipDecompressGetTempSize
+#endif
 #ifndef nvcompConfigTest
 #  define nvcompConfigTest hipcompConfigTest
 #endif
@@ -123,4 +129,50 @@
 #endif
 #ifndef nvcompZstdCompressionMaxAllowedChunkSize
 #  define nvcompZstdCompressionMaxAllowedChunkSize hipcompZstdCompressionMaxAllowedChunkSize
+#endif
+
+// NOTE(HIP/AMD): the 26.06 nvcomp API splits the per-algorithm options into separate
+// Compress/Decompress *DefaultOpts VALUE constants. hipcomp 2.3.0 instead exposes opts
+// TYPES (combined hipcompBatched{Snappy,LZ4}Opts_t for Snappy/LZ4; split
+// hipcompBatched{Deflate,Zstd,Gzip}{Compress,Decompress}Opts_t) and provides NO matching
+// DefaultOpts value constants. Map each split DefaultOpts the adapter uses to a
+// value-initialized instance of the hipcomp opts type that that algo's async/get-temp-size
+// signature expects.
+#include "hipcomp/deflate.h"
+#include "hipcomp/gzip.h"
+#include "hipcomp/snappy.h"
+#include "hipcomp/zstd.h"
+
+// Snappy / LZ4 use a single combined opts type for both directions.
+#ifndef nvcompBatchedSnappyCompressDefaultOpts
+#  define nvcompBatchedSnappyCompressDefaultOpts (hipcompBatchedSnappyOpts_t{})
+#endif
+#ifndef nvcompBatchedSnappyDecompressDefaultOpts
+#  define nvcompBatchedSnappyDecompressDefaultOpts (hipcompBatchedSnappyOpts_t{})
+#endif
+#ifndef nvcompBatchedLZ4CompressDefaultOpts
+#  define nvcompBatchedLZ4CompressDefaultOpts (hipcompBatchedLZ4Opts_t{})
+#endif
+#ifndef nvcompBatchedLZ4DecompressDefaultOpts
+#  define nvcompBatchedLZ4DecompressDefaultOpts (hipcompBatchedLZ4Opts_t{})
+#endif
+
+// Deflate / Zstd / Gzip use split per-direction opts types in hipcomp.
+#ifndef nvcompBatchedDeflateCompressDefaultOpts
+#  define nvcompBatchedDeflateCompressDefaultOpts (hipcompBatchedDeflateCompressOpts_t{})
+#endif
+#ifndef nvcompBatchedDeflateDecompressDefaultOpts
+#  define nvcompBatchedDeflateDecompressDefaultOpts (hipcompBatchedDeflateDecompressOpts_t{})
+#endif
+#ifndef nvcompBatchedZstdCompressDefaultOpts
+#  define nvcompBatchedZstdCompressDefaultOpts (hipcompBatchedZstdCompressOpts_t{})
+#endif
+#ifndef nvcompBatchedZstdDecompressDefaultOpts
+#  define nvcompBatchedZstdDecompressDefaultOpts (hipcompBatchedZstdDecompressOpts_t{})
+#endif
+#ifndef nvcompBatchedGzipCompressDefaultOpts
+#  define nvcompBatchedGzipCompressDefaultOpts (hipcompBatchedGzipCompressOpts_t{})
+#endif
+#ifndef nvcompBatchedGzipDecompressDefaultOpts
+#  define nvcompBatchedGzipDecompressDefaultOpts (hipcompBatchedGzipDecompressOpts_t{})
 #endif

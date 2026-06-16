@@ -2,6 +2,29 @@
  * SPDX-FileCopyrightText: Copyright (c) 2019-2025, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/column/column.hpp>
@@ -22,7 +45,11 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#else
 #include <cub/cub.cuh>
+#endif
 #include <cuda/functional>
 #include <cuda/std/iterator>
 #include <thrust/binary_search.h>
@@ -34,6 +61,14 @@
 namespace cudf {
 namespace strings {
 namespace detail {
+
+// NOTE(HIP/AMD): hipcub provides the same DeviceMemcpy::Batched API (rocPRIM backend).
+// Alias the class per platform to keep call sites platform-agnostic.
+#ifdef __HIP_PLATFORM_AMD__
+using DeviceMemcpy = hipcub::DeviceMemcpy;
+#else
+using DeviceMemcpy = cub::DeviceMemcpy;
+#endif
 
 // Helper function for loading 16B from a potentially unaligned memory location to registers.
 __forceinline__ __device__ uint4 load_uint4(char const* ptr)
@@ -280,13 +315,22 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
     // use the custom cuDF kernel.
     constexpr int64_t cub_batch_copy_threshold = 1024 * 1024 * 0.5;
 
+    // NOTE(HIP/AMD): rocPRIM's batch_memcpy (backing hipcub::DeviceMemcpy::Batched)
+    // does not support non-pointer (transform_iterator) source/destination buffer
+    // iterators, so the CUB batched-copy fast path cannot be instantiated here. Always
+    // use the custom char-parallel kernel on AMD; it handles any output_count correctly.
+#ifdef __HIP_PLATFORM_AMD__
+    if (true) {
+#else
     if (output_count < cub_batch_copy_threshold) {
+#endif
       constexpr int strings_per_threadblock = 32;
       auto const grid_size                  = cudf::util::div_rounding_up_safe(
         static_cast<int64_t>(output_count), static_cast<int64_t>(strings_per_threadblock));
       gather_chars_fn_char_parallel<strings_per_threadblock>
         <<<grid_size, warps_per_threadblock * cudf::detail::warp_size, 0, stream.value()>>>(
           d_strings->begin<string_view>(), d_out_chars, offsets_view, begin, output_count);
+#ifndef __HIP_PLATFORM_AMD__
     } else {
       // Iterator over the character column of input strings to gather
       auto in_chars_itr = thrust::make_transform_iterator(
@@ -309,25 +353,26 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
 
       // Determine temporary device storage requirements
       size_t temp_storage_bytes = 0;
-      cub::DeviceMemcpy::Batched(nullptr,
-                                 temp_storage_bytes,
-                                 in_chars_itr,
-                                 out_chars_itr,
-                                 sizes_itr,
-                                 output_count,
-                                 stream.value());
+      CUDF_CUDA_TRY(DeviceMemcpy::Batched(nullptr,
+                                          temp_storage_bytes,
+                                          in_chars_itr,
+                                          out_chars_itr,
+                                          sizes_itr,
+                                          output_count,
+                                          stream.value()));
 
       // Allocate temporary storage
       auto d_temp_storage = rmm::device_buffer(temp_storage_bytes, stream, mr);
 
       // Run batched copy algorithm
-      cub::DeviceMemcpy::Batched(d_temp_storage.data(),
-                                 temp_storage_bytes,
-                                 in_chars_itr,
-                                 out_chars_itr,
-                                 sizes_itr,
-                                 output_count,
-                                 stream.value());
+      CUDF_CUDA_TRY(DeviceMemcpy::Batched(d_temp_storage.data(),
+                                          temp_storage_bytes,
+                                          in_chars_itr,
+                                          out_chars_itr,
+                                          sizes_itr,
+                                          output_count,
+                                          stream.value()));
+#endif
     }
   }
 

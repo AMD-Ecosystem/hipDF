@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "write_json.hpp"
 
 #include "io/comp/compression.hpp"
@@ -290,8 +312,11 @@ struct column_to_strings_fn {
                    i_col_begin + num_columns,
                    std::back_inserter(str_column_vec),
                    [this, &children_names](auto const& i_current_col) {
-                     auto const i            = cuda::std::get<0>(i_current_col);
-                     auto const& current_col = cuda::std::get<1>(i_current_col);
+                     // NOTE(HIP/AMD): rocThrust zip dereference yields a thrust tuple
+                     // proxy (tuple_of_iterator_references), not a cuda::std::tuple, so
+                     // use thrust::get to extract its elements.
+                     auto const i            = thrust::get<0>(i_current_col);
+                     auto const& current_col = thrust::get<1>(i_current_col);
                      if (current_col.type().id() == type_id::STRUCT) {
                        return this->template operator()<cudf::struct_view>(
                          current_col, child_column_names(children_names, i));

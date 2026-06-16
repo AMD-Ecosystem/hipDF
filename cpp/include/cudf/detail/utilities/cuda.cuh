@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,10 @@
 #include "cudf/cuda_runtime.h"
 #include <cudf/types.hpp>
 
-#ifndef __CUDACC_RTC__
+// NOTE(HIP/AMD): mirror the NVRTC guard for hipRTC so these host/device-library
+// headers (incl. hipcub, whose relative includes jitify can't resolve) are not
+// dragged into runtime-JIT'd kernels. The JIT kernels only use grid_1d helpers.
+#if !defined(__CUDACC_RTC__) && !defined(__HIPCC_RTC__)
 
 #include <cudf/utilities/default_stream.hpp>
 
@@ -57,7 +60,10 @@ static constexpr size_type warp_size{32};
 static constexpr size_type warp_size{32};
 #endif
 
-#ifndef __CUDACC_RTC__
+// NOTE(HIP/AMD): mirror the NVRTC guard for hipRTC. These function bodies use
+// hipcub::WarpReduce and rmm::cuda_stream_view, whose host/device-library headers
+// are intentionally excluded above under runtime JIT; guard the bodies to match.
+#if !defined(__CUDACC_RTC__) && !defined(__HIPCC_RTC__)
 
 /**
  * @brief Performs a sum reduction of values from the same lane across all

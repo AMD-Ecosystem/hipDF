@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "sort.hpp"
 
 #include <cudf/column/column.hpp>
@@ -22,7 +44,9 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifndef __HIP_PLATFORM_AMD__
 #include <cub/device/device_topk.cuh>
+#endif
 #include <cuda/iterator>
 #include <cuda/std/execution>
 #include <cuda/stream>
@@ -32,8 +56,17 @@ namespace detail {
 namespace {
 bool is_fast_path(column_view const& column)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipcub/rocPRIM does not provide a DeviceTopK API, so the CUB
+  // partial-selection fast path is unavailable. Always take the sorted_order slow
+  // path on AMD, which produces identical top-k indices (just without the
+  // partial-selection optimization).
+  (void)column;
+  return false;
+#else
   return !column.has_nulls() && cudf::is_fixed_width(column.type()) &&
          !cudf::is_floating_point(column.type());  // needs special NaN handling
+#endif
 }
 
 template <bool fast_path>
@@ -47,6 +80,13 @@ struct dispatch_topk_fn {
   template <typename T>
   std::unique_ptr<column> top_k()
   {
+#ifdef __HIP_PLATFORM_AMD__
+    // NOTE(HIP/AMD): DeviceTopK is unavailable in hipcub/rocPRIM. This fast-path
+    // body is never reached at runtime on AMD (is_fast_path() returns false), but
+    // it is still instantiated by the type_dispatcher, so it must compile. Provide
+    // an unreachable stub instead of the CUB DeviceTopK implementation.
+    CUDF_UNREACHABLE("top_k fast path (DeviceTopK) is not supported on AMD/HIP");
+#else
     auto requirements = cuda::execution::require(cuda::execution::determinism::not_guaranteed,
                                                  cuda::execution::output_ordering::unsorted);
     auto env          = cuda::std::execution::env{cuda::stream_ref{stream.value()}, requirements};
@@ -74,6 +114,7 @@ struct dispatch_topk_fn {
     }
 
     return std::make_unique<column>(std::move(indices), rmm::device_buffer{}, 0);
+#endif
   }
 
   template <typename T>

@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -321,11 +321,13 @@ distinct_hash_join::inner_join(cudf::table_view const& left,
     }
   }
 
+  // NOTE(HIP/AMD): copy_if writes through a rocThrust zip iterator whose proxy is a
+  // thrust::tuple, so the transform iterator must yield thrust::tuple (not cuda::std::tuple).
   auto const tuple_iter = cudf::detail::make_counting_transform_iterator(
     0,
-    cuda::proclaim_return_type<cuda::std::tuple<size_type, size_type>>(
+    cuda::proclaim_return_type<thrust::tuple<size_type, size_type>>(
       [found_iter = found_indices.begin()] __device__(size_type idx) {
-        return cuda::std::tuple{*(found_iter + idx), idx};
+        return thrust::make_tuple(*(found_iter + idx), idx);
       }));
   auto const output_begin =
     thrust::make_zip_iterator(right_indices->begin(), left_indices->begin());

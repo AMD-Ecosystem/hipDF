@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,8 @@
 #include <cudf/detail/utilities/grid_1d.cuh>
 #include <cudf/join/join.hpp>
 #include <cudf/table/table_device_view.cuh>
+
+#include <cuda/atomic>
 
 #include <hipcub/hipcub.hpp>
 

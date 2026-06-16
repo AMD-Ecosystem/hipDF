@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "filter_join_indices_jit_kernel.cuh"
 #include "jit/filter_join_kernel.cuh"
 
@@ -27,17 +49,20 @@
 #include <rmm/exec_policy.hpp>
 #include <rmm/mr/polymorphic_allocator.hpp>
 
+#ifndef __HIP_PLATFORM_AMD__
 #include <cub/device/device_transform.cuh>
+#endif
 #include <cuco/static_set.cuh>
 #include <cuda/iterator>
 #include <cuda/std/tuple>
+#include <thrust/fill.h>
 #include <thrust/iterator/zip_iterator.h>
 
 #include <jit/cache.hpp>
 #include <jit/helpers.hpp>
 #include <jit/parser.hpp>
 #include <jit/row_ir.hpp>
-#include <jit/span.cuh>
+#include <cudf/detail/jit/span.cuh>
 #include <jit_preprocessed_files/join/jit/filter_join_kernel.cu.jit.hpp>
 
 #include <memory>
@@ -57,7 +82,14 @@ jitify2::StringVec build_join_filter_template_params(std::vector<column_view> co
   jitify2::StringVec template_params;
 
   template_params.emplace_back(jitify2::reflection::reflect(has_user_data));
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): the bundled jitify2 value_string uses std::to_string, which does not accept a
+  // scoped enum (`enum class null_aware : bool`). Emit the fully-qualified enumerator explicitly.
+  template_params.emplace_back(is_null_aware == null_aware::YES ? "cudf::null_aware::YES"
+                                                               : "cudf::null_aware::NO");
+#else
   template_params.emplace_back(jitify2::reflection::reflect(is_null_aware));
+#endif
 
   // Add left column accessors
   for (std::size_t i = 0; i < left_columns.size(); ++i) {
@@ -159,7 +191,8 @@ void launch_join_filter_kernel(jitify2::ConfiguredKernel& kernel,
                             &predicate_results,
                             &user_data_ptr};
 
-  kernel->launch_raw(args.data());
+  // NOTE(HIP/AMD): jitify2 ConfiguredKernelData exposes launch(void**) (the former launch_raw).
+  kernel->launch(args.data());
 }
 
 // Same join semantics handling as the AST version
@@ -204,9 +237,8 @@ apply_join_semantics(cudf::table_view const& left,
     auto [filtered_left_indices, filtered_right_indices] = make_result_vectors(num_valid);
 
     auto input_iter =
-      thrust::make_zip_iterator(cuda::std::tuple{left_indices.begin(), right_indices.begin()});
-    auto output_iter = thrust::make_zip_iterator(
-      cuda::std::tuple{filtered_left_indices->begin(), filtered_right_indices->begin()});
+      thrust::make_zip_iterator(left_indices.begin(), right_indices.begin());
+    auto output_iter = thrust::make_zip_iterator(filtered_left_indices->begin(), filtered_right_indices->begin());
 
     cudf::detail::copy_if(
       input_iter,
@@ -261,9 +293,8 @@ apply_join_semantics(cudf::table_view const& left,
     auto [filtered_left_indices, filtered_right_indices] = make_result_vectors(output_size);
     if (num_valid > 0) {
       auto input_iter =
-        thrust::make_zip_iterator(cuda::std::tuple{left_indices.begin(), right_indices.begin()});
-      auto output_iter = thrust::make_zip_iterator(
-        cuda::std::tuple{filtered_left_indices->begin(), filtered_right_indices->begin()});
+        thrust::make_zip_iterator(left_indices.begin(), right_indices.begin());
+      auto output_iter = thrust::make_zip_iterator(filtered_left_indices->begin(), filtered_right_indices->begin());
       auto valid_predicate = [predicate_results_ptr] __device__(auto i) -> bool {
         return predicate_results_ptr[i];
       };
@@ -287,8 +318,16 @@ apply_join_semantics(cudf::table_view const& left,
                             is_unmatched_idx,
                             stream);
 
+#ifdef __HIP_PLATFORM_AMD__
+      // NOTE(HIP/AMD): hipcub has no DeviceTransform::Fill; use thrust::fill_n.
+      thrust::fill_n(rmm::exec_policy_nosync(stream),
+                     filtered_right_indices->begin() + num_valid,
+                     num_invalid,
+                     JoinNoMatch);
+#else
       cub::DeviceTransform::Fill(
         filtered_right_indices->begin() + num_valid, num_invalid, JoinNoMatch, stream.value());
+#endif
     }
 
     return std::pair{std::move(filtered_left_indices), std::move(filtered_right_indices)};
@@ -313,25 +352,28 @@ apply_join_semantics(cudf::table_view const& left,
     thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       cuda::counting_iterator<cudf::size_type>{0},
                       cuda::counting_iterator{static_cast<size_type>(left_indices.size())},
-                      thrust::make_zip_iterator(cuda::std::tuple{filtered_left_indices->begin(),
-                                                                 filtered_right_indices->begin()}),
-                      [=] __device__(size_type i) -> cuda::std::tuple<size_type, size_type> {
+                      thrust::make_zip_iterator(filtered_left_indices->begin(),
+                                                                 filtered_right_indices->begin()),
+                      // NOTE(HIP/AMD): rocThrust zip iterator proxy is a thrust::tuple, so
+                      // return thrust::tuple (not cuda::std::tuple) from the transform functor.
+                      [=] __device__(size_type i) -> thrust::tuple<size_type, size_type> {
                         auto const left_idx  = left_ptr[i];
                         auto const right_idx = right_ptr[i];
                         auto const output_right_idx =
                           (predicate_results_ptr[i] || left_idx == JoinNoMatch) ? right_idx
                                                                                 : JoinNoMatch;
-                        return cuda::std::tuple{left_idx, output_right_idx};
+                        return thrust::make_tuple(left_idx, output_right_idx);
                       });
 
     if (failed_matched_count > 0) {
-      auto secondary_iter = thrust::make_zip_iterator(
-        cuda::std::tuple{filtered_left_indices->begin() + left_indices.size(),
-                         filtered_right_indices->begin() + left_indices.size()});
+      auto secondary_iter = thrust::make_zip_iterator(filtered_left_indices->begin() + left_indices.size(),
+                         filtered_right_indices->begin() + left_indices.size());
 
+      // NOTE(HIP/AMD): copy_if writes through a rocThrust zip iterator (thrust::tuple proxy),
+      // so the transform iterator must yield thrust::tuple (not cuda::std::tuple).
       auto failed_match_iter = cudf::detail::make_counting_transform_iterator(
-        0, [=] __device__(size_type i) -> cuda::std::tuple<size_type, size_type> {
-          return cuda::std::tuple{JoinNoMatch, right_ptr[i]};
+        0, [=] __device__(size_type i) -> thrust::tuple<size_type, size_type> {
+          return thrust::make_tuple(JoinNoMatch, right_ptr[i]);
         });
       cudf::detail::copy_if(failed_match_iter,
                             failed_match_iter + left_indices.size(),
@@ -357,7 +399,13 @@ jitify2::StringVec build_join_filter_template_params_from_specs(
 {
   jitify2::StringVec template_params;
   template_params.emplace_back(jitify2::reflection::reflect(false));  // has_user_data = false
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): see above; bundled jitify2 can't std::to_string a scoped enum.
+  template_params.emplace_back(is_null_aware == null_aware::YES ? "cudf::null_aware::YES"
+                                                               : "cudf::null_aware::NO");
+#else
   template_params.emplace_back(jitify2::reflection::reflect(is_null_aware));
+#endif
 
   // Scalar columns are appended to the left table's device views,
   // starting at index left.num_columns().

@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,9 @@
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
 #include <thrust/for_each.h>
+#include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
+#include <thrust/tuple.h>
 
 namespace cudf {
 namespace strings {
@@ -80,7 +82,10 @@ constexpr size_type AVG_CHAR_BYTES_THRESHOLD = 256;
  * @brief Type used for holding the target position (first) and the
  * target index (second).
  */
-using target_pair = cuda::std::tuple<int64_t, size_type>;
+// NOTE(HIP/AMD): this pair is produced by pair_generator and copied into a thrust zip
+// iterator (out_itr) via copy_if. rocThrust's zip deref is a thrust::tuple, so the value
+// type must be thrust::tuple (not cuda::std::tuple) to be assignable into the zip output.
+using target_pair = thrust::tuple<int64_t, size_type>;
 
 /**
  * @brief Helper functions for performing character-parallel replace
@@ -315,14 +320,14 @@ CUDF_KERNEL void count_targets(replace_multi_parallel_fn fn, int64_t chars_bytes
 struct pair_generator {
   __device__ target_pair operator()(int64_t idx) const
   {
-    return cuda::std::make_tuple(idx, fn.target_index(idx, chars_bytes));
+    return thrust::make_tuple(idx, fn.target_index(idx, chars_bytes));
   }
   replace_multi_parallel_fn fn;
   int64_t chars_bytes;
 };
 
 struct copy_if_fn {
-  __device__ bool operator()(target_pair pos) { return cuda::std::get<1>(pos) >= 0; }
+  __device__ bool operator()(target_pair pos) { return thrust::get<1>(pos) >= 0; }
 };
 
 std::unique_ptr<column> replace_character_parallel(strings_column_view const& input,
@@ -365,8 +370,7 @@ std::unique_ptr<column> replace_character_parallel(strings_column_view const& in
   // cudf::detail::make_counting_transform_iterator hardcodes size_type
   auto const copy_itr = thrust::make_transform_iterator(cuda::counting_iterator<int64_t>{0},
                                                         pair_generator{fn, chars_bytes});
-  auto const out_itr  = thrust::make_zip_iterator(
-    cuda::std::make_tuple(targets_positions.begin(), targets_indices.begin()));
+  auto const out_itr  = thrust::make_zip_iterator(targets_positions.begin(), targets_indices.begin());
   auto const copy_end =
     cudf::detail::copy_if(copy_itr, copy_itr + chars_bytes, out_itr, copy_if_fn{}, stream);
 

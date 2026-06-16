@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 // SOFTWARE.
 
 #include "io/utilities/parsing_utils.cuh"
+#include "io/utilities/string_parsing.hpp"
 
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_device_view.cuh>
@@ -804,11 +805,13 @@ template <typename SymbolT>
 struct to_string_view_pair {
   SymbolT const* data;
   to_string_view_pair(SymbolT const* _data) : data(_data) {}
+  // NOTE(HIP/AMD): the input zip iterator dereferences to a rocThrust thrust::tuple
+  // (not a cuda::std::tuple), so accept a thrust::tuple and use thrust::get here.
   __device__ cuda::std::pair<char const*, std::size_t> operator()(
-    cuda::std::tuple<size_type, size_type> ip)
+    thrust::tuple<size_type, size_type> ip)
   {
     return cuda::std::pair<char const*, std::size_t>{
-      data + cuda::std::get<0>(ip), static_cast<std::size_t>(cuda::std::get<1>(ip))};
+      data + thrust::get<0>(ip), static_cast<std::size_t>(thrust::get<1>(ip))};
   }
 };
 
@@ -935,7 +938,7 @@ static std::unique_ptr<column> parse_string(string_view_pair_it str_tuples,
 
 std::unique_ptr<column> parse_data(
   char const* data,
-  thrust::zip_iterator<cuda::std::tuple<size_type const*, size_type const*>> offset_length_begin,
+  offset_length_iterator offset_length_begin,
   size_type col_size,
   data_type col_type,
   rmm::device_buffer&& null_mask,

@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "large_strings_fixture.hpp"
 
 #include <cudf_test/column_wrapper.hpp>
@@ -120,7 +142,11 @@ int main(int argc, char** argv)
 
   if (std::getenv("GTEST_CUDF_MEMORY_PEAK")) {
     auto mr = rmm::mr::statistics_resource_adaptor(cudf::get_current_device_resource_ref());
-    cudf::set_current_device_resource(mr);
+    // NOTE(HIP/AMD): hipMM 5.0.0's statistics_resource_adaptor cannot be stored by value in
+    // cuda::mr::any_resource (the type set_current_device_resource takes). Use the shared
+    // helper from testing_main.hpp which sets it via a non-owning device_async_resource_ref
+    // on AMD (mr outlives RUN_ALL_TESTS here). CUDA path is unchanged.
+    CUDF_TEST_SET_STATISTICS_RESOURCE(mr);
     auto rc = RUN_ALL_TESTS();
     std::cout << "Peak memory usage " << mr.get_bytes_counter().peak << " bytes" << std::endl;
     rmm::mr::reset_current_device_resource();

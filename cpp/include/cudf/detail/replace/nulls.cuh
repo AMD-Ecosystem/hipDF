@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,8 @@ using idx_valid_pair_t = cuda::std::tuple<cudf::size_type, bool>;
  * row is valid, otherwise a tuple of the nearest non-null row index and a discarded boolean.
  */
 struct replace_policy_functor {
-  __host__ __device__ idx_valid_pair_t operator()(idx_valid_pair_t const& lhs, idx_valid_pair_t const& rhs)
+  __host__ __device__ idx_valid_pair_t operator()(idx_valid_pair_t const& lhs,
+                                                  idx_valid_pair_t const& rhs) const
   {
     return cuda::std::get<1>(rhs) ? rhs : lhs;
   }

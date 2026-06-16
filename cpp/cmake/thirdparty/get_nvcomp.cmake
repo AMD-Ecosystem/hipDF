@@ -46,6 +46,22 @@ function(find_and_configure_hipcomp)
     )
   endif()
 
+  # NOTE(HIP/AMD): upstream cuDF links the nvcomp library into libcudf via
+  # ${CUDF_nvcomp_TARGET}, but that variable is never set anywhere in the tree (upstream
+  # relies on the NVIDIA nvcomp rapids module to export it). With the HIP port the rapids
+  # hipcomp module only guarantees the `hipcomp::hipcomp` target (the nvcomp::nvcomp alias
+  # is gated on HIP_AS_CUDA). Without this, libcudf.so is left with undefined hipcomp*
+  # symbols which only surface when the gtest executables link with
+  # --no-allow-shlib-undefined. Set CUDF_nvcomp_TARGET to the available hipcomp target so
+  # the (static) hipcomp library is actually linked into libcudf.
+  if(TARGET nvcomp::nvcomp)
+    set(CUDF_nvcomp_TARGET nvcomp::nvcomp PARENT_SCOPE)
+  elseif(TARGET hipcomp::hipcomp)
+    set(CUDF_nvcomp_TARGET hipcomp::hipcomp PARENT_SCOPE)
+  elseif(TARGET hipcomp)
+    set(CUDF_nvcomp_TARGET hipcomp PARENT_SCOPE)
+  endif()
+
 endfunction()
 
 find_and_configure_hipcomp()

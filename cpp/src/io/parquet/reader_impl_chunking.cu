@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 
 #include "compact_protocol_reader.hpp"
 #include "io/comp/gpuinflate.hpp"
-#include "io/utilities/time_utils.cuh"
+#include "io/utilities/time_utils.hpp"
 #include "reader_impl.hpp"
 #include "reader_impl_chunking.hpp"
 #include "reader_impl_chunking_utils.cuh"

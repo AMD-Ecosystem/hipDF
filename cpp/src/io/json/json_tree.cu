@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -93,7 +93,10 @@ struct node_ranges {
   device_span<PdaTokenT const> tokens;
   device_span<SymbolOffsetT const> token_indices;
   bool include_quote_char;
-  __device__ auto operator()(size_type i) -> cuda::std::tuple<SymbolOffsetT, SymbolOffsetT>
+  // NOTE(HIP/AMD): this functor feeds a transform_output_iterator whose underlying output
+  // is a rocThrust zip iterator; its deref is a thrust::tuple proxy with no viable '=' from
+  // a cuda::std::tuple, so return a thrust::tuple instead.
+  __device__ auto operator()(size_type i) -> thrust::tuple<SymbolOffsetT, SymbolOffsetT>
   {
     // Whether a token expects to be followed by its respective end-of-* token partner
     auto const is_begin_of_section = [] __device__(PdaTokenT const token) {
@@ -138,7 +141,7 @@ struct node_ranges {
         range_end = get_token_index(tokens[i + 1], token_indices[i + 1]);
       }
     }
-    return cuda::std::make_tuple(range_begin, range_end);
+    return thrust::make_tuple(range_begin, range_end);
   }
 };
 
@@ -563,8 +566,11 @@ std::pair<size_t, rmm::device_uvector<size_type>> remapped_field_nodes_after_uni
                     offset_length_it,
                     [node_range_begin = d_tree.node_range_begin.data(),
                      node_range_end   = d_tree.node_range_end.data()] __device__(auto key) {
-                      return cuda::std::make_tuple(node_range_begin[key],
-                                                   node_range_end[key] - node_range_begin[key]);
+                      // NOTE(HIP/AMD): output is a rocThrust zip iterator whose deref is a
+                      // thrust::tuple proxy; return a thrust::make_tuple so the assignment
+                      // matches (cuda::std::make_tuple has no viable '=' to the proxy).
+                      return thrust::make_tuple(node_range_begin[key],
+                                                node_range_end[key] - node_range_begin[key]);
                     });
   cudf::io::parse_options_view opt{',', '\n', '\0', '.'};
   opt.keepquotes = true;
@@ -730,7 +736,7 @@ rmm::device_uvector<size_type> hash_node_type_with_field_name(device_span<Symbol
     auto reverse_map        = make_map(num_keys);
     auto matching_keys_iter = thrust::make_permutation_iterator(keys.begin(), found_keys.begin());
     auto pair_iter =
-      thrust::make_zip_iterator(cuda::std::make_tuple(keys.begin(), matching_keys_iter));
+      thrust::make_zip_iterator(keys.begin(), matching_keys_iter);
     reverse_map.insert_async(pair_iter, pair_iter + num_keys, stream);
     return std::pair{is_need_remap, std::move(reverse_map)};
   };

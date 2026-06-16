@@ -34,13 +34,23 @@
 #include "parquet_gpu.hpp"
 #include "rle_stream.cuh"
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
+// TODO(HIP/AMD): workaround for missing cg::reduce/invoke_one APIs in HIP cooperative groups.
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#else
+#include <cooperative_groups.h>
+#endif
 #include <cuda/atomic>
 #include <cuda/std/tuple>
 
 namespace cudf::io::parquet::detail {
 
+#ifdef __HIP_PLATFORM_AMD__
+namespace cg = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
 namespace cg = cooperative_groups;
+#endif
 
 enum class copy_mode : bool { INDIRECT, DIRECT };
 

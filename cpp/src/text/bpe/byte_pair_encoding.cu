@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -459,6 +459,21 @@ std::unique_ptr<cudf::column> byte_pair_encoding(cudf::strings_column_view const
 
   // this will insert the single-byte separator into positions specified in d_inserts
   auto const sep_char = cuda::constant_iterator<char>(separator.to_string(stream)[0]);
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): rocThrust's merge_by_key zips the keys-output with the values-output, and a
+  // cuda::discard_iterator (void value_type) makes that zip "form a reference to void". Write the
+  // merged keys into a throwaway device buffer instead of discarding them inline.
+  auto keys_out = rmm::device_uvector<int64_t>(bytes, stream);
+  thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                       d_inserts,      // where to insert separator byte
+                       copy_end,       //
+                       chars_begin,    // all indices
+                       chars_end,      //
+                       sep_char,       // byte to insert
+                       d_input_chars,  // original data
+                       keys_out.begin(),
+                       d_chars);  // result
+#else
   thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                        d_inserts,      // where to insert separator byte
                        copy_end,       //
@@ -468,6 +483,7 @@ std::unique_ptr<cudf::column> byte_pair_encoding(cudf::strings_column_view const
                        d_input_chars,  // original data
                        cuda::make_discard_iterator(),
                        d_chars);  // result
+#endif
 
   return cudf::make_strings_column(input.size(),
                                    std::move(offsets),

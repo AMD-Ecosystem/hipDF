@@ -1655,6 +1655,22 @@ set_property(
   PROPERTY COMPILE_DEFINITIONS "CUDF_VERSION=${PROJECT_VERSION}"
 )
 
+# NOTE(HIP/AMD): the ROCm 7.2 AMDGPU backend miscompiles the shared-memory groupby aggregation
+# kernel (single_pass_shmem_aggs_kernel) at the default -O3 ("Illegal instruction detected: Operand
+# has incorrect register class"). A previous workaround forced -O1 on this single TU to dodge the
+# compile error, but -O1 then produces a runtime GPU HANG: the kernel's per-block 128-thread (two
+# wavefront) barrier deadlocks because divergent lanes in the aggregation phase never reconverge to
+# reach the s_barrier (confirmed by rocgdb: one wave stuck at the aggregator's divergent return with
+# a partial exec mask, the other wave parked at the barrier). -O2 both compiles cleanly and runs
+# correctly (GROUPBY_TEST argmin and STREAM_GROUPBY_TEST count both pass), so build this single TU at
+# -O2. This is a HIP-only build tree (the project FATAL_ERRORs above if not using a HIP/ROCm
+# compiler); the CUDA build is unaffected.
+set_property(
+  SOURCE src/groupby/hash/compute_shared_memory_aggs.cu
+  APPEND_STRING
+  PROPERTY COMPILE_FLAGS " -O2"
+)
+
 set_cudf_target_properties()
 
 # Specify include paths for the current target and dependents
@@ -1742,12 +1758,35 @@ else()
   set(THRUST_LIBRARY roc::rocthrust)
 endif()
 
+# NOTE(HIP/AMD): cudf normally links the header-only `nvtx3::nvtx3-cpp` target, which upstream gets
+# transitively from rmm's public interface. The AMD rmm/hipMM port disables its own nvtx3 fetch
+# (rmm cpp/CMakeLists.txt get_nvtx is commented out, linking hip::host instead) and USE_NVTX is
+# force-disabled on AMD, so the nvtx3 target does not exist here. Since NVTX is fully disabled
+# (NVTX_DISABLE is defined below, so no NVTX headers/calls are emitted), only link nvtx3::nvtx3-cpp
+# when it is actually available; otherwise drop it. This keeps the upstream link line intact for the
+# CUDA/USE_NVTX build.
+if(TARGET nvtx3::nvtx3-cpp)
+  set(_cudf_nvtx3_link $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>)
+else()
+  set(_cudf_nvtx3_link "")
+endif()
+
+# NOTE(HIP/AMD): KvikIO is only fetched on the CUDA backend (get_kvikio.cmake is gated by
+# CUDA_BACKEND above), so the kvikio::kvikio target does not exist on AMD. Only link it when present
+# (mirrors the `if(TARGET KvikIO)` gate used for CUDF_HAS_KVIKIO above). Upstream/CUDA build links it
+# as before.
+if(TARGET kvikio::kvikio)
+  set(_cudf_kvikio_link kvikio::kvikio)
+else()
+  set(_cudf_kvikio_link "")
+endif()
+
 # Specify the target module library dependencies
 target_link_libraries(
   cudf
   PUBLIC CCCL::CCCL $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
-  PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp> $<BUILD_LOCAL_INTERFACE:cuco::cuco> ZLIB::ZLIB
-          ${CUDF_nvcomp_TARGET} kvikio::kvikio ${CUDF_nanoarrow_TARGET} zstd
+  PRIVATE ${_cudf_nvtx3_link} $<BUILD_LOCAL_INTERFACE:cuco::cuco> ZLIB::ZLIB
+          ${CUDF_nvcomp_TARGET} ${_cudf_kvikio_link} ${CUDF_nanoarrow_TARGET} zstd
 )
 
 # When building a shared libcudf with static deps, we absorb them via whole-archive linking so that

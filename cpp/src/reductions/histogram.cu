@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/algorithms/copy_if.cuh>
 #include <cudf/detail/cuco_helpers.hpp>
@@ -45,7 +67,9 @@ struct is_not_zero {
   template <typename Pair>
   __device__ bool operator()(Pair const input) const
   {
-    return cuda::std::get<1>(input) != 0;
+    // NOTE(HIP/AMD): rocprim passes a rocThrust thrust::tuple here, so use thrust::get
+    // instead of cuda::std::get (which finds no matching overload for thrust::tuple).
+    return thrust::get<1>(input) != 0;
   }
 };
 
@@ -181,10 +205,9 @@ compute_row_frequencies(table_view const& input,
     data_type{type_to_id<histogram_count_type>()}, set_size, mask_state::UNALLOCATED, stream, mr);
 
   // Copy row indices and counts to the output if counts are non-zero
-  auto const input_it = thrust::make_zip_iterator(
-    cuda::std::make_tuple(cuda::counting_iterator<cudf::size_type>{0}, reduction_results.begin()));
-  auto const output_it = thrust::make_zip_iterator(cuda::std::make_tuple(
-    distinct_indices->begin(), distinct_counts->mutable_view().begin<histogram_count_type>()));
+  auto const input_it = thrust::make_zip_iterator(cuda::counting_iterator<cudf::size_type>{0}, reduction_results.begin());
+  auto const output_it = thrust::make_zip_iterator(
+    distinct_indices->begin(), distinct_counts->mutable_view().begin<histogram_count_type>());
 
   // Reduction results above are either group sizes of equal rows, or `0`.
   // The final output is non-zero group sizes only.

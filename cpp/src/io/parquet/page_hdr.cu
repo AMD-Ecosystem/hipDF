@@ -38,6 +38,8 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
+// TODO(HIP/AMD): workaround for missing cg::reduce/invoke_one APIs in HIP cooperative groups.
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #else
 #include <cooperative_groups.h>
 #endif
@@ -54,7 +56,11 @@ auto constexpr decode_page_headers_block_size     = 4 * cudf::detail::warp_size;
 auto constexpr count_page_headers_block_size      = 4 * cudf::detail::warp_size;
 auto constexpr build_string_dict_index_block_size = 4 * cudf::detail::warp_size;
 
+#ifdef __HIP_PLATFORM_AMD__
+namespace cg = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
 namespace cg = cooperative_groups;
+#endif
 
 /**
  * @brief Minimal thrift implementation for parsing page headers
@@ -581,10 +587,13 @@ void __launch_bounds__(decode_page_headers_block_size)
 
   if (chunk_idx >= num_chunks) { return; }
 
-  __shared__ byte_stream_s bs_g[num_warps_per_block];
+  // NOTE(HIP/AMD): byte_stream_s has in-class member initializers (non-trivial default ctor),
+  // which HIP/clang forbids for __shared__ variables. Wrap each element in
+  // hipcub::Uninitialized so the shared storage is declared without running a constructor.
+  __shared__ hipcub::Uninitialized<byte_stream_s> bs_g[num_warps_per_block];
   __shared__ kernel_error::value_type error[num_warps_per_block];
 
-  auto const bs = &bs_g[warp_id];
+  auto const bs = &bs_g[warp_id].Alias();
 
   cg::invoke_one(warp, [&]() {
     bs->ck         = chunks[chunk_idx];
@@ -701,16 +710,19 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
 
   auto const warp_id = warp.meta_group_rank();
   auto const lane_id = warp.thread_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
   auto const chunk_idx =
-    static_cast<cudf::size_type>((cg::this_grid().block_rank() * num_warps_per_block) + warp_id);
+    static_cast<cudf::size_type>((blockIdx.x * num_warps_per_block) + warp_id);
   auto const num_chunks = static_cast<cudf::size_type>(chunks.size());
 
   if (chunk_idx >= num_chunks) { return; }
 
-  __shared__ byte_stream_s bs_g[num_warps_per_block];
+  // NOTE(HIP/AMD): see byte_stream_s __shared__ note above; wrap in hipcub::Uninitialized.
+  __shared__ hipcub::Uninitialized<byte_stream_s> bs_g[num_warps_per_block];
   __shared__ kernel_error::value_type error[num_warps_per_block];
 
-  auto const bs = &bs_g[warp_id];
+  auto const bs = &bs_g[warp_id].Alias();
 
   cg::invoke_one(warp, [&] {
     bs->ck         = chunks[chunk_idx];
@@ -874,7 +886,9 @@ CUDF_KERNEL void __launch_bounds__(build_string_dict_index_block_size)
                                        kernel_error::pointer error_code)
 {
   auto constexpr num_warps_per_block = build_string_dict_index_block_size / cudf::detail::warp_size;
-  __shared__ ColumnChunkDesc chunk_g[num_warps_per_block];
+  // NOTE(HIP/AMD): ColumnChunkDesc has in-class member initializers (non-trivial default ctor);
+  // wrap in hipcub::Uninitialized so it can be declared as a __shared__ array under HIP/clang.
+  __shared__ hipcub::Uninitialized<ColumnChunkDesc> chunk_g[num_warps_per_block];
 
   auto const block   = cg::this_thread_block();
   auto const warp    = cg::tiled_partition<cudf::detail::warp_size>(block);
@@ -885,7 +899,7 @@ CUDF_KERNEL void __launch_bounds__(build_string_dict_index_block_size)
 
   if (chunk >= num_chunks) { return; }
 
-  ColumnChunkDesc* const ck = &chunk_g[warp_id];
+  ColumnChunkDesc* const ck = &chunk_g[warp_id].Alias();
   cg::invoke_one(warp, [&] { *ck = chunks[chunk]; });
   warp.sync();
 

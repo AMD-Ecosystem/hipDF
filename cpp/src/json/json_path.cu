@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,7 @@
 #include <rmm/exec_policy.hpp>
 
 #include <cuda/std/optional>
+#include <cuda/std/tuple>
 #include <cuda/std/utility>
 #include <thrust/scan.h>
 #include <thrust/tuple.h>
@@ -955,7 +956,9 @@ __launch_bounds__(block_size) CUDF_KERNEL
 
       parse_result result;
       json_output out;
-      thrust::tie(result, out) =
+      // NOTE(HIP/AMD): get_json_object_single returns a cuda::std::pair; use cuda::std::tie so the
+      // target tuple type matches (rocThrust thrust::tie cannot be assigned a cuda::std::pair).
+      cuda::std::tie(result, out) =
         get_json_object_single(str.data(), str.size_bytes(), commands, dst, dst_size, options);
       output_size = out.output_len.value_or(0);
       if (out.output_len.has_value() && result == parse_result::SUCCESS) { is_valid = true; }

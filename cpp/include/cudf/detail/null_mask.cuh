@@ -5,7 +5,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -644,8 +644,10 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
       thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
     auto segment_length_iterator = thrust::transform_iterator(
       segments_begin, cuda::proclaim_return_type<size_type>([] __device__(auto const& segment) {
-        auto const begin = cuda::std::get<0>(segment);
-        auto const end   = cuda::std::get<1>(segment);
+        // NOTE(HIP/AMD): rocThrust's zip dereferences to a thrust::tuple; use thrust::get
+        // (cuda::std::get does not accept a thrust::tuple).
+        auto const begin = thrust::get<0>(segment);
+        auto const end   = thrust::get<1>(segment);
         return end - begin;
       }));
     thrust::transform(rmm::exec_policy_nosync(stream),
@@ -861,8 +863,9 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
     thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
   auto const segment_length_iterator = thrust::make_transform_iterator(
     segments_begin, cuda::proclaim_return_type<size_type>([] __device__(auto const& segment) {
-      auto const begin = cuda::std::get<0>(segment);
-      auto const end   = cuda::std::get<1>(segment);
+      // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+      auto const begin = thrust::get<0>(segment);
+      auto const end   = thrust::get<1>(segment);
       return end - begin;
     }));
 
@@ -897,8 +900,9 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
     length_and_valid_count + num_segments,
     [null_handling, has_valid_initial_value, valid_initial] __device__(
       auto const& length_and_valid_count) {
-      auto const length      = cuda::std::get<0>(length_and_valid_count);
-      auto const valid_count = cuda::std::get<1>(length_and_valid_count);
+      // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+      auto const length      = thrust::get<0>(length_and_valid_count);
+      auto const valid_count = thrust::get<1>(length_and_valid_count);
       return (null_handling == null_policy::EXCLUDE)
                ? (valid_initial || valid_count > 0)
                : ((has_valid_initial_value ? valid_initial : length > 0) && valid_count == length);

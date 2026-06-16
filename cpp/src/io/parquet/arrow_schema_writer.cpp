@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 /**
  * @file arrow_schema_writer.cpp
  * @brief Arrow IPC schema writer implementation
@@ -380,14 +402,13 @@ std::string construct_arrow_schema_ipc_message(cudf::detail::LinkedColVector con
 
   // populate field offsets (aka schema fields)
   std::transform(
-    thrust::make_zip_iterator(
-      cuda::std::make_tuple(linked_columns.begin(), metadata.column_metadata.begin())),
-    thrust::make_zip_iterator(
-      cuda::std::make_tuple(linked_columns.end(), metadata.column_metadata.end())),
+    thrust::make_zip_iterator(linked_columns.begin(), metadata.column_metadata.begin()),
+    thrust::make_zip_iterator(linked_columns.end(), metadata.column_metadata.end()),
     std::back_inserter(field_offsets),
     [&](auto const& elem) {
+      // NOTE(HIP/AMD): elem comes from a rocThrust zip dereference (thrust::tuple); use thrust::get.
       return make_arrow_schema_fields(
-        fbb, cuda::std::get<0>(elem), cuda::std::get<1>(elem), write_mode, utc_timestamps);
+        fbb, thrust::get<0>(elem), thrust::get<1>(elem), write_mode, utc_timestamps);
     });
 
   // Build an arrow:schema flatbuffer using the field offset vector and use it as the header to

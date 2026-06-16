@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "reader_impl.hpp"
 
 #include "error.hpp"
@@ -982,7 +1004,7 @@ void reader_impl::update_output_nullmasks_for_pruned_pages(cudf::host_span<bool 
   }
 
   auto page_and_mask_begin =
-    thrust::make_zip_iterator(cuda::std::make_tuple(pages.host_begin(), page_mask.begin()));
+    thrust::make_zip_iterator(pages.host_begin(), page_mask.begin());
 
   auto null_masks = std::vector<bitmask_type*>{};
   auto begin_bits = std::vector<cudf::size_type>{};
@@ -991,10 +1013,12 @@ void reader_impl::update_output_nullmasks_for_pruned_pages(cudf::host_span<bool 
   std::for_each(
     page_and_mask_begin, page_and_mask_begin + pages.size(), [&](auto const& page_and_mask_pair) {
       // Return early if the page is valid - Note: dictionary pages are always valid
-      if (cuda::std::get<1>(page_and_mask_pair)) { return; }
+      // NOTE(HIP/AMD): rocThrust zip dereference yields a thrust tuple proxy, not a
+      // cuda::std::tuple, so use thrust::get to extract its elements.
+      if (thrust::get<1>(page_and_mask_pair)) { return; }
 
       // Get the current page
-      auto const& page = cuda::std::get<0>(page_and_mask_pair);
+      auto const& page = thrust::get<0>(page_and_mask_pair);
 
       // Table row bounds
       auto const table_start_row = skip_rows;
@@ -1068,13 +1092,14 @@ void reader_impl::update_output_nullmasks_for_pruned_pages(cudf::host_span<bool 
   }
   // Otherwise, update the nullmasks in a loop
   else {
-    auto nullmask_iter = thrust::make_zip_iterator(cuda::std::make_tuple(
-      pinned_null_masks.begin(), pinned_begin_bits.begin(), pinned_end_bits.begin()));
+    auto nullmask_iter = thrust::make_zip_iterator(
+      pinned_null_masks.begin(), pinned_begin_bits.begin(), pinned_end_bits.begin());
     std::for_each(
       nullmask_iter, nullmask_iter + pinned_null_masks.size(), [&](auto const& nullmask_tuple) {
-        cudf::set_null_mask(cuda::std::get<0>(nullmask_tuple),
-                            cuda::std::get<1>(nullmask_tuple),
-                            cuda::std::get<2>(nullmask_tuple),
+        // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+        cudf::set_null_mask(thrust::get<0>(nullmask_tuple),
+                            thrust::get<1>(nullmask_tuple),
+                            thrust::get<2>(nullmask_tuple),
                             false,
                             _stream);
       });

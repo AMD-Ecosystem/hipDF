@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "join_common_utils.cuh"
 #include "mark_join.cuh"
 
@@ -21,9 +43,16 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+// TODO(HIP/AMD): workaround for missing cg::reduce/invoke_one APIs in HIP cooperative groups.
+#include <cudf/hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <hipcub/device/device_transform.hpp>
+#else
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
 #include <cub/device/device_transform.cuh>
+#endif
 #include <cuco/detail/open_addressing/kernels.cuh>
 #include <cuco/static_multiset_ref.cuh>
 #include <cuda/atomic>
@@ -32,7 +61,17 @@
 #include <thrust/copy.h>
 #include <thrust/sequence.h>
 
+#ifdef __HIP_PLATFORM_AMD__
+namespace cg = cudf::hip_extensions::hip_cooperative_groups_ext;
+#else
 namespace cg = cooperative_groups;
+#endif
+
+#ifdef __HIP_PLATFORM_AMD__
+using DeviceTransform = hipcub::DeviceTransform;
+#else
+using DeviceTransform = cub::DeviceTransform;
+#endif
 
 namespace cudf {
 namespace detail {
@@ -480,11 +519,11 @@ std::unique_ptr<rmm::device_uvector<cudf::size_type>> mark_join::mark_probe_and_
   auto const temp_mr          = cudf::get_current_device_resource_ref();
   auto materialize_probe_rows = [&](auto const& key_fn) {
     rmm::device_uvector<probe_key_type> probe_rows(probe.num_rows(), stream, temp_mr);
-    cub::DeviceTransform::Transform(cuda::counting_iterator<size_type>{0},
-                                    probe_rows.begin(),
-                                    probe.num_rows(),
-                                    cuda::proclaim_return_type<probe_key_type>(key_fn),
-                                    stream.value());
+    CUDF_CUDA_TRY(DeviceTransform::Transform(cuda::counting_iterator<size_type>{0},
+                                             probe_rows.begin(),
+                                             probe.num_rows(),
+                                             cuda::proclaim_return_type<probe_key_type>(key_fn),
+                                             stream.value()));
     return probe_rows;
   };
 
@@ -666,12 +705,12 @@ mark_join::mark_join(cudf::table_view const& build,
   auto do_build_and_filter = [&](auto const& d_build_hasher, auto const& d_build_comparator) {
     if (_prefilter == cudf::join_prefilter::YES) {
       rmm::device_uvector<hash_value_type> build_hashes(_build.num_rows(), stream, temp_mr);
-      cub::DeviceTransform::Transform(
+      CUDF_CUDA_TRY(DeviceTransform::Transform(
         cuda::counting_iterator{size_type{0}},
         build_hashes.begin(),
         _build.num_rows(),
         cuda::proclaim_return_type<hash_value_type>(masked_hash_value_fn{d_build_hasher}),
-        stream.value());
+        stream.value()));
       auto const build_iter = cudf::detail::make_counting_transform_iterator(
         size_type{0}, hash_pair_fn<lhs_index_type>{build_hashes.data()});
       cuco::static_multiset_ref set_ref{masked_empty_sentinel,

@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1554,10 +1554,10 @@ std::pair<rmm::device_uvector<PdaTokenT>, rmm::device_uvector<SymbolOffsetT>> pr
   // this stage anymore
   filter_fst.Transduce(
     cuda::std::make_reverse_iterator(
-      thrust::make_zip_iterator(tokens.data(), token_indices.data()) + tokens.size()),
+      cuda::make_zip_iterator(tokens.data(), token_indices.data()) + tokens.size()),
     static_cast<SymbolOffsetT>(tokens.size()),
     cuda::std::make_reverse_iterator(
-      thrust::make_zip_iterator(filtered_tokens_out.data(), filtered_token_indices_out.data()) +
+      cuda::make_zip_iterator(filtered_tokens_out.data(), filtered_token_indices_out.data()) +
       tokens.size()),
     cuda::make_discard_iterator(),
     d_num_selected_tokens.data(),
@@ -1615,7 +1615,7 @@ std::pair<rmm::device_uvector<PdaTokenT>, rmm::device_uvector<SymbolOffsetT>> ge
   // Input to the full pushdown automaton finite-state transducer, where a input symbol comprises
   // the combination of a character from the JSON input together with the stack context for that
   // character.
-  auto zip_in = thrust::make_zip_iterator(json_in.data(), stack_symbols.data());
+  auto zip_in = cuda::make_zip_iterator(json_in.data(), stack_symbols.data());
 
   // Spark, as the main stakeholder in the `recover_from_error` option, has the specific need to
   // ignore any characters that follow the first value on each JSON line. This is an FST that

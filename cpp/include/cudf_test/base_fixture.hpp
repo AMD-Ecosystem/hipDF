@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf_test/cudf_gtest.hpp>
@@ -15,6 +37,20 @@
 #include <rmm/resource_ref.hpp>
 
 #include <cuda/memory_resource>
+
+// TODO(HIP/AMD): Workaround for the libhipcxx cuda::std::swap vs thrust::swap ADL
+// ambiguity (libhipcxx 3.3.4). thrust::detail::contiguous_storage::swap on host vectors
+// of cuda::std::chrono types (time_point/duration), used pervasively by the column
+// wrappers below, finds both cuda::std::swap and thrust::swap and cannot disambiguate.
+// Mirrors the same WAR in cpp/src/datetime/timezone.cpp; injecting std::swap into
+// namespace thrust forces it to be preferred for these host containers. Placed in this
+// widely-included test base header so it covers every gtest TU that uses chrono columns.
+#if defined(__HIP_PLATFORM_AMD__)
+#include <utility>
+namespace thrust {
+using std::swap;
+}
+#endif
 
 namespace CUDF_EXPORT cudf {
 namespace test {

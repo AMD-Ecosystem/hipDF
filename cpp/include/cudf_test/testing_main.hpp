@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf_test/cudf_gtest.hpp>
@@ -28,6 +50,7 @@
 #include <rmm/resource_ref.hpp>
 
 #include <cuda/memory_resource>
+#include <cuda/std/utility>
 
 #include <iostream>
 
@@ -124,11 +147,28 @@ inline auto make_binning()
 inline cuda::mr::any_resource<cuda::mr::device_accessible> create_memory_resource(
   std::string const& allocation_mode)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): with hipMM 5.0.0 + libhipcxx 3.3.4, the implicit value-conversion
+  // path of cuda::mr::any_resource (the `return make_arena();` form) imposes a stricter
+  // override/`__imovable` constraint than the explicit in_place_type construction path,
+  // which arena_memory_resource / binning_memory_resource do not satisfy even though they
+  // model cuda::mr::resource<device_accessible>. Construct these two via in_place_type,
+  // which is accepted; the remaining modes convert directly (pool/cuda/async/managed work).
+  if (allocation_mode == "binning") {
+    return cuda::mr::any_resource<cuda::mr::device_accessible>{
+      cuda::std::in_place_type<rmm::mr::binning_memory_resource>, make_pool(), 18, 22};
+  }
+  if (allocation_mode == "arena") {
+    return cuda::mr::any_resource<cuda::mr::device_accessible>{
+      cuda::std::in_place_type<rmm::mr::arena_memory_resource>, make_cuda()};
+  }
+#else
   if (allocation_mode == "binning") return make_binning();
+  if (allocation_mode == "arena") return make_arena();
+#endif
   if (allocation_mode == "cuda") return make_cuda();
   if (allocation_mode == "async") return make_async();
   if (allocation_mode == "pool") return make_pool();
-  if (allocation_mode == "arena") return make_arena();
   if (allocation_mode == "managed") return make_managed();
   CUDF_FAIL("Invalid RMM allocation mode: " + allocation_mode);
 }
@@ -243,6 +283,19 @@ inline void init_cudf_test(int argc, char** argv, cudf::test::config const& conf
   make_stream_mode_adaptor(config);
 }
 
+// NOTE(HIP/AMD): hipMM 5.0.0's statistics_resource_adaptor does not satisfy the
+// `__imovable` override required to be stored by value in cuda::mr::any_resource
+// (the type set_current_device_resource takes), even though it models the resource
+// concept. Set it via a non-owning device_async_resource_ref instead; `mr` is a local
+// in CUDF_TEST_PROGRAM_MAIN that outlives RUN_ALL_TESTS, so the reference stays valid.
+#ifdef __HIP_PLATFORM_AMD__
+#define CUDF_TEST_SET_STATISTICS_RESOURCE(mr) \
+  cudf::set_current_device_resource(          \
+    cuda::mr::any_resource<cuda::mr::device_accessible>{rmm::device_async_resource_ref{mr}})
+#else
+#define CUDF_TEST_SET_STATISTICS_RESOURCE(mr) cudf::set_current_device_resource(mr)
+#endif
+
 /**
  * @brief Macro that defines main function for gtest programs that use rmm
  *
@@ -257,7 +310,7 @@ inline void init_cudf_test(int argc, char** argv, cudf::test::config const& conf
     init_cudf_test(argc, argv);                                                                  \
     if (std::getenv("GTEST_CUDF_MEMORY_PEAK")) {                                                 \
       auto mr = rmm::mr::statistics_resource_adaptor(cudf::get_current_device_resource_ref());   \
-      cudf::set_current_device_resource(mr);                                                     \
+      CUDF_TEST_SET_STATISTICS_RESOURCE(mr);                                                     \
       auto rc = RUN_ALL_TESTS();                                                                 \
       std::cout << "Peak memory usage " << mr.get_bytes_counter().peak << " bytes" << std::endl; \
       cudf::teardown();                                                                          \

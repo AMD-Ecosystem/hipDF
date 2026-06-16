@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -118,6 +118,27 @@ __device__ __attribute__((always_inline)) TArg reduce(
   greater<TArg>&& op) {
   auto member_mask = internal::get_mask(tile);
   return __reduce_max_sync(member_mask, value);
+}
+
+// NOTE(HIP/AMD): invoke_one / invoke_one_broadcast are missing from HIP's
+// cooperative groups. Provide portable replacements:
+//  - invoke_one(group, fn): the lowest-ranked member of the group calls fn once.
+//  - invoke_one_broadcast(group, fn): the lowest-ranked member calls fn and the
+//    returned value is broadcast to all members of the (tiled) group via shfl.
+
+template <typename Group, typename F>
+__device__ __attribute__((always_inline)) void invoke_one(const Group& group, F&& fn) {
+  if (group.thread_rank() == 0) { fn(); }
+}
+
+// Group must support thread_rank() and shfl() (thread_block_tile or coalesced_group).
+template <typename Group, typename F>
+__device__ __attribute__((always_inline)) auto invoke_one_broadcast(const Group& group, F&& fn)
+  -> decltype(fn()) {
+  using result_t = decltype(fn());
+  result_t result{};
+  if (group.thread_rank() == 0) { result = fn(); }
+  return group.shfl(result, 0);
 }
 
 // Passthroughs for commonly used cooperative_groups types/functions so callers

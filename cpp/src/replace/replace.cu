@@ -27,7 +27,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -73,6 +73,7 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/std/iterator>
+#include <cuda/std/tuple>
 #include <cuda/std/utility>
 #include <thrust/execution_policy.h>
 #include <thrust/find.h>
@@ -151,7 +152,10 @@ CUDF_KERNEL void replace_kernel(cudf::column_device_view input,
       output_is_valid = input_is_valid;
     }
     if (input_is_valid)
-      thrust::tie(output_data[idx], output_is_valid) = get_new_value<T, replacement_has_nulls>(
+      // NOTE(HIP/AMD): get_new_value returns a cuda::std::pair; use cuda::std::tie so the
+      // assignment target tuple type matches (rocThrust's thrust::tie cannot be assigned from
+      // a cuda::std::pair).
+      cuda::std::tie(output_data[idx], output_is_valid) = get_new_value<T, replacement_has_nulls>(
         idx,
         input.data<T>(),
         values_to_replace.data<T>(),

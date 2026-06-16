@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,18 @@ using scoped_range = ::nvtx3::scoped_range_in<libcudf_domain>;
  */
 #define CUDF_FUNC_RANGE() NVTX3_FUNC_RANGE_IN(cudf::libcudf_domain)
 #else
-// FIXME(HIP/AMD)
+// NOTE(HIP/AMD): NVTX is unavailable on HIP (NVTX_DISABLE). Provide a no-op scoped_range
+// stub so source that constructs `cudf::scoped_range range{"name"}` still compiles, and
+// make CUDF_FUNC_RANGE() a no-op.
+namespace cudf {
+struct scoped_range {
+  scoped_range() = default;
+  template <typename... Args>
+  explicit scoped_range(Args&&...)
+  {
+  }
+};
+}  // namespace cudf
+
 #define CUDF_FUNC_RANGE()
 #endif

@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
@@ -206,18 +228,19 @@ std::unique_ptr<cudf::column> clamper(column_view const& input,
   auto output_device_view =
     cudf::mutable_column_device_view::create(output->mutable_view(), stream);
   auto input_device_view = cudf::column_device_view::create(input, stream);
-  auto scalar_zip_itr    = thrust::make_zip_iterator(
-    cuda::std::make_tuple(lo_itr, lo_replace_itr, hi_itr, hi_replace_itr));
+  auto scalar_zip_itr    = thrust::make_zip_iterator(lo_itr, lo_replace_itr, hi_itr, hi_replace_itr);
 
   auto trans =
     cuda::proclaim_return_type<T>([] __device__(auto element_optional, auto scalar_tuple) {
+      // NOTE(HIP/AMD): scalar_tuple is a rocThrust zip dereference (thrust::tuple of references);
+      // use thrust::get rather than cuda::std::get.
       if (element_optional.has_value()) {
-        auto lo_optional = cuda::std::get<0>(scalar_tuple);
-        auto hi_optional = cuda::std::get<2>(scalar_tuple);
+        auto lo_optional = thrust::get<0>(scalar_tuple);
+        auto hi_optional = thrust::get<2>(scalar_tuple);
         if (lo_optional.has_value() and (*element_optional < *lo_optional)) {
-          return *(cuda::std::get<1>(scalar_tuple));
+          return *(thrust::get<1>(scalar_tuple));
         } else if (hi_optional.has_value() and (*element_optional > *hi_optional)) {
-          return *(cuda::std::get<3>(scalar_tuple));
+          return *(thrust::get<3>(scalar_tuple));
         }
         return *element_optional;
       }

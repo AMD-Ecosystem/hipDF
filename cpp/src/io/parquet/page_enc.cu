@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,11 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_cooperative_groups.h>
+#else
 #include <cooperative_groups.h>
+#endif
 #include <hipcub/hipcub.hpp>
 #include <cuda/iterator>
 #include <cuda/std/chrono>
@@ -3348,7 +3352,11 @@ inline __device__ void* align8(void* ptr)
 }
 
 struct mask_tform {
-  __device__ uint32_t operator()(EncPage const& p) { return static_cast<uint32_t>(p.kernel_mask); }
+  // NOTE(HIP/AMD): rocprim's transform_iterator invokes the op via a const object.
+  __device__ uint32_t operator()(EncPage const& p) const
+  {
+    return static_cast<uint32_t>(p.kernel_mask);
+  }
 };
 
 }  // namespace

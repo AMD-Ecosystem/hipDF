@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "scan.cuh"
 
 #include <cudf/column/column_device_view.cuh>
@@ -37,7 +59,8 @@ using pair_type = cuda::std::pair<T, T>;
 template <typename T>
 class recurrence_functor {
  public:
-  __device__ pair_type<T> operator()(pair_type<T> ci, pair_type<T> cj)
+  // NOTE(HIP/AMD): const-qualified so rocPRIM (which stores the scan op as const) can invoke it.
+  __device__ pair_type<T> operator()(pair_type<T> ci, pair_type<T> cj) const
   {
     return {ci.first * cj.first, ci.second * cj.first + cj.second};
   }
@@ -51,10 +74,15 @@ struct ewma_functor_base {
 
 template <typename T, bool is_numerator>
 struct ewma_adjust_nulls_functor : public ewma_functor_base<T> {
-  __device__ pair_type<T> operator()(cuda::std::tuple<bool, int, T> const data)
+  // NOTE(HIP/AMD): templated tuple parameter so a rocThrust zip_iterator (thrust::tuple) and a
+  // CCCL zip (cuda::std::tuple) both bind; structured bindings work for either tuple type.
+  template <typename TupleT>
+  __device__ pair_type<T> operator()(TupleT const data) const
   {
-    // Not const to allow for updating the input value
-    auto [valid, exp, input] = data;
+    // NOTE(HIP/AMD): structured bindings over a rocThrust zip dereference bind to references;
+    // copy `input` into a mutable local so it can be reassigned below.
+    auto const [valid, exp, input_in] = data;
+    T input                           = input_in;
     if (!valid) { return this->IDENTITY; }
     if constexpr (not is_numerator) { input = 1; }
 
@@ -67,7 +95,7 @@ struct ewma_adjust_nulls_functor : public ewma_functor_base<T> {
 
 template <typename T, bool is_numerator>
 struct ewma_adjust_no_nulls_functor : public ewma_functor_base<T> {
-  __device__ pair_type<T> operator()(T const data)
+  __device__ pair_type<T> operator()(T const data) const
   {
     T const beta = this->beta;
     if constexpr (is_numerator) {
@@ -93,7 +121,8 @@ struct ewma_noadjust_nulls_functor : public ewma_functor_base<T> {
     properly downweight the previous values. But now but we also need to compute
     the normalization factors and divide the results into them at the end.
   */
-  __device__ pair_type<T> operator()(cuda::std::tuple<T, size_type, bool, size_type> const data)
+  template <typename TupleT>
+  __device__ pair_type<T> operator()(TupleT const data) const
   {
     T const beta                              = this->beta;
     auto const [input, index, valid, nullcnt] = data;
@@ -112,7 +141,8 @@ struct ewma_noadjust_nulls_functor : public ewma_functor_base<T> {
 
 template <typename T>
 struct ewma_noadjust_no_nulls_functor : public ewma_functor_base<T> {
-  __device__ pair_type<T> operator()(cuda::std::tuple<T, size_type> const data)
+  template <typename TupleT>
+  __device__ pair_type<T> operator()(TupleT const data) const
   {
     T const beta              = this->beta;
     auto const [input, index] = data;
@@ -150,6 +180,41 @@ rmm::device_uvector<cudf::size_type> null_roll_up(column_view const& input,
   return output;
 }
 
+// NOTE(HIP/AMD): rocThrust/rocPRIM's transform_inclusive_scan mis-infers the scan accumulator
+// type when the transform output type (here cuda::std::pair<T,T>) differs from the input
+// iterator's value type, producing a recurrence_functor no-match. WAR: materialize the
+// transform into the output buffer, then run a plain inclusive_scan with the binary op.
+template <typename InputIt, typename OutputIt, typename TransformOp>
+void ewma_transform_inclusive_scan(InputIt first,
+                                   std::size_t count,
+                                   OutputIt out,
+                                   TransformOp transform_op,
+                                   rmm::cuda_stream_view stream)
+{
+#ifdef __HIP_PLATFORM_AMD__
+  using value_t   = typename std::iterator_traits<OutputIt>::value_type;
+  auto const dist = static_cast<std::ptrdiff_t>(count);
+  thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                    first,
+                    first + dist,
+                    out,
+                    transform_op);
+  thrust::inclusive_scan(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+                         out,
+                         out + dist,
+                         out,
+                         recurrence_functor<typename value_t::first_type>{});
+#else
+  thrust::transform_inclusive_scan(
+    rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
+    first,
+    first + count,
+    out,
+    transform_op,
+    recurrence_functor<typename std::iterator_traits<OutputIt>::value_type::first_type>{});
+#endif
+}
+
 template <typename T>
 rmm::device_uvector<T> compute_ewma_adjust(column_view const& input,
                                            T const beta,
@@ -164,37 +229,22 @@ rmm::device_uvector<T> compute_ewma_adjust(column_view const& input,
     auto device_view                             = column_device_view::create(input, stream);
     auto valid_it = cudf::detail::make_validity_iterator(*device_view);
     auto data =
-      thrust::make_zip_iterator(cuda::std::make_tuple(valid_it, nullcnt.begin(), input.begin<T>()));
+      thrust::make_zip_iterator(valid_it, nullcnt.begin(), input.begin<T>());
 
-    thrust::transform_inclusive_scan(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      data,
-      data + input.size(),
-      pairs.begin(),
-      ewma_adjust_nulls_functor<T, true>{beta},
-      recurrence_functor<T>{});
+    ewma_transform_inclusive_scan(
+      data, input.size(), pairs.begin(), ewma_adjust_nulls_functor<T, true>{beta}, stream);
     thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       pairs.begin(),
                       pairs.end(),
                       output.begin(),
                       [] __device__(pair_type<T> pair) -> T { return pair.second; });
 
-    thrust::transform_inclusive_scan(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      data,
-      data + input.size(),
-      pairs.begin(),
-      ewma_adjust_nulls_functor<T, false>{beta},
-      recurrence_functor<T>{});
+    ewma_transform_inclusive_scan(
+      data, input.size(), pairs.begin(), ewma_adjust_nulls_functor<T, false>{beta}, stream);
 
   } else {
-    thrust::transform_inclusive_scan(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      input.begin<T>(),
-      input.end<T>(),
-      pairs.begin(),
-      ewma_adjust_no_nulls_functor<T, true>{beta},
-      recurrence_functor<T>{});
+    ewma_transform_inclusive_scan(
+      input.begin<T>(), input.size(), pairs.begin(), ewma_adjust_no_nulls_functor<T, true>{beta}, stream);
     thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       pairs.begin(),
                       pairs.end(),
@@ -202,13 +252,8 @@ rmm::device_uvector<T> compute_ewma_adjust(column_view const& input,
                       [] __device__(pair_type<T> pair) -> T { return pair.second; });
     auto itr = cuda::counting_iterator<size_type>{0};
 
-    thrust::transform_inclusive_scan(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      itr,
-      itr + input.size(),
-      pairs.begin(),
-      ewma_adjust_no_nulls_functor<T, false>{beta},
-      recurrence_functor<T>{});
+    ewma_transform_inclusive_scan(
+      itr, input.size(), pairs.begin(), ewma_adjust_no_nulls_functor<T, false>{beta}, stream);
   }
 
   thrust::transform(
@@ -242,30 +287,19 @@ rmm::device_uvector<T> compute_ewma_noadjust(column_view const& input,
   // pairs are all (beta, 1-beta x_i) except for the first one
 
   if (!input.has_nulls()) {
-    auto data = thrust::make_zip_iterator(
-      cuda::std::make_tuple(input.begin<T>(), cuda::counting_iterator<size_type>{0}));
-    thrust::transform_inclusive_scan(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      data,
-      data + input.size(),
-      pairs.begin(),
-      ewma_noadjust_no_nulls_functor<T>{beta},
-      recurrence_functor<T>{});
+    auto data = thrust::make_zip_iterator(input.begin<T>(), cuda::counting_iterator<size_type>{0});
+    ewma_transform_inclusive_scan(
+      data, input.size(), pairs.begin(), ewma_noadjust_no_nulls_functor<T>{beta}, stream);
 
   } else {
     auto device_view = column_device_view::create(input, stream);
     auto valid_it    = detail::make_validity_iterator(*device_view);
 
-    auto data = thrust::make_zip_iterator(cuda::std::make_tuple(
-      input.begin<T>(), cuda::counting_iterator<size_type>{0}, valid_it, nullcnt.begin()));
+    auto data = thrust::make_zip_iterator(
+      input.begin<T>(), cuda::counting_iterator<size_type>{0}, valid_it, nullcnt.begin());
 
-    thrust::transform_inclusive_scan(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      data,
-      data + input.size(),
-      pairs.begin(),
-      ewma_noadjust_nulls_functor<T>{beta},
-      recurrence_functor<T>());
+    ewma_transform_inclusive_scan(
+      data, input.size(), pairs.begin(), ewma_noadjust_nulls_functor<T>{beta}, stream);
   }
 
   // copy the second elements to the output for now

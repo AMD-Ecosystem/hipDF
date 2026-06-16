@@ -2,6 +2,29 @@
  * SPDX-FileCopyrightText: Copyright (c) 2023-2025, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include "io/utilities/trie.hpp"
@@ -15,8 +38,20 @@
 
 #include <cuda/std/tuple>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/tuple.h>
 
 namespace cudf::io {
+
+// NOTE(HIP/AMD): rocThrust's make_zip_iterator yields thrust::zip_iterator<thrust::tuple<...>>,
+// whereas CCCL-thrust yields thrust::zip_iterator<cuda::std::tuple<...>>. Use a platform-correct
+// alias for the offset-length tuple iterator so the parse/inference signatures match the callers.
+#ifdef __HIP_PLATFORM_AMD__
+using offset_length_iterator =
+  thrust::zip_iterator<thrust::tuple<size_type const*, size_type const*>>;
+#else
+using offset_length_iterator =
+  thrust::zip_iterator<cuda::std::tuple<size_type const*, size_type const*>>;
+#endif
 /**
  * @brief Non-owning view for json type inference options
  */
@@ -119,7 +154,7 @@ namespace detail {
 CUDF_EXPORT cudf::data_type infer_data_type(
   cudf::io::json_inference_options_view const& options,
   device_span<char const> data,
-  thrust::zip_iterator<cuda::std::tuple<size_type const*, size_type const*>> offset_length_begin,
+  offset_length_iterator offset_length_begin,
   std::size_t const size,
   rmm::cuda_stream_view stream);
 }  // namespace detail
@@ -141,7 +176,7 @@ namespace json::detail {
  */
 CUDF_EXPORT std::unique_ptr<column> parse_data(
   char const* data,
-  thrust::zip_iterator<cuda::std::tuple<size_type const*, size_type const*>> offset_length_begin,
+  offset_length_iterator offset_length_begin,
   size_type col_size,
   data_type col_type,
   rmm::device_buffer&& null_mask,

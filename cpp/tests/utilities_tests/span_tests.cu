@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@
 
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/utilities/default_stream.hpp>
+#include <cudf/utilities/error.hpp>
 #include <cudf/utilities/memory_resource.hpp>
 #include <cudf/utilities/span.hpp>
 
@@ -436,11 +437,13 @@ TEST(HostDeviceSpanTest, CanSendToDevice)
   original_message.host_to_device_async(stream);
 
   std::string got_message(original_message.size(), '\0');
-  cudaMemcpyAsync(got_message.data(),
-                  original_message.device_ptr(),
-                  original_message.size(),
-                  cudaMemcpyDefault,
-                  stream.value());
+  // NOTE(HIP/AMD): cudaMemcpyAsync (hipMemcpyAsync) returns a [[nodiscard]] hipError_t;
+  // wrap in CUDF_CUDA_TRY to consume/check the status (-Werror=unused-value otherwise).
+  CUDF_CUDA_TRY(cudaMemcpyAsync(got_message.data(),
+                                original_message.device_ptr(),
+                                original_message.size(),
+                                cudaMemcpyDefault,
+                                stream.value()));
   stream.synchronize();
 
   EXPECT_EQ(got_message, hello_world_message);

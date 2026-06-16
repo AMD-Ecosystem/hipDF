@@ -28,7 +28,9 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/bit.hpp>
 
-#include <rolling/detail/rolling_jit.hpp>
+// NOTE(HIP/AMD): JIT headers live under the public include tree (cpp/include) for
+// hipRTC; upstream keeps this at src/rolling/detail/rolling_jit.hpp.
+#include <cudf/detail/rolling/rolling_jit.hpp>
 
 #pragma nv_hdrstop  // The above headers are used by the kernel below and need to be included before
                     // it. Each UDF will have a different operation-udf.hpp generated for it, so we
@@ -37,8 +39,13 @@
 #include <cudf/detail/operation-udf.hpp>
 
 struct rolling_udf_ptx {
+  // NOTE(HIP/AMD): operate is called from the __global__ rolling kernel, so it must be a
+  // __device__ function. NVRTC's whole-program-is-device default tolerates the missing
+  // annotation, but HIPRTC does not and errors with "call to __host__ function from __global__".
   template <typename OutType, typename InType>
-  static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
+  static __device__ OutType operate(InType const* in_col,
+                                    cudf::size_type start,
+                                    cudf::size_type count)
   {
     OutType ret;
     GENERIC_ROLLING_OP(&ret, 0, 0, 0, 0, &in_col[start], count, sizeof(InType));
@@ -47,8 +54,11 @@ struct rolling_udf_ptx {
 };
 
 struct rolling_udf_cuda {
+  // NOTE(HIP/AMD): see rolling_udf_ptx::operate; __device__ is required for the HIPRTC path.
   template <typename OutType, typename InType>
-  static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
+  static __device__ OutType operate(InType const* in_col,
+                                    cudf::size_type start,
+                                    cudf::size_type count)
   {
     OutType ret;
     GENERIC_ROLLING_OP(&ret, in_col, start, count);

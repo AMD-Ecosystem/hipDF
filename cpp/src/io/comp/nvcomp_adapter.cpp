@@ -109,8 +109,14 @@ namespace {
 #endif
     case nvcompStatus_t::nvcompErrorCudaError: return "nvcompErrorCudaError";
     case nvcompStatus_t::nvcompErrorInternal: return "nvcompErrorInternal";
+#ifndef __HIP_PLATFORM_AMD__
+    // NOTE(HIP/AMD): hipcomp's hipcompStatus_t enum does not define these values
+    // (shared_types.h has only Success/InvalidValue/NotSupported/CannotDecompress/
+    // CudaError/Internal). Guard them out on AMD; this also resolves the
+    // 'duplicate case value' diagnostic.
     case nvcompStatus_t::nvcompErrorCannotCompress: return "nvcompErrorCannotCompress";
     case nvcompStatus_t::nvcompErrorWrongInputLength: return "nvcompErrorWrongInputLength";
+#endif
 #if NVCOMP_VER_MAJOR >= 5 and NVCOMP_VER_MINOR >= 1
     case nvcompStatus_t::nvcompErrorBatchSizeTooLarge: return "nvcompErrorBatchSizeTooLarge";
 #endif
@@ -158,6 +164,30 @@ auto batched_decompress_get_temp_size_async(compression_type compression,
                                             size_t* temp_bytes,
                                             size_t max_total_uncompressed_bytes)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipcomp 2.3.0 exposes only the classic
+  // nvcompBatched<format>DecompressGetTempSize(num_chunks, max_uncompressed_chunk_bytes,
+  // temp_bytes) signature: no *GetTempSizeAsync, no opts arg, no max_total argument.
+  (void)max_total_uncompressed_bytes;
+  switch (compression) {
+    case compression_type::SNAPPY:
+      return nvcompBatchedSnappyDecompressGetTempSize(
+        num_chunks, max_uncompressed_chunk_bytes, temp_bytes);
+    case compression_type::ZSTD:
+      return nvcompBatchedZstdDecompressGetTempSize(
+        num_chunks, max_uncompressed_chunk_bytes, temp_bytes);
+    case compression_type::LZ4:
+      return nvcompBatchedLZ4DecompressGetTempSize(
+        num_chunks, max_uncompressed_chunk_bytes, temp_bytes);
+    case compression_type::DEFLATE:
+      return nvcompBatchedDeflateDecompressGetTempSize(
+        num_chunks, max_uncompressed_chunk_bytes, temp_bytes);
+    case compression_type::GZIP:
+      return nvcompBatchedGzipDecompressGetTempSize(
+        num_chunks, max_uncompressed_chunk_bytes, temp_bytes);
+    default: UNSUPPORTED_COMPRESSION(compression);
+  }
+#else
   switch (compression) {
     case compression_type::SNAPPY:
       return nvcompBatchedSnappyDecompressGetTempSizeAsync(num_chunks,
@@ -192,6 +222,7 @@ auto batched_decompress_get_temp_size_async(compression_type compression,
                                                          max_total_uncompressed_bytes);
     default: UNSUPPORTED_COMPRESSION(compression);
   }
+#endif
 }
 
 // Dispatcher for nvcompBatched<format>DecompressAsync
@@ -210,6 +241,7 @@ auto batched_decompress_async(compression_type compression,
 {
   switch (compression) {
     case compression_type::SNAPPY: {
+#ifndef __HIP_PLATFORM_AMD__
       auto opts = nvcompBatchedSnappyDecompressDefaultOpts;
       if (use_hw_decompression.has_value()) {
         opts.backend = *use_hw_decompression ? NVCOMP_DECOMPRESS_BACKEND_HARDWARE
@@ -226,6 +258,22 @@ auto batched_decompress_async(compression_type compression,
                                                 opts,
                                                 device_statuses,
                                                 stream.value());
+#else
+      // NOTE(HIP/AMD): hipcomp has no HW-decompression engine and no .backend member;
+      // the decompress-async signature takes no opts argument. Always take the default
+      // (software) path.
+      (void)use_hw_decompression;
+      return nvcompBatchedSnappyDecompressAsync(device_compressed_chunk_ptrs,
+                                                device_compressed_chunk_bytes,
+                                                device_uncompressed_buffer_bytes,
+                                                device_uncompressed_chunk_bytes,
+                                                num_chunks,
+                                                device_temp_ptr,
+                                                temp_bytes,
+                                                device_uncompressed_chunk_ptrs,
+                                                device_statuses,
+                                                stream.value());
+#endif
     }
     case compression_type::ZSTD:
       return nvcompBatchedZstdDecompressAsync(device_compressed_chunk_ptrs,
@@ -236,7 +284,9 @@ auto batched_decompress_async(compression_type compression,
                                               device_temp_ptr,
                                               temp_bytes,
                                               device_uncompressed_chunk_ptrs,
+#ifndef __HIP_PLATFORM_AMD__
                                               nvcompBatchedZstdDecompressDefaultOpts,
+#endif
                                               device_statuses,
                                               stream.value());
     case compression_type::DEFLATE:
@@ -248,7 +298,9 @@ auto batched_decompress_async(compression_type compression,
                                                  device_temp_ptr,
                                                  temp_bytes,
                                                  device_uncompressed_chunk_ptrs,
+#ifndef __HIP_PLATFORM_AMD__
                                                  nvcompBatchedDeflateDecompressDefaultOpts,
+#endif
                                                  device_statuses,
                                                  stream.value());
     case compression_type::LZ4:
@@ -260,7 +312,9 @@ auto batched_decompress_async(compression_type compression,
                                              device_temp_ptr,
                                              temp_bytes,
                                              device_uncompressed_chunk_ptrs,
+#ifndef __HIP_PLATFORM_AMD__
                                              nvcompBatchedLZ4DecompressDefaultOpts,
+#endif
                                              device_statuses,
                                              stream.value());
     case compression_type::GZIP:
@@ -272,7 +326,9 @@ auto batched_decompress_async(compression_type compression,
                                               device_temp_ptr,
                                               temp_bytes,
                                               device_uncompressed_chunk_ptrs,
+#ifndef __HIP_PLATFORM_AMD__
                                               nvcompBatchedGzipDecompressDefaultOpts,
+#endif
                                               device_statuses,
                                               stream.value());
     default: UNSUPPORTED_COMPRESSION(compression);
@@ -280,6 +336,10 @@ auto batched_decompress_async(compression_type compression,
 }
 
 // Wrapper for nvcompBatched<format>CompressGetTempSizeAsync
+// NOTE(HIP/AMD): hipcomp 2.3.0 has no *CompressGetTempSizeAsync; this wrapper is only
+// referenced from the NVCOMP_HAS_COMP_TEMPSIZE_EX(=false on hipcomp 2.3) path below, so it is
+// compiled out entirely on AMD to avoid referencing the missing async symbols.
+#if NVCOMP_HAS_COMP_TEMPSIZE_EX(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
 nvcompStatus_t batched_compress_get_temp_size_async(compression_type compression,
                                                     size_t batch_size,
                                                     size_t max_uncompressed_chunk_bytes,
@@ -318,6 +378,7 @@ nvcompStatus_t batched_compress_get_temp_size_async(compression_type compression
     default: UNSUPPORTED_COMPRESSION(compression);
   }
 }
+#endif
 
 #if NVCOMP_HAS_COMP_TEMPSIZE_EX(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
 // Wrapper for nvcompBatched<format>CompressGetTempSizeEx
@@ -418,6 +479,7 @@ void batched_compress_async(compression_type compression,
   nvcompStatus_t nvcomp_status = nvcompStatus_t::nvcompSuccess;
   switch (compression) {
     case compression_type::SNAPPY:
+      // NOTE(HIP/AMD): hipcomp's CompressAsync has no per-chunk statuses output param; drop it.
       nvcomp_status = nvcompBatchedSnappyCompressAsync(device_uncompressed_ptrs,
                                                        device_uncompressed_bytes,
                                                        max_uncompressed_chunk_bytes,
@@ -427,10 +489,19 @@ void batched_compress_async(compression_type compression,
                                                        device_compressed_ptrs,
                                                        device_compressed_bytes,
                                                        nvcompBatchedSnappyCompressDefaultOpts,
+#ifndef __HIP_PLATFORM_AMD__
                                                        device_nvcomp_statuses,
+#endif
                                                        stream.value());
       break;
     case compression_type::DEFLATE:
+      // NOTE(HIP/AMD): hipcomp 2.3.0 has no nvcompBatchedDeflateCompressAsync; Deflate
+      // compression is also runtime-disabled (NVCOMP_HAS_DEFLATE(2,3,0)=false).
+#if defined(__HIP_PLATFORM_AMD__) || \
+  !NVCOMP_HAS_DEFLATE(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
+      CUDF_FAIL("Compression error: " +
+                nvcomp::is_compression_disabled(nvcomp::compression_type::DEFLATE).value());
+#else
       nvcomp_status = nvcompBatchedDeflateCompressAsync(device_uncompressed_ptrs,
                                                         device_uncompressed_bytes,
                                                         max_uncompressed_chunk_bytes,
@@ -443,7 +514,15 @@ void batched_compress_async(compression_type compression,
                                                         device_nvcomp_statuses,
                                                         stream.value());
       break;
+#endif
     case compression_type::ZSTD:
+      // NOTE(HIP/AMD): hipcomp 2.3.0 has no nvcompBatchedZstdCompressAsync; Zstd compression
+      // is also runtime-disabled (NVCOMP_HAS_ZSTD_COMP(2,3,0)=false).
+#if defined(__HIP_PLATFORM_AMD__) || \
+  !NVCOMP_HAS_ZSTD_COMP(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
+      CUDF_FAIL("Compression error: " +
+                nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD).value());
+#else
       nvcomp_status = nvcompBatchedZstdCompressAsync(device_uncompressed_ptrs,
                                                      device_uncompressed_bytes,
                                                      max_uncompressed_chunk_bytes,
@@ -456,7 +535,9 @@ void batched_compress_async(compression_type compression,
                                                      device_nvcomp_statuses,
                                                      stream.value());
       break;
+#endif
     case compression_type::LZ4:
+      // NOTE(HIP/AMD): hipcomp's CompressAsync has no per-chunk statuses output param; drop it.
       nvcomp_status = nvcompBatchedLZ4CompressAsync(device_uncompressed_ptrs,
                                                     device_uncompressed_bytes,
                                                     max_uncompressed_chunk_bytes,
@@ -466,11 +547,14 @@ void batched_compress_async(compression_type compression,
                                                     device_compressed_ptrs,
                                                     device_compressed_bytes,
                                                     nvcompBatchedLZ4CompressDefaultOpts,
+#ifndef __HIP_PLATFORM_AMD__
                                                     device_nvcomp_statuses,
+#endif
                                                     stream.value());
       break;
     default: UNSUPPORTED_COMPRESSION(compression);
   }
+  (void)device_nvcomp_statuses;
   CHECK_NVCOMP_STATUS(nvcomp_status);
 }
 
@@ -592,6 +676,19 @@ auto batched_decompress_get_temp_size_sync(compression_type compression,
                                            nvcompStatus_t* device_statuses,
                                            cudaStream_t stream)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipcomp 2.3.0 has no nvcompBatched<format>DecompressGetTempSizeSync. Report
+  // NotSupported so callers fall back to the classic batched_decompress_temp_size path.
+  (void)device_compressed_chunk_ptrs;
+  (void)device_compressed_chunk_bytes;
+  (void)num_chunks;
+  (void)max_uncompressed_chunk_bytes;
+  (void)temp_bytes;
+  (void)max_total_uncompressed_bytes;
+  (void)device_statuses;
+  (void)stream;
+  return nvcompStatus_t::nvcompErrorNotSupported;
+#else
   switch (compression) {
     case compression_type::SNAPPY:
       return nvcompBatchedSnappyDecompressGetTempSizeSync(device_compressed_chunk_ptrs,
@@ -646,6 +743,7 @@ auto batched_decompress_get_temp_size_sync(compression_type compression,
                                                         stream);
     default: UNSUPPORTED_COMPRESSION(compression);
   }
+#endif
 }
 
 // Overload for internal use that takes device pointers and sizes directly
@@ -807,6 +905,12 @@ size_t compress_max_output_chunk_size(compression_type compression,
       break;
     case compression_type::DEFLATE:
     case compression_type::GZIP: {
+#ifdef __HIP_PLATFORM_AMD__
+      // NOTE(HIP/AMD): hipcomp 2.3.0 has no nvcompBatchedDeflateCompressGetMaxOutputChunkSize;
+      // Deflate/Gzip compression is unsupported on this hipcomp.
+      CUDF_FAIL("Compression error: " +
+                nvcomp::is_compression_disabled(nvcomp::compression_type::DEFLATE).value());
+#else
       // nvcompBatchedGzipCompressGetMaxOutputChunkSize is not yet available
       status = nvcompBatchedDeflateCompressGetMaxOutputChunkSize(
         capped_uncomp_bytes, nvcompBatchedDeflateCompressDefaultOpts, &max_comp_chunk_size);
@@ -815,11 +919,18 @@ size_t compress_max_output_chunk_size(compression_type compression,
         max_comp_chunk_size += 18;
       }
       break;
+#endif
     }
     case compression_type::ZSTD:
+#ifdef __HIP_PLATFORM_AMD__
+      // NOTE(HIP/AMD): hipcomp 2.3.0 has no nvcompBatchedZstdCompressGetMaxOutputChunkSize.
+      CUDF_FAIL("Compression error: " +
+                nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD).value());
+#else
       status = nvcompBatchedZstdCompressGetMaxOutputChunkSize(
         capped_uncomp_bytes, nvcompBatchedZstdCompressDefaultOpts, &max_comp_chunk_size);
       break;
+#endif
     case compression_type::LZ4:
       status = nvcompBatchedLZ4CompressGetMaxOutputChunkSize(
         capped_uncomp_bytes, nvcompBatchedLZ4CompressDefaultOpts, &max_comp_chunk_size);
@@ -957,6 +1068,18 @@ std::optional<std::string> is_decompression_disabled(compression_type compressio
 }
 size_t compress_required_alignment(compression_type compression)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipcomp 2.3.0 has no nvcompBatched<format>CompressGetRequiredAlignments and no
+  // nvcompAlignmentRequirements_t; it exposes a single per-algorithm required-alignment constant.
+  switch (compression) {
+    case compression_type::GZIP: return hipcompGzipRequiredAlignment;
+    case compression_type::DEFLATE: return hipcompDeflateRequiredAlignment;
+    case compression_type::SNAPPY: return hipcompSnappyRequiredAlignment;
+    case compression_type::ZSTD: return hipcompZstdRequiredAlignment;
+    case compression_type::LZ4: return hipcompLZ4RequiredAlignment;
+    default: UNSUPPORTED_COMPRESSION(compression);
+  }
+#else
   nvcompAlignmentRequirements_t alignments{};
   nvcompStatus_t status;
   switch (compression) {
@@ -981,10 +1104,22 @@ size_t compress_required_alignment(compression_type compression)
   }
   CHECK_NVCOMP_STATUS(status);
   return std::max({alignments.input, alignments.output, alignments.temp});
+#endif
 }
 
 size_t decompress_required_alignment(compression_type compression)
 {
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): see compress_required_alignment; use the single hipcomp alignment constants.
+  switch (compression) {
+    case compression_type::GZIP: return hipcompGzipRequiredAlignment;
+    case compression_type::DEFLATE: return hipcompDeflateRequiredAlignment;
+    case compression_type::SNAPPY: return hipcompSnappyRequiredAlignment;
+    case compression_type::ZSTD: return hipcompZstdRequiredAlignment;
+    case compression_type::LZ4: return hipcompLZ4RequiredAlignment;
+    default: UNSUPPORTED_COMPRESSION(compression);
+  }
+#else
   nvcompAlignmentRequirements_t alignments{};
   nvcompStatus_t status;
   switch (compression) {
@@ -1009,6 +1144,7 @@ size_t decompress_required_alignment(compression_type compression)
   }
   CHECK_NVCOMP_STATUS(status);
   return std::max({alignments.input, alignments.output, alignments.temp});
+#endif
 }
 
 std::optional<size_t> compress_max_allowed_chunk_size(compression_type compression)

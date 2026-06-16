@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@
 
 namespace cudf::io::parquet::detail {
 
-namespace cg = cooperative_groups;
+// NOTE(HIP/AMD): the `cg` alias is provided (HIP-guarded) by the included page_decode.cuh.
 
 namespace {
 
@@ -1294,7 +1294,9 @@ CUDF_KERNEL void preprocess_string_offsets_kernel(
   size_t min_row,
   size_t num_rows)
 {
-  int const page_idx = cg::this_grid().block_rank();
+  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
+  // currently missing in HIP cooperative groups
+  int const page_idx = blockIdx.x;
   PageInfo* const pp = &pages[page_idx];
 
   // Don't process pages that don't need to be decoded
@@ -1314,8 +1316,15 @@ CUDF_KERNEL void preprocess_string_offsets_kernel(
           decode_kernel_mask::STRING_STREAM_SPLIT_NESTED,
           decode_kernel_mask::STRING_STREAM_SPLIT_LIST);
 
+  // NOTE(HIP/AMD): page_state_s has in-class member initializers (non-trivial default ctor), which
+  // is illegal for a __shared__ variable under HIP/clang. Wrap in hipcub::Uninitialized and alias.
+#ifdef __HIP_PLATFORM_AMD__
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage;
+  page_state_s* const s = &state_g_storage.Alias();
+#else
   __shared__ __align__(16) page_state_s state_g;
   page_state_s* const s = &state_g;
+#endif
   if (!setup_local_page_info(s,
                              pp,
                              chunks,

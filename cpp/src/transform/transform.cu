@@ -229,11 +229,37 @@ jitify2::Kernel instantiate(null_aware is_null_aware,
                     : jit::parse_single_function_cuda(udf, "GENERIC_TRANSFORM_OP");
   }
 
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): the bundled jitify2 value_string uses std::to_string, which cannot reflect a
+  // scoped enum (`enum class null_aware : bool`). Build the template-arg strings explicitly and use
+  // the StringVec instantiate overload; emit the fully-qualified enumerator for null_aware.
+  jitify2::StringVec null_aware_targs{
+    is_null_aware == null_aware::YES ? "cudf::null_aware::YES" : "cudf::null_aware::NO",
+    jitify2::reflection::reflect(has_user_data),
+    jitify2::reflection::reflect(ins),
+    jitify2::reflection::reflect(outs)};
+  auto kernel =
+    jitify2::reflection::Template("cudf::jit::transform_kernel").instantiate(null_aware_targs);
+#else
   auto kernel = jitify2::reflection::Template("cudf::jit::transform_kernel")
                   .instantiate(is_null_aware, has_user_data, ins, outs);
+#endif
 
-  return jit::get_udf_kernel(
-    *transform_jit_kernel_cu_jit, kernel, cuda_source, {"-restrict", "--dopt=on"});
+  // NOTE(HIP/AMD): -restrict/--dopt=on are NVRTC-only; on AMD pass no extra compiler options
+  // and forward the arch-adapted LLVM IR so the PTX UDF path links (see get_udf_kernel).
+  // Only forward the IR when it is non-empty (i.e. the PTX/LLVM-IR UDF path). For a
+  // CUDA-source UDF parsed_udf_llvm_ir is empty; passing a non-null pointer to an empty
+  // string would make jitify link an empty extra-bitcode program whose input type is
+  // unsupported by HIPRTC linking. Mirror the rolling UDF path (rolling_udf.cuh).
+  if constexpr (HIP_PLATFORM_AMD) {
+    std::string const* const extra_bitcode =
+      parsed_udf_llvm_ir.empty() ? nullptr : &parsed_udf_llvm_ir;
+    return jit::get_udf_kernel(
+      *transform_jit_kernel_cu_jit, kernel, cuda_source, {}, extra_bitcode);
+  } else {
+    return jit::get_udf_kernel(
+      *transform_jit_kernel_cu_jit, kernel, cuda_source, {"-restrict", "--dopt=on"});
+  }
 }
 
 void launch(jitify2::Kernel const& kernel,
@@ -246,7 +272,8 @@ void launch(jitify2::Kernel const& kernel,
 {
   CUDF_FUNC_RANGE();
   void* args[] = {&row_size, &stencil, &user_data, &input_cols, &output_cols};
-  kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())->launch_raw(args);
+  // NOTE(HIP/AMD): jitify2 ConfiguredKernelData exposes launch(void**) (the former launch_raw).
+  kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())->launch(args);
 }
 
 std::string reflect_input_element(column_view const& c) { return type_to_name(c.type()); }
@@ -667,6 +694,29 @@ std::optional<std::pair<bitmask_type*, size_type>> make_stencil(
   return std::pair<bitmask_type*, size_type>{*stencil, stencil_null_count};
 }
 
+#ifdef __HIP_PLATFORM_AMD__
+// NOTE(HIP/AMD): WAR for missing rocPRIM batch_memcpy support of transform_iterator buffers.
+// Each warp copies the bytes of one (src,dst,size) triplet; grid-strides over all triplets.
+template <typename SrcIt, typename DstIt, typename SizeIt>
+CUDF_KERNEL void batched_byte_copy_kernel(SrcIt srcs, DstIt dsts, SizeIt sizes, size_type num_items)
+{
+  auto const global_thread_id = cudf::detail::grid_1d::global_thread_id();
+  auto const global_warp_id   = global_thread_id / cudf::detail::warp_size;
+  auto const warp_lane        = global_thread_id % cudf::detail::warp_size;
+  auto const nwarps           = cudf::detail::grid_1d::grid_stride() / cudf::detail::warp_size;
+
+  for (auto item = global_warp_id; item < num_items; item += nwarps) {
+    auto const nbytes = static_cast<size_type>(sizes[item]);
+    if (nbytes == 0) { continue; }
+    auto const* src = static_cast<char const*>(srcs[item]);
+    auto* dst       = static_cast<char*>(dsts[item]);
+    for (size_type b = warp_lane; b < nbytes; b += cudf::detail::warp_size) {
+      dst[b] = src[b];
+    }
+  }
+}
+#endif
+
 rmm::device_uvector<char> make_chars_buffer(column_view const& offsets_view,
                                             int64_t chars_size,
                                             string_view const* begin,
@@ -692,12 +742,27 @@ rmm::device_uvector<char> make_chars_buffer(column_view const& offsets_view,
       return chars + offsets[idx];
     });
 
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): rocPRIM's batch_memcpy (backing hipcub::DeviceMemcpy::Batched) does not
+  // support non-pointer (transform_iterator) src/dst/size buffer iterators. Use a custom
+  // warp-per-string byte-copy kernel instead, which handles arbitrary iterators.
+  if (size > 0) {
+    constexpr int warps_per_block = 4;
+    auto const grid               = cudf::detail::grid_1d(
+      static_cast<thread_index_type>(size) * cudf::detail::warp_size,
+      warps_per_block * cudf::detail::warp_size);
+    batched_byte_copy_kernel<<<grid.num_blocks, grid.num_threads_per_block, 0, stream.value()>>>(
+      srcs, dsts, src_sizes, size);
+    CUDF_CHECK_CUDA(stream.value());
+  }
+#else
   size_t temp_storage_bytes = 0;
   CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(
     nullptr, temp_storage_bytes, srcs, dsts, src_sizes, size, stream.value()));
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
   CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(
     d_temp_storage.data(), temp_storage_bytes, srcs, dsts, src_sizes, size, stream.value()));
+#endif
 
   return chars;
 }

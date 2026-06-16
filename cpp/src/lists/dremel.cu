@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/algorithms/copy_if.cuh>
@@ -312,14 +334,19 @@ dremel_data get_encoding(column_view h_col,
 
     // Zip the input and output value iterators so that merge operation is done only once
     auto input_parent_zip_it =
-      thrust::make_zip_iterator(cuda::std::make_tuple(input_parent_rep_it, input_parent_def_it));
+      thrust::make_zip_iterator(input_parent_rep_it, input_parent_def_it);
 
     auto input_child_zip_it =
-      thrust::make_zip_iterator(cuda::std::make_tuple(input_child_rep_it, input_child_def_it));
+      thrust::make_zip_iterator(input_child_rep_it, input_child_def_it);
 
     auto output_zip_it =
-      thrust::make_zip_iterator(cuda::std::make_tuple(rep_level.begin(), def_level.begin()));
+      thrust::make_zip_iterator(rep_level.begin(), def_level.begin());
 
+    // NOTE(HIP/AMD): rocprim's merge_by_key combines the (discarded) key output and the
+    // zip value output into a single internal tuple and cannot form a reference to `void`
+    // for a cuda::make_discard_iterator() key-output slot. Write the merged keys to a
+    // throwaway device buffer instead of discarding them.
+    rmm::device_uvector<size_type> discarded_keys(max_vals_size, stream);
     auto ends =
       thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                            empties.begin(),
@@ -328,7 +355,7 @@ dremel_data get_encoding(column_view h_col,
                            cuda::counting_iterator{column_ends[level + 1]},
                            input_parent_zip_it,
                            input_child_zip_it,
-                           cuda::make_discard_iterator(),
+                           discarded_keys.begin(),
                            output_zip_it);
 
     curr_rep_values_size = ends.second - output_zip_it;
@@ -402,14 +429,18 @@ dremel_data get_encoding(column_view h_col,
 
     // Zip the input and output value iterators so that merge operation is done only once
     auto input_parent_zip_it =
-      thrust::make_zip_iterator(cuda::std::make_tuple(input_parent_rep_it, input_parent_def_it));
+      thrust::make_zip_iterator(input_parent_rep_it, input_parent_def_it);
 
-    auto input_child_zip_it = thrust::make_zip_iterator(
-      cuda::std::make_tuple(temp_rep_vals.begin(), temp_def_vals.begin()));
+    auto input_child_zip_it = thrust::make_zip_iterator(temp_rep_vals.begin(), temp_def_vals.begin());
 
     auto output_zip_it =
-      thrust::make_zip_iterator(cuda::std::make_tuple(rep_level.begin(), def_level.begin()));
+      thrust::make_zip_iterator(rep_level.begin(), def_level.begin());
 
+    // NOTE(HIP/AMD): rocprim's merge_by_key combines the (discarded) key output and the
+    // zip value output into a single internal tuple and cannot form a reference to `void`
+    // for a cuda::make_discard_iterator() key-output slot. Write the merged keys to a
+    // throwaway device buffer instead of discarding them.
+    rmm::device_uvector<size_type> discarded_keys(max_vals_size, stream);
     auto ends =
       thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                            transformed_empties,
@@ -418,7 +449,7 @@ dremel_data get_encoding(column_view h_col,
                            cuda::counting_iterator{curr_rep_values_size},
                            input_parent_zip_it,
                            input_child_zip_it,
-                           cuda::make_discard_iterator(),
+                           discarded_keys.begin(),
                            output_zip_it);
 
     curr_rep_values_size = ends.second - output_zip_it;

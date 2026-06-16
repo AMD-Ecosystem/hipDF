@@ -2,6 +2,29 @@
  * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/detail/device_scalar.hpp>
@@ -12,13 +35,26 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/device/device_select.hpp>
+#else
 #include <cub/device/device_select.cuh>
+#endif
 #include <cuda/iterator>
 #include <cuda/std/functional>
 #include <cuda/stream_ref>
 #include <thrust/copy.h>
 
 namespace cudf::detail {
+
+// NOTE(HIP/AMD): the classic temporary-storage CUB DeviceSelect APIs used below have
+// identical signatures in hipcub (rocPRIM backend). Alias the DeviceSelect class
+// per platform so the call sites stay platform-agnostic without a global cub=hipcub alias.
+#ifdef __HIP_PLATFORM_AMD__
+using DeviceSelect = hipcub::DeviceSelect;
+#else
+using DeviceSelect = cub::DeviceSelect;
+#endif
 
 /**
  * @copydoc cudf::detail::copy_if_safe(rmm::exec_policy, InputIterator, InputIterator,
@@ -90,7 +126,7 @@ OutputIterator copy_if(InputIterator begin,
     cudf::detail::device_scalar<cuda::std::size_t>(stream, cudf::get_current_device_resource_ref());
 
   auto temp_storage_bytes = std::size_t{0};
-  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(nullptr,
+  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(nullptr,
                                              temp_storage_bytes,
                                              begin,
                                              stencil,
@@ -103,7 +139,7 @@ OutputIterator copy_if(InputIterator begin,
   auto d_temp_storage =
     rmm::device_buffer(temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
 
-  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(d_temp_storage.data(),
+  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(d_temp_storage.data(),
                                              temp_storage_bytes,
                                              begin,
                                              stencil,
@@ -191,7 +227,7 @@ OutputIterator copy_if(InputIterator begin,
 
   // First call to get temporary storage size
   size_t temp_storage_bytes = 0;
-  CUDF_CUDA_TRY(cub::DeviceSelect::If(nullptr,
+  CUDF_CUDA_TRY(DeviceSelect::If(nullptr,
                                       temp_storage_bytes,
                                       begin,
                                       output,
@@ -205,7 +241,7 @@ OutputIterator copy_if(InputIterator begin,
     temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
 
   // Run copy_if
-  CUDF_CUDA_TRY(cub::DeviceSelect::If(d_temp_storage.data(),
+  CUDF_CUDA_TRY(DeviceSelect::If(d_temp_storage.data(),
                                       temp_storage_bytes,
                                       begin,
                                       output,
@@ -236,11 +272,11 @@ void copy_if_async(InputIterator begin,
 
   auto tmp_bytes = std::size_t{0};
   auto no_out    = cuda::make_discard_iterator<int>();
-  CUDF_CUDA_TRY(cub::DeviceSelect::If(
+  CUDF_CUDA_TRY(DeviceSelect::If(
     nullptr, tmp_bytes, begin, output, no_out, num_items, predicate, stream.value()));
 
   auto tmp_stg = rmm::device_buffer(tmp_bytes, stream, cudf::get_current_device_resource_ref());
-  CUDF_CUDA_TRY(cub::DeviceSelect::If(
+  CUDF_CUDA_TRY(DeviceSelect::If(
     tmp_stg.data(), tmp_bytes, begin, output, no_out, num_items, predicate, stream.value()));
 }
 
@@ -266,11 +302,11 @@ void copy_if_async(InputIterator begin,
 
   auto tmp_bytes = std::size_t{0};
   auto no_out    = cuda::make_discard_iterator<int>();
-  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(
+  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(
     nullptr, tmp_bytes, begin, stencil, result, no_out, num_items, predicate, stream.value()));
 
   auto tmp = rmm::device_buffer(tmp_bytes, stream, cudf::get_current_device_resource_ref());
-  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(
+  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(
     tmp.data(), tmp_bytes, begin, stencil, result, no_out, num_items, predicate, stream.value()));
 }
 

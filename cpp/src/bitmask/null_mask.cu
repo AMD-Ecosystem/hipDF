@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -789,7 +789,8 @@ CUDF_KERNEL void find_first_set_bit_kernel(bitmask_type const* __restrict__ bitm
   if (thread_word_index <= end_word_index) {
     auto const mask = detail::get_mask_offset_word(bitmask, tid, start, stop);
     // returned index is 1-based; 0 means no bits were set
-    auto const mask_bit_index = __ffs(mask);
+    // NOTE(HIP/AMD): cast to unsigned int to disambiguate HIP's __ffs(int)/(unsigned) overloads.
+    auto const mask_bit_index = __ffs(static_cast<unsigned int>(mask));
     if (mask_bit_index != 0) {
       bit_index = static_cast<size_type>(tid * word_size) + mask_bit_index - 1;
     }
@@ -797,7 +798,7 @@ CUDF_KERNEL void find_first_set_bit_kernel(bitmask_type const* __restrict__ bitm
 
   // using cooperative_group::reduce(block,bit_index,cg::less());
   // fails at runtime on a V100 (sm70) with driver 535
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage ts;
   auto const out_index = BlockReduce(ts).Reduce(bit_index, cuda::minimum());
 

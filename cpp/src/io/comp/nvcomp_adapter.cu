@@ -2,6 +2,29 @@
  * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "nvcomp_adapter.cuh"
 
 #include <cudf/detail/utilities/integer_utils.hpp>
@@ -33,7 +56,9 @@ batched_args create_batched_nvcomp_args(device_span<device_span<uint8_t const> c
     inputs.begin(),
     inputs.end(),
     ins_it,
-    [] __device__(auto const& in) { return cuda::std::make_tuple(in.data(), in.size()); });
+    // NOTE(HIP/AMD): rocThrust's zip_iterator deref proxy is a thrust::tuple of refs; return a
+    // thrust::tuple (not cuda::std::tuple) so the proxy assignment resolves.
+    [] __device__(auto const& in) { return thrust::make_tuple(in.data(), in.size()); });
 
   // Prepare the output vectors
   auto outs_it = thrust::make_zip_iterator(output_data_ptrs.begin(), output_data_sizes.begin());
@@ -42,7 +67,7 @@ batched_args create_batched_nvcomp_args(device_span<device_span<uint8_t const> c
     outputs.begin(),
     outputs.end(),
     outs_it,
-    [] __device__(auto const& out) { return cuda::std::make_tuple(out.data(), out.size()); });
+    [] __device__(auto const& out) { return thrust::make_tuple(out.data(), out.size()); });
 
   return {std::move(input_data_ptrs),
           std::move(input_data_sizes),
@@ -62,7 +87,8 @@ std::pair<rmm::device_uvector<void const*>, rmm::device_uvector<size_t>> create_
     inputs.begin(),
     inputs.end(),
     ins_it,
-    [] __device__(auto const& in) { return cuda::std::make_tuple(in.data(), in.size()); });
+    // NOTE(HIP/AMD): see above; thrust::make_tuple matches the rocThrust zip proxy.
+    [] __device__(auto const& in) { return thrust::make_tuple(in.data(), in.size()); });
 
   return {std::move(input_data_ptrs), std::move(input_data_sizes)};
 }
@@ -116,7 +142,9 @@ void skip_unsupported_inputs(device_span<size_t> input_sizes,
       input_sizes.begin(),
       status_size_it,
       [] __device__(auto const& status) {
-        return cuda::std::pair{0, codec_exec_result{0, codec_status::SKIPPED}};
+        // NOTE(HIP/AMD): output is a rocThrust zip proxy (thrust::tuple of refs); return a
+        // thrust::tuple so the assignment resolves (was cuda::std::pair).
+        return thrust::make_tuple(size_t{0}, codec_exec_result{0, codec_status::SKIPPED});
       },
       [max_size = max_valid_input_size.value()] __device__(size_t input_size) {
         return input_size > max_size;

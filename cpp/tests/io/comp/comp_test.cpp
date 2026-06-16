@@ -398,7 +398,7 @@ TEST_F(ZstdDecompressTest, CpuCompressGpuDecompress)
   setenv("LIBCUDF_HOST_COMPRESSION", "ON", 1);
 
   auto const stream = cudf::get_default_stream();
-  auto const mr     = rmm::mr::get_current_device_resource();
+  auto const mr     = cudf::get_current_device_resource_ref();
 
   // Create test data - use multiple chunks to stress GPU path
   // Each chunk is 256 KB, total 10 chunks = 2.5 MB

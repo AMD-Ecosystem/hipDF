@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/comp/decompression.hpp"
 #include "io/comp/gpuinflate.hpp"
 #include "io/orc/reader_impl.hpp"
@@ -438,9 +460,12 @@ void scan_null_counts(cudf::detail::hostdevice_2dvector<column_desc> const& chun
     std::count_if(chunks[0].begin(), chunks[0].end(), [](auto const& chunk) {
       return chunk.type_kind == STRUCT;
     });
+  // NOTE(HIP/AMD): use thrust::pair as the host_vector element type. cuda::std::pair pulls
+  // cuda::std::swap into ADL, which clashes with thrust::swap inside thrust's contiguous_storage
+  // ("call to 'swap' is ambiguous"); thrust::pair avoids that ambiguity.
   auto prefix_sums_to_update =
-    cudf::detail::make_empty_host_vector<cuda::std::pair<size_type, uint32_t*>>(num_struct_cols,
-                                                                                stream);
+    cudf::detail::make_empty_host_vector<thrust::pair<size_type, uint32_t*>>(num_struct_cols,
+                                                                             stream);
   for (auto col_idx = 0ul; col_idx < num_columns; ++col_idx) {
     // Null counts sums are only needed for children of struct columns
     if (chunks[0][col_idx].type_kind == STRUCT) {
