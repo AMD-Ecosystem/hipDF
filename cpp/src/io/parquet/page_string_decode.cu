@@ -1022,12 +1022,20 @@ void compute_page_string_sizes_pass1(cudf::detail::hostdevice_span<PageInfo> pag
   dim3 const dim_block(preprocess_block_size, 1);
   dim3 const dim_grid(pages.size(), 1);  // 1 threadblock per page
 
+  // NOTE(HIP/AMD): this kernel declares its page_state_s as `extern __shared__` (dynamic shared
+  // memory), so the launch MUST provide sizeof(page_state_s) as the dynamic-shared size — exactly
+  // like the sibling compute_delta_* launches below. The 26.06 upstream merge dropped this to 0
+  // (upstream uses a static __shared__ page_state_s), which left state_g pointing at a 0-byte shared
+  // region -> garbage page_state_s -> null s->nesting_info -> GPU memory fault in
+  // setup_local_page_info. Restore the baseline dynamic-shared size.
   if (level_type_size == 1) {
-    compute_string_page_bounds_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
-      pages.device_ptr(), chunks, page_mask, min_row, num_rows, all_rows);
+    compute_string_page_bounds_kernel<uint8_t>
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+        pages.device_ptr(), chunks, page_mask, min_row, num_rows, all_rows);
   } else {
-    compute_string_page_bounds_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
-      pages.device_ptr(), chunks, page_mask, min_row, num_rows, all_rows);
+    compute_string_page_bounds_kernel<uint16_t>
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+        pages.device_ptr(), chunks, page_mask, min_row, num_rows, all_rows);
   }
 
   // kernel mask may contain other kernels we don't need to count
@@ -1050,7 +1058,9 @@ void compute_page_string_sizes_pass1(cudf::detail::hostdevice_span<PageInfo> pag
       pages.device_ptr(), chunks, page_mask, min_row, num_rows);
   }
   if (BitAnd(kernel_mask, STRINGS_MASK_NON_DELTA) != 0) {
-    compute_page_string_sizes_kernel<<<dim_grid, dim_block, 0, streams[s_idx++].value()>>>(
+    // NOTE(HIP/AMD): page_state_s is `extern __shared__` here too; provide its dynamic-shared size
+    // (see compute_string_page_bounds_kernel above). 0 would fault in setup_local_page_info.
+    compute_page_string_sizes_kernel<<<dim_grid, dim_block, sizeof(page_state_s), streams[s_idx++].value()>>>(
       pages.device_ptr(), chunks, page_mask, page_string_offset_indices, min_row, num_rows);
   }
 

@@ -534,12 +534,19 @@ void compute_page_sizes(cudf::detail::hostdevice_span<PageInfo> pages,
   // This computes the size for the entire page, not taking row bounds into account.
   // If uses_custom_row_bounds is set to true, we have to do a second pass later that "trims"
   // the starting and ending read values to account for these bounds.
+  // NOTE(HIP/AMD): compute_page_sizes_kernel declares its page_state_s as `extern __shared__`
+  // (dynamic shared memory), so the launch MUST pass sizeof(page_state_s) as the dynamic-shared
+  // size. The 26.06 upstream merge dropped this to 0 (upstream uses a static __shared__), leaving
+  // state_g pointing at a 0-byte shared region -> garbage page_state_s -> null s->nesting_info ->
+  // GPU memory fault in setup_local_page_info. Restore the baseline dynamic-shared size.
   if (level_type_size == 1) {
-    compute_page_sizes_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
-      pages.device_ptr(), chunks, page_mask, min_row, num_rows, compute_num_rows);
+    compute_page_sizes_kernel<uint8_t>
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+        pages.device_ptr(), chunks, page_mask, min_row, num_rows, compute_num_rows);
   } else {
-    compute_page_sizes_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
-      pages.device_ptr(), chunks, page_mask, min_row, num_rows, compute_num_rows);
+    compute_page_sizes_kernel<uint16_t>
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+        pages.device_ptr(), chunks, page_mask, min_row, num_rows, compute_num_rows);
   }
 }
 
