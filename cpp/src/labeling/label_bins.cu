@@ -97,7 +97,18 @@ struct bin_finder {
     // Exit early and return sentinel for values that lie below the interval.
     if (bound == m_left_begin) { return NULL_VALUE; }
 
+#ifdef __HIP_PLATFORM_AMD__
+    // NOTE(HIP/AMD): cuda::std::prev requires its argument to model
+    // cuda::std::bidirectional_iterator. The rocThrust column_device_view
+    // iterator does NOT satisfy that CCCL concept, so cuda::std::prev(bound)
+    // silently returns the iterator UNCHANGED, yielding an off-by-one bin index
+    // (and out-of-range right-edge reads). cuda::std::distance returns the
+    // correct offset, so compute the predecessor index arithmetically; the
+    // `bound == m_left_begin` early-out above guarantees the index is >= 0.
+    auto index = cuda::std::distance(m_left_begin, bound) - 1;
+#else
     auto index = cuda::std::distance(m_left_begin, cuda::std::prev(bound));
+#endif
     return (m_right_comp(value, m_right_begin[index])) ? index : NULL_VALUE;
   }
 
