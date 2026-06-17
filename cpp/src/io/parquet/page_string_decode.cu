@@ -125,6 +125,25 @@ __device__ cuda::std::pair<int, int> page_bounds(
   auto const def_decode    = reinterpret_cast<level_t*>(pp->lvl_decode_buf[level_type::DEFINITION]);
   auto const rep_decode    = reinterpret_cast<level_t*>(pp->lvl_decode_buf[level_type::REPETITION]);
 
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): a nullable page whose definition levels were never decoded (e.g. a page that
+  // lies entirely outside the pass skip_rows/num_rows range gets def_level_size==0 in
+  // allocate_level_decode_space, so lvl_decode_buf[DEFINITION]==nullptr and
+  // num_decoded_level_values==0). When such a page is still visited by this all_rows sizing pass
+  // (no predicate page-mask masks it out), the upstream `actual_num_values` fallback above uses
+  // num_input_values when num_decoded_level_values==0 and the null-counting loops below would then
+  // dereference the null def_decode -> GPU OOB fault (see ParquetChunkedReaderTest
+  // .ReadStringsWithRowBounds). Such a page contributes no rows to the output range, so report it
+  // as having no decoded values (matching its empty level buffers) instead of reading past null.
+  if (process_nulls && def_decode == nullptr) {
+    if (t == 0) {
+      s->page.num_nulls  = 0;
+      s->page.num_valids = 0;
+    }
+    return {0, 0};
+  }
+#endif
+
   // if this is a bounds page, we need to do extra work to find the start and/or end value index
   if (is_bounds_pg) {
     __shared__ int skipped_values;
