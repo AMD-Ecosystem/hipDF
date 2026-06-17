@@ -27,10 +27,17 @@ import math
 
 import numba
 import pyarrow as pa
-from numba import cuda
-from utils import assert_column_eq, assert_table_eq
 
-import pylibcudf as plc
+# NOTE(HIP/AMD): pose numba.hip as numba.cuda before `from numba import cuda`, so
+# `cuda.compile_ptx_for_current_device(..., name=...)` (the numba-hip signature
+# the AMD UDF path relies on) is used rather than the stock numba-cuda one.
+import numba.hip
+
+numba.hip.pose_as_cuda()
+from numba import cuda  # noqa: E402
+from utils import assert_column_eq, assert_table_eq  # noqa: E402
+
+import pylibcudf as plc  # noqa: E402
 
 
 def test_nans_to_nulls(has_nans):
