@@ -24,15 +24,23 @@
 
 import numpy as np
 import pytest
-from numba.cuda import compile_ptx
-from numba.np import numpy_support
 
-import pylibcudf as plc
-import rmm
+# NOTE(HIP/AMD): pose numba.hip as numba.cuda before importing from numba.cuda,
+# so compile_ptx resolves to numba-hip's (whose target context is correctly
+# initialized). Otherwise the stock numba-cuda compile_ptx is captured and its
+# target context has typing_context=None -> .refresh() AttributeError.
+import numba.hip
 
-import cudf
-from cudf import Series
-from cudf.utils import dtypes as dtypeutils
+numba.hip.pose_as_cuda()
+from numba.cuda import compile_ptx  # noqa: E402
+from numba.np import numpy_support  # noqa: E402
+
+import pylibcudf as plc  # noqa: E402
+import rmm  # noqa: E402
+
+import cudf  # noqa: E402
+from cudf import Series  # noqa: E402
+from cudf.utils import dtypes as dtypeutils  # noqa: E402
 
 _driver_version = rmm._cuda.gpu.driverGetVersion()
 _runtime_version = rmm._cuda.gpu.runtimeGetVersion()
@@ -72,9 +80,10 @@ def test_generic_ptx(dtype):
 
     dtype = numpy_support.as_dtype(output_type).type
 
+    # NOTE(HIP/AMD): 26.06 to_pylibcudf() no longer takes a `mode` argument.
     out_col = plc.binaryop.binaryop_udf(
-        lhs_col.to_pylibcudf(mode="read"),
-        rhs_col.to_pylibcudf(mode="read"),
+        lhs_col.to_pylibcudf(),
+        rhs_col.to_pylibcudf(),
         ptx_code,
         dtype,
     )
