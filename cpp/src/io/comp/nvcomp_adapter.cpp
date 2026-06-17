@@ -992,7 +992,19 @@ void batched_compress(compression_type compression,
                          nvcomp_statuses.data(),
                          stream.value());
 
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipcomp's batched <Snappy|LZ4>CompressAsync have no per-chunk statuses output
+  // parameter, so batched_compress_async leaves `nvcomp_statuses` UNINITIALIZED on AMD (the only
+  // compress codecs reachable here; Deflate/Zstd compress are CUDF_FAIL'd). The overall compress
+  // status is already validated via CHECK_NVCOMP_STATUS inside batched_compress_async, so use the
+  // size-only result update (status = SUCCESS) instead of reading the garbage per-chunk statuses,
+  // which otherwise yields spurious codec_status::FAILURE (e.g. COMPRESSION_TEST HostDecompression
+  // SNAPPY, ParquetCompressionTest with LIBCUDF_NVCOMP_POLICY=ALWAYS).
+  (void)nvcomp_statuses;
+  update_compression_results(actual_compressed_data_sizes, results, stream);
+#else
   update_compression_results(nvcomp_statuses, actual_compressed_data_sizes, results, stream);
+#endif
 }
 
 feature_status_parameters::feature_status_parameters()
