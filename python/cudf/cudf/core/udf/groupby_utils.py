@@ -29,7 +29,12 @@ import cupy as cp
 import numpy as np
 from numba import cuda, types
 from numba.core.errors import TypingError as CoreTypingError
-from numba.cuda.core.errors import TypingError as CudaTypingError
+# NOTE(HIP/AMD): numba-hip has no `numba.cuda.core.errors` submodule (a
+# numba-cuda-only location); the TypingError is the same numba.core one.
+try:
+    from numba.cuda.core.errors import TypingError as CudaTypingError
+except ModuleNotFoundError:
+    from numba.core.errors import TypingError as CudaTypingError
 from numba.cuda.cudadrv.devices import get_context
 from numba.np import numpy_support
 

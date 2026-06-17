@@ -38,7 +38,8 @@ from cuda.bindings import runtime
 from numba import cuda, typeof
 from numba.core.datamodel import models
 from numba.core.extending import register_model
-from numba.cuda.descriptor import cuda_target
+# NOTE(HIP/AMD): numba-hip's descriptor exposes `hip_target`, not `cuda_target`.
+from numba.cuda.descriptor import hip_target as cuda_target
 from numba.np import numpy_support
 from numba.types import CPointer, Record, Tuple, int64, void
 

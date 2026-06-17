@@ -19,7 +19,8 @@ from numba.core.typing.templates import (
 )
 from numba.core.typing.typeof import typeof
 from numba.cuda.cudadecl import registry as cuda_decl_registry
-from numba.cuda.descriptor import cuda_target
+# NOTE(HIP/AMD): numba-hip's descriptor exposes `hip_target`, not `cuda_target`.
+from numba.cuda.descriptor import hip_target as cuda_target
 from numba.np.numpy_support import from_dtype
 
 from cudf.core.missing import NA
