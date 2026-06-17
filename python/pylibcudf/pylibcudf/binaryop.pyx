@@ -171,7 +171,14 @@ cpdef bool is_supported_operation(
 # NOTE(HIP/AMD): This method is removed from cudf-24.04.
 # We have added it for additional testing purposes.
 @acquire_spill_lock()
-def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype, Stream stream=None):
+def binaryop_udf(
+    Column lhs,
+    Column rhs,
+    udf_ptx,
+    dtype,
+    Stream stream=None,
+    DeviceMemoryResource mr=None,
+):
     """
     Apply a user-defined binary operator (a UDF) defined in `udf_ptx` on
     the two input columns `lhs` and `rhs`. The output type of the UDF
@@ -190,7 +197,9 @@ def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype, Stream stream=None):
 
     cdef unique_ptr[column] c_result
 
-    stream = _get_stream(stream)
+    cdef Stream _stream = _get_stream(stream)
+    cdef cudaStream_t _cs = _stream.view().value()
+    mr = _get_memory_resource(mr)
 
     with nogil:
         c_result = move(
@@ -199,11 +208,12 @@ def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype, Stream stream=None):
                 c_rhs,
                 cpp_str,
                 c_dtype,
-                stream.view()
+                _cs,
+                mr.get_mr()
             )
         )
 
-    return Column.from_libcudf(move(c_result), stream)
+    return Column.from_libcudf(move(c_result), _stream, mr)
 
 
 BinaryOperator.__str__ = BinaryOperator.__repr__
