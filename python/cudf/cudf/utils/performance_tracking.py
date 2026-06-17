@@ -40,6 +40,12 @@ from cudf.options import get_option
 class nvtx:  # type: ignore
     """Noop-stub with the same API as nvtx."""
 
+    # NOTE(HIP/AMD): upstream 26.06 introduced a `dummy_domain` sentinel and a
+    # `dummy_annotate.domain is nvtx.nvtx.dummy_domain` check in
+    # `_performance_tracking`. Mirror those on this noop stub so the guard
+    # resolves (the stub keeps NVTX disabled regardless).
+    dummy_domain = object()
+
     @staticmethod
     def enabled():
         return False
@@ -57,7 +63,9 @@ class nvtx:  # type: ignore
             domain: str | None = None,
             category: str | int | None = None,
         ):
-            pass
+            # NOTE(HIP/AMD): always use the dummy domain sentinel so the
+            # upstream `dummy_annotate.domain is ...dummy_domain` check passes.
+            self.domain = nvtx.dummy_domain
 
         def __enter__(self):
             return self
@@ -87,7 +95,9 @@ def _get_color_for_nvtx(name):
 def _performance_tracking(func, domain="cudf_python"):
     """Decorator for applying performance tracking (if enabled)."""
     global dummy_annotate
-    if dummy_annotate.domain is nvtx.nvtx.dummy_domain and not get_option(
+    # NOTE(HIP/AMD): the noop `nvtx` stub exposes `dummy_domain` directly
+    # (upstream's real nvtx nests it under `nvtx.nvtx`).
+    if dummy_annotate.domain is nvtx.dummy_domain and not get_option(
         "memory_profiling"
     ):
         # If `dummy_domain` is enabled it means NVTX is present but nsys profiling is not enabled.

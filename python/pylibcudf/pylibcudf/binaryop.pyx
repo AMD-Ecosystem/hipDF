@@ -37,9 +37,10 @@ from pylibcudf.libcudf.column.column cimport column
 from pylibcudf.libcudf.types cimport data_type, type_id
 from pylibcudf.libcudf.column.column_view cimport column_view
 from libcpp.string cimport string
-from cudf.core.buffer import acquire_spill_lock
-from cudf.utils.dtypes import SUPPORTED_NUMPY_TO_PYLIBCUDF_TYPES
-import cudf
+# NOTE(HIP/AMD): cudf is imported lazily inside binaryop_udf to avoid a circular
+# import at pylibcudf load time (cudf imports pylibcudf). acquire_spill_lock was
+# removed upstream (PR #21013); pylibcudf no longer owns spilling (the cudf layer
+# does), matching every other pylibcudf entry point.
 
 from pylibcudf.libcudf.binaryop import \
     binary_operator as BinaryOperator  # no-cython-lint
@@ -170,7 +171,6 @@ cpdef bool is_supported_operation(
 
 # NOTE(HIP/AMD): This method is removed from cudf-24.04.
 # We have added it for additional testing purposes.
-@acquire_spill_lock()
 def binaryop_udf(
     Column lhs,
     Column rhs,
@@ -185,6 +185,10 @@ def binaryop_udf(
     has to be specified in `dtype`, a numpy data type.
     Currently ONLY int32, int64, float32 and float64 are supported.
     """
+    # NOTE(HIP/AMD): lazy import to avoid the pylibcudf<->cudf circular import.
+    import cudf
+    from cudf.utils.dtypes import SUPPORTED_NUMPY_TO_PYLIBCUDF_TYPES
+
     cdef column_view c_lhs = lhs.view()
     cdef column_view c_rhs = rhs.view()
 
