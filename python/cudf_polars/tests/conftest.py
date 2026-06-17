@@ -39,7 +39,13 @@ def with_nulls(request: pytest.FixtureRequest):
 @pytest.fixture(autouse=True)
 def _skip_unless_spmd(request: pytest.FixtureRequest) -> None:
     """Skip tests in SPMD multi-rank mode unless marked with ``pytest.mark.spmd``."""
-    from rapidsmpf.bootstrap import get_nranks, is_running_with_rrun
+    # NOTE(HIP/AMD): rapidsmpf (the SPMD multi-GPU shuffle backend) is not
+    # available on ROCm. Without it there is no SPMD multi-rank mode, so this
+    # autouse fixture becomes a no-op instead of erroring at every test setup.
+    try:
+        from rapidsmpf.bootstrap import get_nranks, is_running_with_rrun
+    except ImportError:
+        return
 
     if (
         is_running_with_rrun()

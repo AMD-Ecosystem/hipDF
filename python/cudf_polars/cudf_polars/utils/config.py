@@ -89,6 +89,10 @@ def get_device_handle() -> Any:
     except pynvml.NVMLError_NotSupported:  # pragma: no cover
         # System doesn't have proper "GPU memory".
         return None
+    except (pynvml.NVMLError_LibraryNotFound, OSError):
+        # NOTE(HIP/AMD): NVIDIA's NVML (libnvidia-ml.so) is not present on ROCm.
+        # NVML-based device telemetry is unavailable; degrade gracefully.
+        return None
     else:
         return handle
 
