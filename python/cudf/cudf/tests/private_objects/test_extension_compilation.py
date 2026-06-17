@@ -7,15 +7,21 @@ import operator
 import cupy as cp
 import numpy as np
 import pytest
-from numba import cuda, types
-from numba.cuda import compile_ptx
-from numba.np.numpy_support import from_dtype
 
-import cudf
-from cudf import NA
-from cudf.core.udf.api import Masked
-from cudf.core.udf.masked_typing import MaskedType
-from cudf.utils._numba import _CUDFNumbaConfig
+# NOTE(HIP/AMD): pose numba.hip as numba.cuda before importing from numba.cuda,
+# so cuda/compile_ptx resolve to numba-hip's (correctly-initialized target ctx).
+import numba.hip
+
+numba.hip.pose_as_cuda()
+from numba import cuda, types  # noqa: E402
+from numba.cuda import compile_ptx  # noqa: E402
+from numba.np.numpy_support import from_dtype  # noqa: E402
+
+import cudf  # noqa: E402
+from cudf import NA  # noqa: E402
+from cudf.core.udf.api import Masked  # noqa: E402
+from cudf.core.udf.masked_typing import MaskedType  # noqa: E402
+from cudf.utils._numba import _CUDFNumbaConfig  # noqa: E402
 
 arith_ops = (
     operator.add,
