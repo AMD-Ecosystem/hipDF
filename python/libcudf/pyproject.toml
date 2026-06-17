@@ -45,8 +45,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Database",
     "Topic :: Scientific/Engineering",
-    "License :: OSI Approved :: Apache Software License",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: C++",
     "Environment :: GPU :: AMD HIP",
 ]
