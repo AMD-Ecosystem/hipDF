@@ -7,6 +7,14 @@ import sys
 
 import pytest
 
+import cudf
+
+# TODO(HIP/AMD): the `python -m cudf.pandas` subprocess startup (numba.hip +
+# libcudf load/JIT) takes ~50s on the ROCm/HIP build, well above the 20s budget
+# the upstream test assumes for CUDA. The thread output is correct; only the
+# cold-start time differs, so allow a larger budget on the HIP port.
+_SUBPROCESS_TIMEOUT = 120 if getattr(cudf, "__is_hip_amd_port__", False) else 20
+
 
 @pytest.mark.flaky(reruns=3, reruns_delay=30)
 def test_disable_pandas_accelerator_multi_threaded():
@@ -21,7 +29,7 @@ def test_disable_pandas_accelerator_multi_threaded():
         ],
         capture_output=True,
         text=True,
-        timeout=20,
+        timeout=_SUBPROCESS_TIMEOUT,
     )
     assert sp_completed.returncode == 0
     output = sp_completed.stdout
