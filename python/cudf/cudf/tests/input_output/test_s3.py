@@ -415,6 +415,9 @@ def test_read_json(s3_bucket_public, s3so):
 
 
 def test_read_jsonl_files_kvikio_remote(s3_bucket_public, s3so, monkeypatch):
+    if cudf.__is_hip_amd_port__:
+        pytest.skip("KvikIO with HIP is not supported yet")
+
     fname1 = "test_json_reader1.jsonl"
     fname2 = "test_json_reader2.jsonl"
     buffer1 = (

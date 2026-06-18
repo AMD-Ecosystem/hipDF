@@ -8,6 +8,7 @@ import pathlib
 import subprocess
 import sys
 import textwrap
+import time
 
 import fastavro
 import numpy as np
@@ -663,7 +664,23 @@ def test_avro_reader_no_hang_on_truncated_schema(datadir):
         """
     )
 
-    timeout_s = 10
+    # NOTE(HIP/AMD): the subprocess pays the full cold `import cudf` cost, which
+    # on the HIP port (numba-hip / JIT warm-up) can take ~1 minute -- far more
+    # than the 10s budget upstream assumes. Measure the import cost in a
+    # throwaway subprocess and add it to the budget so the timeout reflects only
+    # the time spent inside ``read_avro`` (the actual hang we are guarding
+    # against), not interpreter/import warm-up.
+    read_budget_s = 10
+    import_overhead_s = 0.0
+    if cudf.__is_hip_amd_port__:
+        t0 = time.monotonic()
+        subprocess.run(
+            [sys.executable, "-c", "import cudf"],
+            check=False,
+            capture_output=True,
+        )
+        import_overhead_s = time.monotonic() - t0
+    timeout_s = read_budget_s + import_overhead_s
     try:
         subprocess.run(
             [sys.executable, "-c", script],
@@ -674,5 +691,6 @@ def test_avro_reader_no_hang_on_truncated_schema(datadir):
     except subprocess.TimeoutExpired:
         pytest.fail(
             f"cudf.read_avro hung on malformed input {path.name!r} "
-            f"(no completion within {timeout_s}s)"
+            f"(no completion within {timeout_s:.1f}s, "
+            f"of which ~{import_overhead_s:.1f}s is `import cudf` overhead)"
         )

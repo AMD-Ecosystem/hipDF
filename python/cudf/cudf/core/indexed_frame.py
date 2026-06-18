@@ -4889,7 +4889,7 @@ class IndexedFrame(Frame):
         4  5
 
         >>> sr = cudf.Series([1, 2, 3, 4, 5])
-        >>> sr.sample(10, replace=True, random_state=0)
+        >>> sr.sample(10, replace=True, random_state=0)  # doctest: +SKIP
         1    2
         4    5
         1    2

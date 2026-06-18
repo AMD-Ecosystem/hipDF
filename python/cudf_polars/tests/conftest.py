@@ -299,13 +299,41 @@ def pytest_generate_tests(metafunc: pytest.Metafunc):
         return
 
     if "spmd_engine" in fixtures or "spmd_engine_factory" in fixtures:
-        engines = ["spmd"]
+        # NOTE(HIP/AMD): the SPMD engine is backed by rapidsmpf, which is not
+        # available on ROCm. Only offer "spmd" when rapidsmpf is importable;
+        # otherwise leave the engine list empty so the test is skipped below
+        # instead of erroring at setup when SPMDEngine() is instantiated.
+        engines = ["spmd"] if "spmd" in STREAMING_ENGINE_FIXTURE_PARAMS else []
     elif "streaming_engine" in fixtures or "streaming_engine_factory" in fixtures:
         engines = STREAMING_ENGINE_FIXTURE_PARAMS
     elif "engine" in fixtures:
         engines = ALL_ENGINE_FIXTURE_PARAMS
     else:
         raise AssertionError("Unknown engine fixture")
+
+    # NOTE(HIP/AMD): the streaming engine fixtures (spmd/dask/ray) are all
+    # backed by rapidsmpf, which is not available on ROCm. Without it
+    # STREAMING_ENGINE_FIXTURE_PARAMS is empty, which would make pytest raise
+    # "Empty parameter set" at collection for streaming-only tests. Emit a
+    # single skipped parameter instead so collection succeeds and the test is
+    # recorded as skipped rather than erroring.
+    if not engines:
+        metafunc.parametrize(
+            "_engine_param",
+            [
+                pytest.param(
+                    "in-memory",
+                    marks=pytest.mark.skip(
+                        reason="no streaming engine available (rapidsmpf "
+                        "unavailable on ROCm)"
+                    ),
+                )
+            ],
+            indirect=True,
+            ids=["no-streaming-engine"],
+            scope="session",
+        )
+        return
 
     metafunc.parametrize(
         "_engine_param",

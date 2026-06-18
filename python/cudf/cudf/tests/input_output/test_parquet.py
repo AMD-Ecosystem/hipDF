@@ -5110,6 +5110,17 @@ def test_read_parquet_case_insensitive_structs():
 def test_read_parquet_snappy_malformed_copy_elem(
     datadir, monkeypatch, host_decompression
 ):
+    # NOTE(HIP/AMD): the "OFF" case forces host decompression with
+    # LIBCUDF_NVCOMP_POLICY=OFF, but hipDF requires nvcomp for
+    # compression/decompression on HIP/AMD platforms (see
+    # cpp/src/io/utilities/config_utils.cpp), so that combination raises a
+    # different, AMD-specific error instead of the upstream decompression
+    # message. Only the device-decompression ("ON") path is supported here.
+    if host_decompression == "OFF" and cudf.__is_hip_amd_port__:
+        pytest.skip(
+            "LIBCUDF_NVCOMP_POLICY=OFF (host decompression) is not "
+            "supported on hipDF; nvcomp is required on HIP/AMD."
+        )
     monkeypatch.setenv("LIBCUDF_NVCOMP_POLICY", "OFF")
     monkeypatch.setenv("LIBCUDF_HOST_DECOMPRESSION", host_decompression)
     fname = datadir / "invalid-snappy.parquet"
