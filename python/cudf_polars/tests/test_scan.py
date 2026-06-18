@@ -524,6 +524,15 @@ def test_scan_from_file_uri(tmp_path: Path) -> None:
 def test_scan_parquet_remote(
     tmp_path: Path, df: pl.DataFrame, httpserver: HTTPServer, *, chunked: bool
 ) -> None:
+    # NOTE(HIP/AMD): remote (http/s3) reads go through libcudf's KvikIO remote
+    # datasource, which is CUDA-gated on the HIP port (CUDF_KVIKIO_REMOTE_IO
+    # disabled). Without it the URL is treated as a local file and the read
+    # fails. Skip until KvikIO remote IO is supported on HIP.
+    import cudf
+
+    if cudf.__is_hip_amd_port__:
+        pytest.skip("KvikIO remote IO is not supported on HIP")
+
     path = tmp_path / "foo.parquet"
     df.write_parquet(path)
     bytes_ = path.read_bytes()

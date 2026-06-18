@@ -3,7 +3,15 @@
 
 from __future__ import annotations
 
-from cudf_polars.testing.engine_utils import (
+import pytest
+
+# NOTE(HIP/AMD): create_streaming_options / merge_streaming_options /
+# StreamingOptions pull in rapidsmpf, which is not available on ROCm. Skip the
+# streaming-option helper tests when rapidsmpf is missing instead of erroring at
+# import. EngineFixtureParam itself has no rapidsmpf dependency.
+pytest.importorskip("rapidsmpf")
+
+from cudf_polars.testing.engine_utils import (  # noqa: E402
     EngineFixtureParam,
     create_streaming_options,
     merge_streaming_options,
