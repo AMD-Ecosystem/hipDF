@@ -98,5 +98,5 @@ Memory resource modes
    The ``async`` memory resource mode (``CUDF_PANDAS_RMM_MODE=async``, backed by
    ``hipMallocFromPoolAsync``) has shown stability issues, including hangs, on some
    AMD GPUs with certain ROCm driver versions. If you encounter a hang while using
-   the async allocator, prefer the default ``pool`` or ``managed_pool`` modes. See
+   the async allocator, prefer the default ``pool`` or ``managed_pool`` modes.
    ROCM-3003 for tracking.
