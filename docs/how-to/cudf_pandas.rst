@@ -89,3 +89,13 @@ Summary
   - Can avoid thrashing and may be used for datasets exceeding the available device memory.
   - Instablities observed with some recent ROCm driver versions.
   - Not recommended for any production workloads.
+
+Memory resource modes
+---------------------
+
+.. note::
+
+   The ``async`` memory resource mode (``CUDF_PANDAS_RMM_MODE=async``, backed by
+   ``hipMallocFromPoolAsync``) has shown stability issues, including hangs, on some
+   AMD GPUs with certain ROCm driver versions. If you encounter a hang while using
+   the async allocator, prefer the default ``pool`` or ``managed_pool`` modes.

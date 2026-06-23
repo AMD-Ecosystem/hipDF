@@ -100,6 +100,28 @@ pd = xpd._fsproxy_slow
 cudf = xpd._fsproxy_fast
 
 
+def _is_mi350_gfx950():
+    """Return True when the default GPU is an MI350-series (gfx950) device.
+
+    The RMM ``async`` allocator (``hipMallocFromPoolAsync``) can wedge the GPU on
+    MI350-series parts with some ROCm/driver versions, which manifests as a hang
+    on the next device operation. See GH issue #460 and ROCm tracker ROCM-3003.
+    """
+    try:
+        from hip import hip
+
+        prop = hip.hipDeviceProp_t()
+        hip.hipGetDeviceProperties(prop, 0)
+        gcn_arch_name = (
+            prop.gcnArchName.decode("utf-8")
+            if hasattr(prop, "gcnArchName") and prop.gcnArchName
+            else ""
+        )
+        return gcn_arch_name.startswith("gfx950")
+    except Exception:
+        return False
+
+
 @pytest.fixture
 def dataframe():
     pdf = pd.DataFrame({"a": [1, 1, 1, 2, 3], "b": [1, 2, 3, 4, 5]})
@@ -1499,7 +1521,25 @@ def test_holidays_within_dates(holiday, start, expected):
 @pytest.mark.serial
 @pytest.mark.parametrize(
     "env_value",
-    ["", "cuda", "pool", "async", "managed", "managed_pool", "abc"],
+    [
+        "",
+        "cuda",
+        "pool",
+        pytest.param(
+            "async",
+            marks=pytest.mark.skipif(
+                _is_mi350_gfx950(),
+                reason=(
+                    "RMM async allocator (hipMallocFromPoolAsync) can hang on "
+                    "MI350 (gfx950) with some ROCm/driver versions; skipping to "
+                    "avoid wedging the GPU. See GH #460 and ROCM-3003."
+                ),
+            ),
+        ),
+        "managed",
+        "managed_pool",
+        "abc",
+    ],
 )
 def test_rmm_option_on_import(env_value):
     data_directory = os.path.dirname(os.path.abspath(__file__))
