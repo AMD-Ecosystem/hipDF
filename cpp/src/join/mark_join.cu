@@ -63,14 +63,9 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 namespace cg = cudf::hip_extensions::hip_cooperative_groups_ext;
+namespace cub = hipcub;
 #else
 namespace cg = cooperative_groups;
-#endif
-
-#ifdef __HIP_PLATFORM_AMD__
-using DeviceTransform = hipcub::DeviceTransform;
-#else
-using DeviceTransform = cub::DeviceTransform;
 #endif
 
 namespace cudf {
@@ -519,7 +514,7 @@ std::unique_ptr<rmm::device_uvector<cudf::size_type>> mark_join::mark_probe_and_
   auto const temp_mr          = cudf::get_current_device_resource_ref();
   auto materialize_probe_rows = [&](auto const& key_fn) {
     rmm::device_uvector<probe_key_type> probe_rows(probe.num_rows(), stream, temp_mr);
-    CUDF_CUDA_TRY(DeviceTransform::Transform(cuda::counting_iterator<size_type>{0},
+    CUDF_CUDA_TRY(cub::DeviceTransform::Transform(cuda::counting_iterator<size_type>{0},
                                              probe_rows.begin(),
                                              probe.num_rows(),
                                              cuda::proclaim_return_type<probe_key_type>(key_fn),
@@ -705,7 +700,7 @@ mark_join::mark_join(cudf::table_view const& build,
   auto do_build_and_filter = [&](auto const& d_build_hasher, auto const& d_build_comparator) {
     if (_prefilter == cudf::join_prefilter::YES) {
       rmm::device_uvector<hash_value_type> build_hashes(_build.num_rows(), stream, temp_mr);
-      CUDF_CUDA_TRY(DeviceTransform::Transform(
+      CUDF_CUDA_TRY(cub::DeviceTransform::Transform(
         cuda::counting_iterator{size_type{0}},
         build_hashes.begin(),
         _build.num_rows(),

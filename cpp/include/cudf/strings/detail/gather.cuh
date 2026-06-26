@@ -62,12 +62,8 @@ namespace cudf {
 namespace strings {
 namespace detail {
 
-// NOTE(HIP/AMD): hipcub provides the same DeviceMemcpy::Batched API (rocPRIM backend).
-// Alias the class per platform to keep call sites platform-agnostic.
 #ifdef __HIP_PLATFORM_AMD__
-using DeviceMemcpy = hipcub::DeviceMemcpy;
-#else
-using DeviceMemcpy = cub::DeviceMemcpy;
+namespace cub = hipcub;
 #endif
 
 // Helper function for loading 16B from a potentially unaligned memory location to registers.
@@ -353,7 +349,7 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
 
       // Determine temporary device storage requirements
       size_t temp_storage_bytes = 0;
-      CUDF_CUDA_TRY(DeviceMemcpy::Batched(nullptr,
+      CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(nullptr,
                                           temp_storage_bytes,
                                           in_chars_itr,
                                           out_chars_itr,
@@ -365,7 +361,7 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
       auto d_temp_storage = rmm::device_buffer(temp_storage_bytes, stream, mr);
 
       // Run batched copy algorithm
-      CUDF_CUDA_TRY(DeviceMemcpy::Batched(d_temp_storage.data(),
+      CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(d_temp_storage.data(),
                                           temp_storage_bytes,
                                           in_chars_itr,
                                           out_chars_itr,

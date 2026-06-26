@@ -51,9 +51,7 @@ namespace cudf {
 namespace detail {
 
 #ifdef __HIP_PLATFORM_AMD__
-using DeviceTransform = hipcub::DeviceTransform;
-#else
-using DeviceTransform = cub::DeviceTransform;
+namespace cub = hipcub;
 #endif
 
 namespace {
@@ -69,7 +67,7 @@ template <bool has_nested_columns>
     nullate::DYNAMIC{has_nested_nulls(left) or has_nested_nulls(right)}, nulls_equal);
   rmm::device_uvector<bool> eq_rows{
     static_cast<std::size_t>(left.num_rows()), stream, cudf::get_current_device_resource_ref()};
-  CUDF_CUDA_TRY(DeviceTransform::Transform(
+  CUDF_CUDA_TRY(cub::DeviceTransform::Transform(
     cuda::counting_iterator<size_type>{0},
     eq_rows.begin(),
     eq_rows.size(),

@@ -53,18 +53,9 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-// NOTE(HIP/AMD): bare <cub/device/device_*.cuh> headers are not available on AMD.
-// Use hipcub and alias the specific device classes used here (no cuco include in this
-// file, so no global cub=hipcub alias exists).
 #ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/hipcub.hpp>
-namespace cub {
-using hipcub::DeviceCopy;
-using hipcub::DeviceReduce;
-using hipcub::DeviceScan;
-using hipcub::DeviceSelect;
-using hipcub::DeviceTransform;
-}  // namespace cub
+namespace cub = hipcub;
 #else
 #include <cub/device/device_copy.cuh>
 #include <cub/device/device_reduce.cuh>

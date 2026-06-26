@@ -47,13 +47,8 @@
 
 namespace cudf::detail {
 
-// NOTE(HIP/AMD): the classic temporary-storage CUB DeviceSelect APIs used below have
-// identical signatures in hipcub (rocPRIM backend). Alias the DeviceSelect class
-// per platform so the call sites stay platform-agnostic without a global cub=hipcub alias.
 #ifdef __HIP_PLATFORM_AMD__
-using DeviceSelect = hipcub::DeviceSelect;
-#else
-using DeviceSelect = cub::DeviceSelect;
+namespace cub = hipcub;
 #endif
 
 /**
@@ -126,7 +121,7 @@ OutputIterator copy_if(InputIterator begin,
     cudf::detail::device_scalar<cuda::std::size_t>(stream, cudf::get_current_device_resource_ref());
 
   auto temp_storage_bytes = std::size_t{0};
-  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(nullptr,
+  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(nullptr,
                                              temp_storage_bytes,
                                              begin,
                                              stencil,
@@ -139,7 +134,7 @@ OutputIterator copy_if(InputIterator begin,
   auto d_temp_storage =
     rmm::device_buffer(temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
 
-  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(d_temp_storage.data(),
+  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(d_temp_storage.data(),
                                              temp_storage_bytes,
                                              begin,
                                              stencil,
@@ -227,7 +222,7 @@ OutputIterator copy_if(InputIterator begin,
 
   // First call to get temporary storage size
   size_t temp_storage_bytes = 0;
-  CUDF_CUDA_TRY(DeviceSelect::If(nullptr,
+  CUDF_CUDA_TRY(cub::DeviceSelect::If(nullptr,
                                       temp_storage_bytes,
                                       begin,
                                       output,
@@ -241,7 +236,7 @@ OutputIterator copy_if(InputIterator begin,
     temp_storage_bytes, stream, cudf::get_current_device_resource_ref());
 
   // Run copy_if
-  CUDF_CUDA_TRY(DeviceSelect::If(d_temp_storage.data(),
+  CUDF_CUDA_TRY(cub::DeviceSelect::If(d_temp_storage.data(),
                                       temp_storage_bytes,
                                       begin,
                                       output,
@@ -272,11 +267,11 @@ void copy_if_async(InputIterator begin,
 
   auto tmp_bytes = std::size_t{0};
   auto no_out    = cuda::make_discard_iterator<int>();
-  CUDF_CUDA_TRY(DeviceSelect::If(
+  CUDF_CUDA_TRY(cub::DeviceSelect::If(
     nullptr, tmp_bytes, begin, output, no_out, num_items, predicate, stream.value()));
 
   auto tmp_stg = rmm::device_buffer(tmp_bytes, stream, cudf::get_current_device_resource_ref());
-  CUDF_CUDA_TRY(DeviceSelect::If(
+  CUDF_CUDA_TRY(cub::DeviceSelect::If(
     tmp_stg.data(), tmp_bytes, begin, output, no_out, num_items, predicate, stream.value()));
 }
 
@@ -302,11 +297,11 @@ void copy_if_async(InputIterator begin,
 
   auto tmp_bytes = std::size_t{0};
   auto no_out    = cuda::make_discard_iterator<int>();
-  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(
+  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(
     nullptr, tmp_bytes, begin, stencil, result, no_out, num_items, predicate, stream.value()));
 
   auto tmp = rmm::device_buffer(tmp_bytes, stream, cudf::get_current_device_resource_ref());
-  CUDF_CUDA_TRY(DeviceSelect::FlaggedIf(
+  CUDF_CUDA_TRY(cub::DeviceSelect::FlaggedIf(
     tmp.data(), tmp_bytes, begin, stencil, result, no_out, num_items, predicate, stream.value()));
 }
 
