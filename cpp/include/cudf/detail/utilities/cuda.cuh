@@ -29,9 +29,6 @@
 #include "cudf/cuda_runtime.h"
 #include <cudf/types.hpp>
 
-// NOTE(HIP/AMD): mirror the NVRTC guard for hipRTC so these host/device-library
-// headers (incl. hipcub, whose relative includes jitify can't resolve) are not
-// dragged into runtime-JIT'd kernels. The JIT kernels only use grid_1d helpers.
 #if !defined(__CUDACC_RTC__) && !defined(__HIPCC_RTC__)
 
 #include <cudf/utilities/default_stream.hpp>
@@ -60,9 +57,6 @@ static constexpr size_type warp_size{32};
 static constexpr size_type warp_size{32};
 #endif
 
-// NOTE(HIP/AMD): mirror the NVRTC guard for hipRTC. These function bodies use
-// hipcub::WarpReduce and rmm::cuda_stream_view, whose host/device-library headers
-// are intentionally excluded above under runtime JIT; guard the bodies to match.
 #if !defined(__CUDACC_RTC__) && !defined(__HIPCC_RTC__)
 
 /**

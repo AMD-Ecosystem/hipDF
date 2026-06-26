@@ -200,9 +200,9 @@ void binary_operation(mutable_column_view& out,
                                                  cudf::type_to_name(rhs.type()),
                                                  std::string("cudf::binops::jit::UserDefinedOp"));
 
-  // NOTE(HIP/AMD): get_udf_kernel now emits --offload-arch=gfx. on AMD and links the
-  // arch-adapted LLVM IR (parsed_llvm_ir) as extra bitcode so the UDF binaryop path links.
-  // On NVIDIA parsed_llvm_ir is empty and PTX is used; pass nullptr so behavior is unchanged.
+  // NOTE(HIP/AMD): On AMD, pass the LLVM IR bitcode (parsed_llvm_ir) to get_udf_kernel
+  // so it can link it into the JIT-compiled kernel for the AMD GPU. On NVIDIA, pass nullptr
+  // because the NVIDIA path uses PTX and does not need external bitcode.
   std::string const* udf_llvm_ir = HIP_PLATFORM_AMD ? &parsed_llvm_ir : nullptr;
 
   cudf::jit::get_udf_kernel(

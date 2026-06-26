@@ -105,13 +105,14 @@ CUDF_KERNEL void transform_kernel(size_type row_size,
       });
 
     } else {
-      // NOTE(HIP/AMD): this is reached inside the grid-stride loop, so lanes whose row is out
-      // of range have already exited and are not converged. Passing LANE_MASK_ALL as the
-      // participating mask to __ballot_sync would reference inactive lanes and faults on AMD
-      // (and is UB on NVIDIA). Use __activemask() to ballot over exactly the executing lanes;
-      // the resulting mask drives both the null-word compaction and the leader election. On AMD
-      // __activemask() returns a 64-bit wavefront mask (HIPRTC static-asserts a 64-bit mask).
-      // See SWDEV-490930.
+      // NOTE(HIP/AMD): Inside the grid-stride loop, some lanes may have exited early (their
+      // row index exceeded the input size), so not all lanes in the warp are executing. Using
+      // LANE_MASK_ALL with __ballot_sync would reference inactive lanes, which causes a fault
+      // on AMD hardware (and is undefined behavior on NVIDIA). Instead, use __activemask() to
+      // obtain the mask of currently-executing lanes, then ballot over exactly those lanes.
+      // The resulting mask is used for null-word compaction and leader election. On AMD GPUs,
+      // __activemask() returns a 64-bit wavefront mask (HIPRTC enforces 64-bit masks to ensure
+      // compatibility across wave32 and wave64 architectures; see SWDEV-490930 for details).
       auto active_mask = __activemask();
 
       auto ins = InputAccessors::map([&]<typename... A>() {

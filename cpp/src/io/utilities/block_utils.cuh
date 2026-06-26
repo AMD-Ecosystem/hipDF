@@ -27,8 +27,6 @@
 #pragma once
 #include <cudf/detail/utilities/cuda.cuh>
 
-// NOTE(HIP/AMD): use the HIP cooperative groups / hipcub headers; the raw NVIDIA
-// <cooperative_groups.h> and <cub/cub.cuh> do not exist on the AMD/HIP toolchain.
 #include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
 #include <cuda/std/cstdint>
