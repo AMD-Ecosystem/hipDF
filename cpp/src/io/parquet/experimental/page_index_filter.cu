@@ -59,6 +59,7 @@
 
 #include <cuda/functional>
 #include <cuda/iterator>
+#include <cuda/std/bit>
 #include <thrust/gather.h>
 
 #include <algorithm>
@@ -762,16 +763,10 @@ struct search_fenwick_tree_functor {
       if (start == 0 or is_power_of_two(start)) {
         auto const block_size =
           cuda::std::max<size_type>(start & -start, largest_power_of_two_in_range(start, end));
-        // NOTE(HIP/AMD): libhipcxx lacks cuda::std::countr_zero at this revision; use
-        // __builtin_ctz (valid in HIP device code). block_size may be 0 here (start==0 with
-        // no power of two in range), so preserve countr_zero(0)==32 semantics with a guard.
-        auto const tree_level = static_cast<uint32_t>(
-          block_size == 0 ? 32u : __builtin_ctz(static_cast<uint32_t>(block_size)));
+        auto const tree_level = cuda::std::countr_zero(static_cast<uint32_t>(block_size));
         return cuda::std::pair{tree_level, block_size};
       } else {
-        // NOTE(HIP/AMD): libhipcxx lacks cuda::std::countr_zero; use __builtin_ctz. This is the
-        // else branch of `start == 0 or is_power_of_two(start)`, so start is guaranteed nonzero.
-        auto const tree_level = static_cast<uint32_t>(__builtin_ctz(static_cast<uint32_t>(start)));
+        auto const tree_level = cuda::std::countr_zero(static_cast<uint32_t>(start));
         return cuda::std::pair{tree_level, size_type{1} << tree_level};
       }
     } else {
@@ -781,10 +776,7 @@ struct search_fenwick_tree_functor {
                                                    largest_power_of_two_in_range(0, end - start));
         block_size                = end - next_alignment;
       }
-      // NOTE(HIP/AMD): libhipcxx lacks cuda::std::countr_zero; use __builtin_ctz. block_size may
-      // be 0 here (end==0, or end-next_alignment==0), so preserve countr_zero(0)==32 with a guard.
-      auto const tree_level = static_cast<uint32_t>(
-        block_size == 0 ? 32u : __builtin_ctz(static_cast<uint32_t>(block_size)));
+      auto const tree_level = cuda::std::countr_zero(static_cast<uint32_t>(block_size));
       return cuda::std::pair{tree_level, block_size};
     }
   }

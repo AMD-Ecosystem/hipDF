@@ -36,6 +36,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <cuda/functional>
 #include <cuda/iterator>
 #include <thrust/functional.h>
 #include <thrust/gather.h>
@@ -240,9 +241,7 @@ rmm::device_uvector<size_type> compute_page_indices_async(
                          page_indices.begin(),
                          page_indices.end(),
                          page_indices.begin(),
-                         // NOTE(HIP/AMD): cuda::maximum is unavailable in libhipcxx; use
-                         // thrust::maximum, which rocThrust provides.
-                         thrust::maximum<cudf::size_type>{});
+                         cuda::maximum<cudf::size_type>());
   return page_indices;
 }
 

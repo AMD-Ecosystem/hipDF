@@ -43,6 +43,7 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/iterator>
+#include <cuda/std/cmath>
 #include <cuda/std/limits>
 
 namespace cudf {
@@ -57,9 +58,7 @@ struct dispatch_nan_to_null {
     auto input_device_view     = *input_device_view_ptr;
 
     auto pred = [input_device_view] __device__(cudf::size_type idx) {
-      // NOTE(HIP/AMD): libhipcxx does not provide cuda::std::isnan; use std::isnan (the
-      // codebase convention, e.g. replace/nans.cu, unary/nan_ops.cu).
-      return not(std::isnan(input_device_view.element<T>(idx)) || input_device_view.is_null(idx));
+      return not(cuda::std::isnan(input_device_view.element<T>(idx)) || input_device_view.is_null(idx));
     };
 
     auto mask = detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
