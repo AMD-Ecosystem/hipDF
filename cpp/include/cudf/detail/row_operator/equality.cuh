@@ -411,8 +411,11 @@ class device_row_comparator {
 
   // NOTE(HIP/AMD): under clang/HIP a struct with `const` members of class type is reported as not
   // trivially copyable, which breaks storing device_row_comparator in rmm::device_uvector (used by
-  // the streaming groupby cross-comparator path). Drop the top-level `const` qualifiers (the
-  // members are never reassigned) so the type stays trivially copyable on AMD. Behavior-preserving.
+  // the streaming groupby cross-comparator path). Drop the top-level `const` qualifiers on AMD so
+  // the type stays trivially copyable. This is behaviour-preserving: the members are only ever set
+  // by the constructor's initializer list and never reassigned afterward, and operator() is `const`
+  // (it cannot mutate them), so logical const-ness is preserved even though the qualifier is gone.
+  // INVARIANT: do not add any non-const member function that mutates these fields.
 #ifdef __HIP_PLATFORM_AMD__
   table_device_view lhs;
   table_device_view rhs;

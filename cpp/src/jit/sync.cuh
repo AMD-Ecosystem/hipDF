@@ -77,15 +77,21 @@ __device__ void warp_compact_validity(lane_mask_type active_mask,
     auto const lane_id  = static_cast<size_type>(threadIdx.x & (cudf::detail::warp_size - 1));
     auto const row_base = row - lane_id;
 #if defined(__HIP_PLATFORM_AMD__)
-    // NOTE(HIP/AMD): the wavefront is 64 lanes wide but cudf null masks are 32-bit words, so a
-    // single 64-lane ballot spans two consecutive null-mask words. Split it and write both.
-    static_assert(cudf::detail::warp_size == 64,
-                  "warp_compact_validity assumes a 64-lane wavefront on AMD");
+    // NOTE(HIP/AMD): a wavefront-wide ballot is a 64-bit value but cudf null masks are 32-bit
+    // words. On a 64-lane wavefront the ballot spans two consecutive null-mask words, so split it
+    // and write both; on a 32-lane wavefront it maps to a single word like the NVIDIA path. The
+    // compile-time branch on warp_size keeps this correct on both wave64 and wave32 hardware.
+    // TODO(SWDEV-ticket): replace this hand-rolled leader election with a wavefront-size-agnostic
+    // `elect` intrinsic provided by libhipcxx (must work for both wave32 and wave64).
     auto const word_base = cudf::word_index(row_base);
-    Out::set_null_mask_word(
-      outcols, word_base, static_cast<bitmask_type>(null_word & 0xFFFF'FFFFULL));
-    Out::set_null_mask_word(
-      outcols, word_base + 1, static_cast<bitmask_type>((null_word >> 32) & 0xFFFF'FFFFULL));
+    if constexpr (cudf::detail::warp_size == 64) {
+      Out::set_null_mask_word(
+        outcols, word_base, static_cast<bitmask_type>(null_word & 0xFFFF'FFFFULL));
+      Out::set_null_mask_word(
+        outcols, word_base + 1, static_cast<bitmask_type>((null_word >> 32) & 0xFFFF'FFFFULL));
+    } else {
+      Out::set_null_mask_word(outcols, word_base, static_cast<bitmask_type>(null_word));
+    }
 #else
     Out::set_null_mask_word(outcols, cudf::word_index(row_base), null_word);
 #endif

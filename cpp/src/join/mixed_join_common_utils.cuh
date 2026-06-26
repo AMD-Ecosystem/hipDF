@@ -194,11 +194,7 @@ struct hash_probe_result {
     cuco::pair<hash_value_type, cudf::size_type> const& probe_key,
     std::size_t probe_idx)
   {
-    // NOTE(HIP/AMD): assign the result of __builtin_assume_aligned back to `data`; clang's
-    // const (pure) attribute makes discarding the return value an error under -Werror.
-    auto const* data = static_cast<cuco::pair<hash_value_type, cudf::size_type> const*>(
-      __builtin_assume_aligned(hash_table_storage.data(),
-                               2 * sizeof(cuco::pair<hash_value_type, cudf::size_type>)));
+    auto const* data  = hash_table_storage.data();
     auto const first  = *(data + probe_idx);
     auto const second = *(data + probe_idx + 1);
 
@@ -266,11 +262,7 @@ struct hash_table_prober {
 
   __device__ __forceinline__ auto get_bucket_slots() const noexcept
   {
-    // NOTE(HIP/AMD): assign __builtin_assume_aligned result back; clang's const(pure) attribute
-    // makes discarding the return value an error under -Werror.
-    auto const* data = static_cast<cuco::pair<hash_value_type, cudf::size_type> const*>(
-      __builtin_assume_aligned(hash_table_storage_.data(),
-                               2 * sizeof(cuco::pair<hash_value_type, cudf::size_type>)));
+    auto const* data  = hash_table_storage_.data();
     auto const first  = *(data + probe_idx_);
     auto const second = *(data + probe_idx_ + 1);
     return cuda::std::pair{first, second};
