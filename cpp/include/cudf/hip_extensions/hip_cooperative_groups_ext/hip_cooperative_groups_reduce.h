@@ -125,6 +125,10 @@ __device__ __attribute__((always_inline)) TArg reduce(
 //  - invoke_one(group, fn): the lowest-ranked member of the group calls fn once.
 //  - invoke_one_broadcast(group, fn): the lowest-ranked member calls fn and the
 //    returned value is broadcast to all members of the (tiled) group via shfl.
+// TODO(SWDEV-ticket): file a HIP cooperative-groups feature request to add native
+// invoke_one / invoke_one_broadcast (and the reduce overloads above); once available
+// upstream, drop these portable replacements. The implementations below can serve as the
+// reference for the feature request.
 
 template <typename Group, typename F>
 __device__ __attribute__((always_inline)) void invoke_one(const Group& group, F&& fn) {

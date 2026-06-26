@@ -288,6 +288,9 @@ inline void init_cudf_test(int argc, char** argv, cudf::test::config const& conf
 // (the type set_current_device_resource takes), even though it models the resource
 // concept. Set it via a non-owning device_async_resource_ref instead; `mr` is a local
 // in CUDF_TEST_PROGRAM_MAIN that outlives RUN_ALL_TESTS, so the reference stays valid.
+// TODO: revisit once libhipcxx 3.4 lands — if its any_resource `__imovable` override
+// constraint accepts the hipMM adaptors, drop this WAR and store the adaptor by value
+// like upstream.
 #ifdef __HIP_PLATFORM_AMD__
 #define CUDF_TEST_SET_STATISTICS_RESOURCE(mr) \
   cudf::set_current_device_resource(          \
