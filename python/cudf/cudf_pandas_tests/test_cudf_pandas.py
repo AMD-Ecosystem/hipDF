@@ -3,7 +3,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -1834,12 +1834,11 @@ def test_numpy_ndarray_numba_ufunc(array):
     assert_eq(add_one_ufunc(arr1), add_one_ufunc(arr2))
 
 
-@pytest.mark.filterwarnings(
-    "ignore:Grid size:numba.core.errors.NumbaPerformanceWarning"
-)
-@pytest.mark.filterwarnings(
-    "ignore:Grid size:numba.cuda.core.errors.NumbaPerformanceWarning"
-)
+# NOTE(HIP/AMD): match the warning by message only. Upstream pins the category to
+# numba(.cuda).core.errors.NumbaPerformanceWarning, but `numba.cuda.core.errors`
+# does not exist on numba-hip, so pytest raises a usage error (rc=4) while resolving
+# the filter. A message-only filter is robust across numba-cuda and numba-hip.
+@pytest.mark.filterwarnings("ignore:Grid size")
 def test_numpy_ndarray_numba_cuda_ufunc(array):
     arr1, arr2 = array
 
