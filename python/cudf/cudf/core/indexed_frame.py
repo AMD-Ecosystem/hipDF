@@ -4910,6 +4910,20 @@ class IndexedFrame(Frame):
         0  3  4
         1  4  5
 
+        .. note::
+            The two ``random_state=0`` examples above that sample along
+            ``axis=0`` are excluded from doctest verification
+            (``# doctest: +SKIP``) because their output is not portable across
+            GPU vendors. When sampling ``axis=0`` with an integer seed, the
+            rows to draw are generated with ``cupy.random.RandomState``, which
+            is backed by the platform GPU RNG library (cuRAND on NVIDIA,
+            rocRAND on AMD). These libraries emit different pseudo-random
+            sequences for the same seed, so the specific sampled rows differ by
+            platform even though the sampling itself is correct and fully
+            reproducible on any single platform. (The ``axis=1`` example is
+            verified because column sampling uses NumPy on the host, which is
+            deterministic and matches pandas.)
+
         .. pandas-compat::
             :meth:`pandas.DataFrame.sample`, :meth:`pandas.Series.sample`
 
