@@ -1,6 +1,28 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026, NVIDIA CORPORATION & AFFILIATES.
 # SPDX-License-Identifier: Apache-2.0
 
+# MIT License
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Callback for the polars collect function to execute on device."""
 
 from __future__ import annotations
@@ -235,7 +257,22 @@ def set_device(device: int | None) -> Generator[int, None, None]:
             )
         SEEN_DEVICE = to_use
     if to_use != current:
-        gpu.setDevice(to_use)
+        try:
+            gpu.setDevice(to_use)
+        except Exception:
+            # NOTE(HIP/AMD): a failed hipSetDevice (e.g. an invalid ordinal, as
+            # exercised by test_invalid_device_raises) leaves a *sticky* error in
+            # the HIP runtime. Left uncleared it surfaces on the next, unrelated
+            # GPU operation (an `invalid device ordinal` from a later
+            # CUDF_CHECK_CUDA, e.g. in HConcat's copy_range). Consume it before
+            # propagating. No-op on CUDA: the library load fails and is ignored.
+            try:
+                import ctypes as _ctypes
+
+                _ctypes.CDLL("libamdhip64.so").hipGetLastError()
+            except OSError:
+                pass
+            raise
         try:
             yield to_use
         finally:
