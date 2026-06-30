@@ -402,8 +402,18 @@ std::optional<size_t> compress_max_allowed_chunk_size(compression_type compressi
 {
   if (compression == compression_type::NONE) { return uncompressed_size; }
 
-  if (auto nvcomp_type = to_nvcomp_compression(compression); nvcomp_type.has_value()) {
+  // Only query nvcomp when device compression for this codec is actually available.
+  // Otherwise we fall back to the host compressor and must size the buffer with its
+  // worst-case bound (NOTE(HIP/AMD): e.g. ZSTD on hipcomp < 2.4 has no device
+  // compressor, so nvcomp::compress_max_output_chunk_size would CUDF_FAIL here).
+  if (auto nvcomp_type = to_nvcomp_compression(compression);
+      nvcomp_type.has_value() and not nvcomp::is_compression_disabled(*nvcomp_type)) {
     return nvcomp::compress_max_output_chunk_size(*nvcomp_type, uncompressed_size);
+  }
+
+  switch (compression) {
+    case compression_type::ZSTD: return ZSTD_compressBound(uncompressed_size);
+    default: break;
   }
   CUDF_FAIL("Unsupported compression type: " + compression_type_name(compression));
 }
