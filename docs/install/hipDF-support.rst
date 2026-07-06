@@ -41,9 +41,9 @@ This topic lists the system requirements for using hipDF.
    Building hipDF from source files requires GCC 13 or later, which is not delivered as part of Ubuntu 22.04 by default. You must install it manually. 
 * AMD Instinct GPUs: 
 
-  - MI350X / MI355X (GPU target gfx950) 
-  - MI300A / MI300X (GPU target gfx942) 
-  - MI250X / MI250 / MI210 (GPU target gfx90a) 
+  - MI355X (GPU target gfx950) 
+  - MI325X / MI300X (GPU target gfx942) 
+  - MI250 / MI210 (GPU target gfx90a) 
 
 * Python versions: 3.10, 3.11, 3.12, 3.13
 

@@ -141,7 +141,7 @@ Via AMD PyPI (recommended)
 .. code-block:: bash
 
    conda activate hipdf_dev
-   pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/rocm-7.2.1/simple
+   pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/rocm-7.2.3/simple
 
 From source
 ^^^^^^^^^^^
@@ -211,8 +211,8 @@ optional dependency key ``rocm-X-Y-Z``, as shown in the following command.
    conda activate hipdf_dev
 
    pip install --upgrade pip
-   pip install --extra-index-url https://pypi.amd.com/rocm-7.2.1/simple \
-     numba-hip[rocm-7-2-1]@git+https://github.com/rocm/numba-hip.git
+   pip install --extra-index-url https://pypi.amd.com/rocm-7.2.3/simple \
+     numba-hip[rocm-7-2-3]@git+https://github.com/rocm/numba-hip.git
      # NOTE: adapt ROCm key to your Python version
 
 .. _step-6-install-hipmm-into-hipdf_dev:
@@ -225,7 +225,7 @@ Via AMD PyPI (recommended)
 
 .. code-block:: bash
 
-   pip install amd-hipmm==4.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.2.1/simple
+   pip install amd-hipmm==4.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.2.3/simple
 
 From source
 ^^^^^^^^^^^
