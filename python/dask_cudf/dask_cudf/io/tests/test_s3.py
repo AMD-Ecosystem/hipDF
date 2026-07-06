@@ -1,6 +1,28 @@
 # SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
+# MIT License
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import socket
 from contextlib import contextmanager
@@ -67,6 +89,13 @@ def s3_base(endpoint_ip, endpoint_port):
         os.environ["AWS_SESSION_TOKEN"] = "foobar_session_token"
         os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
+        # Exempt loopback/link-local from any ambient HTTP proxy so requests to
+        # the local moto server are not routed through a proxy (which 503s them).
+        os.environ["no_proxy"] = (
+            "127.0.0.1,localhost,0.0.0.0,::1,169.254.169.254"
+        )
+        os.environ["NO_PROXY"] = os.environ["no_proxy"]
+
         # Launching moto in server mode, i.e., as a separate process
         # with an S3 endpoint on localhost
 
@@ -113,6 +142,11 @@ def s3_context(s3_base, bucket, files=None):
     ids=["kvikio=ON", "kvikio=OFF"],
 )
 def kvikio_remote_io(request):
+    # KvikIO remote (libcurl) datasource is CUDA-gated; on the HIP/AMD port it is
+    # disabled, so an s3:// path is treated as a local file and fails to open.
+    # Mirrors the __is_hip_amd_port__ skip in cudf's test_read_jsonl_files_kvikio_remote.
+    if request.param and cudf.__is_hip_amd_port__:
+        pytest.skip("KvikIO with HIP is not supported yet")
     with cudf.option_context("kvikio_remote_io", request.param):
         yield request.param
 

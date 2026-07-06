@@ -1,6 +1,28 @@
 # SPDX-FileCopyrightText: Copyright (c) 2023-2025, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
 
+# MIT License
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from __future__ import annotations
 
 import glob
@@ -16,10 +38,39 @@ import pytest
 if TYPE_CHECKING:
     import _pytest.python
 
+# NOTE(HIP/AMD): On the ROCm port, torch ships its own bundled ROCm stack including
+# librocm_smi64, whose static ROCm-SMI map is double-freed by a C++ static destructor
+# at process teardown when torch coexists with the system ROCm stack driven by
+# rmm/cudf (a ROCm-SMI teardown bug -- reproducible with a bare `import rmm; import
+# torch; <gpu op>`, and unrelated to libcudf/libhipcxx which are not even loaded).
+# All tests have already run and reported by the time the destructors fire, so the
+# abort (SIGABRT / "double free or corruption", exit 134) is a spurious teardown
+# artifact. Bypass the buggy destructors by hard-exiting with the real pytest status
+# during interpreter shutdown. Guarded to the HIP/AMD port only.
+import atexit as _atexit
+
 from _pytest.stash import StashKey
 
+import cudf as _cudf
 from cudf.pandas.module_accelerator import disable_module_accelerator
 from cudf.testing._rocm_smi import exit_if_rocm_smi_loaded, stash_exitstatus
+
+if getattr(_cudf, "__is_hip_amd_port__", False):
+    _hipdf_exit_status = {"code": 0}
+
+    def pytest_sessionfinish(session, exitstatus):
+        _hipdf_exit_status["code"] = int(exitstatus)
+
+    @_atexit.register
+    def _hipdf_hard_exit():
+        import sys as _sys
+
+        try:
+            _sys.stdout.flush()
+            _sys.stderr.flush()
+        finally:
+            os._exit(_hipdf_exit_status["code"])
+
 
 file_handle_key = StashKey[BinaryIO]()
 basename_key = StashKey[str]()

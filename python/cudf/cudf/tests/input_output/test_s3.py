@@ -3,7 +3,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2025-2026 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,16 @@ def aws_credentials(monkeymodule):
     monkeymodule.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeymodule.setenv("AWS_SESSION_TOKEN", "foobar_session_token")
     monkeymodule.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    # The local moto server is reached over http://127.0.0.1:<port>. If an HTTP
+    # proxy (e.g. HTTP_PROXY/HTTPS_PROXY) is set in the environment, boto3/botocore
+    # will route these local requests through it and the proxy returns 503, so
+    # exempt loopback/link-local addresses from proxying.
+    monkeymodule.setenv(
+        "no_proxy", "127.0.0.1,localhost,0.0.0.0,::1,169.254.169.254"
+    )
+    monkeymodule.setenv(
+        "NO_PROXY", "127.0.0.1,localhost,0.0.0.0,::1,169.254.169.254"
+    )
 
 
 @pytest.fixture(scope="module")
