@@ -2012,12 +2012,25 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
     )
   endif()
 
+  # NOTE(HIP/AMD): The upstream stream-identification utility (identify_stream_usage.cpp) was
+  # rewritten in rapidsai/cudf#22290 to use the NVIDIA Compute Sanitizer callback API
+  # (<sanitizer.h>, generated_cuda_runtime_api_meta.h), which has no ROCm equivalent. To avoid
+  # touching the upstream file (so future upstream changes keep merging cleanly), the AMD backend
+  # compiles identify_stream_usage_hip.cpp instead -- the pre-#22290 LD_PRELOAD symbol-interposition
+  # implementation, HIP-ported. Switch back to the upstream file once a compute-sanitizer equivalent
+  # exists on AMD.
+  if(CUDA_BACKEND)
+    set(_cudf_identify_stream_usage_src tests/utilities/identify_stream_usage.cpp)
+  else()
+    set(_cudf_identify_stream_usage_src tests/utilities/identify_stream_usage_hip.cpp)
+  endif()
+
   # Libraries for stream-related testing. We build the library twice, one with STREAM_MODE_TESTING
   # on and one with it set to off. Each test will then be configured to use the appropriate library
   # depending via ctest and whether it has been updated to expose public stream APIs.
   foreach(_mode cudf testing)
     set(_tgt "cudf_identify_stream_usage_mode_${_mode}")
-    add_library(${_tgt} SHARED tests/utilities/identify_stream_usage.cpp)
+    add_library(${_tgt} SHARED ${_cudf_identify_stream_usage_src})
 
     if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
       target_compile_definitions(
@@ -2036,7 +2049,9 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+    # NOTE(HIP/AMD): the LD_PRELOAD interposer resolves the real HIP symbols via
+    # dlsym(RTLD_NEXT, ...), so link the dl library (${CMAKE_DL_LIBS}).
+    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm ${CMAKE_DL_LIBS})
 
     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
     add_library(cudf::${_tgt} ALIAS ${_tgt})

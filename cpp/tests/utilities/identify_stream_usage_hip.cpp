@@ -1,0 +1,361 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2022-2026, NVIDIA CORPORATION.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+// MIT License
+//
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+// NOTE(HIP/AMD): This is the AMD/ROCm implementation of the stream-usage identification
+// utility. The upstream implementation (identify_stream_usage.cpp) was rewritten in
+// rapidsai/cudf#22290 to use the NVIDIA Compute Sanitizer callback API
+// (<sanitizer.h>, sanitizerSubscribe, generated_cuda_runtime_api_meta.h,
+// SANITIZER_CBID_RUNTIME_API_*), none of which have a ROCm equivalent. Rather than modify
+// that file (so upstream changes keep merging cleanly), the build compiles THIS file instead
+// whenever CUDA_BACKEND is OFF (see cpp/CMakeLists.txt). It is the pre-#22290 LD_PRELOAD
+// symbol-interposition approach, HIP-ported: the library is LD_PRELOAD'd ahead of the HIP
+// runtime and redefines the stream-taking HIP runtime symbols to validate the stream before
+// forwarding to the real implementation (resolved via dlsym(RTLD_NEXT, ...)). Once a
+// compute-sanitizer equivalent exists on AMD, the CMake gate can select the upstream file.
+
+#include <cudf/detail/utilities/stream_pool.hpp>
+
+#include <rmm/cuda_stream.hpp>
+#include <rmm/cuda_stream_view.hpp>
+
+#include <cudf/cuda_runtime.h>
+
+#include <dlfcn.h>
+
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+
+// This file is compiled into a separate library that is dynamically loaded with LD_PRELOAD at
+// runtime to libcudf to override some stream-related symbols in libcudf. The goal of such a library
+// is to verify if the stream/stream pool is being correctly forwarded between API calls.
+//
+// We control whether to override cudf::test::get_default_stream or
+// cudf::get_default_stream with a compile-time flag. The behaviour of tests
+// depend on whether STREAM_MODE_TESTING is defined:
+// 1. If STREAM_MODE_TESTING is not defined, cudf::get_default_stream will
+//    return a custom stream and stream_is_invalid will return true if any CUDA
+//    API is called using any of CUDA's default stream constants
+//    (cudaStreamLegacy, cudaStreamDefault, or cudaStreamPerThread). This check
+//    is sufficient to ensure that cudf is using cudf::get_default_stream
+//    everywhere internally rather than implicitly using stream 0,
+//    cudaStreamDefault, cudaStreamLegacy, thrust execution policies, etc. It
+//    is not sufficient to guarantee a stream-ordered API because it will not
+//    identify places in the code that use cudf::get_default_stream instead of
+//    properly forwarding along a user-provided stream.
+// 2. If STREAM_MODE_TESTING compiler option is defined, cudf::test::get_default_stream
+//    returns a custom stream and stream_is_invalid returns true if any CUDA
+//    API is called using any stream other than cudf::test::get_default_stream.
+//    This is a necessary and sufficient condition to ensure that libcudf is
+//    properly passing streams through all of its (tested) APIs.
+
+namespace cudf {
+
+#ifdef STREAM_MODE_TESTING
+namespace test {
+#endif
+
+rmm::cuda_stream_view const get_default_stream()
+{
+  static rmm::cuda_stream stream{};
+  return stream;
+}
+
+#ifdef STREAM_MODE_TESTING
+}  // namespace test
+#endif
+
+#ifdef STREAM_MODE_TESTING
+namespace detail {
+
+/**
+ * @brief Implementation of `cuda_stream_pool` that always returns the
+ * `cudf::test::get_default_stream()`
+ */
+class test_cuda_stream_pool : public cuda_stream_pool {
+ public:
+  rmm::cuda_stream_view get_stream() override { return cudf::test::get_default_stream(); }
+  [[maybe_unused]] rmm::cuda_stream_view get_stream(stream_id_type stream_id) override
+  {
+    return cudf::test::get_default_stream();
+  }
+
+  std::vector<rmm::cuda_stream_view> get_streams(std::size_t count) override
+  {
+    return std::vector<rmm::cuda_stream_view>(count, cudf::test::get_default_stream());
+  }
+
+  [[nodiscard]] std::size_t get_stream_pool_size() const override { return 1UL; }
+};
+
+cuda_stream_pool* create_global_cuda_stream_pool() { return new test_cuda_stream_pool(); }
+
+}  // namespace detail
+#endif
+
+}  // namespace cudf
+
+bool stream_is_invalid(hipStream_t stream)
+{
+#ifdef STREAM_MODE_TESTING
+  // In this mode the _only_ valid stream is the one returned by cudf::test::get_default_stream.
+  return (stream != cudf::test::get_default_stream().value());
+#else
+  // We explicitly list the possibilities rather than using
+  // `cudf::get_default_stream().value()` because there is no guarantee that
+  // `thrust::device` and the default value of
+  // `cudf::get_default_stream().value()` are actually the same. At present, the
+  // former is `hipStreamLegacy` while the latter is 0.
+  // NOTE(HIP/AMD): HIP's default-stream handles are the null stream (hipStreamDefault == 0x0),
+  // hipStreamLegacy ((hipStream_t)1) and hipStreamPerThread ((hipStream_t)2). Flag all three,
+  // mirroring the upstream cudaStreamDefault/cudaStreamLegacy/cudaStreamPerThread check.
+  return (stream == hipStreamDefault) || (stream == hipStreamLegacy) ||
+         (stream == hipStreamPerThread);
+#endif
+}
+
+/**
+ * @brief Raise an error if stream is invalid.
+ */
+void check_stream_and_error(hipStream_t stream)
+{
+  if (stream_is_invalid(stream)) {
+    char const* env_stream_error_mode{std::getenv("GTEST_CUDF_STREAM_ERROR_MODE")};
+    if (env_stream_error_mode && !strcmp(env_stream_error_mode, "print")) {
+      std::cout << "cudf_identify_stream_usage found unexpected stream!" << std::endl;
+    } else {
+      throw std::runtime_error("cudf_identify_stream_usage found unexpected stream!");
+    }
+  }
+}
+
+/**
+ * @brief Container for CUDA APIs that have been overloaded using DEFINE_OVERLOAD.
+ *
+ * This variable must be initialized before everything else.
+ *
+ * @see find_originals for a description of the priorities
+ */
+__attribute__((init_priority(1001))) std::unordered_map<std::string, void*> originals;
+
+/**
+ * @brief Macro for generating functions to override existing CUDA functions.
+ *
+ * Define a new function with the provided signature that checks the used
+ * stream and raises an exception if it is one of CUDA's default streams. If
+ * not, the new function forwards all arguments to the original function.
+ *
+ * Note that since this only defines the function, we do not need default
+ * parameter values since those will be provided by the original declarations
+ * in CUDA itself.
+ *
+ * @see find_originals for a description of the priorities
+ *
+ * @param function The function to overload.
+ * @param signature The function signature (must include names, not just types).
+ * @parameter arguments The function arguments (names only, no types).
+ *
+ * NOTE(HIP/AMD): We add overloads for HIP's _spt variants, too
+ *  (if a per-thread default stream is used).
+ */
+
+#define STRINGIFY(x) #x
+#define ADD_QUOTES(x) "\"" STRINGIFY(x) "\""
+#define CONCAT_SPT(x) (x##_spt)
+
+#define DEFINE_OVERLOAD(function, signature, arguments)     \
+  using function##_t = hipError_t (*)(signature);           \
+                                                            \
+  hipError_t function(signature)                            \
+  {                                                         \
+    check_stream_and_error(stream);                         \
+    return ((function##_t)originals[#function])(arguments); \
+  }                                                         \
+  __attribute__((constructor(1002))) void queue_##function() { originals[#function] = nullptr; }
+
+#define DEFINE_OVERLOAD_WITH_SPT(function, signature, arguments)                                    \
+  using function##_t = hipError_t (*)(signature);                                                   \
+                                                                                                   \
+  hipError_t function(signature)                                                                    \
+  {                                                                                                 \
+    check_stream_and_error(stream);                                                                 \
+    return ((function##_t)originals[#function])(arguments);                                         \
+  }                                                                                                 \
+  __attribute__((constructor(1002))) void queue_##function() { originals[#function] = nullptr; }   \
+  hipError_t function##_spt(signature)                                                              \
+  {                                                                                                 \
+    check_stream_and_error(stream);                                                                 \
+    return ((function##_t)originals[STRINGIFY(function##_spt)])(arguments);                         \
+  }                                                                                                 \
+  __attribute__((constructor(1002))) void queue_##function##_spt()                                  \
+  {                                                                                                 \
+    originals[STRINGIFY(function##_spt)] = nullptr;                                                 \
+  }
+
+/**
+ * @brief Helper macro to define macro arguments that contain a comma.
+ */
+#define ARG(...) __VA_ARGS__
+
+// clang-format off
+/*
+   We need to overload all the functions from the runtime API (assuming that we
+   don't use the driver API) that accept streams. The upstream reference for the
+   corresponding CUDA runtime API modules is
+   https://docs.nvidia.com/cuda/cuda-runtime-api/modules.html#modules; below are
+   the HIP equivalents of the stream-taking APIs.
+ */
+// clang-format on
+
+// Event APIS:
+DEFINE_OVERLOAD_WITH_SPT(hipEventRecord, ARG(hipEvent_t event, hipStream_t stream), ARG(event, stream));
+
+DEFINE_OVERLOAD(hipEventRecordWithFlags,
+                ARG(hipEvent_t event, hipStream_t stream, unsigned int flags),
+                ARG(event, stream, flags));
+
+// Execution APIS:
+DEFINE_OVERLOAD_WITH_SPT(hipLaunchKernel,
+                ARG(void const* func,
+                    dim3 gridDim,
+                    dim3 blockDim,
+                    void** args,
+                    size_t sharedMem,
+                    hipStream_t stream),
+                ARG(func, gridDim, blockDim, args, sharedMem, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipLaunchCooperativeKernel,
+                ARG(void const* func,
+                    dim3 gridDim,
+                    dim3 blockDim,
+                    void** args,
+                    size_t sharedMem,
+                    hipStream_t stream),
+                ARG(func, gridDim, blockDim, args, sharedMem, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipLaunchHostFunc,
+                ARG(hipStream_t stream, hipHostFn_t fn, void* userData),
+                ARG(stream, fn, userData));
+
+// Memory transfer APIS:
+DEFINE_OVERLOAD(hipMemPrefetchAsync,
+                ARG(void const* devPtr, size_t count, int dstDevice, hipStream_t stream),
+                ARG(devPtr, count, dstDevice, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy2DAsync,
+                ARG(void* dst,
+                    size_t dpitch,
+                    void const* src,
+                    size_t spitch,
+                    size_t width,
+                    size_t height,
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
+                ARG(dst, dpitch, src, spitch, width, height, kind, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy2DFromArrayAsync,
+                ARG(void* dst,
+                    size_t dpitch,
+                    hipArray_const_t src,
+                    size_t wOffset,
+                    size_t hOffset,
+                    size_t width,
+                    size_t height,
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
+                ARG(dst, dpitch, src, wOffset, hOffset, width, height, kind, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy2DToArrayAsync,
+                ARG(hipArray_t dst,
+                    size_t wOffset,
+                    size_t hOffset,
+                    void const* src,
+                    size_t spitch,
+                    size_t width,
+                    size_t height,
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
+                ARG(dst, wOffset, hOffset, src, spitch, width, height, kind, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy3DAsync,
+                ARG(hipMemcpy3DParms const* p, hipStream_t stream),
+                ARG(p, stream));
+// NOTE(HIP/AMD): HIP's hipMemcpy3DPeerAsync takes a non-const hipMemcpy3DPeerParms* and has no
+// _spt variant, so it uses DEFINE_OVERLOAD (not DEFINE_OVERLOAD_WITH_SPT).
+DEFINE_OVERLOAD(hipMemcpy3DPeerAsync,
+                ARG(hipMemcpy3DPeerParms* p, hipStream_t stream),
+                ARG(p, stream));
+DEFINE_OVERLOAD_WITH_SPT(
+  hipMemcpyAsync,
+  ARG(void* dst, void const* src, size_t count, hipMemcpyKind kind, hipStream_t stream),
+  ARG(dst, src, count, kind, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpyFromSymbolAsync,
+                ARG(void* dst,
+                    void const* symbol,
+                    size_t count,
+                    size_t offset,
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
+                ARG(dst, symbol, count, offset, kind, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpyToSymbolAsync,
+                ARG(void const* symbol,
+                    void const* src,
+                    size_t count,
+                    size_t offset,
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
+                ARG(symbol, src, count, offset, kind, stream));
+DEFINE_OVERLOAD_WITH_SPT(
+  hipMemset2DAsync,
+  ARG(void* devPtr, size_t pitch, int value, size_t width, size_t height, hipStream_t stream),
+  ARG(devPtr, pitch, value, width, height, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemset3DAsync,
+                ARG(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, hipStream_t stream),
+                ARG(pitchedDevPtr, value, extent, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipMemsetAsync,
+                ARG(void* devPtr, int value, size_t count, hipStream_t stream),
+                ARG(devPtr, value, count, stream));
+
+// Memory allocation APIS:
+DEFINE_OVERLOAD(hipFreeAsync, ARG(void* devPtr, hipStream_t stream), ARG(devPtr, stream));
+DEFINE_OVERLOAD(hipMallocAsync,
+                ARG(void** devPtr, size_t size, hipStream_t stream),
+                ARG(devPtr, size, stream));
+DEFINE_OVERLOAD(hipMallocFromPoolAsync,
+                ARG(void** ptr, size_t size, hipMemPool_t memPool, hipStream_t stream),
+                ARG(ptr, size, memPool, stream));
+
+/**
+ * @brief Function to collect all the original CUDA symbols corresponding to overloaded functions.
+ *
+ * Note on priorities:
+ * - `originals` must be initialized first, so it is 1001.
+ * - The function names must be added to originals next in the macro, so those are 1002.
+ * - Finally, this function actually finds the original symbols so it is 1003.
+ */
+__attribute__((constructor(1003))) void find_originals()
+{
+  for (auto it : originals) {
+    originals[it.first] = dlsym(RTLD_NEXT, it.first.data());
+  }
+}
