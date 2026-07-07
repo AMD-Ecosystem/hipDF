@@ -2,6 +2,29 @@
  * SPDX-FileCopyrightText: Copyright (c) 2024-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "common.hpp"
 #include "groupby_results.hpp"
 
@@ -105,7 +128,16 @@ int main(int argc, char const** argv)
   auto const mr_name = std::string("pool");
   auto resource      = create_memory_resource(mr_name);
   auto stats_mr      = rmm::mr::statistics_resource_adaptor{resource};
+#ifdef __HIP_PLATFORM_AMD__
+  // NOTE(HIP/AMD): hipMM 5.0.0's statistics_resource_adaptor cannot be stored by value in
+  // cuda::mr::any_resource (the type set_current_device_resource takes), even though it models
+  // the resource concept. Set it via a non-owning device_async_resource_ref instead; stats_mr
+  // outlives its use here. Matches the CUDF_TEST_SET_STATISTICS_RESOURCE WAR in the gtests.
+  cudf::set_current_device_resource(
+    cuda::mr::any_resource<cuda::mr::device_accessible>{rmm::device_async_resource_ref{stats_mr}});
+#else
   rmm::mr::set_current_device_resource(stats_mr);
+#endif
   auto stream = cudf::get_default_stream();
 
   std::filesystem::path p = input_file;

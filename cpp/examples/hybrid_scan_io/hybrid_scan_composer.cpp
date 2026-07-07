@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "hybrid_scan_composer.hpp"
 
 #include "common_utils.hpp"
@@ -18,7 +40,15 @@
 
 #include <rmm/mr/aligned_resource_adaptor.hpp>
 
+// NOTE(HIP/AMD): NVTX is unavailable on HIP (built with -DNVTX_DISABLE). Only pull in the
+// nvtx header when NVTX is enabled, and otherwise provide no-op nvtxRangePush/nvtxRangePop
+// so the example builds without an nvtx equivalent. Re-enable once nvtx is available.
+#ifndef NVTX_DISABLE
 #include <nvtx3/nvtx3.hpp>
+#else
+#define nvtxRangePush(msg) ((void)0)
+#define nvtxRangePop() ((void)0)
+#endif
 
 #include <unordered_set>
 

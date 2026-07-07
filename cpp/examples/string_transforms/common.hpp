@@ -115,7 +115,19 @@ int main(int argc, char const** argv)
 
   rmm::mr::statistics_resource_adaptor stats_adaptor{cudf::get_current_device_resource_ref()};
 
-  if (enable_stats) { cudf::set_current_device_resource(stats_adaptor); }
+  if (enable_stats) {
+#ifdef __HIP_PLATFORM_AMD__
+    // NOTE(HIP/AMD): hipMM 5.0.0's statistics_resource_adaptor cannot be stored by value in
+    // cuda::mr::any_resource (the type set_current_device_resource takes), even though it models
+    // the resource concept. Set it via a non-owning device_async_resource_ref instead;
+    // stats_adaptor outlives its use here. Matches the CUDF_TEST_SET_STATISTICS_RESOURCE WAR in
+    // the gtests.
+    cudf::set_current_device_resource(cuda::mr::any_resource<cuda::mr::device_accessible>{
+      rmm::device_async_resource_ref{stats_adaptor}});
+#else
+    cudf::set_current_device_resource(stats_adaptor);
+#endif
+  }
 
   cudf::io::csv_reader_options in_opts =
     cudf::io::csv_reader_options::builder(cudf::io::source_info{in_csv}).header(0);
