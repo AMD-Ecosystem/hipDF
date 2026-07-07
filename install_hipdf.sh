@@ -58,7 +58,7 @@ HIPMM_BRANCH=${HIPMM_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
 HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
 HIPDF_BRANCH=${HIPDF_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
 
-AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/rocm-7.2.1/simple"}
+AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/rocm-7.2.3/simple"}
 
 # We assume that you have already installed ROCm into /opt/rocm
 

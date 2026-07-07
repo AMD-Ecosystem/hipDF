@@ -96,7 +96,7 @@ print(tips_df.groupby("size").tip_percentage.mean())
 
 ### ROCm/GPU Requirements
 
-* ROCm HIP SDK compilers version 7.2.1
+* ROCm HIP SDK compilers version 7.2.3
 * GCC 14 toolchain or later (for building from source)
 * Build requirements: `rocthrust-dev`, `rocm-llvm-dev`, `hipcub` (Ubuntu)
 * Runtime requirements: `rocm-llvm-dev` (Ubuntu)
