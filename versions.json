@@ -1,25 +1,5 @@
 {
-  "packages": {
-    "hipco": {
-      "version": "0.4.0",
-      "git_url": "https://github.com/${rapids-cmake-rocm-org}/hipCollections",
-      "git_tag": "fix/moberste/transform-iterator-random-access"
-    },
-    "hipmm": {
-      "version": "5.0.0",
-      "git_url": "https://github.com/${rapids-cmake-rocm-ds-org}/hipMM",
-      "git_tag": "develop/rapids-26.06",
-      "source_subdir": "cpp"
-    },
-    "libhipcxx": {
-      "version": "3.3.4",
-      "git_url": "https://github.com/${rapids-cmake-rocm-org}/libhipcxx",
-      "git_tag": "upgrade/3.3.4_enable"
-    },
-    "rocmds_logger": {
-      "version": "1.0.0",
-      "git_url": "https://github.com/${rapids-cmake-rocm-ds-org}/ROCmDS-Logger",
-      "git_tag": "amd-integration"
-    }
+  "packages" : {
+
   }
 }

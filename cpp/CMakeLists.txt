@@ -504,6 +504,15 @@ if(CUDF_INSTALL_LIBRARY_DEPS OR NOT _rapids_logger_type STREQUAL "STATIC_LIBRARY
   rapids_export_package(INSTALL rapids_logger cudf-exports VERSION ${rapids_logger_VERSION})
 endif()
 
+# NOTE(HIP/AMD): ROCmDS-Logger's create_logger_macros.cmake is not installed to the CMake package,
+# so include it directly from the fetched source tree. This is a temporary workaround until
+# ROCmDS-Logger exports this function in its package config.
+if(rapids_logger_SOURCE_DIR AND EXISTS
+                                "${rapids_logger_SOURCE_DIR}/cmake/create_logger_macros.cmake"
+)
+  include("${rapids_logger_SOURCE_DIR}/cmake/create_logger_macros.cmake")
+endif()
+
 create_logger_macros(CUDF "cudf::default_logger()" include/cudf)
 
 # find jitify
@@ -1669,8 +1678,8 @@ set_property(
 # wavefront) barrier deadlocks because divergent lanes in the aggregation phase never reconverge to
 # reach the s_barrier (confirmed by rocgdb: one wave stuck at the aggregator's divergent return with
 # a partial exec mask, the other wave parked at the barrier). -O2 both compiles cleanly and runs
-# correctly (GROUPBY_TEST argmin and STREAM_GROUPBY_TEST count both pass), so build this single TU at
-# -O2. This is a HIP-only build tree (the project FATAL_ERRORs above if not using a HIP/ROCm
+# correctly (GROUPBY_TEST argmin and STREAM_GROUPBY_TEST count both pass), so build this single TU
+# at -O2. This is a HIP-only build tree (the project FATAL_ERRORs above if not using a HIP/ROCm
 # compiler); the CUDA build is unaffected.
 # Fixed in ROCm 7.14: -O3 both compiles and runs correctly there (verified on gfx90a: the TU builds
 # with no diagnostics, GROUPBY_TEST 4354/4354 and STREAM_GROUPBY_TEST 28/28 pass), so apply the pin
@@ -1773,8 +1782,8 @@ else()
 endif()
 
 # NOTE(HIP/AMD): cudf normally links the header-only `nvtx3::nvtx3-cpp` target, which upstream gets
-# transitively from rmm's public interface. The AMD rmm/hipMM port disables its own nvtx3 fetch
-# (rmm cpp/CMakeLists.txt get_nvtx is commented out, linking hip::host instead) and USE_NVTX is
+# transitively from rmm's public interface. The AMD rmm/hipMM port disables its own nvtx3 fetch (rmm
+# cpp/CMakeLists.txt get_nvtx is commented out, linking hip::host instead) and USE_NVTX is
 # force-disabled on AMD, so the nvtx3 target does not exist here. Since NVTX is fully disabled
 # (NVTX_DISABLE is defined below, so no NVTX headers/calls are emitted), only link nvtx3::nvtx3-cpp
 # when it is actually available; otherwise drop it. This keeps the upstream link line intact for the
@@ -1787,8 +1796,8 @@ endif()
 
 # NOTE(HIP/AMD): KvikIO is only fetched on the CUDA backend (get_kvikio.cmake is gated by
 # CUDA_BACKEND above), so the kvikio::kvikio target does not exist on AMD. Only link it when present
-# (mirrors the `if(TARGET KvikIO)` gate used for CUDF_HAS_KVIKIO above). Upstream/CUDA build links it
-# as before.
+# (mirrors the `if(TARGET KvikIO)` gate used for CUDF_HAS_KVIKIO above). Upstream/CUDA build links
+# it as before.
 if(TARGET kvikio::kvikio)
   set(_cudf_kvikio_link kvikio::kvikio)
 else()
@@ -1799,8 +1808,8 @@ endif()
 target_link_libraries(
   cudf
   PUBLIC CCCL::CCCL $<BUILD_LOCAL_INTERFACE:BS::thread_pool>
-  PRIVATE ${_cudf_nvtx3_link} $<BUILD_LOCAL_INTERFACE:cuco::cuco> ZLIB::ZLIB
-          ${CUDF_nvcomp_TARGET} ${_cudf_kvikio_link} ${CUDF_nanoarrow_TARGET} zstd
+  PRIVATE ${_cudf_nvtx3_link} $<BUILD_LOCAL_INTERFACE:cuco::cuco> ZLIB::ZLIB ${CUDF_nvcomp_TARGET}
+          ${_cudf_kvikio_link} ${CUDF_nanoarrow_TARGET} zstd
 )
 
 # When building a shared libcudf with static deps, we absorb them via whole-archive linking so that
@@ -2049,8 +2058,8 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    # NOTE(HIP/AMD): the LD_PRELOAD interposer resolves the real HIP symbols via
-    # dlsym(RTLD_NEXT, ...), so link the dl library (${CMAKE_DL_LIBS}).
+    # NOTE(HIP/AMD): the LD_PRELOAD interposer resolves the real HIP symbols via dlsym(RTLD_NEXT,
+    # ...), so link the dl library (${CMAKE_DL_LIBS}).
     target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm ${CMAKE_DL_LIBS})
 
     rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
