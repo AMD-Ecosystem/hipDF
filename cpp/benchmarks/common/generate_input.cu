@@ -462,9 +462,9 @@ rmm::device_uvector<cudf::size_type> sample_indices_with_run_length(cudf::size_t
 
 struct valid_or_zero {
   template <typename T>
-  __device__ T operator()(cuda::std::tuple<T, bool> len_valid) const
+  __device__ T operator()(thrust::tuple<T, bool> len_valid) const
   {
-    return cuda::std::get<1>(len_valid) ? cuda::std::get<0>(len_valid) : T{0};
+    return thrust::get<1>(len_valid) ? thrust::get<0>(len_valid) : T{0};
   }
 };
 
@@ -485,10 +485,10 @@ struct string_generator {
   // range 32-127 is ASCII; 127-136 will be multi-byte UTF-8
   {
   }
-  __device__ void operator()(cuda::std::tuple<int64_t, int64_t> str_begin_end)
+  __device__ void operator()(thrust::tuple<int64_t, int64_t> str_begin_end)
   {
-    auto begin = cuda::std::get<0>(str_begin_end);
-    auto end   = cuda::std::get<1>(str_begin_end);
+    auto begin = thrust::get<0>(str_begin_end);
+    auto end   = thrust::get<1>(str_begin_end);
     engine.discard(begin);
     for (auto i = begin; i < end; ++i) {
       auto ch = char_dist(engine);
