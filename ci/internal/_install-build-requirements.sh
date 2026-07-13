@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # MIT License
 #
 # Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
@@ -28,6 +29,7 @@ pip install --upgrade pip
 # running outside a conda env (e.g. in a pipeline-managed venv).
 if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     pip install ${BUILD_ARTIFACTS_DIR}/hip_python*.whl \
+                ${BUILD_ARTIFACTS_DIR}/rocm_bindings*.whl \
                 ${BUILD_ARTIFACTS_DIR}/*rocmds_logger*.whl \
                 ${BUILD_ARTIFACTS_DIR}/amd_libhipmm*.whl \
                 ${BUILD_ARTIFACTS_DIR}/amd_hipmm*.whl \
