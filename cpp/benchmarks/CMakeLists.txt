@@ -47,7 +47,7 @@ target_compile_options(
 target_link_libraries(
   cudf_datagen
   PUBLIC GTest::gmock GTest::gtest nvbench::nvbench Threads::Threads cudf cudf::cudftestutil
-         nvtx3::nvtx3-cpp
+         $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>
   PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
 )
 
@@ -91,7 +91,7 @@ add_library(
 )
 target_link_libraries(
   cudf_benchmark_common PRIVATE cudf_datagen $<TARGET_NAME_IF_EXISTS:conda_env> GTest::gmock
-                                GTest::gtest kvikio::kvikio
+                                GTest::gtest $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
 )
 
 add_custom_command(
