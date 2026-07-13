@@ -39,6 +39,7 @@ struct benchmark_domain {
   static constexpr char const* name{"benchmarks"};  ///< Name of the domain
 };
 
+#ifndef NVTX_DISABLE
 /**
  * @brief Alias for an NVTX range in the libcudf benchmark domain.
  *
@@ -53,6 +54,13 @@ struct benchmark_domain {
  * ```
  */
 using scoped_range = ::nvtx3::scoped_range_in<benchmark_domain>;
+#else
+// NOTE(HIP/AMD): No-op placeholder when NVTX is disabled
+struct scoped_range {
+  template <typename... Args>
+  scoped_range(Args&&...) {}
+};
+#endif
 
 }  // namespace cudf::benchmark
 
