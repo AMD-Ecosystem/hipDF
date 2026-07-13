@@ -73,10 +73,7 @@ cmake_args=(
   ${no_use_versions_json:+"-D CPM_rmm_SOURCE=${SRC_DIR}/hipmm"}
   ${no_use_versions_json:+"-D CPM_cudf_SOURCE=${SRC_DIR}/hipdf"}
   # NOTE(HIP/AMD): rapids_logger source override for ROCmDS-Logger v2.0.0+
-  #                Set CPM_rapids_logger_SOURCE environment variable to override
-  ${CPM_rapids_logger_SOURCE:+"-D CPM_rapids_logger_SOURCE=${CPM_rapids_logger_SOURCE}"}
-  # Legacy fallback:
-  # ${no_use_versions_json:+"-D CPM_rapids_logger_SOURCE=${SRC_DIR}/rocmds_logger"}
+  ${no_use_versions_json:+"-D CPM_rapids_logger_SOURCE=${SRC_DIR}/rocmds_logger"}
   ${use_sccache:+"-D CMAKE_HIP_COMPILER_LAUNCHER=sccache"}
   ${use_sccache:+"-D CMAKE_CXX_COMPILER_LAUNCHER=sccache"}
   ${use_sccache:+"-D CMAKE_C_COMPILER_LAUNCHER=sccache"}
