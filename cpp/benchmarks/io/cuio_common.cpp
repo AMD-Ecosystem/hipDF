@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <benchmarks/io/cuio_common.hpp>
 
 #include <cudf/detail/utilities/integer_utils.hpp>
@@ -10,7 +32,9 @@
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/memory_resource.hpp>
 
+#ifdef CUDF_BENCHMARK_HAVE_KVIKIO
 #include <kvikio/file_utils.hpp>
+#endif
 
 #include <rmm/mr/pinned_host_memory_resource.hpp>
 
@@ -266,6 +290,7 @@ std::pair<bool, bool> parse_cache_dropping_env()
 
 void drop_page_cache_if_enabled(std::vector<std::string> const& file_paths)
 {
+#ifdef CUDF_BENCHMARK_HAVE_KVIKIO
   static auto const parsed_env                = parse_cache_dropping_env();
   auto [is_drop_cache_enabled, is_file_scope] = parsed_env;
   if (not is_drop_cache_enabled) {
@@ -288,6 +313,11 @@ void drop_page_cache_if_enabled(std::vector<std::string> const& file_paths)
     if (path.empty()) { continue; }
     kvikio::drop_file_page_cache(path);
   }
+#else
+  // NOTE(HIP/AMD): kvikio not available - page cache dropping is disabled
+  (void)file_paths;  // Suppress unused parameter warning
+  log_page_cache_warning_once();
+#endif
 }
 
 io_type retrieve_io_type_enum(std::string_view io_string)

@@ -94,6 +94,11 @@ target_link_libraries(
                                 GTest::gtest $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
 )
 
+# NOTE(HIP/AMD): Define CUDF_BENCHMARK_HAVE_KVIKIO when kvikio is available
+if(TARGET kvikio::kvikio)
+  target_compile_definitions(cudf_benchmark_common PRIVATE CUDF_BENCHMARK_HAVE_KVIKIO)
+endif()
+
 add_custom_command(
   OUTPUT CUDF_BENCHMARKS
   COMMAND echo Running benchmarks
