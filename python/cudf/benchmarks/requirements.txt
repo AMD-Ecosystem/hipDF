@@ -1,0 +1,5 @@
+# Runtime dependencies required to run the cudf Python benchmarks.
+# These mirror the versions installed by the AMD-AIOSS CI benchmark stage.
+pyarrow
+cachetools
+pandas<2.4.0dev0
