@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # MIT License
 #
 # Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
@@ -70,6 +71,7 @@ cmake_args=(
   ${no_use_versions_json:+"-D CPM_nvbench_SOURCE=${SRC_DIR}/hipbench"}
   ${no_use_versions_json:+"-D CPM_jitify_SOURCE=${SRC_DIR}/jitify"}
   ${no_use_versions_json:+"-D CPM_hipcollections_SOURCE=${SRC_DIR}/hipcollections"}
+  ${no_use_versions_json:+"-D CPM_cuco_SOURCE=${SRC_DIR}/hipcollections"}
   ${no_use_versions_json:+"-D CPM_rmm_SOURCE=${SRC_DIR}/hipmm"}
   ${no_use_versions_json:+"-D CPM_cudf_SOURCE=${SRC_DIR}/hipdf"}
   # NOTE(HIP/AMD): rapids_logger source override for ROCmDS-Logger v2.0.0+
