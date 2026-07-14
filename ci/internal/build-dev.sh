@@ -124,6 +124,12 @@ cd ${build_dir}
     export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
     export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:${ROCM_PATH}
 
+    # NOTE(HIP/AMD): When -n is passed (no install), pylibcudf needs CMAKE_PREFIX_PATH
+    # to point to the build directory where cudfConfig.cmake is generated
+    if [[ -n "${no_install:-}" ]]; then
+      export INSTALL_PREFIX=${build_build_dir}
+    fi
+
     set +u
     bash build.sh ${build_sh_args[@]} \
      ${cmake_args:+"--cmake-args=\"${cmake_args[@]}\""}
