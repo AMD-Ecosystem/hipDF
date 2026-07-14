@@ -147,7 +147,7 @@ From source
 ^^^^^^^^^^^
 
 These instructions use the AMD MI300 GPU (gfx942 architecture). The following only serves
-as an example. ``HCC_AMDGPU_TARGET`` can be set to `any supported architecture <./hipDF-support.rst>`__.
+as an example. ``HCC_AMDGPU_TARGET`` can be set to `any supported architecture <./hipDF-support.html>`__.
 
 1. In order to build CuPy from source, you will not only require the library
    packages (``hipblas``, ``hipfft``, ...) but also additional development packages
@@ -232,7 +232,7 @@ From source
 
 The following instructions use the AMD MI300 GPU (gfx942 architecture). However, this
 is only for example purposes. ``RAPIDS_CMAKE_HIP_ARCHITECTURES`` can be
-set to `any supported architecture <./hipDF-support.rst>`__.
+set to `any supported architecture <./hipDF-support.html>`__.
 
 1. Clone the hipMM release branch into the work directory:
 
@@ -264,7 +264,7 @@ Step 7: Install hipDF into hipdf_dev
 
 These instructions use the AMD MI300 GPU (gfx942 architecture). However, this
 is only for example purposes. ``CUDF_CMAKE_HIP_ARCHITECTURES`` can be set
-to `any supported architecture <./hipDF-support.rst>`__.
+to `any supported architecture <./hipDF-support.html>`__.
 
 Install the ``amd-hipdf`` Python package as shown below:
 
