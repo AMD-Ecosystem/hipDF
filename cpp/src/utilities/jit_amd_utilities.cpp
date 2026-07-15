@@ -88,6 +88,41 @@ namespace cudf {
     return get_llvm_ir_target_features_for_arch(get_arch_name_of_current_device());
   }
 
+  namespace {
+    // Remove the `noreturn` function attribute from every `attributes #N = { ... }` group in the
+    // given LLVM IR, leaving all other text untouched.
+    //
+    // Background: Some older hand-written or Numba-generated LLVM IR fixtures incorrectly mark
+    // device UDF functions with the `noreturn` attribute even though they do return (ret void).
+    // When that bitcode is linked and inlined into a JIT kernel, LLVM trusts the noreturn promise
+    // and treats everything after the UDF call—the result write-back and the grid-stride loop—as
+    // unreachable, deleting it. The resulting miscompiled kernel dereferences garbage and triggers
+    // a GPU memory-access fault.
+    //
+    // This function defensively strips `noreturn` from attribute groups before the IR is linked,
+    // protecting against any incoming UDF IR that carries the bogus attribute.
+    std::string strip_noreturn_from_attribute_groups(const std::string& llvm_ir) {
+      const std::regex attribute_group_pattern(R"(attributes #[0-9]+ = \{[^}]*\})");
+      const std::regex noreturn_pattern(R"(\s*\bnoreturn\b)");
+
+      std::string result = llvm_ir;
+      std::smatch match;
+      std::string::const_iterator search_start(result.cbegin());
+
+      while (std::regex_search(search_start, result.cend(), match, attribute_group_pattern)) {
+        std::string attr_group = match.str();
+        std::string cleaned = std::regex_replace(attr_group, noreturn_pattern, "");
+
+        auto pos = std::distance(result.cbegin(), search_start) + match.position();
+        result.replace(pos, attr_group.length(), cleaned);
+
+        search_start = result.cbegin() + pos + cleaned.length();
+      }
+
+      return result;
+    }
+  }  // namespace
+
   std::string adapt_llvm_ir_attributes_for_current_arch(const std::string& llvm_ir) {
     std::string target_features = get_llvm_ir_target_features_for_current_arch();
     std::string target_cpu = "\"target-cpu\"=\"" + get_arch_name_of_current_device();
@@ -98,6 +133,9 @@ namespace cudf {
 
     std::string result = std::regex_replace(llvm_ir, target_feat_pattern, "\"target-features\"=\"" + target_features);
     result = std::regex_replace(result, target_cpu_pattern, target_cpu);
+
+    // Strip noreturn attribute from all attribute groups to prevent miscompilation
+    result = strip_noreturn_from_attribute_groups(result);
 
     return result;
 
