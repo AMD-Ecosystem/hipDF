@@ -129,7 +129,11 @@ del rmm_cupy_allocator
 del RMMNumbaManager
 
 
-from cuda import cuda as _cuda_python_cuda
+# NOTE(HIP/AMD): use the modern cuda-python layout (cuda.bindings.driver),
+# consistent with the rest of the codebase. The `HIP_PYTHON` marker set by
+# ROCm's hip-python lives on the cuda.bindings.* modules; the deprecated
+# top-level `cuda.cuda` module is not provided by hip-python-interop.
+from cuda.bindings import driver as _cuda_python_cuda
 
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
 del _cuda_python_cuda

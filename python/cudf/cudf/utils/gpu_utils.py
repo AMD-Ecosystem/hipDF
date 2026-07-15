@@ -244,7 +244,10 @@ def validate_setup():  # type: ignore[no-redef]
     ):
         return
 
-    from cuda.cudart import cudaError_t
+    # NOTE(HIP/AMD): use the modern cuda-python layout (cuda.bindings.runtime),
+    # consistent with the rest of the codebase. The deprecated `cuda.cudart`
+    # module is not provided by the ROCm hip-python-interop package.
+    from cuda.bindings.runtime import cudaError_t
 
     from rmm._cuda.gpu import (
         CUDARuntimeError,
