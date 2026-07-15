@@ -37,13 +37,11 @@ def test_import_hipdf():
     import hipdf.core._internals.binaryop
     import hipdf.core._internals.copying
     import hipdf.core._internals.sorting
-    import hipdf.core._internals.stream_compaction
     import hipdf.core._internals.timezones
     import hipdf.core.abc
     import hipdf.core.algorithms
     import hipdf.core.buffer
     import hipdf.core.buffer.buffer
-    import hipdf.core.buffer.exposure_tracked_buffer
     import hipdf.core.buffer.spill_manager
     import hipdf.core.buffer.spillable_buffer
     import hipdf.core.buffer.utils
@@ -122,7 +120,6 @@ def test_import_hipdf():
     import hipdf.testing.testing
     import hipdf.utils
     import hipdf.utils._numba
-    import hipdf.utils.applyutils
     import hipdf.utils.cudautils
     import hipdf.utils.docutils
     import hipdf.utils.dtypes
