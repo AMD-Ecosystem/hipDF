@@ -105,6 +105,11 @@ if [ -n "${HIPDF_CONDA_ENV:-}" ] && [ "${STAGE_NAME:-}" != "test-wheels" ]; then
     source ${CONDA_DIR}/etc/profile.d/conda.sh
     conda activate ${HIPDF_CONDA_ENV}
     set -u
+elif [ -z "${HIPDF_CONDA_ENV:-}" ] && [ "${STAGE_NAME:-}" != "test-wheels" ]; then
+    # No conda env: activate the pipeline-managed venv created by _build-preamble.sh
+    # (mirrors test-cpp.sh). Required so pip/pytest run inside the venv instead of the
+    # externally-managed system Python, which rejects `pip install` under PEP 668.
+    . ${INSTALL_DIR}/venv/hipdf_dev/bin/activate
 fi
 
 test_failures=0

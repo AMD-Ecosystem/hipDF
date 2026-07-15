@@ -26,16 +26,25 @@ pip install --upgrade pip
 pip install pytest pytest-timeout pytest-csv pytest-benchmark
 
 # When using a conda env, dependency packages (hip_python, cupy, hipmm, etc.)
-# are already installed there. Only install from BUILD_ARTIFACTS_DIR when
-# running outside a conda env (e.g. in a pipeline-managed venv).
+# and the hipDF packages themselves are already installed there. Only install
+# from BUILD_ARTIFACTS_DIR when running outside a conda env (e.g. in a
+# pipeline-managed venv).
 if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     pip install ${BUILD_ARTIFACTS_DIR}/hip_python*.whl \
                 ${BUILD_ARTIFACTS_DIR}/rocm_bindings*.whl \
                 ${BUILD_ARTIFACTS_DIR}/*rocmds_logger*.whl \
-                ${BUILD_ARTIFACTS_DIR}/rocm_llvm_python*.whl \
                 ${BUILD_ARTIFACTS_DIR}/numba_hip*.whl \
                 ${BUILD_ARTIFACTS_DIR}/*cupy*.whl \
                 ${BUILD_ARTIFACTS_DIR}/*hipmm*.whl
+
+    # Install the hipDF packages under test. In the venv flow these are not
+    # otherwise present (build-wheels.sh installs them only into a throwaway
+    # venv, and _build-preamble.sh clears ${INSTALL_DIR}/venv/hipdf_dev), so the
+    # test modules cannot `import cudf` without this. Installed in dependency
+    # order: libhipdf (C++), pylibhipdf (bindings), then hipdf.
+    pip install ${BUILD_ARTIFACTS_DIR}/amd_libhipdf*.whl \
+                ${BUILD_ARTIFACTS_DIR}/amd_pylibhipdf*.whl \
+                ${BUILD_ARTIFACTS_DIR}/amd_hipdf*.whl
 fi
 
 # note: for jupyter notebooks
