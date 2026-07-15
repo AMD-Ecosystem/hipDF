@@ -37,7 +37,7 @@ from cudf.options import get_option
 # import nvtx  # NOTE(HIP/AMD): we follow cudf/pandas/annotation.py here
 
 
-class nvtx:  # type: ignore
+class nvtx:
     """Noop-stub with the same API as nvtx."""
 
     # NOTE(HIP/AMD): upstream 26.06 introduced a `dummy_domain` sentinel and a
