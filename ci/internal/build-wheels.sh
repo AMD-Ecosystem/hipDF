@@ -163,13 +163,18 @@ cd ${build_dir}
     . "${SCRIPT_DIR}/_build-preamble.sh"
 
     # Setup wheel build environment
+    # NOTE(HIP/AMD): Export CC/CXX as environment variables instead of passing
+    # CMAKE_C_COMPILER/CMAKE_CXX_COMPILER in cmake_args. This prevents CMake
+    # from detecting "compiler changed" during re-configuration, which would
+    # wipe the cache and drop all CPM_*_SOURCE overrides from _build-preamble.sh.
+    export CC=hipcc
+    export CXX=hipcc
     cmake_args+=( # from preamble
-        "-DCMAKE_C_COMPILER=hipcc"
-        "-DCMAKE_CXX_COMPILER=hipcc"
         "-DAMDGPU_TARGETS=${AMDGPU_TARGETS}"
         "-DCMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}"
         "-DGPU_TARGETS=${AMDGPU_TARGETS}"
     )
+    # shellcheck disable=SC2155
     export SKBUILD_CMAKE_ARGS=$(echo "${cmake_args[@]}" | tr ' ' ';')
     export RAPIDS_DISABLE_CUDA=true
     export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
