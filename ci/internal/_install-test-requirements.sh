@@ -23,7 +23,14 @@
 
 # NOTE: meant to be sourced
 pip install --upgrade pip
-pip install pytest pytest-timeout pytest-csv pytest-benchmark
+# Pin pytest below 9.1. pytest 9.1.0 removed a positional parameter from the
+# internal `_pytest.python.IdMaker` constructor, which `pytest-cases` (pulled in
+# by the hipdf `[test]` extra and used by python/cudf/benchmarks) probes at
+# import time. Under pytest >= 9.1 that probe raises `TypeError: IdMaker.__init__()
+# takes 7 positional arguments but 8 were given`; because pytest-cases registers
+# as a global pytest11 plugin, the crash aborts collection for *every* test file.
+# pytest 9.0.x (the newest allowed here) is compatible with pytest-cases 3.10.1.
+pip install 'pytest<9.1' pytest-timeout pytest-csv pytest-benchmark
 
 # When using a conda env, dependency packages (hip_python, cupy, hipmm, etc.)
 # and the hipDF packages themselves are already installed there. Only install
@@ -68,6 +75,10 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
         echo "ERROR: expected exactly one amd_hipdf wheel in ${BUILD_ARTIFACTS_DIR}, found ${#hipdf_wheels[@]}: ${hipdf_wheels[*]:-<none>}" >&2
         exit 1
     fi
+    # The `test` extra declares `pytest-cases` (used by python/cudf/benchmarks).
+    # Its bare `pytest` requirement is already satisfied by the `pytest<9.1` pin
+    # installed above, so pip keeps the compatible pytest rather than upgrading
+    # to a version that would break the pytest-cases global plugin.
     pip install "amd-hipdf[test] @ file://${hipdf_wheels[0]}"
     unset hipdf_wheels _prev_nullglob
 fi
