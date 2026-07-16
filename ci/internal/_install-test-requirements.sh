@@ -42,9 +42,34 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     # venv, and _build-preamble.sh clears ${INSTALL_DIR}/venv/hipdf_dev), so the
     # test modules cannot `import cudf` without this. Installed in dependency
     # order: libhipdf (C++), pylibhipdf (bindings), then hipdf.
+    #
+    # The hipdf wheel is installed with its `test` extra so that optional
+    # test-only dependencies declared in python/cudf/pyproject.toml (fastavro,
+    # msgpack, cramjam, s3fs, ...) are present. Without them, suites such as
+    # test_avro.py, test_hdfs.py, dask/test_serialize.py and the read_avro
+    # doctest error out on missing imports instead of running.
     pip install ${BUILD_ARTIFACTS_DIR}/amd_libhipdf*.whl \
-                ${BUILD_ARTIFACTS_DIR}/amd_pylibhipdf*.whl \
-                ${BUILD_ARTIFACTS_DIR}/amd_hipdf*.whl
+                ${BUILD_ARTIFACTS_DIR}/amd_pylibhipdf*.whl
+    # Resolve the hipdf wheel via a bash array glob (not `ls` in a command
+    # substitution, which would silently join multiple matches into a single
+    # invalid argument) and require exactly one match. The `[test]` extra is
+    # requested using the PEP 508 direct-reference form
+    # `amd-hipdf[test] @ file://<abs-path>`; the file:// scheme is required, as
+    # a bare path is rejected by pip with "Invalid URL ... No scheme supplied".
+    #
+    # `shopt -p nullglob` exits non-zero when nullglob is currently disabled, so
+    # `|| true` prevents the surrounding `set -e` from aborting the (sourced)
+    # script while still capturing the restore command in _prev_nullglob.
+    _prev_nullglob="$(shopt -p nullglob || true)"
+    shopt -s nullglob
+    hipdf_wheels=( "${BUILD_ARTIFACTS_DIR}"/amd_hipdf*.whl )
+    eval "${_prev_nullglob}"
+    if [ "${#hipdf_wheels[@]}" -ne 1 ]; then
+        echo "ERROR: expected exactly one amd_hipdf wheel in ${BUILD_ARTIFACTS_DIR}, found ${#hipdf_wheels[@]}: ${hipdf_wheels[*]:-<none>}" >&2
+        exit 1
+    fi
+    pip install "amd-hipdf[test] @ file://${hipdf_wheels[0]}"
+    unset hipdf_wheels _prev_nullglob
 fi
 
 # note: for jupyter notebooks
