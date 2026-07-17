@@ -33,16 +33,46 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # pytest arguments. Do not forgot to use quotes if there are
 # more than one arguments.
 # The 5th argument can be used to append a suffix to the test ID output in the CSV files.
+# Map a test directory to the pytest config file that declares the intended
+# options for that package (filterwarnings=error, --strict-markers, xfail_strict,
+# registered markers, ...).
+#
+# Why this is needed: pytest is invoked from the repo top-level
+# (${BUILD_DIR}/${PROJECT_ID}) with a single test-file path. Its rootdir/config
+# auto-discovery can select the top-level pyproject.toml, which has NO
+# [tool.pytest.ini_options] table, instead of the per-package config. When that
+# happens the package options are silently dropped: warnings are no longer turned
+# into errors and custom marks are unregistered, which makes "error case" tests
+# (that expect a warning-turned-exception) fail and emits PytestUnknownMarkWarning.
+# Passing an explicit `-c` makes the active config deterministic regardless of the
+# cwd/rootdir that pytest would otherwise infer.
+function config_for_tests() {
+    case "$1" in
+        python/pylibcudf/*)          echo "python/pylibcudf/pyproject.toml" ;;
+        python/cudf/cudf_pandas_tests*) echo "python/cudf/cudf_pandas_tests/pytest.ini" ;;
+        python/cudf/*)               echo "python/cudf/pyproject.toml" ;;
+        *)                           echo "" ;;
+    esac
+}
+
 function run_tests() {
     set +e # continue on error
     local pytest_args=${4:-""}
     local suffix=${5:-""}
     local id_suffix=${6:-""}
+    # Resolve the per-package pytest config and pass it explicitly (see
+    # config_for_tests above). Empty => fall back to pytest auto-discovery.
+    local config_file
+    config_file="$(config_for_tests "$1")"
+    local config_arg=""
+    if [ -n "${config_file}" ]; then
+        config_arg="-c ${config_file}"
+    fi
     find $1 -name "test_*.py" \
       -printf "run_tests: found test file: %p\n" \
       -exec bash -c '
         csv_file="$2/{}${5}.csv"
-        pytest $4 -v --timeout $3 {} \
+        pytest $7 $4 -v --timeout $3 {} \
         --continue-on-collection-errors \
         --csv "$csv_file" --csv-columns file,id,status,message
         if [[ -n "$5" && -f "$csv_file" ]]; then
@@ -51,7 +81,7 @@ function run_tests() {
           tail -n +2 "$csv_file" | awk -F"," -v suffix="$6" "BEGIN{OFS=\",\"} {\$2=\$2 suffix; print}" >> "$temp_file"
           mv "$temp_file" "$csv_file"
         fi
-        ' _ "$1" "$2" "$3" "$pytest_args" "$suffix" "$id_suffix" \;
+        ' _ "$1" "$2" "$3" "$pytest_args" "$suffix" "$id_suffix" "$config_arg" \;
     set -e
 }
 
