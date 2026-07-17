@@ -88,8 +88,14 @@ def install():
 
     # TODO(HIP/AMD): On MI300A, prefetching is not supported due to a known ROCm issue. Bypass prefetching by default.
     is_mi300a = False
-    prop = hip.hipDeviceProp_t()
-    hip.hipGetDeviceProperties(prop, 0)
+    # The rocm.bindings HIP API returns (error, properties) and takes only the
+    # device id; the older populate-in-place form hipGetDeviceProperties(prop, 0)
+    # is no longer valid and raises TypeError under recent hip-python.
+    err, prop = hip.hipGetDeviceProperties(0)
+    if err != hip.hipError_t.hipSuccess:
+        raise RuntimeError(
+            f"Failed to query device properties with error {err}"
+        )
     arch_name = prop.name.decode("utf-8")
     gcn_arch_name = (
         prop.gcnArchName.decode("utf-8")
