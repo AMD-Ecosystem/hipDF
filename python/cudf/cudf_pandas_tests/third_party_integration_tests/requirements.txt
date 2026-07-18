@@ -24,8 +24,10 @@
 pytest
 pytest-xdist
 
-# test_dask
-dask
+# test_dask / test_stumpy_distributed
+# The [distributed] extra pulls in the `distributed` package, which
+# test_stumpy_distributed.py needs via `from dask.distributed import ...`.
+dask[distributed]
 
 # test_matplotlib
 matplotlib
