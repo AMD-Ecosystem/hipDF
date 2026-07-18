@@ -83,7 +83,8 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     unset hipdf_wheels _prev_nullglob
 fi
 
-# note: for jupyter notebooks. nbformat is imported directly by
-# cudf_pandas_tests/test_cudf_pandas.py; without it that module errors out on
+# note: for jupyter notebooks. nbformat and nbconvert
+# (nbconvert.preprocessors.ExecutePreprocessor) are imported directly by
+# cudf_pandas_tests/test_cudf_pandas.py; without them that module errors out on
 # collection instead of running.
-pip install ipykernel==7.0.0a0 nbformat
+pip install ipykernel==7.0.0a0 nbformat nbconvert

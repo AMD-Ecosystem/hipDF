@@ -151,6 +151,15 @@ cd ${BUILD_DIR}/${PROJECT_ID}
 #==========================
 # BEGIN of project-specific
 #==========================
+    # Disable dask.distributed's NVML GPU diagnostics. On this ROCm stack the
+    # `pynvml` shim that distributed probes at cluster startup falls back to
+    # `rocm.bindings.amdsmi`, whose `amdsmi_get_processor_type()` signature is
+    # incompatible (expects 2 positional args, pynvml passes 1). That mismatch
+    # raises `TypeError` and aborts LocalCluster startup, erroring out
+    # test_stumpy_distributed.py. GPU diagnostics are not needed for these
+    # CPU-distributed tests, so switch them off. (case-sensitive value)
+    export DASK_DISTRIBUTED__DIAGNOSTICS__NVML=False
+
     # Allow partial failures here — some packages (e.g. tensorflow-rocm) may not
     # be available for every ROCm/Python version combination.
     python3 -m pip install -r python/cudf/cudf_pandas_tests/third_party_integration_tests/requirements.txt || \
