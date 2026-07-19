@@ -79,12 +79,17 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     # Its bare `pytest` requirement is already satisfied by the `pytest<9.1` pin
     # installed above, so pip keeps the compatible pytest rather than upgrading
     # to a version that would break the pytest-cases global plugin.
-    pip install "amd-hipdf[test] @ file://${hipdf_wheels[0]}"
+    #
+    # The `cudf-pandas-tests` extra (see python/cudf/pyproject.toml) provides the
+    # dependencies that cudf_pandas_tests/test_cudf_pandas.py needs but that are
+    # absent from the base `test` extra: nbformat/nbconvert (imported directly),
+    # openpyxl (pandas `.xlsx` ExcelWriter engine), and pytest-rerunfailures
+    # (which registers the `@pytest.mark.flaky` marker those tests use). Without
+    # this extra those tests error/fail on collection or execution.
+    pip install "amd-hipdf[test,cudf-pandas-tests] @ file://${hipdf_wheels[0]}"
     unset hipdf_wheels _prev_nullglob
 fi
 
-# note: for jupyter notebooks. nbformat and nbconvert
-# (nbconvert.preprocessors.ExecutePreprocessor) are imported directly by
-# cudf_pandas_tests/test_cudf_pandas.py; without them that module errors out on
-# collection instead of running.
-pip install ipykernel==7.0.0a0 nbformat nbconvert
+# note: for jupyter notebooks. The `cudf-pandas-tests` extra above installs a
+# bare `ipykernel`; pin it here to the version the notebook-based tests expect.
+pip install ipykernel==7.0.0a0
