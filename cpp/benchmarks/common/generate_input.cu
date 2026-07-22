@@ -2,7 +2,6 @@
  * SPDX-FileCopyrightText: Copyright (c) 2020-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 // MIT License
 //
 // Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
@@ -25,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "datagen_mode.hpp"
 #include "generate_input.hpp"
 #include "random_distribution_factory.cuh"
 
@@ -402,7 +402,29 @@ struct random_value_fn<T, typename std::enable_if_t<std::is_same_v<T, bool>>> {
   random_value_fn(distribution_params<bool> const& desc)
     : dist{[valid_prob = desc.probability_true](thrust::minstd_rand& engine,
                                                 size_t size) -> rmm::device_uvector<bool> {
-        rmm::device_uvector<bool> result(size, cudf::get_default_stream());
+        auto stream = cudf::get_default_stream();
+        if (cudf::datagen::is_cpu_datagen_enabled()) {
+          // Host-side bool generation: sequential O(N) with a single shared
+          // engine. Previous implementation created a fresh engine per index
+          // and called engine.discard(i), giving O(N^2) work that hung on
+          // large benchmark configurations.
+          std::vector<uint8_t> host_buf(size);
+          bool_generator gen(engine, valid_prob);
+          for (size_t i = 0; i < size; ++i) {
+            host_buf[i] = static_cast<uint8_t>(gen.dist(gen.engine) < gen.probability_true);
+          }
+          rmm::device_uvector<bool> result(size, stream);
+          if (size > 0) {
+            CUDF_CUDA_TRY(cudaMemcpyAsync(result.data(),
+                                          host_buf.data(),
+                                          size * sizeof(uint8_t),
+                                          cudaMemcpyHostToDevice,
+                                          stream.value()));
+            stream.synchronize();
+          }
+          return result;
+        }
+        rmm::device_uvector<bool> result(size, stream);
         thrust::tabulate(
           thrust::device, result.begin(), result.end(), bool_generator(engine, valid_prob));
         return result;
@@ -540,10 +562,67 @@ std::unique_ptr<cudf::column> create_random_utf8_string_column(data_profile cons
   // use the offsetalator to normalize the offset values for use by the string_generator
   auto offsets_itr = cudf::detail::offsetalator_factory::make_input_iterator(offsets->view());
   rmm::device_uvector<char> chars(chars_length, cudf::get_default_stream());
-  thrust::for_each_n(thrust::device,
-                     thrust::make_zip_iterator(offsets_itr, offsets_itr + 1),
-                     num_rows,
-                     string_generator<Encoding>{chars.data(), engine});
+  if (cudf::datagen::is_cpu_datagen_enabled()) {
+    // Copy offsets to host (column is INT32 or INT64).
+    auto const offsets_view = offsets->view();
+    std::vector<int64_t> host_offsets(num_rows + 1);
+    if (offsets_view.type().id() == cudf::type_id::INT32) {
+      std::vector<int32_t> tmp(num_rows + 1);
+      CUDF_CUDA_TRY(cudaMemcpyAsync(tmp.data(),
+                                    offsets_view.data<int32_t>(),
+                                    (num_rows + 1) * sizeof(int32_t),
+                                    cudaMemcpyDeviceToHost,
+                                    stream.value()));
+      stream.synchronize();
+      for (cudf::size_type i = 0; i <= num_rows; ++i) host_offsets[i] = tmp[i];
+    } else {
+      CUDF_CUDA_TRY(cudaMemcpyAsync(host_offsets.data(),
+                                    offsets_view.data<int64_t>(),
+                                    (num_rows + 1) * sizeof(int64_t),
+                                    cudaMemcpyDeviceToHost,
+                                    stream.value()));
+      stream.synchronize();
+    }
+    std::vector<char> host_chars(chars_length);
+    // Sequential character generation with a single shared engine: O(total
+    // chars) total work. The previous implementation created a fresh engine
+    // per row and called engine.discard(begin) where `begin` is the cumulative
+    // byte offset for that row, which grows linearly and produced O(N^2)
+    // behavior that effectively hung benchmarks like
+    // bench_groupby_mixed_types_keys at large num_rows. This mirrors the device
+    // `string_generator<Encoding>` byte-generation logic sequentially on host.
+    std::mt19937 local_engine(engine());
+    std::uniform_int_distribution<unsigned char> char_dist(
+      32, Encoding == string_encoding::ASCII ? 126 : 137);
+    for (cudf::size_type row = 0; row < num_rows; ++row) {
+      auto begin = host_offsets[row];
+      auto end   = host_offsets[row + 1];
+      for (auto i = begin; i < end; ++i) {
+        auto ch = char_dist(local_engine);
+        if constexpr (Encoding == string_encoding::UTF8) {
+          if (i == end - 1 && ch >= '\x7F') ch = ' ';  // last element ASCII only.
+          if (ch >= '\x7F') {                          // x7F is at the top edge of ASCII
+            host_chars[i++] = '\xC4';                  // these characters are assigned two bytes
+            ch              = (ch >> 2) | 0x80;
+          }
+        }
+        host_chars[i] = static_cast<char>(ch);
+      }
+    }
+    if (chars_length > 0) {
+      CUDF_CUDA_TRY(cudaMemcpyAsync(chars.data(),
+                                    host_chars.data(),
+                                    chars_length * sizeof(char),
+                                    cudaMemcpyHostToDevice,
+                                    stream.value()));
+      stream.synchronize();
+    }
+  } else {
+    thrust::for_each_n(thrust::device,
+                       thrust::make_zip_iterator(offsets_itr, offsets_itr + 1),
+                       num_rows,
+                       string_generator<Encoding>{chars.data(), engine});
+  }
 
   auto [result_bitmask, null_count] =
     profile.get_null_probability().has_value()
@@ -1106,6 +1185,44 @@ std::pair<rmm::device_buffer, cudf::size_type> create_random_null_mask(
   } else if (*null_probability == 1.0) {
     return {cudf::create_null_mask(size, cudf::mask_state::ALL_NULL), size};
   } else {
+    if (cudf::datagen::is_cpu_datagen_enabled()) {
+      // Build the bitmask on host and upload. Sequential O(N) generation
+      // with a single shared engine. Previous implementation created a fresh
+      // engine per index and called engine.discard(i), giving O(N^2) work
+      // that hung on large benchmark configurations.
+      auto stream                 = cudf::get_default_stream();
+      auto mr                     = cudf::get_current_device_resource_ref();
+      double const valid_p        = 1.0 - *null_probability;
+      auto const alloc_bytes      = cudf::bitmask_allocation_size_bytes(size);
+      // Allocate a buffer matching alloc_bytes/sizeof(bitmask_type) so the
+      // copy below covers the whole device buffer (avoids leaving the padding
+      // tail uninitialized on device).
+      auto const padded_words = alloc_bytes / sizeof(cudf::bitmask_type);
+      std::vector<cudf::bitmask_type> host_mask(padded_words, 0);
+      cudf::size_type valid_count                 = 0;
+      constexpr size_t bits_per_word = sizeof(cudf::bitmask_type) * 8;
+      std::mt19937 local_engine(seed);
+      std::uniform_real_distribution<float> dist(0, 1);
+      for (cudf::size_type i = 0; i < size; ++i) {
+        bool const v = (dist(local_engine) < valid_p);
+        if (v) {
+          auto const idx = static_cast<size_t>(i);
+          host_mask[idx / bits_per_word] |=
+            (cudf::bitmask_type{1} << (idx % bits_per_word));
+          ++valid_count;
+        }
+      }
+      rmm::device_buffer device_mask(alloc_bytes, stream, mr);
+      if (alloc_bytes > 0) {
+        CUDF_CUDA_TRY(cudaMemcpyAsync(device_mask.data(),
+                                      host_mask.data(),
+                                      alloc_bytes,
+                                      cudaMemcpyHostToDevice,
+                                      stream.value()));
+        stream.synchronize();
+      }
+      return std::pair{std::move(device_mask), size - valid_count};
+    }
     return cudf::detail::valid_if(cuda::counting_iterator<cudf::size_type>{0},
                                   cuda::counting_iterator<cudf::size_type>{size},
                                   bool_generator{seed, 1.0 - *null_probability},

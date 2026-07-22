@@ -2,7 +2,6 @@
  * SPDX-FileCopyrightText: Copyright (c) 2024-2026, NVIDIA CORPORATION.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 // MIT License
 //
 // Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
@@ -27,11 +26,13 @@
 
 #include "random_column_generator.hpp"
 
+#include <benchmarks/common/datagen_mode.hpp>
 #include <benchmarks/common/nvtx_ranges.hpp>
 
 #include <cudf_test/column_wrapper.hpp>
 
 #include <cudf/binaryop.hpp>
+#include <cudf/copying.hpp>
 #include <cudf/detail/iterator.cuh>
 #include <cudf/filling.hpp>
 #include <cudf/strings/detail/strings_children.cuh>
@@ -43,11 +44,26 @@
 #include <thrust/random.h>
 #include <thrust/transform.h>
 
+#include <mutex>
+#include <random>
 #include <string>
+#include <vector>
 
 namespace cudf::datagen {
 
 namespace {
+
+// Global RNG state for deterministic generation
+// This ensures sequential calls produce different but reproducible sequences
+struct global_rng_state {
+  std::mt19937 rng{42};  // Fixed seed
+  std::mutex mtx;        // Thread safety
+
+  static global_rng_state& instance() {
+    static global_rng_state inst;
+    return inst;
+  }
+};
 
 // Functor for generating random strings
 struct random_string_generator {
@@ -96,6 +112,98 @@ struct random_number_generator {
   }
 };
 
+// CPU-based deterministic random number generation
+template <typename T>
+std::unique_ptr<cudf::column> generate_random_numeric_column_cpu(T lower,
+                                                                  T upper,
+                                                                  cudf::size_type num_rows,
+                                                                  rmm::cuda_stream_view stream,
+                                                                  rmm::device_async_resource_ref mr)
+{
+  CUDF_BENCHMARK_RANGE();
+
+  // Generate on CPU with global RNG state for cross-call determinism
+  std::vector<T> host_data(num_rows);
+
+  {
+    auto& state = global_rng_state::instance();
+    std::lock_guard<std::mutex> lock(state.mtx);
+
+    if constexpr (cudf::is_integral<T>()) {
+      std::uniform_int_distribution<T> dist(lower, upper);
+      for (cudf::size_type i = 0; i < num_rows; ++i) {
+        host_data[i] = dist(state.rng);
+      }
+    } else {
+      std::uniform_real_distribution<T> dist(lower, upper);
+      for (cudf::size_type i = 0; i < num_rows; ++i) {
+        host_data[i] = dist(state.rng);
+      }
+    }
+  }
+
+  // Create column and copy from host
+  auto col = cudf::make_numeric_column(
+    cudf::data_type{cudf::type_to_id<T>()}, num_rows, cudf::mask_state::UNALLOCATED, stream, mr);
+
+  auto err = cudaMemcpy(col->mutable_view().data<T>(),
+                        host_data.data(),
+                        num_rows * sizeof(T),
+                        cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    throw std::runtime_error("Failed to copy random data to device");
+  }
+
+  return col;
+}
+
+// CPU-based string from set generation
+std::unique_ptr<cudf::column> generate_random_string_column_from_set_cpu(
+  cudf::host_span<const char* const> set,
+  cudf::size_type num_rows,
+  rmm::cuda_stream_view stream,
+  rmm::device_async_resource_ref mr)
+{
+  CUDF_BENCHMARK_RANGE();
+
+  // Generate random indices on CPU using global RNG state
+  std::vector<int16_t> host_indices(num_rows);
+
+  {
+    auto& state = global_rng_state::instance();
+    std::lock_guard<std::mutex> lock(state.mtx);
+    std::uniform_int_distribution<int16_t> dist(0, set.size() - 1);
+
+    for (cudf::size_type i = 0; i < num_rows; ++i) {
+      host_indices[i] = dist(state.rng);
+    }
+  }
+
+  // Create gather map
+  auto const indices =
+    generate_primary_key_column(cudf::numeric_scalar<int16_t>(0), set.size(), stream, mr);
+  auto const keys       = cudf::test::strings_column_wrapper(set.begin(), set.end()).release();
+  auto const gather_map = cudf::table_view({indices->view(), keys->view()});
+
+  // Create gather keys column from host data
+  auto gather_keys = cudf::make_numeric_column(
+    cudf::data_type{cudf::type_id::INT16}, num_rows, cudf::mask_state::UNALLOCATED, stream, mr);
+
+  auto err = cudaMemcpy(gather_keys->mutable_view().data<int16_t>(),
+                        host_indices.data(),
+                        num_rows * sizeof(int16_t),
+                        cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    throw std::runtime_error("Failed to copy gather keys to device");
+  }
+
+  // Perform the gather operation
+  auto const gathered_table = cudf::gather(
+    gather_map, gather_keys->view(), cudf::out_of_bounds_policy::DONT_CHECK, stream, mr);
+  auto gathered_table_columns = gathered_table->release();
+  return std::move(gathered_table_columns[1]);
+}
+
 }  // namespace
 
 std::unique_ptr<cudf::column> generate_random_string_column(cudf::size_type lower,
@@ -133,6 +241,13 @@ std::unique_ptr<cudf::column> generate_random_numeric_column(T lower,
                                                              rmm::device_async_resource_ref mr)
 {
   CUDF_BENCHMARK_RANGE();
+
+  // Use CPU-based generation if deterministic mode is enabled
+  if (is_cpu_datagen_enabled()) {
+    return generate_random_numeric_column_cpu<T>(lower, upper, num_rows, stream, mr);
+  }
+
+  // Original GPU-based generation
   auto col = cudf::make_numeric_column(
     cudf::data_type{cudf::type_to_id<T>()}, num_rows, cudf::mask_state::UNALLOCATED, stream, mr);
   cudf::size_type begin = 0;
@@ -199,6 +314,13 @@ std::unique_ptr<cudf::column> generate_random_string_column_from_set(
   rmm::device_async_resource_ref mr)
 {
   CUDF_BENCHMARK_RANGE();
+
+  // Use CPU-based generation if deterministic mode is enabled
+  if (is_cpu_datagen_enabled()) {
+    return generate_random_string_column_from_set_cpu(set, num_rows, stream, mr);
+  }
+
+  // Original GPU-based generation
   // Build a gather map of random strings to choose from
   // The size of the string sets always fits within 16-bit integers
   auto const indices =

@@ -26,9 +26,11 @@
 
 #pragma once
 
+#include "datagen_mode.hpp"
 #include "generate_input.hpp"
 
 #include <cudf/utilities/default_stream.hpp>
+#include <cudf/utilities/error.hpp>
 
 #include <rmm/device_uvector.hpp>
 
@@ -41,9 +43,11 @@
 #include <thrust/tabulate.h>
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <memory>
 #include <type_traits>
+#include <vector>
 
 /**
  * @brief Real Type that has at least number of bits of integral type in its mantissa.
@@ -165,6 +169,50 @@ struct value_generator {
 template <typename T>
 using distribution_fn = std::function<rmm::device_uvector<T>(thrust::minstd_rand&, size_t)>;
 
+/**
+ * @brief Helper: build a `device_uvector<T>` by running the distribution on host
+ * sequentially with a single engine instance (O(N) total) and uploading the
+ * result. Note: this is deterministic and reproducible, but produces a different
+ * value sequence than the per-thread `discard(i)` pattern used on device.
+ */
+template <typename T, typename Dist>
+rmm::device_uvector<T> tabulate_value_generator_on_host(T lower_bound,
+                                                        T upper_bound,
+                                                        thrust::minstd_rand& engine,
+                                                        Dist dist,
+                                                        size_t size)
+{
+  // Build host buffer. Avoid std::vector<bool> bit-packing (T is never bool here, but be explicit).
+  static_assert(!std::is_same_v<T, bool>,
+                "tabulate_value_generator_on_host is not used for bool");
+  std::vector<T> host_buf(size);
+  // Sequential generation with a single shared engine: O(N) total work.
+  // The previous implementation created a fresh engine each iteration and
+  // called engine.discard(i), resulting in O(N^2) behavior that effectively
+  // hung on large benchmark configurations.
+  auto const lo = std::min(lower_bound, upper_bound);
+  auto const hi = std::max(lower_bound, upper_bound);
+  for (size_t i = 0; i < size; ++i) {
+    if constexpr (cuda::std::is_integral_v<T> &&
+                  cuda::std::is_floating_point_v<decltype(dist(engine))>) {
+      host_buf[i] = std::clamp(static_cast<T>(std::round(dist(engine))), lo, hi);
+    } else {
+      host_buf[i] = std::clamp(static_cast<T>(dist(engine)), lo, hi);
+    }
+  }
+  auto stream = cudf::get_default_stream();
+  rmm::device_uvector<T> result(size, stream);
+  if (size > 0) {
+    CUDF_CUDA_TRY(cudaMemcpyAsync(result.data(),
+                                  host_buf.data(),
+                                  size * sizeof(T),
+                                  cudaMemcpyHostToDevice,
+                                  stream.value()));
+    stream.synchronize();
+  }
+  return result;
+}
+
 template <
   typename T,
   std::enable_if_t<cuda::std::is_integral_v<T> or cuda::std::is_floating_point_v<T>, T>* = nullptr>
@@ -174,6 +222,9 @@ distribution_fn<T> make_distribution(distribution_id dist_id, T lower_bound, T u
     case distribution_id::NORMAL:
       return [lower_bound, upper_bound, dist = make_normal_dist(lower_bound, upper_bound)](
                thrust::minstd_rand& engine, size_t size) -> rmm::device_uvector<T> {
+        if (cudf::datagen::is_cpu_datagen_enabled()) {
+          return tabulate_value_generator_on_host<T>(lower_bound, upper_bound, engine, dist, size);
+        }
         rmm::device_uvector<T> result(size, cudf::get_default_stream());
         thrust::tabulate(thrust::device,
                          result.begin(),
@@ -184,6 +235,9 @@ distribution_fn<T> make_distribution(distribution_id dist_id, T lower_bound, T u
     case distribution_id::UNIFORM:
       return [lower_bound, upper_bound, dist = make_uniform_dist(lower_bound, upper_bound)](
                thrust::minstd_rand& engine, size_t size) -> rmm::device_uvector<T> {
+        if (cudf::datagen::is_cpu_datagen_enabled()) {
+          return tabulate_value_generator_on_host<T>(lower_bound, upper_bound, engine, dist, size);
+        }
         rmm::device_uvector<T> result(size, cudf::get_default_stream());
         thrust::tabulate(thrust::device,
                          result.begin(),
@@ -195,6 +249,9 @@ distribution_fn<T> make_distribution(distribution_id dist_id, T lower_bound, T u
       // kind of exponential distribution from lower_bound to upper_bound.
       return [lower_bound, upper_bound, dist = geometric_distribution<T>(lower_bound, upper_bound)](
                thrust::minstd_rand& engine, size_t size) -> rmm::device_uvector<T> {
+        if (cudf::datagen::is_cpu_datagen_enabled()) {
+          return tabulate_value_generator_on_host<T>(lower_bound, upper_bound, engine, dist, size);
+        }
         rmm::device_uvector<T> result(size, cudf::get_default_stream());
         thrust::tabulate(thrust::device,
                          result.begin(),
