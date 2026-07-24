@@ -108,6 +108,10 @@ fi
 
 echo "=== Running Python Benchmarks ==="
 
+# The cudf Python extensions load libhipdf/libcudf from the C++ build tree at
+# runtime; make sure the loader can find it.
+export LD_LIBRARY_PATH="${BUILD_DIR}/${PROJECT_ID}/cpp/build${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
 # Verify pytest is available (assumed by caller who activates conda)
 if ! command -v pytest &> /dev/null; then
   echo "ERROR: pytest command not found. This script must be run in a conda environment with pytest-benchmark installed."

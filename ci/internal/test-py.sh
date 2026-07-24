@@ -144,6 +144,10 @@ fi
 
 test_failures=0
 cd ${BUILD_DIR}/${PROJECT_ID}
+    # The cudf Python extensions load libhipdf/libcudf from the C++ build tree
+    # at runtime; make sure the loader can find it.
+    export LD_LIBRARY_PATH="${BUILD_DIR}/${PROJECT_ID}/cpp/build${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
     . "${SCRIPT_DIR}/_install-test-requirements.sh"
 
     CSV_OUTPUT_DIR=${PROJECT_ID}_pytest_output

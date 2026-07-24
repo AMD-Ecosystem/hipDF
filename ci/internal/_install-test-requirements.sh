@@ -32,6 +32,10 @@ pip install --upgrade pip
 # pytest 9.0.x (the newest allowed here) is compatible with pytest-cases 3.10.1.
 pip install 'pytest<9.1' pytest-timeout pytest-csv pytest-benchmark
 
+# NOTE: runtime deps required by the cudf test/benchmark suite.
+# pandas is pinned <2.4.0dev0 to match the version cudf supports.
+pip install pyarrow cachetools "pandas<2.4.0dev0"
+
 # When using a conda env, dependency packages (hip_python, cupy, hipmm, etc.)
 # and the hipDF packages themselves are already installed there. Only install
 # from BUILD_ARTIFACTS_DIR when running outside a conda env (e.g. in a
