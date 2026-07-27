@@ -26,7 +26,7 @@ Building and installing hipDF from source
 
 For developers, the following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
-into the `install_hipdf.sh <https://github.com/ROCm-DS/hipDF/blob/release/rocmds-26.03/install_hipdf.sh>`__ script. Read and edit the
+into the `install_hipdf.sh <https://github.com/AMD-Ecosystem/hipDF/blob/release/rocmds-26.03/install_hipdf.sh>`__ script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
 The following provides details on building the C++ components, running tests and benchmarks, and for building
@@ -239,7 +239,7 @@ set to `any supported architecture <./hipDF-support.html>`__.
    .. code-block:: bash
 
       cd /tmp/hipdf
-      git clone -b release/rocmds-26.03 https://github.com/ROCm-DS/hipMM hipmm
+      git clone -b release/rocmds-26.03 https://github.com/AMD-Ecosystem/hipMM hipmm
 
 2. Build and install the hipMM wheel:
 
