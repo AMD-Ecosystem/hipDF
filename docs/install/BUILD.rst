@@ -114,7 +114,7 @@ Create a work directory ``/tmp/hipdf`` and clone the hipDF release branch into t
    mkdir -p /tmp/hipdf # NOTE: feel free to adapt
    cd /tmp/hipdf
 
-   git clone -b release/rocmds-26.03 https://github.com/ROCm-DS/hipDF hipdf
+   git clone -b release/rocmds-26.03 https://github.com/AMD-Ecosystem/hipDF hipdf
 
 .. _step-3-create-and-activate-hipdf-conda-environment-hipdf_dev:
 
