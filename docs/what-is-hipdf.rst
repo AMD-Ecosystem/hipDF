@@ -23,7 +23,7 @@
 
 .. meta::
   :description: hipDF documentation and API reference library
-  :keywords: hipDF, cuDF, Pandas, ROCm-DS, API, documentation
+  :keywords: hipDF, cuDF, Pandas, AMD Data Science, API, documentation
 
 .. _what-is-hipDF:
 
