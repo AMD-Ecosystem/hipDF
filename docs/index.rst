@@ -39,7 +39,7 @@ GPUs, enabling data manipulation tasks such as loading, joining, aggregating, an
 to be performed on data in GPU memory. hipDF offers both a Python and C++ API, supporting
 a wide range of use cases. For more information and to learn about what's new in the latest release, see :ref:`what-is-hipdf`
 
-The hipDF code is open and hosted at `https://github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
+The hipDF code is open and hosted at `https://github.com/AMD-Ecosystem/hipDF <https://github.com/AMD-Ecosystem/hipDF>`_.
 
 The hipDF documentation is structured as follows:
 
@@ -62,6 +62,6 @@ The hipDF documentation is structured as follows:
     * :ref:`hipDF-reference`
     * :ref:`pylibhipdf-reference`
 
-To contribute to the documentation refer to `Contributing to ROCm-DS  <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/contribute/contributing.html>`__.
+To contribute to the documentation refer to `Contributing to AMD Data Science  <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/contribute/contributing.html>`__.
 
 You can find licensing information on the `Licenses <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/about/license.html>`__ page.
