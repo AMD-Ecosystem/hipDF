@@ -26,8 +26,8 @@
 ---
 myst:
   html_meta:
-    "description": "ROCm Data Science (ROCm-DS) library for Data Frames."
-    "keywords": "ROCm, ROCm-DS, Data Science, RAPIDS, AMD, CUDA, Data Frames, SDK"
+    "description": "AMD Data Science library for Data Frames."
+    "keywords": "ROCm, AMD Data Science, RAPIDS, AMD, CUDA, Data Frames, SDK"
 ---
 -->
 
@@ -35,7 +35,7 @@ myst:
 
 For developers, the following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
-into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/rocmds-25.10/install_hipdf.sh) script. Read and edit the
+into the [install_hipdf.sh](https://github.com/AMD-Ecosystem/hipDF/blob/release/rocmds-25.10/install_hipdf.sh) script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
 The following provides details on building the C++ components, running tests and benchmarks, and for building 
@@ -110,7 +110,7 @@ Create a work directory `/tmp/hipdf` and clone the hipDF release branch into thi
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
 cd /tmp/hipdf
 
-git clone -b release/rocmds-25.10 https://github.com/ROCm-DS/hipDF hipdf
+git clone -b release/rocmds-25.10 https://github.com/AMD-Ecosystem/hipDF hipdf
 ```
 
 ### Step 3: Create and activate hipDF Conda environment hipdf_dev.
@@ -220,7 +220,7 @@ set to [any supported architecture ](./hipDF-support.rst).
 
    ```bash
    cd /tmp/hipdf
-   git clone -b release/rocmds-25.10 https://github.com/ROCm-DS/hipMM hipmm
+   git clone -b release/rocmds-25.10 https://github.com/AMD-Ecosystem/hipMM hipmm
    ```
 
 2. Build and install the hipMM wheel:
