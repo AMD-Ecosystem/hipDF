@@ -1,0 +1,1366 @@
+
+<!DOCTYPE html>
+
+<html data-content_root="../../../" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>hipdf.Series.iteritems — hipDF 3.0.0 documentation</title>
+<script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+<!-- Loaded before other Sphinx assets -->
+<link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet"/>
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet"/>
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet"/>
+<link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet"/>
+<link as="font" crossorigin="" href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" rel="preload" type="font/woff2"/>
+<link href="../../../_static/pygments.css?v=8f2a1f02" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/custom.css?v=22b90084" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/rocm_header.css?v=037afccf" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/rocm_footer.css?v=7095035a" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/fonts.css?v=fcff5274" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" rel="preload"/>
+<link as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" rel="preload"/>
+<script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/documentation_options.js?v=6a41c08d"></script>
+<script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+<script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+<script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../../../_static/copybutton.js?v=f281be69"></script>
+<script async="async" src="../../../_static/code_word_breaks.js?v=327952c4"></script>
+<script async="async" src="../../../_static/renameVersionLinks.js?v=929fe5e4"></script>
+<script async="async" src="../../../_static/rdcMisc.js?v=01f88d96"></script>
+<script async="async" src="../../../_static/theme_mode_captions.js?v=15f4ec5d"></script>
+<script defer="defer" src="../../../_static/search.js?v=90a4452c"></script>
+<script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+<script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'reference/hipdf/api/hipdf.Series.iteritems';</script>
+<script async="async" src="https://download.amd.com/js/analytics/analyticsinit.js"></script>
+<link href="https://www.amd.com/content/dam/code/images/favicon/favicon.ico" rel="icon"/>
+<link href="../../../genindex.html" rel="index" title="Index"/>
+<link href="../../../search.html" rel="search" title="Search"/>
+<link href="hipdf.Series.keys.html" rel="next" title="hipdf.Series.keys"/>
+<link href="hipdf.Series.items.html" rel="prev" title="hipdf.Series.items"/>
+<meta content="vo35SZt_GASsTHAEmdww7AYKPCvZyzLvOXBl8guBME4" name="google-site-verification"/>
+</head>
+<body data-bs-root-margin="0px 0px -60%" data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-default-mode="" data-offset="180">
+<div class="skip-link d-print-none" id="pst-skip-link"><a href="#main-content">Skip to main content</a></div>
+<div id="pst-scroll-pixel-helper"></div>
+<button class="btn rounded-pill" id="pst-back-to-top" type="button">
+<i class="fa-solid fa-arrow-up"></i>Back to top</button>
+<input class="sidebar-toggle" id="pst-primary-sidebar-checkbox" type="checkbox"/>
+<label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+<input class="sidebar-toggle" id="pst-secondary-sidebar-checkbox" type="checkbox"/>
+<label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+<div class="search-button__wrapper">
+<div class="search-button__overlay"></div>
+<div class="search-button__search-container">
+<form action="../../../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" id="search-input" name="q" placeholder="Search..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+</div>
+<div class="pst-async-banner-revealer d-none">
+<aside aria-label="Version warning" class="d-none d-print-none" id="bd-header-version-warning"></aside>
+</div>
+<header class="common-header">
+<nav class="navbar navbar-expand-xl">
+<div class="container-fluid main-nav rocm-header">
+<div class="header-logo">
+<div class="header-logo-title">
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler collapsed" data-bs-target="#navbarSupportedContent" data-bs-toggle="collapse" data-tracking-information="mainMenuToggle" id="nav-icon" type="button">
+<span></span>
+<span></span>
+<span></span>
+</button>
+<a class="navbar-brand" href="https://www.amd.com/">
+<img alt="AMD Logo" class="d-inline-block align-text-top hover-opacity" src="../../../_static/images/amd-header-logo.svg" title="AMD Logo" width="90"/>
+</a>
+<div class="vr mx-40 my-25"></div>
+<a class="klavika-font hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest">Data Science 26.03</a>
+</div>
+<a class="header-all-versions hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest/release/versions.html">Version List</a>
+</div>
+<div class="icon-nav text-center d-flex ms-auto"></div>
+</div>
+</nav>
+<nav class="navbar navbar-expand-xl second-level-nav">
+<div class="container-fluid main-nav">
+<div class="navbar-nav-container collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav nav-mega me-auto mb-2 mb-lg-0 col-xl-10">
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm-DS/hipDF" id="navgithub" role="button" target="_blank">
+                                        GitHub
+                                    </a>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm/ROCm/discussions" id="navcommunity" role="button" target="_blank">
+                                        Community
+                                    </a>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://rocm.blogs.amd.com/" id="navblogs" role="button" target="_blank">
+                                        Blogs
+                                    </a>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://rocm.docs.amd.com" id="navrocm-docs" role="button" target="_blank">
+                                        ROCm Docs
+                                    </a>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://www.amd.com/en/developer/resources/rocm-hub.html" id="navrocm-developer-hub" role="button" target="_blank">
+                                        ROCm Developer Hub
+                                    </a>
+</li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link top-level header-menu-links dropdown-toggle header-nav-dropdown-toggle" data-bs-toggle="dropdown" href="#" id="navamd-toolkits" role="button">
+                                        AMD Toolkits
+                                    </a>
+<ul aria-labelledby="navamd-toolkits" class="dropdown-menu header-nav-dropdown-menu">
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest/index.html" target="_blank">AMD Data Science</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-finance/en/latest/index.html" target="_blank">AMD Finance</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-ls/en/latest/index.html" target="_blank">AMD Life Science</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-llmext/en/latest/index.html" target="_blank">AMD LLM Extension</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-simulation/en/latest/index.html" target="_blank">AMD Simulation</a></li>
+</ul>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://instinct.docs.amd.com" id="navsystems-and-infra-docs" role="button" target="_blank">
+                                        Systems and Infra Docs
+                                    </a>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://www.amd.com/en/developer/resources/infinity-hub.html" id="navinfinity-hub" role="button" target="_blank">
+                                        Infinity Hub
+                                    </a>
+</li>
+<li class="nav-item">
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm-DS/hipDF/issues/new/choose" id="navsupport" role="button" target="_blank">
+                                        Support
+                                    </a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+</header>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<div class="bd-sidebar-primary bd-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-item">
+<a class="navbar-brand logo" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest">
+<p>AMD Data Science</p>
+</a></div>
+</div>
+</div>
+<div class="sidebar-primary-items__start sidebar-primary__section">
+<div class="sidebar-primary-item">
+<a class="navbar-brand logo" href="../../../index.html">
+<p class="title logo__title">hipDF 3.0.0 documentation</p>
+</a></div>
+<div class="sidebar-primary-item">
+<script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+<div class="sidebar-primary-item"><nav aria-label="Main" class="bd-links bd-docs-nav">
+<div class="bd-toc-item navbar-nav active">
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../what-is-hipdf.html">What is hipDF?</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Install</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../install/hipDF-support.html">System requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL.html">Installing hipDF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/BUILD.html">Building and installing hipDF from source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/VERIFY.html">Verifying your hipDF Installation</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">How to</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/cudf_pandas.html">Use hipDF cudf.pandas</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">hipDF API reference</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../series.html">Series</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.html">hipdf.Series</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.axes.html">hipdf.Series.axes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.index.html">hipdf.Series.index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.values.html">hipdf.Series.values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.data.html">hipdf.Series.data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.dtype.html">hipdf.Series.dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.dtypes.html">hipdf.Series.dtypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.shape.html">hipdf.Series.shape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.ndim.html">hipdf.Series.ndim</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.null_count.html">hipdf.Series.null_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.size.html">hipdf.Series.size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.T.html">hipdf.Series.T</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.memory_usage.html">hipdf.Series.memory_usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.hasnans.html">hipdf.Series.hasnans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.has_nulls.html">hipdf.Series.has_nulls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.empty.html">hipdf.Series.empty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.name.html">hipdf.Series.name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.valid_count.html">hipdf.Series.valid_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.values_host.html">hipdf.Series.values_host</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.astype.html">hipdf.Series.astype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.convert_dtypes.html">hipdf.Series.convert_dtypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.copy.html">hipdf.Series.copy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.deserialize.html">hipdf.Series.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.device_deserialize.html">hipdf.Series.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.device_serialize.html">hipdf.Series.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.host_deserialize.html">hipdf.Series.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.host_serialize.html">hipdf.Series.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.serialize.html">hipdf.Series.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_list.html">hipdf.Series.to_list</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.tolist.html">hipdf.Series.tolist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.__array__.html">hipdf.Series.__array__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.scale.html">hipdf.Series.scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.loc.html">hipdf.Series.loc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.iloc.html">hipdf.Series.iloc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.__iter__.html">hipdf.Series.__iter__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.items.html">hipdf.Series.items</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">hipdf.Series.iteritems</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.keys.html">hipdf.Series.keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.squeeze.html">hipdf.Series.squeeze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.add.html">hipdf.Series.add</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.sub.html">hipdf.Series.sub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.subtract.html">hipdf.Series.subtract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.mul.html">hipdf.Series.mul</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.multiply.html">hipdf.Series.multiply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.truediv.html">hipdf.Series.truediv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.div.html">hipdf.Series.div</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.divide.html">hipdf.Series.divide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.floordiv.html">hipdf.Series.floordiv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.mod.html">hipdf.Series.mod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.pow.html">hipdf.Series.pow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.radd.html">hipdf.Series.radd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rsub.html">hipdf.Series.rsub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rmul.html">hipdf.Series.rmul</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rdiv.html">hipdf.Series.rdiv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rtruediv.html">hipdf.Series.rtruediv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rfloordiv.html">hipdf.Series.rfloordiv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rmod.html">hipdf.Series.rmod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rpow.html">hipdf.Series.rpow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.round.html">hipdf.Series.round</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.lt.html">hipdf.Series.lt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.gt.html">hipdf.Series.gt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.le.html">hipdf.Series.le</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.ge.html">hipdf.Series.ge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.ne.html">hipdf.Series.ne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.eq.html">hipdf.Series.eq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.product.html">hipdf.Series.product</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.dot.html">hipdf.Series.dot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.apply.html">hipdf.Series.apply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.map.html">hipdf.Series.map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.groupby.html">hipdf.Series.groupby</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rolling.html">hipdf.Series.rolling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.pipe.html">hipdf.Series.pipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.abs.html">hipdf.Series.abs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.all.html">hipdf.Series.all</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.any.html">hipdf.Series.any</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.autocorr.html">hipdf.Series.autocorr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.between.html">hipdf.Series.between</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.clip.html">hipdf.Series.clip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.corr.html">hipdf.Series.corr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.count.html">hipdf.Series.count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.cov.html">hipdf.Series.cov</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.cummax.html">hipdf.Series.cummax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.cummin.html">hipdf.Series.cummin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.cumprod.html">hipdf.Series.cumprod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.cumsum.html">hipdf.Series.cumsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.describe.html">hipdf.Series.describe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.diff.html">hipdf.Series.diff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.digitize.html">hipdf.Series.digitize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.ewm.html">hipdf.Series.ewm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.factorize.html">hipdf.Series.factorize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.kurt.html">hipdf.Series.kurt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.max.html">hipdf.Series.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.mean.html">hipdf.Series.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.median.html">hipdf.Series.median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.min.html">hipdf.Series.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.mode.html">hipdf.Series.mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.nlargest.html">hipdf.Series.nlargest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.nsmallest.html">hipdf.Series.nsmallest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.pct_change.html">hipdf.Series.pct_change</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.prod.html">hipdf.Series.prod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.quantile.html">hipdf.Series.quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rank.html">hipdf.Series.rank</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.skew.html">hipdf.Series.skew</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.std.html">hipdf.Series.std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.sum.html">hipdf.Series.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.var.html">hipdf.Series.var</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.kurtosis.html">hipdf.Series.kurtosis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.unique.html">hipdf.Series.unique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.nunique.html">hipdf.Series.nunique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.is_unique.html">hipdf.Series.is_unique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.is_monotonic_increasing.html">hipdf.Series.is_monotonic_increasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.is_monotonic_decreasing.html">hipdf.Series.is_monotonic_decreasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.value_counts.html">hipdf.Series.value_counts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.add_prefix.html">hipdf.Series.add_prefix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.add_suffix.html">hipdf.Series.add_suffix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.drop.html">hipdf.Series.drop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.drop_duplicates.html">hipdf.Series.drop_duplicates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.duplicated.html">hipdf.Series.duplicated</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.equals.html">hipdf.Series.equals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.first.html">hipdf.Series.first</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.head.html">hipdf.Series.head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.isin.html">hipdf.Series.isin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.last.html">hipdf.Series.last</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.reindex.html">hipdf.Series.reindex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.rename.html">hipdf.Series.rename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.reset_index.html">hipdf.Series.reset_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.sample.html">hipdf.Series.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.take.html">hipdf.Series.take</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.tail.html">hipdf.Series.tail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.tile.html">hipdf.Series.tile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.truncate.html">hipdf.Series.truncate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.where.html">hipdf.Series.where</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.mask.html">hipdf.Series.mask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.backfill.html">hipdf.Series.backfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.bfill.html">hipdf.Series.bfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.dropna.html">hipdf.Series.dropna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.ffill.html">hipdf.Series.ffill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.fillna.html">hipdf.Series.fillna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.interpolate.html">hipdf.Series.interpolate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.isna.html">hipdf.Series.isna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.isnull.html">hipdf.Series.isnull</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.nans_to_nulls.html">hipdf.Series.nans_to_nulls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.notna.html">hipdf.Series.notna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.notnull.html">hipdf.Series.notnull</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.pad.html">hipdf.Series.pad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.replace.html">hipdf.Series.replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.argsort.html">hipdf.Series.argsort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.sort_values.html">hipdf.Series.sort_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.sort_index.html">hipdf.Series.sort_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.explode.html">hipdf.Series.explode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.searchsorted.html">hipdf.Series.searchsorted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.repeat.html">hipdf.Series.repeat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.transpose.html">hipdf.Series.transpose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.update.html">hipdf.Series.update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.shift.html">hipdf.Series.shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.resample.html">hipdf.Series.resample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.attrs.html">hipdf.Series.attrs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.dt.html">hipdf.Series.dt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.year.html">hipdf.core.series.DatetimeProperties.year</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.month.html">hipdf.core.series.DatetimeProperties.month</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.day.html">hipdf.core.series.DatetimeProperties.day</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.hour.html">hipdf.core.series.DatetimeProperties.hour</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.minute.html">hipdf.core.series.DatetimeProperties.minute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.second.html">hipdf.core.series.DatetimeProperties.second</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.microsecond.html">hipdf.core.series.DatetimeProperties.microsecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.nanosecond.html">hipdf.core.series.DatetimeProperties.nanosecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.dayofweek.html">hipdf.core.series.DatetimeProperties.dayofweek</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.weekday.html">hipdf.core.series.DatetimeProperties.weekday</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.dayofyear.html">hipdf.core.series.DatetimeProperties.dayofyear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.day_of_year.html">hipdf.core.series.DatetimeProperties.day_of_year</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.quarter.html">hipdf.core.series.DatetimeProperties.quarter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_month_start.html">hipdf.core.series.DatetimeProperties.is_month_start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_month_end.html">hipdf.core.series.DatetimeProperties.is_month_end</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_quarter_start.html">hipdf.core.series.DatetimeProperties.is_quarter_start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_quarter_end.html">hipdf.core.series.DatetimeProperties.is_quarter_end</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_year_start.html">hipdf.core.series.DatetimeProperties.is_year_start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_year_end.html">hipdf.core.series.DatetimeProperties.is_year_end</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.is_leap_year.html">hipdf.core.series.DatetimeProperties.is_leap_year</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.days_in_month.html">hipdf.core.series.DatetimeProperties.days_in_month</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.isocalendar.html">hipdf.core.series.DatetimeProperties.isocalendar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.strftime.html">hipdf.core.series.DatetimeProperties.strftime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.round.html">hipdf.core.series.DatetimeProperties.round</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.floor.html">hipdf.core.series.DatetimeProperties.floor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.ceil.html">hipdf.core.series.DatetimeProperties.ceil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.DatetimeProperties.tz_localize.html">hipdf.core.series.DatetimeProperties.tz_localize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.TimedeltaProperties.days.html">hipdf.core.series.TimedeltaProperties.days</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.TimedeltaProperties.seconds.html">hipdf.core.series.TimedeltaProperties.seconds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.TimedeltaProperties.microseconds.html">hipdf.core.series.TimedeltaProperties.microseconds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.TimedeltaProperties.nanoseconds.html">hipdf.core.series.TimedeltaProperties.nanoseconds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.series.TimedeltaProperties.components.html">hipdf.core.series.TimedeltaProperties.components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.str.html">hipdf.Series.str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.byte_count.html">hipdf.core.accessors.string.StringMethods.byte_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.capitalize.html">hipdf.core.accessors.string.StringMethods.capitalize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.cat.html">hipdf.core.accessors.string.StringMethods.cat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.center.html">hipdf.core.accessors.string.StringMethods.center</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.character_ngrams.html">hipdf.core.accessors.string.StringMethods.character_ngrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.character_tokenize.html">hipdf.core.accessors.string.StringMethods.character_tokenize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.code_points.html">hipdf.core.accessors.string.StringMethods.code_points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.contains.html">hipdf.core.accessors.string.StringMethods.contains</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.count.html">hipdf.core.accessors.string.StringMethods.count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.detokenize.html">hipdf.core.accessors.string.StringMethods.detokenize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.edit_distance.html">hipdf.core.accessors.string.StringMethods.edit_distance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.edit_distance_matrix.html">hipdf.core.accessors.string.StringMethods.edit_distance_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.endswith.html">hipdf.core.accessors.string.StringMethods.endswith</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.extract.html">hipdf.core.accessors.string.StringMethods.extract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.filter_alphanum.html">hipdf.core.accessors.string.StringMethods.filter_alphanum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.filter_characters.html">hipdf.core.accessors.string.StringMethods.filter_characters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.filter_tokens.html">hipdf.core.accessors.string.StringMethods.filter_tokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.find.html">hipdf.core.accessors.string.StringMethods.find</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.findall.html">hipdf.core.accessors.string.StringMethods.findall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.find_multiple.html">hipdf.core.accessors.string.StringMethods.find_multiple</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.get.html">hipdf.core.accessors.string.StringMethods.get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.get_json_object.html">hipdf.core.accessors.string.StringMethods.get_json_object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.hex_to_int.html">hipdf.core.accessors.string.StringMethods.hex_to_int</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.htoi.html">hipdf.core.accessors.string.StringMethods.htoi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.index.html">hipdf.core.accessors.string.StringMethods.index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.insert.html">hipdf.core.accessors.string.StringMethods.insert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.ip2int.html">hipdf.core.accessors.string.StringMethods.ip2int</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.ip_to_int.html">hipdf.core.accessors.string.StringMethods.ip_to_int</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.is_consonant.html">hipdf.core.accessors.string.StringMethods.is_consonant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.is_vowel.html">hipdf.core.accessors.string.StringMethods.is_vowel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isalnum.html">hipdf.core.accessors.string.StringMethods.isalnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isalpha.html">hipdf.core.accessors.string.StringMethods.isalpha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isdecimal.html">hipdf.core.accessors.string.StringMethods.isdecimal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isdigit.html">hipdf.core.accessors.string.StringMethods.isdigit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isempty.html">hipdf.core.accessors.string.StringMethods.isempty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isfloat.html">hipdf.core.accessors.string.StringMethods.isfloat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.ishex.html">hipdf.core.accessors.string.StringMethods.ishex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isinteger.html">hipdf.core.accessors.string.StringMethods.isinteger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isipv4.html">hipdf.core.accessors.string.StringMethods.isipv4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isspace.html">hipdf.core.accessors.string.StringMethods.isspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.islower.html">hipdf.core.accessors.string.StringMethods.islower</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isnumeric.html">hipdf.core.accessors.string.StringMethods.isnumeric</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.isupper.html">hipdf.core.accessors.string.StringMethods.isupper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.istimestamp.html">hipdf.core.accessors.string.StringMethods.istimestamp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.istitle.html">hipdf.core.accessors.string.StringMethods.istitle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.jaccard_index.html">hipdf.core.accessors.string.StringMethods.jaccard_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.join.html">hipdf.core.accessors.string.StringMethods.join</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.len.html">hipdf.core.accessors.string.StringMethods.len</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.like.html">hipdf.core.accessors.string.StringMethods.like</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.ljust.html">hipdf.core.accessors.string.StringMethods.ljust</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.lower.html">hipdf.core.accessors.string.StringMethods.lower</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.lstrip.html">hipdf.core.accessors.string.StringMethods.lstrip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.match.html">hipdf.core.accessors.string.StringMethods.match</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.minhash.html">hipdf.core.accessors.string.StringMethods.minhash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.ngrams.html">hipdf.core.accessors.string.StringMethods.ngrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.ngrams_tokenize.html">hipdf.core.accessors.string.StringMethods.ngrams_tokenize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.normalize_spaces.html">hipdf.core.accessors.string.StringMethods.normalize_spaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.pad.html">hipdf.core.accessors.string.StringMethods.pad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.partition.html">hipdf.core.accessors.string.StringMethods.partition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.porter_stemmer_measure.html">hipdf.core.accessors.string.StringMethods.porter_stemmer_measure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.repeat.html">hipdf.core.accessors.string.StringMethods.repeat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.removeprefix.html">hipdf.core.accessors.string.StringMethods.removeprefix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.removesuffix.html">hipdf.core.accessors.string.StringMethods.removesuffix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.replace.html">hipdf.core.accessors.string.StringMethods.replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.replace_tokens.html">hipdf.core.accessors.string.StringMethods.replace_tokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.replace_with_backrefs.html">hipdf.core.accessors.string.StringMethods.replace_with_backrefs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.rfind.html">hipdf.core.accessors.string.StringMethods.rfind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.rindex.html">hipdf.core.accessors.string.StringMethods.rindex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.rjust.html">hipdf.core.accessors.string.StringMethods.rjust</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.rpartition.html">hipdf.core.accessors.string.StringMethods.rpartition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.rsplit.html">hipdf.core.accessors.string.StringMethods.rsplit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.rstrip.html">hipdf.core.accessors.string.StringMethods.rstrip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.slice.html">hipdf.core.accessors.string.StringMethods.slice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.slice_from.html">hipdf.core.accessors.string.StringMethods.slice_from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.slice_replace.html">hipdf.core.accessors.string.StringMethods.slice_replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.split.html">hipdf.core.accessors.string.StringMethods.split</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.startswith.html">hipdf.core.accessors.string.StringMethods.startswith</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.strip.html">hipdf.core.accessors.string.StringMethods.strip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.swapcase.html">hipdf.core.accessors.string.StringMethods.swapcase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.title.html">hipdf.core.accessors.string.StringMethods.title</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.token_count.html">hipdf.core.accessors.string.StringMethods.token_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.tokenize.html">hipdf.core.accessors.string.StringMethods.tokenize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.translate.html">hipdf.core.accessors.string.StringMethods.translate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.upper.html">hipdf.core.accessors.string.StringMethods.upper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.url_decode.html">hipdf.core.accessors.string.StringMethods.url_decode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.url_encode.html">hipdf.core.accessors.string.StringMethods.url_encode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.wrap.html">hipdf.core.accessors.string.StringMethods.wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.string.StringMethods.zfill.html">hipdf.core.accessors.string.StringMethods.zfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.cat.html">hipdf.Series.cat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.categories.html">hipdf.core.accessors.categorical.CategoricalAccessor.categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.ordered.html">hipdf.core.accessors.categorical.CategoricalAccessor.ordered</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.codes.html">hipdf.core.accessors.categorical.CategoricalAccessor.codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.reorder_categories.html">hipdf.core.accessors.categorical.CategoricalAccessor.reorder_categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.add_categories.html">hipdf.core.accessors.categorical.CategoricalAccessor.add_categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.remove_categories.html">hipdf.core.accessors.categorical.CategoricalAccessor.remove_categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.set_categories.html">hipdf.core.accessors.categorical.CategoricalAccessor.set_categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.as_ordered.html">hipdf.core.accessors.categorical.CategoricalAccessor.as_ordered</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.categorical.CategoricalAccessor.as_unordered.html">hipdf.core.accessors.categorical.CategoricalAccessor.as_unordered</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.list.html">hipdf.Series.list</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.astype.html">hipdf.core.accessors.lists.ListMethods.astype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.concat.html">hipdf.core.accessors.lists.ListMethods.concat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.contains.html">hipdf.core.accessors.lists.ListMethods.contains</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.index.html">hipdf.core.accessors.lists.ListMethods.index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.get.html">hipdf.core.accessors.lists.ListMethods.get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.leaves.html">hipdf.core.accessors.lists.ListMethods.leaves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.len.html">hipdf.core.accessors.lists.ListMethods.len</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.sort_values.html">hipdf.core.accessors.lists.ListMethods.sort_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.take.html">hipdf.core.accessors.lists.ListMethods.take</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.lists.ListMethods.unique.html">hipdf.core.accessors.lists.ListMethods.unique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.struct.html">hipdf.Series.struct</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.struct.StructMethods.field.html">hipdf.core.accessors.struct.StructMethods.field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.accessors.struct.StructMethods.explode.html">hipdf.core.accessors.struct.StructMethods.explode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_arrow.html">hipdf.Series.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_cupy.html">hipdf.Series.to_cupy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_dict.html">hipdf.Series.to_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_dlpack.html">hipdf.Series.to_dlpack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_frame.html">hipdf.Series.to_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_hdf.html">hipdf.Series.to_hdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_json.html">hipdf.Series.to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_numpy.html">hipdf.Series.to_numpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_pandas.html">hipdf.Series.to_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_string.html">hipdf.Series.to_string</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.from_arrow.html">hipdf.Series.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.from_pandas.html">hipdf.Series.from_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.hash_values.html">hipdf.Series.hash_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.to_pylibcudf.html">hipdf.Series.to_pylibcudf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Series.from_pylibcudf.html">hipdf.Series.from_pylibcudf</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dataframe.html">DataFrame</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.html">hipdf.DataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.axes.html">hipdf.DataFrame.axes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.index.html">hipdf.DataFrame.index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.columns.html">hipdf.DataFrame.columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.dtypes.html">hipdf.DataFrame.dtypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.info.html">hipdf.DataFrame.info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.select_dtypes.html">hipdf.DataFrame.select_dtypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.values.html">hipdf.DataFrame.values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.values_host.html">hipdf.DataFrame.values_host</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.ndim.html">hipdf.DataFrame.ndim</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.size.html">hipdf.DataFrame.size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.shape.html">hipdf.DataFrame.shape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.memory_usage.html">hipdf.DataFrame.memory_usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.empty.html">hipdf.DataFrame.empty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.astype.html">hipdf.DataFrame.astype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.convert_dtypes.html">hipdf.DataFrame.convert_dtypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.copy.html">hipdf.DataFrame.copy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.head.html">hipdf.DataFrame.head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.at.html">hipdf.DataFrame.at</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.iat.html">hipdf.DataFrame.iat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.loc.html">hipdf.DataFrame.loc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.iloc.html">hipdf.DataFrame.iloc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.insert.html">hipdf.DataFrame.insert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.__iter__.html">hipdf.DataFrame.__iter__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.items.html">hipdf.DataFrame.items</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.keys.html">hipdf.DataFrame.keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.iterrows.html">hipdf.DataFrame.iterrows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.itertuples.html">hipdf.DataFrame.itertuples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pop.html">hipdf.DataFrame.pop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.tail.html">hipdf.DataFrame.tail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.isin.html">hipdf.DataFrame.isin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.squeeze.html">hipdf.DataFrame.squeeze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.where.html">hipdf.DataFrame.where</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.mask.html">hipdf.DataFrame.mask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.query.html">hipdf.DataFrame.query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.add.html">hipdf.DataFrame.add</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.sub.html">hipdf.DataFrame.sub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.subtract.html">hipdf.DataFrame.subtract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.mul.html">hipdf.DataFrame.mul</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.multiply.html">hipdf.DataFrame.multiply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.truediv.html">hipdf.DataFrame.truediv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.div.html">hipdf.DataFrame.div</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.divide.html">hipdf.DataFrame.divide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.floordiv.html">hipdf.DataFrame.floordiv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.mod.html">hipdf.DataFrame.mod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pow.html">hipdf.DataFrame.pow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.dot.html">hipdf.DataFrame.dot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.radd.html">hipdf.DataFrame.radd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rsub.html">hipdf.DataFrame.rsub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rmul.html">hipdf.DataFrame.rmul</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rdiv.html">hipdf.DataFrame.rdiv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rtruediv.html">hipdf.DataFrame.rtruediv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rfloordiv.html">hipdf.DataFrame.rfloordiv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rmod.html">hipdf.DataFrame.rmod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rpow.html">hipdf.DataFrame.rpow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.lt.html">hipdf.DataFrame.lt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.gt.html">hipdf.DataFrame.gt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.le.html">hipdf.DataFrame.le</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.ge.html">hipdf.DataFrame.ge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.ne.html">hipdf.DataFrame.ne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.eq.html">hipdf.DataFrame.eq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.agg.html">hipdf.DataFrame.agg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.apply.html">hipdf.DataFrame.apply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.applymap.html">hipdf.DataFrame.applymap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.apply_chunks.html">hipdf.DataFrame.apply_chunks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.groupby.html">hipdf.DataFrame.groupby</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.map.html">hipdf.DataFrame.map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pipe.html">hipdf.DataFrame.pipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rolling.html">hipdf.DataFrame.rolling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.abs.html">hipdf.DataFrame.abs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.all.html">hipdf.DataFrame.all</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.any.html">hipdf.DataFrame.any</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.clip.html">hipdf.DataFrame.clip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.corr.html">hipdf.DataFrame.corr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.count.html">hipdf.DataFrame.count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.cov.html">hipdf.DataFrame.cov</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.cummax.html">hipdf.DataFrame.cummax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.cummin.html">hipdf.DataFrame.cummin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.cumprod.html">hipdf.DataFrame.cumprod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.cumsum.html">hipdf.DataFrame.cumsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.describe.html">hipdf.DataFrame.describe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.diff.html">hipdf.DataFrame.diff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.eval.html">hipdf.DataFrame.eval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.ewm.html">hipdf.DataFrame.ewm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.kurt.html">hipdf.DataFrame.kurt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.kurtosis.html">hipdf.DataFrame.kurtosis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.max.html">hipdf.DataFrame.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.mean.html">hipdf.DataFrame.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.median.html">hipdf.DataFrame.median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.min.html">hipdf.DataFrame.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.mode.html">hipdf.DataFrame.mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pct_change.html">hipdf.DataFrame.pct_change</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.prod.html">hipdf.DataFrame.prod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.product.html">hipdf.DataFrame.product</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.quantile.html">hipdf.DataFrame.quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rank.html">hipdf.DataFrame.rank</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.round.html">hipdf.DataFrame.round</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.scale.html">hipdf.DataFrame.scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.skew.html">hipdf.DataFrame.skew</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.sum.html">hipdf.DataFrame.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.std.html">hipdf.DataFrame.std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.var.html">hipdf.DataFrame.var</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.nunique.html">hipdf.DataFrame.nunique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.value_counts.html">hipdf.DataFrame.value_counts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.add_prefix.html">hipdf.DataFrame.add_prefix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.add_suffix.html">hipdf.DataFrame.add_suffix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.drop.html">hipdf.DataFrame.drop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.drop_duplicates.html">hipdf.DataFrame.drop_duplicates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.duplicated.html">hipdf.DataFrame.duplicated</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.equals.html">hipdf.DataFrame.equals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.first.html">hipdf.DataFrame.first</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.head.html">hipdf.DataFrame.head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.last.html">hipdf.DataFrame.last</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.reindex.html">hipdf.DataFrame.reindex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.rename.html">hipdf.DataFrame.rename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.reset_index.html">hipdf.DataFrame.reset_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.sample.html">hipdf.DataFrame.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.searchsorted.html">hipdf.DataFrame.searchsorted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.set_index.html">hipdf.DataFrame.set_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.repeat.html">hipdf.DataFrame.repeat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.tail.html">hipdf.DataFrame.tail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.take.html">hipdf.DataFrame.take</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.tile.html">hipdf.DataFrame.tile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.truncate.html">hipdf.DataFrame.truncate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.backfill.html">hipdf.DataFrame.backfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.bfill.html">hipdf.DataFrame.bfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.dropna.html">hipdf.DataFrame.dropna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.ffill.html">hipdf.DataFrame.ffill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.fillna.html">hipdf.DataFrame.fillna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.interpolate.html">hipdf.DataFrame.interpolate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.isna.html">hipdf.DataFrame.isna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.isnull.html">hipdf.DataFrame.isnull</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.nans_to_nulls.html">hipdf.DataFrame.nans_to_nulls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.notna.html">hipdf.DataFrame.notna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.notnull.html">hipdf.DataFrame.notnull</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pad.html">hipdf.DataFrame.pad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.replace.html">hipdf.DataFrame.replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.argsort.html">hipdf.DataFrame.argsort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.interleave_columns.html">hipdf.DataFrame.interleave_columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.partition_by_hash.html">hipdf.DataFrame.partition_by_hash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pivot.html">hipdf.DataFrame.pivot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.pivot_table.html">hipdf.DataFrame.pivot_table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.scatter_by_map.html">hipdf.DataFrame.scatter_by_map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.sort_values.html">hipdf.DataFrame.sort_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.sort_index.html">hipdf.DataFrame.sort_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.nlargest.html">hipdf.DataFrame.nlargest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.nsmallest.html">hipdf.DataFrame.nsmallest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.swaplevel.html">hipdf.DataFrame.swaplevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.stack.html">hipdf.DataFrame.stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.unstack.html">hipdf.DataFrame.unstack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.melt.html">hipdf.DataFrame.melt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.explode.html">hipdf.DataFrame.explode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_struct.html">hipdf.DataFrame.to_struct</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.T.html">hipdf.DataFrame.T</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.transpose.html">hipdf.DataFrame.transpose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.assign.html">hipdf.DataFrame.assign</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.join.html">hipdf.DataFrame.join</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.merge.html">hipdf.DataFrame.merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.update.html">hipdf.DataFrame.update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.shift.html">hipdf.DataFrame.shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.resample.html">hipdf.DataFrame.resample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.attrs.html">hipdf.DataFrame.attrs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.deserialize.html">hipdf.DataFrame.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.device_deserialize.html">hipdf.DataFrame.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.device_serialize.html">hipdf.DataFrame.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.from_arrow.html">hipdf.DataFrame.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.from_dict.html">hipdf.DataFrame.from_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.from_pandas.html">hipdf.DataFrame.from_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.from_records.html">hipdf.DataFrame.from_records</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.hash_values.html">hipdf.DataFrame.hash_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.host_deserialize.html">hipdf.DataFrame.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.host_serialize.html">hipdf.DataFrame.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.serialize.html">hipdf.DataFrame.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_arrow.html">hipdf.DataFrame.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_dict.html">hipdf.DataFrame.to_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_dlpack.html">hipdf.DataFrame.to_dlpack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_parquet.html">hipdf.DataFrame.to_parquet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_csv.html">hipdf.DataFrame.to_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_cupy.html">hipdf.DataFrame.to_cupy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_hdf.html">hipdf.DataFrame.to_hdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_json.html">hipdf.DataFrame.to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_numpy.html">hipdf.DataFrame.to_numpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_pandas.html">hipdf.DataFrame.to_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_feather.html">hipdf.DataFrame.to_feather</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_records.html">hipdf.DataFrame.to_records</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_string.html">hipdf.DataFrame.to_string</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_pylibcudf.html">hipdf.DataFrame.to_pylibcudf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.from_pylibcudf.html">hipdf.DataFrame.from_pylibcudf</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../index_objects.html">Index objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.html">hipdf.Index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.dtype.html">hipdf.Index.dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.duplicated.html">hipdf.Index.duplicated</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.empty.html">hipdf.Index.empty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.has_duplicates.html">hipdf.Index.has_duplicates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.hasnans.html">hipdf.Index.hasnans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_monotonic_increasing.html">hipdf.Index.is_monotonic_increasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_monotonic_decreasing.html">hipdf.Index.is_monotonic_decreasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_unique.html">hipdf.Index.is_unique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.name.html">hipdf.Index.name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.names.html">hipdf.Index.names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.ndim.html">hipdf.Index.ndim</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.nlevels.html">hipdf.Index.nlevels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.shape.html">hipdf.Index.shape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.size.html">hipdf.Index.size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.values.html">hipdf.Index.values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.all.html">hipdf.Index.all</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.any.html">hipdf.Index.any</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.copy.html">hipdf.Index.copy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.drop_duplicates.html">hipdf.Index.drop_duplicates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.equals.html">hipdf.Index.equals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.factorize.html">hipdf.Index.factorize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_boolean.html">hipdf.Index.is_boolean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_categorical.html">hipdf.Index.is_categorical</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_floating.html">hipdf.Index.is_floating</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_integer.html">hipdf.Index.is_integer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_interval.html">hipdf.Index.is_interval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_numeric.html">hipdf.Index.is_numeric</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.is_object.html">hipdf.Index.is_object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.min.html">hipdf.Index.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.max.html">hipdf.Index.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.rename.html">hipdf.Index.rename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.repeat.html">hipdf.Index.repeat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.where.html">hipdf.Index.where</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.take.html">hipdf.Index.take</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.unique.html">hipdf.Index.unique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.nunique.html">hipdf.Index.nunique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.set_names.html">hipdf.Index.set_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.fillna.html">hipdf.Index.fillna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.dropna.html">hipdf.Index.dropna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.isna.html">hipdf.Index.isna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.isnull.html">hipdf.Index.isnull</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.notna.html">hipdf.Index.notna</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.notnull.html">hipdf.Index.notnull</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.memory_usage.html">hipdf.Index.memory_usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.astype.html">hipdf.Index.astype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.deserialize.html">hipdf.Index.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.device_deserialize.html">hipdf.Index.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.device_serialize.html">hipdf.Index.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.host_deserialize.html">hipdf.Index.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.host_serialize.html">hipdf.Index.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.serialize.html">hipdf.Index.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.tolist.html">hipdf.Index.tolist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_arrow.html">hipdf.Index.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_cupy.html">hipdf.Index.to_cupy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_list.html">hipdf.Index.to_list</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_numpy.html">hipdf.Index.to_numpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_series.html">hipdf.Index.to_series</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_frame.html">hipdf.Index.to_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_pandas.html">hipdf.Index.to_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_dlpack.html">hipdf.Index.to_dlpack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.to_pylibcudf.html">hipdf.Index.to_pylibcudf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.from_pylibcudf.html">hipdf.Index.from_pylibcudf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.from_pandas.html">hipdf.Index.from_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.from_arrow.html">hipdf.Index.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.argsort.html">hipdf.Index.argsort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.find_label_range.html">hipdf.Index.find_label_range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.searchsorted.html">hipdf.Index.searchsorted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.sort_values.html">hipdf.Index.sort_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.shift.html">hipdf.Index.shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.append.html">hipdf.Index.append</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.union.html">hipdf.Index.union</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.intersection.html">hipdf.Index.intersection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.join.html">hipdf.Index.join</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.difference.html">hipdf.Index.difference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.get_indexer.html">hipdf.Index.get_indexer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.get_level_values.html">hipdf.Index.get_level_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.get_loc.html">hipdf.Index.get_loc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.get_slice_bound.html">hipdf.Index.get_slice_bound</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.isin.html">hipdf.Index.isin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.Index.str.html">hipdf.Index.str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.RangeIndex.html">hipdf.RangeIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.RangeIndex.start.html">hipdf.RangeIndex.start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.RangeIndex.stop.html">hipdf.RangeIndex.stop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.RangeIndex.step.html">hipdf.RangeIndex.step</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.RangeIndex.to_numpy.html">hipdf.RangeIndex.to_numpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.RangeIndex.to_arrow.html">hipdf.RangeIndex.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.CategoricalIndex.html">hipdf.CategoricalIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.CategoricalIndex.codes.html">hipdf.CategoricalIndex.codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.CategoricalIndex.categories.html">hipdf.CategoricalIndex.categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.CategoricalIndex.equals.html">hipdf.CategoricalIndex.equals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.IntervalIndex.html">hipdf.IntervalIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.IntervalIndex.from_breaks.html">hipdf.IntervalIndex.from_breaks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.IntervalIndex.values.html">hipdf.IntervalIndex.values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.IntervalIndex.get_indexer.html">hipdf.IntervalIndex.get_indexer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.IntervalIndex.get_loc.html">hipdf.IntervalIndex.get_loc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.html">hipdf.MultiIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.from_arrays.html">hipdf.MultiIndex.from_arrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.from_tuples.html">hipdf.MultiIndex.from_tuples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.from_product.html">hipdf.MultiIndex.from_product</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.from_frame.html">hipdf.MultiIndex.from_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.from_arrow.html">hipdf.MultiIndex.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.names.html">hipdf.MultiIndex.names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.levels.html">hipdf.MultiIndex.levels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.codes.html">hipdf.MultiIndex.codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.nlevels.html">hipdf.MultiIndex.nlevels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.to_frame.html">hipdf.MultiIndex.to_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.droplevel.html">hipdf.MultiIndex.droplevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.swaplevel.html">hipdf.MultiIndex.swaplevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.get_indexer.html">hipdf.MultiIndex.get_indexer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.get_loc.html">hipdf.MultiIndex.get_loc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.MultiIndex.get_level_values.html">hipdf.MultiIndex.get_level_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.html">hipdf.DatetimeIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.year.html">hipdf.DatetimeIndex.year</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.month.html">hipdf.DatetimeIndex.month</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.day.html">hipdf.DatetimeIndex.day</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.hour.html">hipdf.DatetimeIndex.hour</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.minute.html">hipdf.DatetimeIndex.minute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.second.html">hipdf.DatetimeIndex.second</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.microsecond.html">hipdf.DatetimeIndex.microsecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.nanosecond.html">hipdf.DatetimeIndex.nanosecond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.day_of_year.html">hipdf.DatetimeIndex.day_of_year</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.dayofyear.html">hipdf.DatetimeIndex.dayofyear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.dayofweek.html">hipdf.DatetimeIndex.dayofweek</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.weekday.html">hipdf.DatetimeIndex.weekday</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.quarter.html">hipdf.DatetimeIndex.quarter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.is_leap_year.html">hipdf.DatetimeIndex.is_leap_year</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.isocalendar.html">hipdf.DatetimeIndex.isocalendar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.round.html">hipdf.DatetimeIndex.round</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.ceil.html">hipdf.DatetimeIndex.ceil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.floor.html">hipdf.DatetimeIndex.floor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.tz_convert.html">hipdf.DatetimeIndex.tz_convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.tz_localize.html">hipdf.DatetimeIndex.tz_localize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.to_series.html">hipdf.DatetimeIndex.to_series</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DatetimeIndex.to_frame.html">hipdf.DatetimeIndex.to_frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.html">hipdf.TimedeltaIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.days.html">hipdf.TimedeltaIndex.days</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.seconds.html">hipdf.TimedeltaIndex.seconds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.microseconds.html">hipdf.TimedeltaIndex.microseconds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.nanoseconds.html">hipdf.TimedeltaIndex.nanoseconds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.components.html">hipdf.TimedeltaIndex.components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.inferred_freq.html">hipdf.TimedeltaIndex.inferred_freq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.to_series.html">hipdf.TimedeltaIndex.to_series</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.TimedeltaIndex.to_frame.html">hipdf.TimedeltaIndex.to_frame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../groupby.html">GroupBy</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.__iter__.html">hipdf.core.groupby.DataFrameGroupBy.__iter__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.__iter__.html">hipdf.core.groupby.SeriesGroupBy.__iter__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.groups.html">hipdf.core.groupby.DataFrameGroupBy.groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.groups.html">hipdf.core.groupby.SeriesGroupBy.groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.indices.html">hipdf.core.groupby.DataFrameGroupBy.indices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.indices.html">hipdf.core.groupby.SeriesGroupBy.indices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.get_group.html">hipdf.core.groupby.DataFrameGroupBy.get_group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.get_group.html">hipdf.core.groupby.SeriesGroupBy.get_group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.apply.html">hipdf.core.groupby.SeriesGroupBy.apply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.apply.html">hipdf.core.groupby.DataFrameGroupBy.apply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.agg.html">hipdf.core.groupby.SeriesGroupBy.agg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.agg.html">hipdf.core.groupby.DataFrameGroupBy.agg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.aggregate.html">hipdf.core.groupby.SeriesGroupBy.aggregate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.aggregate.html">hipdf.core.groupby.DataFrameGroupBy.aggregate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.transform.html">hipdf.core.groupby.SeriesGroupBy.transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.transform.html">hipdf.core.groupby.DataFrameGroupBy.transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.pipe.html">hipdf.core.groupby.SeriesGroupBy.pipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.pipe.html">hipdf.core.groupby.DataFrameGroupBy.pipe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.filter.html">hipdf.core.groupby.DataFrameGroupBy.filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.filter.html">hipdf.core.groupby.SeriesGroupBy.filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.all.html">hipdf.core.groupby.DataFrameGroupBy.all</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.any.html">hipdf.core.groupby.DataFrameGroupBy.any</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.bfill.html">hipdf.core.groupby.DataFrameGroupBy.bfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.corr.html">hipdf.core.groupby.DataFrameGroupBy.corr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.count.html">hipdf.core.groupby.DataFrameGroupBy.count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.cov.html">hipdf.core.groupby.DataFrameGroupBy.cov</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.cumcount.html">hipdf.core.groupby.DataFrameGroupBy.cumcount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.cummax.html">hipdf.core.groupby.DataFrameGroupBy.cummax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.cummin.html">hipdf.core.groupby.DataFrameGroupBy.cummin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.cumprod.html">hipdf.core.groupby.DataFrameGroupBy.cumprod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.cumsum.html">hipdf.core.groupby.DataFrameGroupBy.cumsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.describe.html">hipdf.core.groupby.DataFrameGroupBy.describe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.diff.html">hipdf.core.groupby.DataFrameGroupBy.diff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.ewm.html">hipdf.core.groupby.DataFrameGroupBy.ewm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.expanding.html">hipdf.core.groupby.DataFrameGroupBy.expanding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.ffill.html">hipdf.core.groupby.DataFrameGroupBy.ffill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.first.html">hipdf.core.groupby.DataFrameGroupBy.first</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.head.html">hipdf.core.groupby.DataFrameGroupBy.head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.idxmax.html">hipdf.core.groupby.DataFrameGroupBy.idxmax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.idxmin.html">hipdf.core.groupby.DataFrameGroupBy.idxmin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.last.html">hipdf.core.groupby.DataFrameGroupBy.last</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.max.html">hipdf.core.groupby.DataFrameGroupBy.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.mean.html">hipdf.core.groupby.DataFrameGroupBy.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.median.html">hipdf.core.groupby.DataFrameGroupBy.median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.min.html">hipdf.core.groupby.DataFrameGroupBy.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.ngroup.html">hipdf.core.groupby.DataFrameGroupBy.ngroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.nth.html">hipdf.core.groupby.DataFrameGroupBy.nth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.nunique.html">hipdf.core.groupby.DataFrameGroupBy.nunique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.ohlc.html">hipdf.core.groupby.DataFrameGroupBy.ohlc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.pct_change.html">hipdf.core.groupby.DataFrameGroupBy.pct_change</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.prod.html">hipdf.core.groupby.DataFrameGroupBy.prod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.quantile.html">hipdf.core.groupby.DataFrameGroupBy.quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.rank.html">hipdf.core.groupby.DataFrameGroupBy.rank</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.resample.html">hipdf.core.groupby.DataFrameGroupBy.resample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.rolling.html">hipdf.core.groupby.DataFrameGroupBy.rolling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.sample.html">hipdf.core.groupby.DataFrameGroupBy.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.shift.html">hipdf.core.groupby.DataFrameGroupBy.shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.size.html">hipdf.core.groupby.DataFrameGroupBy.size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.std.html">hipdf.core.groupby.DataFrameGroupBy.std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.sum.html">hipdf.core.groupby.DataFrameGroupBy.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.var.html">hipdf.core.groupby.DataFrameGroupBy.var</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.tail.html">hipdf.core.groupby.DataFrameGroupBy.tail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.take.html">hipdf.core.groupby.DataFrameGroupBy.take</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.value_counts.html">hipdf.core.groupby.DataFrameGroupBy.value_counts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.all.html">hipdf.core.groupby.SeriesGroupBy.all</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.any.html">hipdf.core.groupby.SeriesGroupBy.any</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.bfill.html">hipdf.core.groupby.SeriesGroupBy.bfill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.corr.html">hipdf.core.groupby.SeriesGroupBy.corr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.count.html">hipdf.core.groupby.SeriesGroupBy.count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.cov.html">hipdf.core.groupby.SeriesGroupBy.cov</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.cumcount.html">hipdf.core.groupby.SeriesGroupBy.cumcount</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.cummax.html">hipdf.core.groupby.SeriesGroupBy.cummax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.cummin.html">hipdf.core.groupby.SeriesGroupBy.cummin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.cumprod.html">hipdf.core.groupby.SeriesGroupBy.cumprod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.cumsum.html">hipdf.core.groupby.SeriesGroupBy.cumsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.describe.html">hipdf.core.groupby.SeriesGroupBy.describe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.diff.html">hipdf.core.groupby.SeriesGroupBy.diff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.ewm.html">hipdf.core.groupby.SeriesGroupBy.ewm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.expanding.html">hipdf.core.groupby.SeriesGroupBy.expanding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.ffill.html">hipdf.core.groupby.SeriesGroupBy.ffill</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.first.html">hipdf.core.groupby.SeriesGroupBy.first</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.head.html">hipdf.core.groupby.SeriesGroupBy.head</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.last.html">hipdf.core.groupby.SeriesGroupBy.last</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.idxmax.html">hipdf.core.groupby.SeriesGroupBy.idxmax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.idxmin.html">hipdf.core.groupby.SeriesGroupBy.idxmin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.is_monotonic_increasing.html">hipdf.core.groupby.SeriesGroupBy.is_monotonic_increasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.is_monotonic_decreasing.html">hipdf.core.groupby.SeriesGroupBy.is_monotonic_decreasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.max.html">hipdf.core.groupby.SeriesGroupBy.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.mean.html">hipdf.core.groupby.SeriesGroupBy.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.median.html">hipdf.core.groupby.SeriesGroupBy.median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.min.html">hipdf.core.groupby.SeriesGroupBy.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.ngroup.html">hipdf.core.groupby.SeriesGroupBy.ngroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.nlargest.html">hipdf.core.groupby.SeriesGroupBy.nlargest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.nsmallest.html">hipdf.core.groupby.SeriesGroupBy.nsmallest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.nth.html">hipdf.core.groupby.SeriesGroupBy.nth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.nunique.html">hipdf.core.groupby.SeriesGroupBy.nunique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.unique.html">hipdf.core.groupby.SeriesGroupBy.unique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.ohlc.html">hipdf.core.groupby.SeriesGroupBy.ohlc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.pct_change.html">hipdf.core.groupby.SeriesGroupBy.pct_change</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.prod.html">hipdf.core.groupby.SeriesGroupBy.prod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.quantile.html">hipdf.core.groupby.SeriesGroupBy.quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.rank.html">hipdf.core.groupby.SeriesGroupBy.rank</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.resample.html">hipdf.core.groupby.SeriesGroupBy.resample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.rolling.html">hipdf.core.groupby.SeriesGroupBy.rolling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.sample.html">hipdf.core.groupby.SeriesGroupBy.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.shift.html">hipdf.core.groupby.SeriesGroupBy.shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.size.html">hipdf.core.groupby.SeriesGroupBy.size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.std.html">hipdf.core.groupby.SeriesGroupBy.std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.sum.html">hipdf.core.groupby.SeriesGroupBy.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.var.html">hipdf.core.groupby.SeriesGroupBy.var</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.tail.html">hipdf.core.groupby.SeriesGroupBy.tail</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.take.html">hipdf.core.groupby.SeriesGroupBy.take</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.value_counts.html">hipdf.core.groupby.SeriesGroupBy.value_counts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.boxplot.html">hipdf.core.groupby.DataFrameGroupBy.boxplot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.hist.html">hipdf.core.groupby.DataFrameGroupBy.hist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.hist.html">hipdf.core.groupby.SeriesGroupBy.hist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.DataFrameGroupBy.plot.html">hipdf.core.groupby.DataFrameGroupBy.plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.groupby.SeriesGroupBy.plot.html">hipdf.core.groupby.SeriesGroupBy.plot</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../general_functions.html">General Functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.concat.html">hipdf.concat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.crosstab.html">hipdf.crosstab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.cut.html">hipdf.cut</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.factorize.html">hipdf.factorize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.get_dummies.html">hipdf.get_dummies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.melt.html">hipdf.melt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.merge.html">hipdf.merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.pivot.html">hipdf.pivot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.pivot_table.html">hipdf.pivot_table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.unstack.html">hipdf.unstack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.to_numeric.html">hipdf.to_numeric</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.from_dlpack.html">hipdf.from_dlpack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.from_pandas.html">hipdf.from_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.to_datetime.html">hipdf.to_datetime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.date_range.html">hipdf.date_range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DateOffset.html">hipdf.DateOffset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.interval_range.html">hipdf.interval_range</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../general_utilities.html">General Utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.testing.testing.assert_column_equal.html">hipdf.testing.testing.assert_column_equal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.testing.testing.assert_eq.html">hipdf.testing.testing.assert_eq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.testing.testing.assert_frame_equal.html">hipdf.testing.testing.assert_frame_equal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.testing.testing.assert_index_equal.html">hipdf.testing.testing.assert_index_equal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.testing.testing.assert_neq.html">hipdf.testing.testing.assert_neq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.testing.testing.assert_series_equal.html">hipdf.testing.testing.assert_series_equal</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../window.html">Window</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.count.html">hipdf.core.window.rolling.Rolling.count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.sum.html">hipdf.core.window.rolling.Rolling.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.mean.html">hipdf.core.window.rolling.Rolling.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.var.html">hipdf.core.window.rolling.Rolling.var</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.std.html">hipdf.core.window.rolling.Rolling.std</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.min.html">hipdf.core.window.rolling.Rolling.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.max.html">hipdf.core.window.rolling.Rolling.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.window.rolling.Rolling.apply.html">hipdf.core.window.rolling.Rolling.apply</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../io.html">Input/output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_csv.html">hipdf.read_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_csv.html">hipdf.DataFrame.to_csv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_text.html">hipdf.read_text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_json.html">hipdf.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_json.html">hipdf.DataFrame.to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_parquet.html">hipdf.read_parquet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_parquet.html">hipdf.DataFrame.to_parquet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.io.parquet.read_parquet_metadata.html">hipdf.io.parquet.read_parquet_metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.io.parquet.ParquetDatasetWriter.html">hipdf.io.parquet.ParquetDatasetWriter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.io.parquet.ParquetDatasetWriter.close.html">hipdf.io.parquet.ParquetDatasetWriter.close</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.io.parquet.ParquetDatasetWriter.write_table.html">hipdf.io.parquet.ParquetDatasetWriter.write_table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_orc.html">hipdf.read_orc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_orc.html">hipdf.DataFrame.to_orc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_hdf.html">hipdf.read_hdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_hdf.html">hipdf.DataFrame.to_hdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_feather.html">hipdf.read_feather</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.DataFrame.to_feather.html">hipdf.DataFrame.to_feather</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.read_avro.html">hipdf.read_avro</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../character_normalizer.html">CharacterNormalizer</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.character_normalizer.CharacterNormalizer.html">hipdf.core.character_normalizer.CharacterNormalizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.character_normalizer.CharacterNormalizer.normalize.html">hipdf.core.character_normalizer.CharacterNormalizer.normalize</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../wordpiece_tokenizer.html">WordPieceTokenizer</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.wordpiece_tokenize.WordPieceVocabulary.html">hipdf.core.wordpiece_tokenize.WordPieceVocabulary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.wordpiece_tokenize.WordPieceVocabulary.tokenize.html">hipdf.core.wordpiece_tokenize.WordPieceVocabulary.tokenize</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tokenize_vocabulary.html">TokenizeVocabulary</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.tokenize_vocabulary.TokenizeVocabulary.html">hipdf.core.tokenize_vocabulary.TokenizeVocabulary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.tokenize_vocabulary.TokenizeVocabulary.tokenize.html">hipdf.core.tokenize_vocabulary.TokenizeVocabulary.tokenize</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../options.html">Options and settings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.get_option.html">hipdf.get_option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.set_option.html">hipdf.set_option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.describe_option.html">hipdf.describe_option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.option_context.html">hipdf.option_context</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../extension_dtypes.html">Extension Dtypes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.html">hipdf.core.dtypes.CategoricalDtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.categories.html">hipdf.core.dtypes.CategoricalDtype.categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.construct_from_string.html">hipdf.core.dtypes.CategoricalDtype.construct_from_string</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.deserialize.html">hipdf.core.dtypes.CategoricalDtype.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.device_deserialize.html">hipdf.core.dtypes.CategoricalDtype.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.device_serialize.html">hipdf.core.dtypes.CategoricalDtype.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.from_pandas.html">hipdf.core.dtypes.CategoricalDtype.from_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.host_deserialize.html">hipdf.core.dtypes.CategoricalDtype.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.host_serialize.html">hipdf.core.dtypes.CategoricalDtype.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.is_dtype.html">hipdf.core.dtypes.CategoricalDtype.is_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.name.html">hipdf.core.dtypes.CategoricalDtype.name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.ordered.html">hipdf.core.dtypes.CategoricalDtype.ordered</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.serialize.html">hipdf.core.dtypes.CategoricalDtype.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.str.html">hipdf.core.dtypes.CategoricalDtype.str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.to_pandas.html">hipdf.core.dtypes.CategoricalDtype.to_pandas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.CategoricalDtype.type.html">hipdf.core.dtypes.CategoricalDtype.type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.html">hipdf.core.dtypes.Decimal32Dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.ITEMSIZE.html">hipdf.core.dtypes.Decimal32Dtype.ITEMSIZE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.MAX_PRECISION.html">hipdf.core.dtypes.Decimal32Dtype.MAX_PRECISION</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.deserialize.html">hipdf.core.dtypes.Decimal32Dtype.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.device_deserialize.html">hipdf.core.dtypes.Decimal32Dtype.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.device_serialize.html">hipdf.core.dtypes.Decimal32Dtype.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.from_arrow.html">hipdf.core.dtypes.Decimal32Dtype.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.host_deserialize.html">hipdf.core.dtypes.Decimal32Dtype.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.host_serialize.html">hipdf.core.dtypes.Decimal32Dtype.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.is_dtype.html">hipdf.core.dtypes.Decimal32Dtype.is_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.itemsize.html">hipdf.core.dtypes.Decimal32Dtype.itemsize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.precision.html">hipdf.core.dtypes.Decimal32Dtype.precision</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.scale.html">hipdf.core.dtypes.Decimal32Dtype.scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.serialize.html">hipdf.core.dtypes.Decimal32Dtype.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.str.html">hipdf.core.dtypes.Decimal32Dtype.str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal32Dtype.to_arrow.html">hipdf.core.dtypes.Decimal32Dtype.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.html">hipdf.core.dtypes.Decimal64Dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.ITEMSIZE.html">hipdf.core.dtypes.Decimal64Dtype.ITEMSIZE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.MAX_PRECISION.html">hipdf.core.dtypes.Decimal64Dtype.MAX_PRECISION</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.deserialize.html">hipdf.core.dtypes.Decimal64Dtype.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.device_deserialize.html">hipdf.core.dtypes.Decimal64Dtype.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.device_serialize.html">hipdf.core.dtypes.Decimal64Dtype.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.from_arrow.html">hipdf.core.dtypes.Decimal64Dtype.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.host_deserialize.html">hipdf.core.dtypes.Decimal64Dtype.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.host_serialize.html">hipdf.core.dtypes.Decimal64Dtype.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.is_dtype.html">hipdf.core.dtypes.Decimal64Dtype.is_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.itemsize.html">hipdf.core.dtypes.Decimal64Dtype.itemsize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.precision.html">hipdf.core.dtypes.Decimal64Dtype.precision</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.scale.html">hipdf.core.dtypes.Decimal64Dtype.scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.serialize.html">hipdf.core.dtypes.Decimal64Dtype.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.str.html">hipdf.core.dtypes.Decimal64Dtype.str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal64Dtype.to_arrow.html">hipdf.core.dtypes.Decimal64Dtype.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.html">hipdf.core.dtypes.Decimal128Dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.ITEMSIZE.html">hipdf.core.dtypes.Decimal128Dtype.ITEMSIZE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.MAX_PRECISION.html">hipdf.core.dtypes.Decimal128Dtype.MAX_PRECISION</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.deserialize.html">hipdf.core.dtypes.Decimal128Dtype.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.device_deserialize.html">hipdf.core.dtypes.Decimal128Dtype.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.device_serialize.html">hipdf.core.dtypes.Decimal128Dtype.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.from_arrow.html">hipdf.core.dtypes.Decimal128Dtype.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.host_deserialize.html">hipdf.core.dtypes.Decimal128Dtype.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.host_serialize.html">hipdf.core.dtypes.Decimal128Dtype.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.is_dtype.html">hipdf.core.dtypes.Decimal128Dtype.is_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.itemsize.html">hipdf.core.dtypes.Decimal128Dtype.itemsize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.precision.html">hipdf.core.dtypes.Decimal128Dtype.precision</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.scale.html">hipdf.core.dtypes.Decimal128Dtype.scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.serialize.html">hipdf.core.dtypes.Decimal128Dtype.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.str.html">hipdf.core.dtypes.Decimal128Dtype.str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.Decimal128Dtype.to_arrow.html">hipdf.core.dtypes.Decimal128Dtype.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.html">hipdf.core.dtypes.ListDtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.deserialize.html">hipdf.core.dtypes.ListDtype.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.device_deserialize.html">hipdf.core.dtypes.ListDtype.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.device_serialize.html">hipdf.core.dtypes.ListDtype.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.element_type.html">hipdf.core.dtypes.ListDtype.element_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.from_arrow.html">hipdf.core.dtypes.ListDtype.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.host_deserialize.html">hipdf.core.dtypes.ListDtype.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.host_serialize.html">hipdf.core.dtypes.ListDtype.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.is_dtype.html">hipdf.core.dtypes.ListDtype.is_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.leaf_type.html">hipdf.core.dtypes.ListDtype.leaf_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.serialize.html">hipdf.core.dtypes.ListDtype.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.to_arrow.html">hipdf.core.dtypes.ListDtype.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.ListDtype.type.html">hipdf.core.dtypes.ListDtype.type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.html">hipdf.core.dtypes.StructDtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.deserialize.html">hipdf.core.dtypes.StructDtype.deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.device_deserialize.html">hipdf.core.dtypes.StructDtype.device_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.device_serialize.html">hipdf.core.dtypes.StructDtype.device_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.fields.html">hipdf.core.dtypes.StructDtype.fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.from_arrow.html">hipdf.core.dtypes.StructDtype.from_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.host_deserialize.html">hipdf.core.dtypes.StructDtype.host_deserialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.host_serialize.html">hipdf.core.dtypes.StructDtype.host_serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.is_dtype.html">hipdf.core.dtypes.StructDtype.is_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.serialize.html">hipdf.core.dtypes.StructDtype.serialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.to_arrow.html">hipdf.core.dtypes.StructDtype.to_arrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.core.dtypes.StructDtype.type.html">hipdf.core.dtypes.StructDtype.type</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../performance_tracking.html">Performance Tracking</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.utils.performance_tracking.get_memory_records.html">hipdf.utils.performance_tracking.get_memory_records</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hipdf.utils.performance_tracking.print_memory_report.html">hipdf.utils.performance_tracking.print_memory_report</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+</div>
+</nav></div>
+</div>
+<div class="sidebar-primary-items__end sidebar-primary__section">
+</div>
+<div id="rtd-footer-container"></div>
+</div>
+<main class="bd-main" id="main-content" role="main">
+<div class="sbt-scroll-pixel-helper"></div>
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+<div class="header-article-items__start">
+<div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" data-bs-placement="bottom" data-bs-toggle="tooltip" for="__primary" title="Toggle primary sidebar">
+<span class="fa-solid fa-angle-right"></span>
+</label></div>
+<div class="header-article-item">
+<nav aria-label="Breadcrumb" class="d-print-none">
+<ul class="bd-breadcrumbs">
+<li class="breadcrumb-item breadcrumb-home">
+<a aria-label="Home" class="nav-link" href="../../../index.html">
+<i class="fa-solid fa-home"></i>
+</a>
+</li>
+<li class="breadcrumb-item"><a class="nav-link" href="../index.html">hipDF API reference</a></li>
+<li class="breadcrumb-item"><a class="nav-link" href="../series.html">Series</a></li>
+<li aria-current="page" class="breadcrumb-item active">hipdf.Series...</li>
+</ul>
+</nav>
+</div>
+</div>
+<div class="header-article-items__end">
+<div class="header-article-item">
+<div class="article-header-buttons">
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Toggle secondary sidebar">
+<span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+</div>
+</div>
+</div>
+<div class="onlyprint" id="jb-print-docs-body">
+<h1>hipdf.Series.iteritems</h1>
+<!-- Table of contents -->
+<div id="print-main-content">
+<div id="jb-print-toc">
+<div>
+<h2> Contents </h2>
+</div>
+<nav aria-label="Page">
+<ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hipdf.Series.iteritems"><code class="docutils literal notranslate"><span class="pre">Series.iteritems()</span></code></a></li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div id="searchbox"></div>
+<article class="bd-article">
+<section id="hipdf-series-iteritems">
+<h1>hipdf.Series.iteritems<a class="headerlink" href="#hipdf-series-iteritems" title="Link to this heading">#</a></h1><div class="sd-container-fluid sd-sphinx-override sd-p-0 sd-mt-2 sd-mb-4 sd-p-2 sd-rounded-1 docutils" id="rocm-docs-core-article-info">
+<div class="sd-row sd-row-cols-2 sd-gx-2 sd-gy-1 docutils">
+<div class="sd-col sd-d-flex-row sd-align-minor-center docutils">
+<div class="sd-container-fluid sd-sphinx-override docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-3 sd-row-cols-md-3 sd-row-cols-lg-3 sd-gx-3 sd-gy-1 docutils">
+<div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
+<p class="sd-p-0 sd-m-0" style="color:gray;">
+<span class="sd-pr-2 article-info-date-svg">
+<svg aria-hidden="true" class="sd-octicon sd-octicon-calendar" height="16.0px" version="1.1" viewbox="0 0 16 16" width="16.0px">
+<path d="M4.75 0a.75.75 0 01.75.75V2h5V.75a.75.75 0 011.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0113.25 16H2.75A1.75 1.75 0 011 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 014.75 0zm0 3.5h8.5a.25.25 0 01.25.25V6h-11V3.75a.25.25 0 01.25-.25h2zm-2.25 4v6.75c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25V7.5h-11z" fill-rule="evenodd"></path>
+</svg>
+</span>
+</p>
+</div>
+<div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
+<p class="sd-p-0 sd-m-0" style="color:gray;">
+<span class="sd-pr-2 article-info-read-time-svg">
+<svg aria-hidden="true" class="sd-octicon sd-octicon-clock" height="16.0px" version="1.1" viewbox="0 0 16 16" width="16.0px">
+<path d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.471.696l2.5 1a.75.75 0 00.557-1.392L8.5 7.742V4.75z" fill-rule="evenodd"></path>
+</svg>
+</span>
+                            1 min read time
+                        </p>
+</div>
+<div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils" style="color:gray;">
+                        Applies to Linux
+                    </div>
+<div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
+<p class="sd-p-0 sd-m-0" style="color:gray;"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hipdf.Series.iteritems">
+<span class="sig-prename descclassname"><span class="pre">Series.</span></span><span class="sig-name descname"><span class="pre">iteritems</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#hipdf.Series.iteritems" title="Link to this definition">#</a></dt>
+<dd><p>Iteration is unsupported.</p>
+<p>See <span class="xref std std-ref">iteration</span> for more
+information.</p>
+</dd></dl>
+</section>
+</article>
+<footer class="prev-next-footer d-print-none">
+<div class="prev-next-area">
+<a class="left-prev" href="hipdf.Series.items.html" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">hipdf.Series.items</p>
+</div>
+</a>
+<a class="right-next" href="hipdf.Series.keys.html" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">hipdf.Series.keys</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+<div class="sidebar-secondary-item">
+<div class="page-toc tocsection onthispage">
+<i class="fa-solid fa-list"></i> Contents
+  </div>
+<nav class="bd-toc-nav page-toc">
+<ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hipdf.Series.iteritems"><code class="docutils literal notranslate"><span class="pre">Series.iteritems()</span></code></a></li>
+</ul>
+</nav></div>
+</div></div>
+</div>
+<footer class="bd-footer-content">
+<p>
+</p>
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+<footer class="rocm-footer">
+<div class="container-lg">
+<section class="bottom-menu menu py-45">
+<div class="row d-flex align-items-center">
+<div class="col-12 text-center">
+<ul>
+<li><a href="https://www.amd.com/en/corporate/copyright" target="_blank">Terms and Conditions</a></li>
+<li><a href="https://www.amd.com/en/corporate/privacy" target="_blank">Privacy</a></li>
+<li><a href="https://www.amd.com/en/corporate/trademarks" target="_blank">Trademarks</a></li>
+<li><a href="https://www.amd.com/content/dam/amd/en/documents/corporate/cr/supply-chain-transparency.pdf" target="_blank">Supply Chain Transparency</a></li>
+<li><a href="https://www.amd.com/en/corporate/competition" target="_blank">Fair and Open Competition</a></li>
+<li><a href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf" target="_blank">UK Tax Strategy</a></li>
+<li><a href="https://www.amd.com/en/corporate/cookies" target="_blank">Cookie Policy</a></li>
+<!-- OneTrust Cookies Settings button start -->
+<li><a class="ot-sdk-show-settings" href="#cookie-settings" id="ot-sdk-btn">Cookie Settings</a></li>
+<!-- OneTrust Cookies Settings button end -->
+</ul>
+</div>
+</div>
+<div class="row d-flex align-items-center">
+<div class="col-12 text-center">
+<div>
+<span class="copyright">© 2026 Advanced Micro Devices, Inc</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</footer>
+<!-- <div id="rdc-watermark-container">
+    <img id="rdc-watermark" src="../../../_static/images/alpha-watermark.svg" alt="DRAFT watermark"/>
+</div> -->
+</body>
+</html>
