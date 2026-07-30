@@ -1,8 +1,8 @@
 ---
 myst:
   html_meta:
-    "description": "ROCm Data Science (ROCm-DS) library for Data Frames."
-    "keywords": "ROCm, ROCm-DS, Data Science, RAPIDS, AMD, CUDA, Data Frames, SDK"
+    "description": "AMD Data Science library for Data Frames."
+    "keywords": "ROCm, AMD Data Science, Data Science, RAPIDS, AMD, CUDA, Data Frames, SDK"
 ---
 
 # Installing hipDF
@@ -88,7 +88,7 @@ We create a work directory `/tmp/hipdf` and clone hipDF into this repository:
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
 
 cd /tmp/hipdf
-git clone https://github.com/ROCm-DS/hipDF hipdf -b release/1.0.x
+git clone https://github.com/AMD-Ecosystem/hipDF hipdf -b release/1.0.x
 ```
 
 #### Step 3: Create and activate hipDF Conda environment `hipdf_dev`.
@@ -201,7 +201,7 @@ pip install amd-hipmm==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/1.0.x
+   git clone https://github.com/AMD-Ecosystem/hipMM hipmm -b release/1.0.x
    ```
 
 2. Build and install the hipMM wheel:
@@ -210,7 +210,7 @@ pip install amd-hipmm==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
    conda activate hipdf_dev
 
    cd /tmp/hipdf
-   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/1.0.x
+   git clone https://github.com/AMD-Ecosystem/hipMM hipmm -b release/1.0.x
 
    cd /tmp/hipdf/hipmm
    export RAPIDS_CMAKE_HIP_ARCHITECTURES="gfx942" # NOTE: set AMD GPU architecture(s)
