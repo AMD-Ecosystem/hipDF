@@ -10,7 +10,7 @@ _today = _datetime.today()
 
 # Rocm-docs-core
 external_projects_remote_repository = ""
-# TODO extend with ROCm-DS projects
+# TODO extend with AMD Data Science projects
 external_projects = [
     "hipDF",
     "hipMM",

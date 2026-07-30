@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="hipDF documentation and API reference library" name="description"/>
-<meta content="hipDF, cuDF, Pandas, ROCm-DS, API, documentation" name="keywords"/>
+<meta content="hipDF, cuDF, Pandas, AMD Data Science, API, documentation" name="keywords"/>
 <title>hipDF documentation — hipDF 1.0.0b1 documentation</title>
 <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
@@ -87,7 +87,7 @@
 <img alt="AMD Logo" class="d-inline-block align-text-top hover-opacity" src="_static/images/amd-header-logo.svg" title="AMD Logo" width="90"/>
 </a>
 <div class="vr vr mx-40 my-25"></div>
-<a class="klavika-font hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/docs-25.05">ROCm Data Science 25.05</a>
+<a class="klavika-font hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/docs-25.05">Data Science 25.05</a>
 </div>
 <div class="icon-nav text-center d-flex ms-auto">
 </div>
@@ -98,44 +98,56 @@
 <div class="navbar-nav-container collapse navbar-collapse" id="navbarSupportedContent">
 <ul class="navbar-nav nav-mega me-auto mb-2 mb-lg-0 col-xl-10">
 <li class="nav-item">
-<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm-DS/hipdf" id="navgithub" role="button" target="_blank">
-                                GitHub
-                            </a>
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/AMD-Ecosystem/hipDF" id="navgithub" role="button" target="_blank">
+                                        GitHub
+                                    </a>
 </li>
 <li class="nav-item">
 <a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm/ROCm/discussions" id="navcommunity" role="button" target="_blank">
-                                Community
-                            </a>
+                                        Community
+                                    </a>
 </li>
 <li class="nav-item">
 <a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://rocm.blogs.amd.com/" id="navblogs" role="button" target="_blank">
-                                Blogs
-                            </a>
+                                        Blogs
+                                    </a>
 </li>
 <li class="nav-item">
-<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://rocm.docs.amd.com" id="navrocm™-docs" role="button" target="_blank">
-                                ROCm™ Docs
-                            </a>
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://rocm.docs.amd.com" id="navrocm-docs" role="button" target="_blank">
+                                        ROCm Docs
+                                    </a>
 </li>
 <li class="nav-item">
 <a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://www.amd.com/en/developer/resources/rocm-hub.html" id="navrocm-developer-hub" role="button" target="_blank">
-                                ROCm Developer Hub
-                            </a>
+                                        ROCm Developer Hub
+                                    </a>
+</li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link top-level header-menu-links dropdown-toggle header-nav-dropdown-toggle" data-bs-toggle="dropdown" href="#" id="navamd-toolkits" role="button">
+                                        AMD Toolkits
+                                    </a>
+<ul aria-labelledby="navamd-toolkits" class="dropdown-menu header-nav-dropdown-menu">
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest/index.html" target="_blank">AMD Data Science</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-finance/en/latest/index.html" target="_blank">AMD Finance</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-ls/en/latest/index.html" target="_blank">AMD Life Science</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-llmext/en/latest/index.html" target="_blank">AMD LLM Extension</a></li>
+<li><a class="dropdown-item" href="https://rocm.docs.amd.com/projects/rocm-simulation/en/latest/index.html" target="_blank">AMD Simulation</a></li>
+</ul>
 </li>
 <li class="nav-item">
-<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://instinct.docs.amd.com" id="navinstinct™-docs" role="button" target="_blank">
-                                Instinct™ Docs
-                            </a>
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://instinct.docs.amd.com" id="navsystems-and-infra-docs" role="button" target="_blank">
+                                        Systems and Infra Docs
+                                    </a>
 </li>
 <li class="nav-item">
 <a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://www.amd.com/en/developer/resources/infinity-hub.html" id="navinfinity-hub" role="button" target="_blank">
-                                Infinity Hub
-                            </a>
+                                        Infinity Hub
+                                    </a>
 </li>
 <li class="nav-item">
-<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm-DS/hipdf/issues/new/choose" id="navsupport" role="button" target="_blank">
-                                Support
-                            </a>
+<a aria-expanded="false" class="nav-link top-level header-menu-links" href="https://github.com/ROCm-DS/hipDF/issues/new/choose" id="navsupport" role="button" target="_blank">
+                                        Support
+                                    </a>
 </li>
 </ul>
 </div>
@@ -149,7 +161,7 @@
 <div class="sidebar-header-items__center">
 <div class="navbar-item">
 <a class="navbar-brand logo" href="https://rocm.docs.amd.com/projects/rocm-ds/en/docs-25.05">
-<p>ROCm Data Science</p>
+<p>AMD Data Science</p>
 </a></div>
 </div>
 </div>
@@ -1269,7 +1281,7 @@ document.write(`
 <p>hipDF is in an early access state. Running production workloads is not recommended.</p>
 </div>
 <p>Based on the <a class="reference external" href="http://arrow.apache.org/">Apache Arrow</a> columnar memory format,
-the <a class="reference external" href="https://github.com/ROCm-DS/hipDF">hipDF</a> library enables DataFrames that
+the <a class="reference external" href="https://github.com/AMD-Ecosystem/hipDF">hipDF</a> library enables DataFrames that
 let you load and manipulate your data in the memory of AMD GPUs. Following a
 familiar Pandas-like API, hipDF lets you accelerate both your existing and new
 data science workloads on AMD GPUs with high-level functions that eliminate the
@@ -1278,7 +1290,7 @@ need to go into low-level HIP programming.</p>
 processing applications, hipDF enables you to easily port your existing Pandas
 and cuDF workloads to AMD GPUs. hipDF is derived from the NVIDIA RAPIDS® open-source project cuDF.</p>
 <p>The hipDF code is open and hosted at
-<a class="github reference external" href="https://github.com/ROCm-DS/hipDF">ROCm-DS/hipDF</a>.</p>
+<a class="github reference external" href="https://github.com/AMD-Ecosystem/hipDF">AMD-Ecosystem/hipDF</a>.</p>
 <p>The hipDF documentation is structured as follows:</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
 <div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
@@ -1307,7 +1319,7 @@ Reference</div>
 </div>
 </div>
 </div>
-<p>To contribute to the documentation refer to <a class="reference external" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest/contribute/contributing.html">Contributing to ROCm-DS</a>.</p>
+<p>To contribute to the documentation refer to <a class="reference external" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest/contribute/contributing.html">Contributing to AMD Data Science</a>.</p>
 <p>You can find licensing information on the <a class="reference external" href="https://rocm.docs.amd.com/projects/hipDF/en/latest/license.html">Licensing</a> page.</p>
 <div class="toctree-wrapper compound">
 </div>
