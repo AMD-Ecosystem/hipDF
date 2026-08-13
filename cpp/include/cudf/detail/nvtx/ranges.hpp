@@ -71,9 +71,17 @@ using scoped_range = ::nvtx3::scoped_range_in<libcudf_domain>;
  */
 #define CUDF_FUNC_RANGE() NVTX3_FUNC_RANGE_IN(cudf::libcudf_domain)
 #else
-// NOTE(HIP/AMD): NVTX is unavailable on HIP (NVTX_DISABLE). Provide a no-op scoped_range
-// stub so source that constructs `cudf::scoped_range range{"name"}` still compiles, and
-// make CUDF_FUNC_RANGE() a no-op.
+// TODO(HIP/AMD, <ROCTX>): NVTX is unavailable on HIP (NVTX_DISABLE), so profiling ranges are
+// currently a no-op on AMD - libcudf emits none. Provide a no-op scoped_range stub so source
+// that constructs `cudf::scoped_range range{"name"}` still compiles, and make
+// CUDF_FUNC_RANGE() a no-op.
+//
+// rocTX is the intended replacement (available in ROCm 7.14 as
+// <rocprofiler-sdk-roctx/roctx.h>, providing roctxRangePushA / roctxRangeStartA / roctxMarkA,
+// which cover what scoped_range and CUDF_FUNC_RANGE need). Deferred until rocTX reaches
+// capability parity with NVTX - notably domains, registered string handles and payloads, which
+// upstream relies on via NVTX3_FUNC_RANGE_IN(cudf::libcudf_domain). Revisit then; see the
+// matching TODO on the get_nvtx.cmake include in cpp/CMakeLists.txt.
 namespace cudf {
 struct scoped_range {
   scoped_range() = default;

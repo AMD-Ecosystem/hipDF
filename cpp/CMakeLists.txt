@@ -506,7 +506,9 @@ include(cmake/thirdparty/get_jitify.cmake)
 
 # find NVTX
 if(USE_NVTX)
-  include(cmake/thirdparty/get_nvtx.cmake) # TODO(HIP/AMD): add rocTX
+  # TODO(HIP/AMD, <ROCTX>): add rocTX. Deferred until rocTX reaches capability parity with NVTX
+  # (domains, registered string handles, payloads); see cudf/detail/nvtx/ranges.hpp.
+  include(cmake/thirdparty/get_nvtx.cmake)
 endif()
 # find nvCOMP
 include(cmake/thirdparty/get_nvcomp.cmake)
