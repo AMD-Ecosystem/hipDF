@@ -42,9 +42,16 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_buffer.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
+#else
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+#include <cub/cub.cuh>
+#endif
 #include <cuda/atomic>
+#include <cuda/std/bit>
 #include <thrust/execution_policy.h>
 #include <thrust/tabulate.h>
 
@@ -175,8 +182,11 @@ CUDF_KERNEL void set_null_masks_kernel(cudf::device_span<bitmask_type*> destinat
                                        cudf::device_span<size_type const> numbers_of_mask_words)
 {
   namespace cg = cooperative_groups;
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   auto const bitmask_idx = blockIdx.x;
   // Return early if nothing to do
   if (begin_bits[bitmask_idx] == end_bits[bitmask_idx]) { return; }
@@ -789,8 +799,12 @@ CUDF_KERNEL void find_first_set_bit_kernel(bitmask_type const* __restrict__ bitm
   if (thread_word_index <= end_word_index) {
     auto const mask = detail::get_mask_offset_word(bitmask, tid, start, stop);
     // returned index is 1-based; 0 means no bits were set
-    // NOTE(HIP/AMD): cast to unsigned int to disambiguate HIP's __ffs(int)/(unsigned) overloads.
-    auto const mask_bit_index = __ffs(static_cast<unsigned int>(mask));
+    // NOTE(HIP/AMD): must not use `__ffs`, which takes a 32-bit argument. `bitmask_type` is
+    // `uint64_t` in hipDF unless CUDF_USE_WARPSIZE_32 is set (default OFF; gfx90a is wave64-only),
+    // so narrowing `mask` to 32 bits would silently drop bits 32-63 and report words whose only
+    // set bits live in the upper half as empty. `countr_zero` is width-agnostic and also avoids
+    // HIP's ambiguous `__ffs(int)`/`__ffs(unsigned)` overload pair.
+    auto const mask_bit_index = (mask == 0) ? 0 : (cuda::std::countr_zero(mask) + 1);
     if (mask_bit_index != 0) {
       bit_index = static_cast<size_type>(tid * word_size) + mask_bit_index - 1;
     }

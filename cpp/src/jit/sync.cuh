@@ -42,8 +42,13 @@
 
 namespace cudf {
 
-// NOTE(HIP/AMD): the lane mask is wavefront-wide; on AMD that is 64 lanes, so it must
-// be a 64-bit type. countr_zero on a 64-bit mask yields the correct leader lane.
+// NOTE(HIP/AMD): the lane mask must be 64-bit on AMD for *both* wave64 and wave32 targets:
+// HIP's `__ballot_sync`/`__activemask` return `unsigned long long` regardless of the wavefront
+// size, so that masks are portable across wave32 and wave64 (see SWDEV-490930). `countr_zero`
+// on a 64-bit mask yields the correct leader lane in either case.
+// This is deliberately NOT `bitmask_type`: that is the null-mask *storage* word type and is only
+// coincidentally the same width on wave64. Conflating the two is a correctness hazard - see the
+// note in `warp_compact_validity` below.
 #if defined(__HIP_PLATFORM_AMD__)
 using lane_mask_type = uint64_t;
 #else
@@ -56,6 +61,8 @@ __device__ inline bool warp_elect(lane_mask_type mask)
   // use elect.sync
   return cuda::ptx::elect_sync(mask);
 #else
+  // TODO(HIP/AMD, <LIBHIPCXX>): replace this hand-rolled leader election with a wavefront-size
+  // agnostic `elect` intrinsic once libhipcxx provides one (must work for wave32 and wave64).
   // fallback: manually elect a leader (e.g., the first active thread)
   int leader = mask == 0 ? 0 : cuda::std::countr_zero(mask);
   int lane   = (threadIdx.x & (cudf::detail::warp_size - 1));
@@ -76,25 +83,19 @@ __device__ void warp_compact_validity(lane_mask_type active_mask,
   if (warp_elect(active_mask)) {
     auto const lane_id  = static_cast<size_type>(threadIdx.x & (cudf::detail::warp_size - 1));
     auto const row_base = row - lane_id;
-#if defined(__HIP_PLATFORM_AMD__)
-    // NOTE(HIP/AMD): a wavefront-wide ballot is a 64-bit value but cudf null masks are 32-bit
-    // words. On a 64-lane wavefront the ballot spans two consecutive null-mask words, so split it
-    // and write both; on a 32-lane wavefront it maps to a single word like the NVIDIA path. The
-    // compile-time branch on warp_size keeps this correct on both wave64 and wave32 hardware.
-    // TODO(SWDEV-ticket): replace this hand-rolled leader election with a wavefront-size-agnostic
-    // `elect` intrinsic provided by libhipcxx (must work for both wave32 and wave64).
-    auto const word_base = cudf::word_index(row_base);
-    if constexpr (cudf::detail::warp_size == 64) {
-      Out::set_null_mask_word(
-        outcols, word_base, static_cast<bitmask_type>(null_word & 0xFFFF'FFFFULL));
-      Out::set_null_mask_word(
-        outcols, word_base + 1, static_cast<bitmask_type>((null_word >> 32) & 0xFFFF'FFFFULL));
-    } else {
-      Out::set_null_mask_word(outcols, word_base, static_cast<bitmask_type>(null_word));
-    }
-#else
-    Out::set_null_mask_word(outcols, cudf::word_index(row_base), null_word);
-#endif
+    // NOTE(HIP/AMD): in hipDF the null-mask word width always tracks the wavefront width
+    // (`bitmask_type` is uint64_t at warp_size 64, uint32_t under CUDF_USE_WARPSIZE_32), so one
+    // wavefront-wide ballot maps to exactly one null-mask word on every supported configuration,
+    // just as on NVIDIA. Do NOT split a 64-bit ballot into two 32-bit halves: `set_null_mask_word`
+    // takes a `bitmask_type` and `word_index()` divides by `size_in_bits<bitmask_type>()`, so a
+    // split both zero-fills the upper half of word N and clobbers word N+1, which belongs to the
+    // next wavefront.
+    static_assert(static_cast<cudf::size_type>(cudf::detail::size_in_bits<bitmask_type>()) ==
+                    cudf::detail::warp_size,
+                  "warp_compact_validity assumes one wavefront ballot fills exactly one "
+                  "null-mask word");
+    Out::set_null_mask_word(
+      outcols, cudf::word_index(row_base), static_cast<bitmask_type>(null_word));
   }
 }
 

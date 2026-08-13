@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include "groupby/hash/helpers.cuh"
@@ -27,6 +49,7 @@
 #include <cuda/std/utility>
 
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 namespace cudf::groupby {
@@ -226,6 +249,13 @@ auto build_cross_comparators(
     has_nested_columns,
     cudf::nullate::DYNAMIC,
     cudf::detail::row::equality::nan_equal_physical_equality_comparator>;
+
+  // This is the reason device_row_comparator drops its top-level `const` member qualifiers on
+  // AMD - see the FIXME in cudf/detail/row_operator/equality.cuh (clang bug llvm#59624).
+  // If this assert ever starts passing with the `const` members restored, delete that #ifdef.
+  static_assert(std::is_trivially_copyable_v<eq_t>,
+                "device_row_comparator must be trivially copyable to be shipped to the device "
+                "via make_device_uvector_async");
 
   auto const n       = static_cast<size_type>(preprocessed_batches.size());
   auto const temp_mr = cudf::get_current_device_resource_ref();

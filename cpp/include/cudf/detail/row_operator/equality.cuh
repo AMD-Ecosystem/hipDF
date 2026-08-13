@@ -409,13 +409,26 @@ class device_row_comparator {
     PhysicalEqualityComparator const comparator;
   };
 
-  // NOTE(HIP/AMD): under clang/HIP a struct with `const` members of class type is reported as not
-  // trivially copyable, which breaks storing device_row_comparator in rmm::device_uvector (used by
-  // the streaming groupby cross-comparator path). Drop the top-level `const` qualifiers on AMD so
-  // the type stays trivially copyable. This is behaviour-preserving: the members are only ever set
-  // by the constructor's initializer list and never reassigned afterward, and operator() is `const`
-  // (it cannot mutate them), so logical const-ness is preserved even though the qualifier is gone.
+  // FIXME(HIP/AMD, <CLANG-TRIVIALLY-COPYABLE>): clang reports a class with a `const` member *of
+  // class type* as not trivially copyable; gcc and MSVC (correctly) do not. Such a member makes the
+  // implicit copy-assignment operator deleted, and clang's `__is_trivially_copyable` disqualifies
+  // the type on that basis, whereas [class.prop]/1 only requires the *eligible* special members to
+  // be trivial - and a deleted one is not eligible (P0848R3). This is a known clang bug:
+  //   https://github.com/llvm/llvm-project/issues/59624   (see also #100198)
+  //   WG21 P3279R0 / CWG2463 is the paper cleaning up this family of divergences.
+  // Note a const member of *scalar* type does not trigger it, only class type.
+  //
+  // device_row_comparator must be trivially copyable because build_cross_comparators() ships an
+  // array of them to the device via make_device_uvector_async (see
+  // src/groupby/streaming_groupby/common.cuh), which static_asserts on it.
+  //
+  // Drop the top-level `const` qualifiers on AMD so the type stays trivially copyable. This is
+  // behaviour-preserving: the members are only ever set by the constructor's initializer list and
+  // never reassigned afterward, and operator() is `const` (it cannot mutate them), so logical
+  // const-ness is preserved even though the qualifier is gone.
   // INVARIANT: do not add any non-const member function that mutates these fields.
+  // Once the clang bug is fixed, the static_assert at the use site will start failing on the
+  // NVIDIA-shaped path and this #ifdef can be deleted.
 #ifdef __HIP_PLATFORM_AMD__
   table_device_view lhs;
   table_device_view rhs;

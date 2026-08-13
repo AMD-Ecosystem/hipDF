@@ -194,7 +194,14 @@ struct hash_probe_result {
     cuco::pair<hash_value_type, cudf::size_type> const& probe_key,
     std::size_t probe_idx)
   {
-    auto const* data  = hash_table_storage.data();
+    // NOTE(HIP/AMD): upstream discards the result of `__builtin_assume_aligned`, which makes
+    // `-Wunused-value` an error under the HIP toolchain's -Werror. Consuming the result is both
+    // warning-free and strictly more correct: verified on ROCm 7.14 that the discarded form still
+    // emits `llvm.assume ["align"(ptr, 16)]` under clang (so simply deleting the call loses the
+    // alignment fact), while this form emits the identical assume.
+    using slot_type   = cuco::pair<hash_value_type, cudf::size_type>;
+    auto const* data  = static_cast<slot_type const*>(
+      __builtin_assume_aligned(hash_table_storage.data(), 2 * sizeof(slot_type)));
     auto const first  = *(data + probe_idx);
     auto const second = *(data + probe_idx + 1);
 
@@ -262,7 +269,11 @@ struct hash_table_prober {
 
   __device__ __forceinline__ auto get_bucket_slots() const noexcept
   {
-    auto const* data  = hash_table_storage_.data();
+    // NOTE(HIP/AMD): see hash_probe_result's ctor - consume the __builtin_assume_aligned result
+    // rather than discarding it (upstream form is a -Wunused-value error under -Werror here).
+    using slot_type   = cuco::pair<hash_value_type, cudf::size_type>;
+    auto const* data  = static_cast<slot_type const*>(
+      __builtin_assume_aligned(hash_table_storage_.data(), 2 * sizeof(slot_type)));
     auto const first  = *(data + probe_idx_);
     auto const second = *(data + probe_idx_ + 1);
     return cuda::std::pair{first, second};
