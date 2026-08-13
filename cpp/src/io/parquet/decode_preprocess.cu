@@ -44,6 +44,12 @@
 #include <cuda/std/iterator>
 #include <cuda/std/limits>
 
+// NOTE(HIP/AMD): hipcub::Uninitialized is used below to declare __shared__ objects whose
+// type has a non-trivial default constructor; see the notes at those declarations.
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#endif
+
 namespace cudf::io::parquet::detail {
 
 // NOTE(HIP/AMD): the `cg` alias is provided (HIP-guarded) by the included page_decode.cuh.
@@ -274,7 +280,14 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size)
                             bool is_base_pass)
 {
   //extern __shared__ __align__(16) page_state_s state_g[];
-  extern __shared__ page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
 
   page_state_s* const s = &state_g[0];
   auto const block      = cg::this_thread_block();

@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -674,7 +674,14 @@ CUDF_KERNEL void __launch_bounds__(block_size)
                              device_span<codec_exec_result> results)
 {
   //__shared__ __align__(16) unsnap_state_s state_g;
-  extern __shared__ unsnap_state_s state_g[];
+  // NOTE(HIP/AMD): unsnap_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // unsnap_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory
+  // size has to be passed at the launch site - the extern/dynamic form used here previously had to
+  // be kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<unsnap_state_s> state_g_storage[1];
+  unsnap_state_s* const state_g = &state_g_storage[0].Alias();
   __shared__ hipcub::WarpReduce<uint32_t>::TempStorage temp_storage;
   int t             = threadIdx.x;
   unsnap_state_s* s = &state_g[0];
@@ -755,7 +762,7 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
   dim3 dim_block(4 * cudf::detail::warp_size, 1);           // 4 warps per stream, 1 stream per block
   dim3 dim_grid(inputs.size(), 1);  // TODO: Check max grid dimensions vs max expected count
   unsnap_kernel_no_racecheck<4 * cudf::detail::warp_size>
-    <<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
+    <<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
 }
 
 __global__ void get_snappy_uncompressed_size_kernel(

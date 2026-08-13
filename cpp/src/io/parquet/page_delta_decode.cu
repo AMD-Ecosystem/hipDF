@@ -37,6 +37,12 @@
 
 #include <thrust/transform_scan.h>
 
+// NOTE(HIP/AMD): hipcub::Uninitialized is used below to declare __shared__ objects whose
+// type has a non-trivial default constructor; see the notes at those declarations.
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#endif
+
 namespace cudf::io::parquet::detail {
 
 namespace {
@@ -337,7 +343,14 @@ CUDF_KERNEL void __launch_bounds__(decode_delta_binary_block_size)
                              kernel_error::pointer error_code)
 {
   __shared__ __align__(16) delta_binary_decoder db_state;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
   __shared__ __align__(16) page_state_buffers_s<delta_rolling_buf_size, 1, 1> state_buffers;
 
   page_state_s* const s = &state_g[0];
@@ -503,7 +516,14 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
 {
   __shared__ __align__(16) delta_byte_array_decoder db_state;
   //__shared__ __align__(16) page_state_s state_g;
-  extern  __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
   __shared__ __align__(16) page_state_buffers_s<delta_rolling_buf_size, 1, 1> state_buffers;
 
   page_state_s* const s = &state_g[0];
@@ -742,7 +762,14 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
 {
   __shared__ __align__(16) delta_binary_decoder db_state;
   //__shared__ __align__(16) page_state_s state_g;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
   __shared__ __align__(16) page_state_buffers_s<delta_rolling_buf_size, 1, 1> state_buffers;
   __shared__ __align__(8) uint8_t const* page_string_data;
   __shared__ size_t string_offset;
@@ -984,10 +1011,10 @@ void decode_delta_binary(cudf::detail::hostdevice_span<PageInfo> pages,
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
-    decode_delta_binary_kernel<uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+    decode_delta_binary_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, page_mask, error_code);
   } else {
-    decode_delta_binary_kernel<uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+    decode_delta_binary_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, page_mask, error_code);
   }
 }
@@ -1011,10 +1038,10 @@ void decode_delta_byte_array(cudf::detail::hostdevice_span<PageInfo> pages,
   dim3 const dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
-    decode_delta_byte_array_kernel<uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+    decode_delta_byte_array_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, page_mask, initial_str_offsets, error_code);
   } else {
-    decode_delta_byte_array_kernel<uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+    decode_delta_byte_array_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, page_mask, initial_str_offsets, error_code);
   }
 }
@@ -1038,10 +1065,10 @@ void decode_delta_length_byte_array(cudf::detail::hostdevice_span<PageInfo> page
   dim3 const dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
-    decode_delta_length_byte_array_kernel<uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+    decode_delta_length_byte_array_kernel<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, page_mask, initial_str_offsets, error_code);
   } else {
-    decode_delta_length_byte_array_kernel<uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+    decode_delta_length_byte_array_kernel<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, page_mask, initial_str_offsets, error_code);
   }
 }

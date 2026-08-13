@@ -42,6 +42,12 @@
 
 #include <bitset>
 
+// NOTE(HIP/AMD): hipcub::Uninitialized is used below to declare __shared__ objects whose
+// type has a non-trivial default constructor; see the notes at those declarations.
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#endif
+
 namespace cudf::io::parquet::detail {
 
 // NOTE(HIP/AMD): the `cg` alias is provided (HIP-guarded) by the included page_decode.cuh.
@@ -547,8 +553,14 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size)
                                     size_t num_rows,
                                     bool all_rows)
 {
-  extern __shared__ __align__(16) page_state_s state_g[];
-  extern __shared__ page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
 
   page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
@@ -636,7 +648,14 @@ CUDF_KERNEL void __launch_bounds__(delta_preproc_block_size)
                                          size_t num_rows)
 {
   //__shared__ __align__(16) page_state_s state_g;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
 
   page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
@@ -733,7 +752,14 @@ CUDF_KERNEL void __launch_bounds__(delta_length_block_size)
   using WarpReduce = hipcub::WarpReduce<uleb128_t>;
   __shared__ typename WarpReduce::TempStorage temp_storage;
   //__shared__ __align__(16) page_state_s state_g;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
   __shared__ __align__(16) delta_binary_decoder string_lengths;
 
   page_state_s* const s = &state_g[0];
@@ -849,7 +875,14 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size)
                                    size_t num_rows)
 {
   //__shared__ __align__(16) page_state_s state_g;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
 
   page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
@@ -1005,14 +1038,14 @@ void compute_page_string_sizes_pass1(cudf::detail::hostdevice_span<PageInfo> pag
   int s_idx = 0;
   if (BitAnd(kernel_mask, decode_kernel_mask::DELTA_BYTE_ARRAY) != 0) {
     dim3 dim_delta(delta_preproc_block_size, 1);
-    compute_delta_page_string_sizes_kernel<<<dim_grid, dim_delta, sizeof(page_state_s), streams[s_idx++].value()>>>(
+    compute_delta_page_string_sizes_kernel<<<dim_grid, dim_delta, 0, streams[s_idx++].value()>>>(
       pages.device_ptr(), chunks, page_mask, min_row, num_rows);
   }
   if (BitAnd(kernel_mask, decode_kernel_mask::DELTA_LENGTH_BA) != 0) {
     dim3 dim_delta(delta_length_block_size, 1);
     compute_delta_length_page_string_sizes_kernel<<<dim_grid,
                                                     dim_delta,
-                                                    sizeof(page_state_s),
+                                                    0,
                                                     streams[s_idx++].value()>>>(
       pages.device_ptr(), chunks, page_mask, min_row, num_rows);
   }

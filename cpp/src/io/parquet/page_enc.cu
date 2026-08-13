@@ -638,7 +638,14 @@ CUDF_KERNEL void __launch_bounds__(encode_block_size)
   __shared__ __align__(8) PageFragment frag_g;
   __shared__ __align__(8) EncPage page_g;
   //extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
-  extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
+  // NOTE(HIP/AMD): statistics_merge_group has a non-trivial default constructor (in-class
+  // initializers), which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a
+  // trivially constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // statistics_merge_group. Keeps the allocation static as upstream has it, so no dynamic
+  // shared-memory size has to be passed at the launch site - the extern/dynamic form used here
+  // previously had to be kept in sync with every launch, and was not.
+  __shared__ __align__(8) hipcub::Uninitialized<statistics_merge_group> pagestats_g_storage[1];
+  statistics_merge_group* const pagestats_g = &pagestats_g_storage[0].Alias();
 
   uint32_t const t          = threadIdx.x;
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
@@ -3526,7 +3533,7 @@ void InitEncoderPages(device_2dspan<EncColumnChunk> chunks,
 {
   auto num_rowgroups = chunks.size().first;
   dim3 dim_grid(num_columns, num_rowgroups);  // 1 threadblock per rowgroup
-  gpuInitPages<<<dim_grid, encode_block_size, sizeof(statistics_merge_group), stream.value()>>>(chunks,
+  gpuInitPages<<<dim_grid, encode_block_size, 0, stream.value()>>>(chunks,
                                                                    pages,
                                                                    page_sizes,
                                                                    comp_page_sizes,

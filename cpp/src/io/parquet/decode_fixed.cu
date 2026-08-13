@@ -41,6 +41,12 @@
 #include <cuda/std/bit>
 #include <cuda/std/iterator>
 
+// NOTE(HIP/AMD): hipcub::Uninitialized is used below to declare __shared__ objects whose
+// type has a non-trivial default constructor; see the notes at those declarations.
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#endif
+
 namespace cudf::io::parquet::detail {
 
 namespace {
@@ -1030,7 +1036,14 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size_t, 8)
   // FIXME(HIP/AMD, <HIP-SHMEM-CTOR>): Use dynamic shared memory for page_state_s. state_g is
   // accessed as an array (see `s = &state_g[0]` below). __shared__ __align__(16) page_state_s
   // state_g;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // page_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<page_state_s> state_g_storage[1];
+  page_state_s* const state_g = &state_g_storage[0].Alias();
 
   constexpr bool use_dict_buffers = has_dict_t || has_bools_t || has_strings_t;
   using state_buf_t               = page_state_buffers_s<rolling_buf_size,  // size of nz_idx buffer
@@ -1325,7 +1338,7 @@ void decode_page_data(cudf::detail::hostdevice_span<PageInfo> pages,
 
     if (level_type_size == 1) {
       decode_page_data_generic<uint8_t, decode_block_size, mask>
-        <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(),
+        <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(),
                                                      chunks,
                                                      min_row,
                                                      num_rows,
@@ -1335,7 +1348,7 @@ void decode_page_data(cudf::detail::hostdevice_span<PageInfo> pages,
                                                      error_code);
     } else {
       decode_page_data_generic<uint16_t, decode_block_size, mask>
-        <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(),
+        <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(),
                                                      chunks,
                                                      min_row,
                                                      num_rows,

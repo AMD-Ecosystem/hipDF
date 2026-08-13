@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,14 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
                                       uint64_t compression_block_size,
                                       uint32_t log2maxcr)
 {
-  extern __shared__ compressed_stream_s strm_g[];
+  // NOTE(HIP/AMD): compressed_stream_s has a non-trivial default constructor (in-class
+  // initializers), which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a
+  // trivially constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // compressed_stream_s. Keeps the allocation static as upstream has it, so no dynamic
+  // shared-memory size has to be passed at the launch site - the extern/dynamic form used here
+  // previously had to be kept in sync with every launch, and was not.
+  __shared__ hipcub::Uninitialized<compressed_stream_s> strm_g_storage[4];
+  compressed_stream_s* const strm_g = &strm_g_storage[0].Alias();
 
   compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
   int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
@@ -155,7 +162,14 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
 CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
 post_decompression_reassemble_kernel(compressed_stream_info* strm_info, int32_t num_streams)
 {
-  extern __shared__ compressed_stream_s strm_g[];
+  // NOTE(HIP/AMD): compressed_stream_s has a non-trivial default constructor (in-class
+  // initializers), which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a
+  // trivially constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // compressed_stream_s. Keeps the allocation static as upstream has it, so no dynamic
+  // shared-memory size has to be passed at the launch site - the extern/dynamic form used here
+  // previously had to be kept in sync with every launch, and was not.
+  __shared__ hipcub::Uninitialized<compressed_stream_s> strm_g_storage[4];
+  compressed_stream_s* const strm_g = &strm_g_storage[0].Alias();
 
   compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
   int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
@@ -465,7 +479,14 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
                                size_type rowidx_stride,
                                bool use_base_stride)
 {
-  extern __shared__ __align__(16) rowindex_state_s state_g[];
+  // NOTE(HIP/AMD): rowindex_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // rowindex_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory
+  // size has to be passed at the launch site - the extern/dynamic form used here previously had to
+  // be kept in sync with every launch, and was not.
+  __shared__ __align__(16) hipcub::Uninitialized<rowindex_state_s> state_g_storage[1];
+  rowindex_state_s* const state_g = &state_g_storage[0].Alias();
   rowindex_state_s* const s = &state_g[0];
   auto const col_idx        = blockIdx.x / num_stripes;
   auto const stripe_idx     = blockIdx.x % num_stripes;
@@ -576,7 +597,10 @@ void __host__ parse_compressed_stripe_data(compressed_stream_info* strm_info,
 {
   auto const num_blocks = (num_streams + 3) >> 2;  // 1 stream per warp, 4 warps per block
   if (num_blocks > 0) {
-    parse_compressed_stripe_data_kernel<<<num_blocks, 4 * cudf::detail::warp_size, sizeof(compressed_stream_s) * 4, stream.value()>>>(
+    parse_compressed_stripe_data_kernel<<<num_blocks,
+                                          4 * cudf::detail::warp_size,
+                                          0,
+                                          stream.value()>>>(
       strm_info, num_streams, compression_block_size, log2maxcr);
   }
 }
@@ -587,7 +611,10 @@ void __host__ post_decompression_reassemble(compressed_stream_info* strm_info,
 {
   auto const num_blocks = (num_streams + 3) >> 2;  // 1 stream per warp, 4 warps per block
   if (num_blocks > 0) {
-    post_decompression_reassemble_kernel<<<num_blocks, 4 * cudf::detail::warp_size, sizeof(compressed_stream_s) * 4, stream.value()>>>(strm_info, num_streams);
+    post_decompression_reassemble_kernel<<<num_blocks,
+                                           4 * cudf::detail::warp_size,
+                                           0,
+                                           stream.value()>>>(strm_info, num_streams);
   }
 }
 
@@ -601,7 +628,7 @@ void __host__ parse_row_group_index(row_group* row_groups,
                                     rmm::cuda_stream_view stream)
 {
   auto const num_blocks = num_columns * num_stripes;
-  parse_row_group_index_kernel<<<num_blocks, 4 * cudf::detail::warp_size, sizeof(rowindex_state_s), stream.value()>>>(
+  parse_row_group_index_kernel<<<num_blocks, 4 * cudf::detail::warp_size, 0, stream.value()>>>(
     row_groups, strm_info, chunks, num_columns, num_stripes, rowidx_stride, use_base_stride);
 }
 

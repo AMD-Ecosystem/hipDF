@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,12 @@
 
 #include <cuda/std/utility>
 
+// NOTE(HIP/AMD): hipcub::Uninitialized is used below to declare __shared__ objects whose
+// type has a non-trivial default constructor; see the notes at those declarations.
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#endif
+
 namespace cudf::io::orc::detail {
 
 using strings::detail::fixed_point_string_size;
@@ -56,7 +62,15 @@ CUDF_KERNEL void __launch_bounds__(init_threads_per_block)
 {
   // TODO(HIP/AMD): This is a work around for "initialization is not supported for __shared__ variables"
   // __shared__ __align__(4) statistics_group group_g[init_groups_per_block];
-  extern __shared__ __align__(4) statistics_group group_g[/*init_groups_per_block*/];
+  // NOTE(HIP/AMD): statistics_group has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // statistics_group. Keeps the allocation static as upstream has it, so no dynamic shared-memory
+  // size has to be passed at the launch site - the extern/dynamic form used here previously had to
+  // be kept in sync with every launch, and was not.
+  __shared__ __align__(4)
+    hipcub::Uninitialized<statistics_group> group_g_storage[init_groups_per_block];
+  statistics_group* const group_g = &group_g_storage[0].Alias();
   auto const col_id = blockIdx.x % rowgroup_bounds.size().second;
   auto const chunk_id =
     (blockIdx.x / rowgroup_bounds.size().second * init_groups_per_block) + threadIdx.y;
@@ -273,7 +287,15 @@ CUDF_KERNEL void __launch_bounds__(encode_threads_per_block)
                         uint32_t statistics_count)
 {
   //: TODO(HIP/AMD): This is a work around for "initialization is not supported for __shared__ variables"
-  extern __shared__ __align__(8) stats_state_s state_g[/*encode_chunks_per_block*/];
+  // NOTE(HIP/AMD): stats_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // stats_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(8)
+    hipcub::Uninitialized<stats_state_s> state_g_storage[encode_chunks_per_block];
+  stats_state_s* const state_g = &state_g_storage[0].Alias();
   auto t                 = threadIdx.x;
   auto idx               = blockIdx.x * encode_chunks_per_block + threadIdx.y;
   stats_state_s* const s = &state_g[threadIdx.y];
@@ -476,7 +498,7 @@ void orc_init_statistics_groups(statistics_group* groups,
     rowgroup_bounds.size().second;
 
   dim3 dim_block(init_threads_per_group, init_groups_per_block);
-  gpu_init_statistics_groups<<<num_blocks, dim_block, sizeof(statistics_group)*init_groups_per_block, stream.value()>>>(
+  gpu_init_statistics_groups<<<num_blocks, dim_block, 0, stream.value()>>>(
     groups, cols, rowgroup_bounds);
 }
 
@@ -515,7 +537,7 @@ void orc_encode_statistics(uint8_t* blob_bfr,
   auto const num_blocks =
     cudf::util::div_rounding_up_safe(statistics_count, encode_chunks_per_block);
   dim3 dim_block(encode_threads_per_chunk, encode_chunks_per_block);
-  gpu_encode_statistics<<<num_blocks, dim_block, encode_chunks_per_block*sizeof(stats_state_s), stream.value()>>>(
+  gpu_encode_statistics<<<num_blocks, dim_block, 0, stream.value()>>>(
     blob_bfr, groups, chunks, statistics_count);
 }
 

@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,12 @@
 #include "statistics.cuh"
 #include "temp_storage_wrapper.cuh"
 #include "typed_statistics_chunk.cuh"
+
+// NOTE(HIP/AMD): hipcub::Uninitialized is used below to declare __shared__ objects whose
+// type has a non-trivial default constructor; see the notes at those declarations.
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipcub/hipcub.hpp>
+#endif
 
 namespace cudf {
 namespace io {
@@ -298,7 +304,14 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
 {
   // HIP workaround for the init of shared variables.
   // __shared__ __align__(8) stats_state_s state;
-  extern __shared__ stats_state_s state[];
+  // NOTE(HIP/AMD): stats_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // stats_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(8) hipcub::Uninitialized<stats_state_s> state_storage[1];
+  stats_state_s* const state = &state_storage[0].Alias();
   __shared__ block_reduce_storage<block_size> storage;
 
   // Load state members
@@ -360,7 +373,7 @@ void calculate_group_statistics(statistics_chunk* chunks,
 {
   constexpr int block_size = 256;
   gpu_calculate_group_statistics<block_size, IO>
-    <<<num_chunks, block_size, sizeof(stats_state_s), stream.value()>>>(chunks, groups, int96_timestamps);
+    <<<num_chunks, block_size, 0, stream.value()>>>(chunks, groups, int96_timestamps);
 }
 
 /**
@@ -379,7 +392,14 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
                              statistics_merge_group const* groups)
 {
   // __shared__ __align__(8) merge_state_s state;
-  extern __shared__ __align__(8) merge_state_s state[];
+  // NOTE(HIP/AMD): merge_state_s has a non-trivial default constructor (in-class initializers),
+  // which HIP/clang rejects for __shared__ variables. hipcub::Uninitialized<T> is a trivially
+  // constructible byte buffer of the same size and alignment; Alias() reinterprets it as
+  // merge_state_s. Keeps the allocation static as upstream has it, so no dynamic shared-memory size
+  // has to be passed at the launch site - the extern/dynamic form used here previously had to be
+  // kept in sync with every launch, and was not.
+  __shared__ __align__(8) hipcub::Uninitialized<merge_state_s> state_storage[1];
+  merge_state_s* const state = &state_storage[0].Alias();
   __shared__ block_reduce_storage<block_size> storage;
 
   cooperative_load(state[0].group, &groups[blockIdx.x]);
@@ -415,7 +435,7 @@ void merge_group_statistics(statistics_chunk* chunks_out,
 {
   constexpr int block_size = 256;
   gpu_merge_group_statistics<block_size, IO>
-    <<<num_chunks, block_size, sizeof(merge_state_s), stream.value()>>>(chunks_out, chunks_in, groups);
+    <<<num_chunks, block_size, 0, stream.value()>>>(chunks_out, chunks_in, groups);
 }
 
 }  // namespace detail
