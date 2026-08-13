@@ -142,11 +142,7 @@ int main(int argc, char** argv)
 
   if (std::getenv("GTEST_CUDF_MEMORY_PEAK")) {
     auto mr = rmm::mr::statistics_resource_adaptor(cudf::get_current_device_resource_ref());
-    // NOTE(HIP/AMD): hipMM 5.0.0's statistics_resource_adaptor cannot be stored by value in
-    // cuda::mr::any_resource (the type set_current_device_resource takes). Use the shared
-    // helper from testing_main.hpp which sets it via a non-owning device_async_resource_ref
-    // on AMD (mr outlives RUN_ALL_TESTS here). CUDA path is unchanged.
-    CUDF_TEST_SET_STATISTICS_RESOURCE(mr);
+    cudf::set_current_device_resource(mr);
     auto rc = RUN_ALL_TESTS();
     std::cout << "Peak memory usage " << mr.get_bytes_counter().peak << " bytes" << std::endl;
     rmm::mr::reset_current_device_resource();

@@ -23,24 +23,45 @@
 #pragma once
 
 #include <hip/hip_cooperative_groups.h>
+#include <hip/hip_version.h>
+
+// NOTE(HIP/AMD): `cg::reduce` (with the `plus`/`less`/`greater`/`bit_and`/`bit_or` function
+// objects) landed in HIP cooperative groups in ROCm 7.14, in <hip/cooperative_groups/hip_reduce.h>
+// - which is deliberately NOT pulled in by <hip/hip_cooperative_groups.h>, so it has to be
+// included explicitly. Below 7.14 we fall back to the local implementation further down.
+// The official implementation is a strict superset of ours: same tile member-mask computation,
+// plus an `__activemask()` intersection and a generic `__reduce_op_sync` fallback for arbitrary
+// operators. <hip/hip_version.h> is included above so HIP_VERSION_MAJOR/MINOR are always defined
+// here and this guard never silently falls through to the wrong branch.
+#if (HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR < 14)
+#define CUDF_HIP_CG_REDUCE_WAR 1
 #include <hip/amd_detail/amd_warp_sync_functions.h>
+#else
+#define CUDF_HIP_CG_REDUCE_WAR 0
+#include <hip/cooperative_groups/hip_reduce.h>
+#endif
 
 namespace cudf {
 namespace hip_extensions {
 namespace hip_cooperative_groups_ext {
 namespace internal {
 
+#if CUDF_HIP_CG_REDUCE_WAR
 template <unsigned TILE_SIZE, typename ParentCGTy>
 __device__ __attribute__((always_inline)) unsigned long long get_mask(
   const ::cooperative_groups::thread_block_tile<TILE_SIZE, ParentCGTy>& tile) {
   unsigned long long mask = ~0ull >> (64 - TILE_SIZE);
   return mask << (((threadIdx.x % warpSize) / TILE_SIZE) * TILE_SIZE);
 }
+#endif
 
 } // namespace internal
 
-// NOTE(HIP/AMD): This is a temporary workaround for the missing cg::reduce APIs
-// in HIP's cooperative groups.
+#if CUDF_HIP_CG_REDUCE_WAR
+// FIXME(HIP/AMD, <HIP-CG-REDUCE>): workaround for cg::reduce being absent from HIP's cooperative
+// groups before ROCm 7.14. Delete this whole block (and the CUDF_HIP_CG_REDUCE_WAR guard) once the
+// minimum supported ROCm is >= 7.14; the official <hip/cooperative_groups/hip_reduce.h> used on
+// newer toolchains provides the same API with a superset of the functionality.
 
 template <typename TArg>
 struct plus {
@@ -120,15 +141,28 @@ __device__ __attribute__((always_inline)) TArg reduce(
   return __reduce_max_sync(member_mask, value);
 }
 
-// NOTE(HIP/AMD): invoke_one / invoke_one_broadcast are missing from HIP's
-// cooperative groups. Provide portable replacements:
-//  - invoke_one(group, fn): the lowest-ranked member of the group calls fn once.
-//  - invoke_one_broadcast(group, fn): the lowest-ranked member calls fn and the
-//    returned value is broadcast to all members of the (tiled) group via shfl.
-// TODO(SWDEV-ticket): file a HIP cooperative-groups feature request to add native
-// invoke_one / invoke_one_broadcast (and the reduce overloads above); once available
-// upstream, drop these portable replacements. The implementations below can serve as the
-// reference for the feature request.
+#else  // CUDF_HIP_CG_REDUCE_WAR
+
+// ROCm >= 7.14: forward to the official implementations so callers that alias this namespace as
+// `cg` keep working unchanged. (The trailing `using namespace ::cooperative_groups;` below would
+// make these visible anyway; naming them explicitly documents the intent and keeps the two
+// branches of the guard symmetric.)
+using ::cooperative_groups::bit_and;
+using ::cooperative_groups::bit_or;
+using ::cooperative_groups::greater;
+using ::cooperative_groups::less;
+using ::cooperative_groups::plus;
+using ::cooperative_groups::reduce;
+
+#endif  // CUDF_HIP_CG_REDUCE_WAR
+
+// TODO(HIP/AMD, <HIP-CG-INVOKE-ONE>): invoke_one / invoke_one_broadcast are still missing from
+// HIP's cooperative groups as of ROCm 7.14 (unlike cg::reduce, which landed in 7.14 - see the guard
+// above). Portable replacements: - invoke_one(group, fn): the lowest-ranked member of the group
+// calls fn once. - invoke_one_broadcast(group, fn): the lowest-ranked member calls fn and the
+// returned value is broadcast to all members of the (tiled) group via shfl. A HIP
+// cooperative-groups feature request is tracked in <HIP-CG-INVOKE-ONE>; the implementations below
+// serve as its reference. Drop them once the native APIs are available.
 
 template <typename Group, typename F>
 __device__ __attribute__((always_inline)) void invoke_one(const Group& group, F&& fn) {

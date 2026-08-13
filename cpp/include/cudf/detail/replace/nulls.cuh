@@ -45,6 +45,10 @@ using idx_valid_pair_t = cuda::std::tuple<cudf::size_type, bool>;
  * row is valid, otherwise a tuple of the nearest non-null row index and a discarded boolean.
  */
 struct replace_policy_functor {
+  // FIXME(HIP/AMD, <ROCPRIM-CONSTOP>): `operator()` must be const-qualified - rocThrust's scan
+  // invokes the binary op through a const object, unlike CCCL Thrust. (`__host__` is a pre-existing
+  // hipDF delta; upstream declares this `__device__`-only.) The extra line wrap is clang-format's
+  // consequence of the longer signature, not a gratuitous reformat.
   __host__ __device__ idx_valid_pair_t operator()(idx_valid_pair_t const& lhs,
                                                   idx_valid_pair_t const& rhs) const
   {

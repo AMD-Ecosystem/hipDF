@@ -57,10 +57,14 @@ namespace {
 bool is_fast_path(column_view const& column)
 {
 #ifdef __HIP_PLATFORM_AMD__
-  // NOTE(HIP/AMD): hipcub/rocPRIM does not provide a DeviceTopK API, so the CUB
-  // partial-selection fast path is unavailable. Always take the sorted_order slow
-  // path on AMD, which produces identical top-k indices (just without the
-  // partial-selection optimization).
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub does not expose a DeviceTopK API, so the CUB
+  // partial-selection fast path is unavailable. Always take the sorted_order slow path on AMD;
+  // it produces identical top-k indices but is O(n log n) rather than a partial selection.
+  //
+  // STATUS: rocPRIM *does* provide the underlying primitive as of 4.5.0 (ROCm 7.14) -
+  // rocprim::topk / rocprim::topk_pairs in <rocprim/device/device_topk.hpp>. Only the hipcub
+  // wrapper is missing, so the request is "expose rocprim::topk as hipcub::DeviceTopK", not
+  // "implement top-k".
   (void)column;
   return false;
 #else
@@ -81,7 +85,7 @@ struct dispatch_topk_fn {
   std::unique_ptr<column> top_k()
   {
 #ifdef __HIP_PLATFORM_AMD__
-    // NOTE(HIP/AMD): DeviceTopK is unavailable in hipcub/rocPRIM. This fast-path
+    // TODO(HIP/AMD, <ROCPRIM-API>): DeviceTopK is unavailable in hipcub/rocPRIM. This fast-path
     // body is never reached at runtime on AMD (is_fast_path() returns false), but
     // it is still instantiated by the type_dispatcher, so it must compile. Provide
     // an unreachable stub instead of the CUB DeviceTopK implementation.

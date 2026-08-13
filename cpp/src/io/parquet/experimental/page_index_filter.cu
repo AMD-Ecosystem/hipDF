@@ -763,10 +763,10 @@ struct search_fenwick_tree_functor {
       if (start == 0 or is_power_of_two(start)) {
         auto const block_size =
           cuda::std::max<size_type>(start & -start, largest_power_of_two_in_range(start, end));
-        auto const tree_level = cuda::std::countr_zero(static_cast<uint32_t>(block_size));
+        auto const tree_level = cuda::std::countr_zero<uint32_t>(block_size);
         return cuda::std::pair{tree_level, block_size};
       } else {
-        auto const tree_level = cuda::std::countr_zero(static_cast<uint32_t>(start));
+        auto const tree_level = cuda::std::countr_zero<uint32_t>(start);
         return cuda::std::pair{tree_level, size_type{1} << tree_level};
       }
     } else {
@@ -776,8 +776,7 @@ struct search_fenwick_tree_functor {
                                                    largest_power_of_two_in_range(0, end - start));
         block_size                = end - next_alignment;
       }
-      auto const tree_level = cuda::std::countr_zero(static_cast<uint32_t>(block_size));
-      return cuda::std::pair{tree_level, block_size};
+      return cuda::std::pair{cuda::std::countr_zero<uint32_t>(block_size), block_size};
     }
   }
 
@@ -1027,9 +1026,9 @@ thrust::host_vector<bool> aggregate_reader_metadata::compute_data_page_mask(
   if (row_mask.null_count(row_mask_offset, row_mask_offset + total_rows, stream) == total_rows or
       cudf::detail::all_of(row_mask.template begin<bool>() + row_mask_offset,
                            row_mask.template begin<bool>() + row_mask_offset + total_rows,
-                           // NOTE(HIP/AMD): rocprim's transform_iterator binds the transform op's
-                           // result by value; cuda::std::identity returns a reference and fails to
-                           // bind. Use a by-value identity instead.
+                           // FIXME(HIP/AMD, <ROCPRIM-CONSTOP>): rocprim's transform_iterator binds
+                           // the transform op's result by value; cuda::std::identity returns a
+                           // reference and fails to bind. Use a by-value identity instead.
                            cuda::proclaim_return_type<bool>([] __device__(bool b) { return b; }),
                            stream)) {
     return thrust::host_vector<bool>(0, stream);

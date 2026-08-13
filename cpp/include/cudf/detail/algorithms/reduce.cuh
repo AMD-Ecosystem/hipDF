@@ -83,11 +83,13 @@ OutputType reduce(InputIterator begin,
     cudf::detail::device_scalar<OutputType>(stream, cudf::get_current_device_resource_ref());
 
 #ifdef __HIP_PLATFORM_AMD__
-  // NOTE(HIP/AMD): hipcub/rocPRIM DeviceReduce::Reduce does not provide the CCCL
-  // stream-env overload. Use the classic temporary-storage form with an explicit stream.
-  // TODO: this fallback is only needed for hipcub/rocPRIM before the 3.0 release (ref
-  // ROCm/rocm-libraries PR 4079). Once rocPRIM 3.0 is available with stream-env support,
-  // gate this path on the hipcub version and use the unified env form in 3.0+.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub/rocPRIM DeviceReduce::Reduce does not provide the CCCL
+  // stream-env overload, so use the classic temporary-storage form with an explicit stream.
+  // Status: still absent as of hipcub/rocPRIM 4.5.0 (ROCm 7.14) - the only Reduce overload takes
+  // (d_temp_storage, temp_storage_bytes, ...) and nothing under <hipcub/> references
+  // cuda::std::execution::env. An earlier note expected this in rocPRIM 3.0
+  // (ROCm/rocm-libraries#4079); 3.0 shipped without it, so the WAR still applies. Once it lands,
+  // gate this branch on HIPCUB_VERSION and use the env form in the #else below.
   size_t temp_storage_bytes = 0;
   CUDF_CUDA_TRY(cub::DeviceReduce::Reduce(
     nullptr, temp_storage_bytes, begin, result.data(), num_items, binary_op, init, stream.value()));

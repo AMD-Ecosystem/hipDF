@@ -253,18 +253,7 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
                                [] __device__(size_type idx) -> detail::row::lhs_index_type {
                                  return static_cast<detail::row::lhs_index_type>(idx);
                                }));
-  // NOTE(HIP/AMD): rocThrust's binary_search calls thrust::distance on the values iterator from a
-  // __host__ __device__ context, but cudf's strong_index_iterator (rhs_iterator) has device-only
-  // facade methods. Use a transform_iterator over a counting_iterator that yields rhs_index_type;
-  // its distance is host-callable. (Same value sequence as rhs_iterator(0)...).
-#ifdef __HIP_PLATFORM_AMD__
-  auto rhs_values_begin = cuda::transform_iterator(
-    cuda::counting_iterator<size_type>{0},
-    cuda::proclaim_return_type<detail::row::rhs_index_type>(
-      [] __device__(size_type idx) { return static_cast<detail::row::rhs_index_type>(idx); }));
-#else
   auto rhs_values_begin = cudf::detail::row::rhs_iterator(0);
-#endif
   thrust::upper_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       smaller_it,
                       smaller_it + smaller_numrows,
@@ -273,9 +262,10 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
                       match_counts_it,
                       comparator);
 
-  // NOTE(HIP/AMD): rocThrust's generic binary_search zips (values, output) and dereferences the
-  // output iterator, but cuda::tabulate_output_iterator has a void value_type which cannot form a
-  // zip tuple. Write lower_bound results into a real buffer and subtract in a separate pass.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's generic binary_search zips (values, output) and
+  // dereferences the output iterator, but cuda::tabulate_output_iterator has a void value_type
+  // which cannot form a zip tuple. Write lower_bound results into a real buffer and subtract in a
+  // separate pass.
 #ifdef __HIP_PLATFORM_AMD__
   rmm::device_uvector<size_type> lower_bounds(larger_numrows, stream, mr);
   thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
@@ -376,7 +366,7 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
   rmm::device_uvector<size_type> smaller_indices(total_matches, stream, mr);
 
   // Use cub API to handle large arrays (> INT32_MAX).
-  // NOTE(HIP/AMD): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
 #ifdef __HIP_PLATFORM_AMD__
   thrust::fill_n(rmm::exec_policy_nosync(stream), smaller_indices.begin(), smaller_indices.size(), 1);
 #else
@@ -393,7 +383,7 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
       nonzero_matches.begin(),
       cuda::proclaim_return_type<detail::row::rhs_index_type>(
         [] __device__(size_type idx) { return static_cast<detail::row::rhs_index_type>(idx); }));
-    // NOTE(HIP/AMD): rocThrust's generic binary_search cannot write into a
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's generic binary_search cannot write into a
     // cuda::tabulate_output_iterator (void value_type breaks the zip tuple). Write lower_bound
     // results into a real buffer, then scatter them with a separate for_each.
 #ifdef __HIP_PLATFORM_AMD__
@@ -460,7 +450,8 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
   }
 
   // Use cub API to handle large arrays (> INT32_MAX)
-  // NOTE(HIP/AMD): hipcub device functions return a nodiscard hipError_t; wrap in CUDF_CUDA_TRY.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub device functions return a nodiscard hipError_t; wrap in
+  // CUDF_CUDA_TRY.
   CUDF_CUDA_TRY(
     cub::DeviceTransform::Transform(smaller_indices.begin(),
                                     smaller_indices.begin(),
@@ -538,7 +529,7 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
     larger_indices.begin(),
     [] __device__(auto c) -> bool { return c == 0; },
     stream);
-  // NOTE(HIP/AMD): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
 #ifdef __HIP_PLATFORM_AMD__
   thrust::fill_n(
     rmm::exec_policy_nosync(stream), smaller_indices.begin(), left_join_only_matches, JoinNoMatch);
@@ -565,7 +556,7 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
   }
 
   // Populate smaller indices for matched rows using binary search
-  // NOTE(HIP/AMD): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
 #ifdef __HIP_PLATFORM_AMD__
   thrust::fill_n(rmm::exec_policy_nosync(stream),
                  smaller_indices.begin() + left_join_only_matches,
@@ -586,7 +577,7 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
       nonzero_matches.begin(),
       cuda::proclaim_return_type<detail::row::rhs_index_type>(
         [] __device__(size_type idx) { return static_cast<detail::row::rhs_index_type>(idx); }));
-    // NOTE(HIP/AMD): rocThrust's generic binary_search cannot write into a
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's generic binary_search cannot write into a
     // cuda::tabulate_output_iterator (void value_type breaks the zip tuple). Write lower_bound
     // results into a real buffer, then scatter them with a separate for_each.
 #ifdef __HIP_PLATFORM_AMD__
@@ -655,7 +646,8 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
   }
 
   // Use cub API to handle large arrays (> INT32_MAX)
-  // NOTE(HIP/AMD): hipcub device functions return a nodiscard hipError_t; wrap in CUDF_CUDA_TRY.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub device functions return a nodiscard hipError_t; wrap in
+  // CUDF_CUDA_TRY.
   CUDF_CUDA_TRY(
     cub::DeviceTransform::Transform(smaller_indices.begin() + left_join_only_matches,
                                     smaller_indices.begin() + left_join_only_matches,
@@ -703,7 +695,8 @@ void sort_merge_join::preprocessed_table::populate_nonnull_filter(rmm::cuda_stre
         cuda::std::reverse_iterator(cuda::counting_iterator{offsets.size()}),
         cuda::std::reverse_iterator(offsets_subset.end()),
         cuda::std::reverse_iterator(child_positions.end()));
-      // NOTE(HIP/AMD): thrust::unique_by_key_copy returns a thrust::pair; use thrust::get.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): thrust::unique_by_key_copy returns a thrust::pair; use
+      // thrust::get.
       auto subset_size   = cuda::std::distance(cuda::std::reverse_iterator(offsets_subset.end()),
                                              thrust::get<0>(unique_end));
       auto subset_offset = offsets.size() - subset_size;
@@ -875,7 +868,8 @@ void sort_merge_join::postprocess_indices(preprocessed_table const& preprocessed
     if (has_nested_nulls(preprocessed_left._table_view)) {
       auto left_mapping = preprocessed_left.map_table_to_unprocessed(stream);
       // Use cub API to handle large arrays (> INT32_MAX)
-      // NOTE(HIP/AMD): hipcub device functions return a nodiscard hipError_t; wrap in CUDF_CUDA_TRY.
+      // TODO(HIP/AMD, <ROCPRIM-API>): hipcub device functions return a nodiscard hipError_t; wrap
+      // in CUDF_CUDA_TRY.
       CUDF_CUDA_TRY(
         cub::DeviceTransform::Transform(larger_indices.begin(),
                                         larger_indices.begin(),
@@ -886,7 +880,8 @@ void sort_merge_join::postprocess_indices(preprocessed_table const& preprocessed
     if (has_nested_nulls(preprocessed_right._table_view)) {
       auto right_mapping = preprocessed_right.map_table_to_unprocessed(stream);
       // Use cub API to handle large arrays (> INT32_MAX)
-      // NOTE(HIP/AMD): hipcub device functions return a nodiscard hipError_t; wrap in CUDF_CUDA_TRY.
+      // TODO(HIP/AMD, <ROCPRIM-API>): hipcub device functions return a nodiscard hipError_t; wrap
+      // in CUDF_CUDA_TRY.
       CUDF_CUDA_TRY(
         cub::DeviceTransform::Transform(smaller_indices.begin(),
                                         smaller_indices.begin(),
@@ -1063,7 +1058,8 @@ sort_merge_join::left_join(table_view const& left,
                                   left_result_indices.begin() + preprocessed_left_indices->size(),
                                   is_row_null{validity_mask},
                                   stream);
-      // NOTE(HIP/AMD): hipcub DeviceTransform has no Fill; use thrust::fill_n on AMD.
+      // TODO(HIP/AMD, <ROCPRIM-API>): hipcub DeviceTransform has no Fill; use thrust::fill_n on
+      // AMD.
 #ifdef __HIP_PLATFORM_AMD__
       thrust::fill_n(rmm::exec_policy_nosync(stream),
                      right_result_indices.begin() + preprocessed_right_indices->size(),
@@ -1182,7 +1178,8 @@ sort_merge_join::partitioned_inner_join(cudf::join_partition_context const& cont
     stream);
   // Map from slice to total null processed table
   // Use cub API to handle large arrays (> INT32_MAX)
-  // NOTE(HIP/AMD): hipcub device functions return a nodiscard hipError_t; wrap in CUDF_CUDA_TRY.
+  // TODO(HIP/AMD, <ROCPRIM-API>): hipcub device functions return a nodiscard hipError_t; wrap in
+  // CUDF_CUDA_TRY.
   CUDF_CUDA_TRY(cub::DeviceTransform::Transform(
     preprocessed_left_indices->begin(),
     preprocessed_left_indices->begin(),

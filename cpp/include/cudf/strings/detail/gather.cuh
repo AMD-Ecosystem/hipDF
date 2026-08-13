@@ -311,15 +311,24 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
     // use the custom cuDF kernel.
     constexpr int64_t cub_batch_copy_threshold = 1024 * 1024 * 0.5;
 
-    // NOTE(HIP/AMD): rocPRIM's batch_memcpy (backing hipcub::DeviceMemcpy::Batched)
-    // does not support non-pointer (transform_iterator) source/destination buffer
-    // iterators, so the CUB batched-copy fast path cannot be instantiated here. Always
-    // use the custom char-parallel kernel on AMD; it handles any output_count correctly.
+    // FIXME(HIP/AMD, <ROCPRIM-API>): rocPRIM's batch_memcpy (backing hipcub::DeviceMemcpy::Batched)
+    // did not accept non-pointer (transform_iterator) buffer iterators on the ROCm 7.2 toolchain
+    // this was developed against, so the batched fast path could not be instantiated. Always take
+    // the custom char-parallel kernel on AMD; it handles any output_count correctly but forgoes
+    // the batched-copy speedup above the threshold. Same gap as the WAR in transform/transform.cu.
+    //
+    // STATUS: not reproducible on hipcub/rocPRIM 4.5.0 (ROCm 7.14) - DeviceMemcpy::Batched both
+    // compiles and runs correctly with transform_iterator buffers (verified on gfx90a: 1000
+    // strings copied byte-identically). This branch can be re-enabled behind a HIP_VERSION guard
+    // to restore upstream threshold behaviour. Not done here: it changes performance
+    // characteristics and wants a benchmark first, and on AMD the hipcub call returns a
+    // [[nodiscard]] hipError_t so it must be wrapped in CUDF_CUDA_TRY.
 #ifdef __HIP_PLATFORM_AMD__
-    if (true) {
+    constexpr bool use_batched_memcpy = false;  // see FIXME above
 #else
-    if (output_count < cub_batch_copy_threshold) {
+    bool const use_batched_memcpy = output_count >= cub_batch_copy_threshold;
 #endif
+    if (not use_batched_memcpy) {
       constexpr int strings_per_threadblock = 32;
       auto const grid_size                  = cudf::util::div_rounding_up_safe(
         static_cast<int64_t>(output_count), static_cast<int64_t>(strings_per_threadblock));
@@ -349,25 +358,25 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
 
       // Determine temporary device storage requirements
       size_t temp_storage_bytes = 0;
-      CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(nullptr,
-                                          temp_storage_bytes,
-                                          in_chars_itr,
-                                          out_chars_itr,
-                                          sizes_itr,
-                                          output_count,
-                                          stream.value()));
+      cub::DeviceMemcpy::Batched(nullptr,
+                                 temp_storage_bytes,
+                                 in_chars_itr,
+                                 out_chars_itr,
+                                 sizes_itr,
+                                 output_count,
+                                 stream.value());
 
       // Allocate temporary storage
       auto d_temp_storage = rmm::device_buffer(temp_storage_bytes, stream, mr);
 
       // Run batched copy algorithm
-      CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(d_temp_storage.data(),
-                                          temp_storage_bytes,
-                                          in_chars_itr,
-                                          out_chars_itr,
-                                          sizes_itr,
-                                          output_count,
-                                          stream.value()));
+      cub::DeviceMemcpy::Batched(d_temp_storage.data(),
+                                 temp_storage_bytes,
+                                 in_chars_itr,
+                                 out_chars_itr,
+                                 sizes_itr,
+                                 output_count,
+                                 stream.value());
 #endif
     }
   }

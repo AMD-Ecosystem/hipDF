@@ -695,8 +695,16 @@ std::optional<std::pair<bitmask_type*, size_type>> make_stencil(
 }
 
 #ifdef __HIP_PLATFORM_AMD__
-// NOTE(HIP/AMD): WAR for missing rocPRIM batch_memcpy support of transform_iterator buffers.
-// Each warp copies the bytes of one (src,dst,size) triplet; grid-strides over all triplets.
+// TODO(HIP/AMD, <ROCPRIM-API>): WAR for missing rocPRIM batch_memcpy support of transform_iterator
+// buffers on the ROCm 7.2 toolchain. Each warp copies the bytes of one (src,dst,size) triplet and
+// grid-strides over all triplets; this is byte-granularity with no vectorisation, so it is
+// materially slower than a real batched copy.
+//
+// STATUS: not reproducible on hipcub/rocPRIM 4.5.0 (ROCm 7.14) - hipcub::DeviceMemcpy::Batched
+// both compiles and runs correctly with transform_iterator buffers (verified on gfx90a). This
+// kernel can likely be deleted behind a HIP_VERSION guard in favour of the upstream batched call;
+// needs a benchmark plus a CUDF_CUDA_TRY wrapper (hipcub returns a [[nodiscard]] hipError_t).
+// Same gap as the WAR in cudf/strings/detail/gather.cuh.
 template <typename SrcIt, typename DstIt, typename SizeIt>
 CUDF_KERNEL void batched_byte_copy_kernel(SrcIt srcs, DstIt dsts, SizeIt sizes, size_type num_items)
 {
@@ -743,8 +751,8 @@ rmm::device_uvector<char> make_chars_buffer(column_view const& offsets_view,
     });
 
 #ifdef __HIP_PLATFORM_AMD__
-  // NOTE(HIP/AMD): rocPRIM's batch_memcpy (backing hipcub::DeviceMemcpy::Batched) does not
-  // support non-pointer (transform_iterator) src/dst/size buffer iterators. Use a custom
+  // TODO(HIP/AMD, <ROCPRIM-API>): rocPRIM's batch_memcpy (backing hipcub::DeviceMemcpy::Batched)
+  // does not support non-pointer (transform_iterator) src/dst/size buffer iterators. Use a custom
   // warp-per-string byte-copy kernel instead, which handles arbitrary iterators.
   if (size > 0) {
     constexpr int warps_per_block = 4;
