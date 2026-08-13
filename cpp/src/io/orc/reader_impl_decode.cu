@@ -460,9 +460,9 @@ void scan_null_counts(cudf::detail::hostdevice_2dvector<column_desc> const& chun
     std::count_if(chunks[0].begin(), chunks[0].end(), [](auto const& chunk) {
       return chunk.type_kind == STRUCT;
     });
-  // NOTE(HIP/AMD): use thrust::pair as the host_vector element type. cuda::std::pair pulls
-  // cuda::std::swap into ADL, which clashes with thrust::swap inside thrust's contiguous_storage
-  // ("call to 'swap' is ambiguous"); thrust::pair avoids that ambiguity.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): use thrust::pair as the host_vector element type.
+  // cuda::std::pair pulls cuda::std::swap into ADL, which clashes with thrust::swap inside thrust's
+  // contiguous_storage ("call to 'swap' is ambiguous"); thrust::pair avoids that ambiguity.
   auto prefix_sums_to_update =
     cudf::detail::make_empty_host_vector<thrust::pair<size_type, uint32_t*>>(num_struct_cols,
                                                                              stream);

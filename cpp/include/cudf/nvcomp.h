@@ -131,7 +131,7 @@
 #  define nvcompZstdCompressionMaxAllowedChunkSize hipcompZstdCompressionMaxAllowedChunkSize
 #endif
 
-// NOTE(HIP/AMD): the 26.06 nvcomp API splits the per-algorithm options into separate
+// TODO(HIP/AMD, <HIPCOMP-API>): the 26.06 nvcomp API splits the per-algorithm options into separate
 // Compress/Decompress *DefaultOpts VALUE constants. hipcomp 2.3.0 instead exposes opts
 // TYPES (combined hipcompBatched{Snappy,LZ4}Opts_t for Snappy/LZ4; split
 // hipcompBatched{Deflate,Zstd,Gzip}{Compress,Decompress}Opts_t) and provides NO matching

@@ -170,7 +170,7 @@ precompute_mixed_join_data(mixed_multiset_type const& hash_table,
     auto const step_val = static_cast<hash_value_type>(
       ((static_cast<std::size_t>(hash2_val) % num_buckets_minus_one) + 1) * bucket_size);
 
-    // NOTE(HIP/AMD): rocThrust zip iterator deref yields thrust::tuple, so the
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip iterator deref yields thrust::tuple, so the
     // transform functor must return a thrust::make_tuple rather than a cuda::std::pair.
     return thrust::make_tuple(probe_key, cuda::std::pair{init_idx, step_val});
   };

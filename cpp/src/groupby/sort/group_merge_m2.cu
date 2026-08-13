@@ -58,8 +58,8 @@ struct merge_fn {
   result_type const* d_means;
   result_type const* d_M2s;
 
-  // NOTE(HIP/AMD): rocThrust zip iterator deref is a thrust::tuple proxy, so the
-  // functor must return thrust::tuple (not cuda::std::tuple) to be assignable.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip iterator deref is a thrust::tuple proxy, so
+  // the functor must return thrust::tuple (not cuda::std::tuple) to be assignable.
   __device__ thrust::tuple<count_type, result_type, result_type> operator()(
     size_type const group_idx) const
   {

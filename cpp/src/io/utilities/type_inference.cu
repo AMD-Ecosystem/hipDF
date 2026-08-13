@@ -136,7 +136,8 @@ CUDF_KERNEL void infer_column_type_kernel(OptionsView options,
 
   for (auto idx = threadIdx.x + blockDim.x * blockIdx.x; idx < size;
        idx += gridDim.x * blockDim.x) {
-    // NOTE(HIP/AMD): offset_length_begin derefs to a thrust::tuple on rocThrust; use thrust::get.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): offset_length_begin derefs to a thrust::tuple on
+    // rocThrust; use thrust::get.
     auto const field_offset = thrust::get<0>(*(offset_length_begin + idx));
     auto const field_len    = thrust::get<1>(*(offset_length_begin + idx));
     auto const field_begin  = data.data() + field_offset;

@@ -579,16 +579,19 @@ void __launch_bounds__(decode_page_headers_block_size)
 
   auto const warp_id = warp.meta_group_rank();
   auto const lane_id = warp.thread_rank();
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   auto const chunk_idx =
     static_cast<cudf::size_type>((blockIdx.x * num_warps_per_block) + warp_id);
   auto const num_chunks = static_cast<cudf::size_type>(chunks.size());
 
   if (chunk_idx >= num_chunks) { return; }
 
-  // NOTE(HIP/AMD): byte_stream_s has in-class member initializers (non-trivial default ctor),
-  // which HIP/clang forbids for __shared__ variables. Wrap each element in
+  // FIXME(HIP/AMD, <HIP-SHMEM-CTOR>): byte_stream_s has in-class member initializers (non-trivial
+  // default ctor), which HIP/clang forbids for __shared__ variables. Wrap each element in
   // hipcub::Uninitialized so the shared storage is declared without running a constructor.
   __shared__ hipcub::Uninitialized<byte_stream_s> bs_g[num_warps_per_block];
   __shared__ kernel_error::value_type error[num_warps_per_block];
@@ -710,15 +713,19 @@ CUDF_KERNEL void __launch_bounds__(count_page_headers_block_size)
 
   auto const warp_id = warp.meta_group_rank();
   auto const lane_id = warp.thread_rank();
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   auto const chunk_idx =
     static_cast<cudf::size_type>((blockIdx.x * num_warps_per_block) + warp_id);
   auto const num_chunks = static_cast<cudf::size_type>(chunks.size());
 
   if (chunk_idx >= num_chunks) { return; }
 
-  // NOTE(HIP/AMD): see byte_stream_s __shared__ note above; wrap in hipcub::Uninitialized.
+  // FIXME(HIP/AMD, <HIP-SHMEM-CTOR>): see byte_stream_s __shared__ note above; wrap in
+  // hipcub::Uninitialized.
   __shared__ hipcub::Uninitialized<byte_stream_s> bs_g[num_warps_per_block];
   __shared__ kernel_error::value_type error[num_warps_per_block];
 
@@ -886,15 +893,19 @@ CUDF_KERNEL void __launch_bounds__(build_string_dict_index_block_size)
                                        kernel_error::pointer error_code)
 {
   auto constexpr num_warps_per_block = build_string_dict_index_block_size / cudf::detail::warp_size;
-  // NOTE(HIP/AMD): ColumnChunkDesc has in-class member initializers (non-trivial default ctor);
-  // wrap in hipcub::Uninitialized so it can be declared as a __shared__ array under HIP/clang.
+  // FIXME(HIP/AMD, <HIP-SHMEM-CTOR>): ColumnChunkDesc has in-class member initializers (non-trivial
+  // default ctor); wrap in hipcub::Uninitialized so it can be declared as a __shared__ array under
+  // HIP/clang.
   __shared__ hipcub::Uninitialized<ColumnChunkDesc> chunk_g[num_warps_per_block];
 
   auto const block   = cg::this_thread_block();
   auto const warp    = cg::tiled_partition<cudf::detail::warp_size>(block);
   auto const warp_id = warp.meta_group_rank();
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   int const chunk    = (blockIdx.x * num_warps_per_block) + warp_id;
 
   if (chunk >= num_chunks) { return; }

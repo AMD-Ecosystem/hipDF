@@ -312,9 +312,9 @@ struct column_to_strings_fn {
                    i_col_begin + num_columns,
                    std::back_inserter(str_column_vec),
                    [this, &children_names](auto const& i_current_col) {
-                     // NOTE(HIP/AMD): rocThrust zip dereference yields a thrust tuple
-                     // proxy (tuple_of_iterator_references), not a cuda::std::tuple, so
-                     // use thrust::get to extract its elements.
+                     // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference yields a thrust
+                     // tuple proxy (tuple_of_iterator_references), not a cuda::std::tuple, so use
+                     // thrust::get to extract its elements.
                      auto const i            = thrust::get<0>(i_current_col);
                      auto const& current_col = thrust::get<1>(i_current_col);
                      if (current_col.type().id() == type_id::STRUCT) {

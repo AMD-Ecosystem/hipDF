@@ -63,7 +63,8 @@ writer_compression_statistics collect_compression_statistics(
       zipped_begin,
       zipped_end,
       cuda::proclaim_return_type<size_t>([status] __device__(auto tup) {
-        // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+        // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference is a thrust::tuple; use
+        // thrust::get.
         return thrust::get<1>(tup).status == status ? thrust::get<0>(tup).size() : 0;
       }),
       0ul,

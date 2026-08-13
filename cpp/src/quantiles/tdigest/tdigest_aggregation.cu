@@ -1058,10 +1058,10 @@ std::unique_ptr<column> compute_tdigests(int delta,
   cudf::mutable_column_view mean_col(*centroid_means);
   cudf::mutable_column_view weight_col(*centroid_weights);
 
-  // NOTE(HIP/AMD): the reduced values are `centroid` (a 3-element thrust::tuple of
-  // mean/weight/valid). rocThrust cannot form a reference to `void` for a
-  // cuda::make_discard_iterator() slot inside a zip output, so the validity slot is
-  // written to a throwaway device buffer instead of being discarded.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): the reduced values are `centroid` (a 3-element thrust::tuple
+  // of mean/weight/valid). rocThrust cannot form a reference to `void` for a
+  // cuda::make_discard_iterator() slot inside a zip output, so the validity slot is written to a
+  // throwaway device buffer instead of being discarded.
   rmm::device_uvector<bool> discarded_valid(cinfo.total_clusters, stream);
   auto output = thrust::make_zip_iterator(
     mean_col.begin<double>(), weight_col.begin<double>(), discarded_valid.begin());

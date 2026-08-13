@@ -56,8 +56,8 @@ batched_args create_batched_nvcomp_args(device_span<device_span<uint8_t const> c
     inputs.begin(),
     inputs.end(),
     ins_it,
-    // NOTE(HIP/AMD): rocThrust's zip_iterator deref proxy is a thrust::tuple of refs; return a
-    // thrust::tuple (not cuda::std::tuple) so the proxy assignment resolves.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's zip_iterator deref proxy is a thrust::tuple of
+    // refs; return a thrust::tuple (not cuda::std::tuple) so the proxy assignment resolves.
     [] __device__(auto const& in) { return thrust::make_tuple(in.data(), in.size()); });
 
   // Prepare the output vectors
@@ -87,7 +87,8 @@ std::pair<rmm::device_uvector<void const*>, rmm::device_uvector<size_t>> create_
     inputs.begin(),
     inputs.end(),
     ins_it,
-    // NOTE(HIP/AMD): see above; thrust::make_tuple matches the rocThrust zip proxy.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): see above; thrust::make_tuple matches the rocThrust zip
+    // proxy.
     [] __device__(auto const& in) { return thrust::make_tuple(in.data(), in.size()); });
 
   return {std::move(input_data_ptrs), std::move(input_data_sizes)};
@@ -142,8 +143,8 @@ void skip_unsupported_inputs(device_span<size_t> input_sizes,
       input_sizes.begin(),
       status_size_it,
       [] __device__(auto const& status) {
-        // NOTE(HIP/AMD): output is a rocThrust zip proxy (thrust::tuple of refs); return a
-        // thrust::tuple so the assignment resolves (was cuda::std::pair).
+        // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): output is a rocThrust zip proxy (thrust::tuple of
+        // refs); return a thrust::tuple so the assignment resolves (was cuda::std::pair).
         return thrust::make_tuple(size_t{0}, codec_exec_result{0, codec_status::SKIPPED});
       },
       [max_size = max_valid_input_size.value()] __device__(size_t input_size) {

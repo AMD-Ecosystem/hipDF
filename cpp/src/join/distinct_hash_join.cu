@@ -46,8 +46,13 @@
 #include <rmm/mr/polymorphic_allocator.hpp>
 #include <rmm/resource_ref.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
+#else
+#include <cooperative_groups.h>
+#include <cub/block/block_scan.cuh>
+#endif
 #include <cuco/static_set.cuh>
 #include <cuda/functional>
 #include <cuda/iterator>
@@ -321,8 +326,8 @@ distinct_hash_join::inner_join(cudf::table_view const& left,
     }
   }
 
-  // NOTE(HIP/AMD): copy_if writes through a rocThrust zip iterator whose proxy is a
-  // thrust::tuple, so the transform iterator must yield thrust::tuple (not cuda::std::tuple).
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): copy_if writes through a rocThrust zip iterator whose proxy
+  // is a thrust::tuple, so the transform iterator must yield thrust::tuple (not cuda::std::tuple).
   auto const tuple_iter = cudf::detail::make_counting_transform_iterator(
     0,
     cuda::proclaim_return_type<thrust::tuple<size_type, size_type>>(

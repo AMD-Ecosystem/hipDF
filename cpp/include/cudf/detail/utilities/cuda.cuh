@@ -35,7 +35,11 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/hipcub.hpp>
+#else
+#include <cub/cub.cuh>
+#endif
 #include <cuda/std/type_traits>
 
 #endif

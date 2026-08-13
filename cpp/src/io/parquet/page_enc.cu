@@ -47,10 +47,11 @@
 
 #ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
+#include <hipcub/hipcub.hpp>
 #else
 #include <cooperative_groups.h>
+#include <cub/cub.cuh>
 #endif
-#include <hipcub/hipcub.hpp>
 #include <cuda/iterator>
 #include <cuda/std/chrono>
 #include <cuda/std/functional>
@@ -3352,7 +3353,8 @@ inline __device__ void* align8(void* ptr)
 }
 
 struct mask_tform {
-  // NOTE(HIP/AMD): rocprim's transform_iterator invokes the op via a const object.
+  // FIXME(HIP/AMD, <ROCPRIM-CONSTOP>): rocprim's transform_iterator invokes the op via a const
+  // object.
   __device__ uint32_t operator()(EncPage const& p) const
   {
     return static_cast<uint32_t>(p.kernel_mask);

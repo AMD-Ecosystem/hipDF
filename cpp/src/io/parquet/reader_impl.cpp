@@ -1013,8 +1013,8 @@ void reader_impl::update_output_nullmasks_for_pruned_pages(cudf::host_span<bool 
   std::for_each(
     page_and_mask_begin, page_and_mask_begin + pages.size(), [&](auto const& page_and_mask_pair) {
       // Return early if the page is valid - Note: dictionary pages are always valid
-      // NOTE(HIP/AMD): rocThrust zip dereference yields a thrust tuple proxy, not a
-      // cuda::std::tuple, so use thrust::get to extract its elements.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference yields a thrust tuple proxy,
+      // not a cuda::std::tuple, so use thrust::get to extract its elements.
       if (thrust::get<1>(page_and_mask_pair)) { return; }
 
       // Get the current page
@@ -1096,7 +1096,8 @@ void reader_impl::update_output_nullmasks_for_pruned_pages(cudf::host_span<bool 
       pinned_null_masks.begin(), pinned_begin_bits.begin(), pinned_end_bits.begin());
     std::for_each(
       nullmask_iter, nullmask_iter + pinned_null_masks.size(), [&](auto const& nullmask_tuple) {
-        // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+        // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference is a thrust::tuple; use
+        // thrust::get.
         cudf::set_null_mask(thrust::get<0>(nullmask_tuple),
                             thrust::get<1>(nullmask_tuple),
                             thrust::get<2>(nullmask_tuple),

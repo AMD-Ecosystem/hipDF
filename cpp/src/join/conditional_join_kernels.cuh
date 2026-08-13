@@ -38,7 +38,11 @@
 
 #include <cuda/atomic>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/hipcub.hpp>
+#else
+#include <cub/cub.cuh>
+#endif
 
 namespace cudf {
 namespace detail {

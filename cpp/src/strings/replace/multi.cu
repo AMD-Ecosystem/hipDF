@@ -82,8 +82,8 @@ constexpr size_type AVG_CHAR_BYTES_THRESHOLD = 256;
  * @brief Type used for holding the target position (first) and the
  * target index (second).
  */
-// NOTE(HIP/AMD): this pair is produced by pair_generator and copied into a thrust zip
-// iterator (out_itr) via copy_if. rocThrust's zip deref is a thrust::tuple, so the value
+// FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): this pair is produced by pair_generator and copied into a
+// thrust zip iterator (out_itr) via copy_if. rocThrust's zip deref is a thrust::tuple, so the value
 // type must be thrust::tuple (not cuda::std::tuple) to be assignable into the zip output.
 using target_pair = thrust::tuple<int64_t, size_type>;
 

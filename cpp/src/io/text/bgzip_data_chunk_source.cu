@@ -65,8 +65,9 @@ struct bgzip_nvcomp_transform_functor {
   uint8_t const* compressed_ptr;
   uint8_t* decompressed_ptr;
 
-  // NOTE(HIP/AMD): both the input and output zip iterators deref to thrust::tuple under
-  // rocThrust, so take a thrust::tuple parameter (with thrust::get) and return thrust::tuple.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): both the input and output zip iterators deref to
+  // thrust::tuple under rocThrust, so take a thrust::tuple parameter (with thrust::get) and return
+  // thrust::tuple.
   __device__ thrust::tuple<device_span<uint8_t const>, device_span<uint8_t>> operator()(
     thrust::tuple<std::size_t, std::size_t, std::size_t, std::size_t> t)
   {

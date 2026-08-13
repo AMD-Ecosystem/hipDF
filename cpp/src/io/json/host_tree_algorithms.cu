@@ -118,9 +118,10 @@ std::vector<std::string> copy_strings_to_host_sync(
     thrust::make_zip_iterator(string_offsets.begin(), string_lengths.begin()),
     [] __device__(auto const& offsets) {
       // Note: first character for non-field columns
-      // NOTE(HIP/AMD): offsets is a rocThrust zip dereference (thrust::tuple); use thrust::get.
-      // The output is also a rocThrust zip iterator whose deref is a thrust::tuple proxy, so
-      // return a thrust::make_tuple (cuda::std::make_tuple has no viable '=' to the proxy).
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): offsets is a rocThrust zip dereference (thrust::tuple);
+      // use thrust::get. The output is also a rocThrust zip iterator whose deref is a thrust::tuple
+      // proxy, so return a thrust::make_tuple (cuda::std::make_tuple has no viable '=' to the
+      // proxy).
       return thrust::make_tuple(
         static_cast<size_type>(thrust::get<0>(offsets)),
         static_cast<size_type>(thrust::get<1>(offsets) - thrust::get<0>(offsets)));
@@ -463,8 +464,8 @@ std::
         rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
         thrust::make_zip_iterator(col.string_offsets.begin(), col.string_lengths.begin()),
         thrust::make_zip_iterator(col.string_offsets.end(), col.string_lengths.end()),
-        // NOTE(HIP/AMD): fill value is assigned to a rocThrust zip deref (thrust::tuple
-        // proxy); use thrust::make_tuple (cuda::std::make_tuple has no viable '=').
+        // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): fill value is assigned to a rocThrust zip deref
+        // (thrust::tuple proxy); use thrust::make_tuple (cuda::std::make_tuple has no viable '=').
         thrust::make_tuple(0, 0));
     } else if (column_category == NC_LIST) {
       col.child_offsets.resize(max_row_offsets[i] + 2, stream);
@@ -485,7 +486,8 @@ std::
   auto h_range_col_id_it =
     thrust::make_zip_iterator(column_range_beg.begin(), unique_col_ids.begin());
   std::sort(h_range_col_id_it, h_range_col_id_it + num_columns, [](auto const& a, auto const& b) {
-    // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference is a thrust::tuple; use
+    // thrust::get.
     return thrust::get<0>(a) < thrust::get<0>(b);
   });
   // adjacency list construction

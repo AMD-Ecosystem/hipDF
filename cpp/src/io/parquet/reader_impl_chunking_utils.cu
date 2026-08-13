@@ -154,9 +154,9 @@ void codec_stats::add_pages(host_span<ColumnChunkDesc const> chunks,
     0, [&](size_t page_idx) { return page_mask.empty() ? true : page_mask[page_idx]; });
 
   // Zip iterator for iterating over pages and the page mask
-  // NOTE(HIP/AMD): cuda::make_zip_iterator over a thrust::transform_iterator yields a
-  // thrust::zip_iterator whose operator+ the cuda zip iterator overloads don't match;
-  // use thrust::make_zip_iterator so random-access arithmetic (zip_iter + size) works.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): cuda::make_zip_iterator over a thrust::transform_iterator
+  // yields a thrust::zip_iterator whose operator+ the cuda zip iterator overloads don't match; use
+  // thrust::make_zip_iterator so random-access arithmetic (zip_iter + size) works.
   auto zip_iter = thrust::make_zip_iterator(pages.begin(), page_mask_iter);
 
   std::for_each(zip_iter, zip_iter + pages.size(), [&](auto const& item) {

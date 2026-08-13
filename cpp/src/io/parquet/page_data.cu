@@ -81,8 +81,11 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
 
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   int const page_idx    = blockIdx.x;
   auto const block      = cg::this_thread_block();
   auto const warp       = cg::tiled_partition<cudf::detail::warp_size>(block);
@@ -303,8 +306,11 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
 
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   int const page_idx    = blockIdx.x;
   auto const block      = cg::this_thread_block();
   auto const warp       = cg::tiled_partition<cudf::detail::warp_size>(block);
@@ -556,8 +562,8 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
 }
 
 struct mask_tform {
-  // NOTE(HIP/AMD): rocprim's transform_iterator invokes the functor through a const object,
-  // so operator() must be const.
+  // FIXME(HIP/AMD, <ROCPRIM-CONSTOP>): rocprim's transform_iterator invokes the functor through a
+  // const object, so operator() must be const.
   __device__ uint32_t operator()(PageInfo const& p) const
   {
     return static_cast<uint32_t>(p.kernel_mask);

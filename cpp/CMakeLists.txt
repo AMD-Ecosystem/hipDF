@@ -1691,7 +1691,8 @@ if(CUDF_USE_WARPSIZE_32)
   target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
 endif()
 
-# NOTE(HIP/AMD): Enable workarounds for potential HIP compiler bugs (mode-specific logic in code)
+# FIXME(HIP/AMD, <ROCM-COMPILER>): Enable workarounds for potential HIP compiler bugs
+# (mode-specific logic in code)
 if(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
   target_compile_definitions(cudf PUBLIC "CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS")
 endif()

@@ -33,9 +33,9 @@
 
 #include <cudf/detail/utilities/cuda.cuh>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
-
-#ifndef __HIP_PLATFORM_AMD__
+#else
 #include <cooperative_groups.h>
 #endif
 #include <cuda/std/bit>
@@ -1027,9 +1027,9 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size_t, 8)
   constexpr int rolling_buf_size    = decode_block_size_t * 2;
   constexpr int rle_run_buffer_size = rle_stream_required_run_buffer_size<decode_block_size_t>();
 
-  // NOTE(HIP/AMD): Use dynamic shared memory for page_state_s. state_g is accessed as an array
-  // (see `s = &state_g[0]` below).
-  //__shared__ __align__(16) page_state_s state_g;
+  // FIXME(HIP/AMD, <HIP-SHMEM-CTOR>): Use dynamic shared memory for page_state_s. state_g is
+  // accessed as an array (see `s = &state_g[0]` below). __shared__ __align__(16) page_state_s
+  // state_g;
   extern __shared__ __align__(16) page_state_s state_g[];
 
   constexpr bool use_dict_buffers = has_dict_t || has_bools_t || has_strings_t;
@@ -1041,8 +1041,11 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size_t, 8)
   auto const block      = cg::this_thread_block();
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   int const page_idx    = blockIdx.x;
   int const t           = block.thread_rank();
   PageInfo* pp          = &pages[page_idx];

@@ -291,9 +291,10 @@ std::unique_ptr<cudf::column> replace_nulls_policy_impl(cudf::column_view const&
 {
   auto device_in = cudf::column_device_view::create(input, stream);
   auto index     = cuda::counting_iterator<cudf::size_type>{0};
-  // NOTE(HIP/AMD): build the validity iterator as a CCCL transform_iterator (not the thrust-based
-  // make_validity_iterator) so the resulting cuda::zip_iterator satisfies cuda::std::random_access
-  // and can be advanced with operator+ (rocThrust transform_iterators do not model that concept).
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): build the validity iterator as a CCCL transform_iterator
+  // (not the thrust-based make_validity_iterator) so the resulting cuda::zip_iterator satisfies
+  // cuda::std::random_access and can be advanced with operator+ (rocThrust transform_iterators do
+  // not model that concept).
   auto valid_it =
     cuda::make_transform_iterator(index, cudf::detail::validity_accessor<true>{*device_in});
   auto in_begin = cuda::make_zip_iterator(index, valid_it);

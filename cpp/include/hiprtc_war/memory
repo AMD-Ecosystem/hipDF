@@ -29,6 +29,6 @@
 //
 // NOTE(HIP/AMD): this is a known-fragile shim — it relies on this directory being placed
 // ahead of the system include path during hipRTC compilation so that `#include <new>`
-// resolves here. TODO(SWDEV-ticket): replace it with a robust hipRTC mechanism (e.g. a
+// resolves here. TODO(HIP/AMD, <HIPRTC-STDHDR>): replace it with a robust hipRTC mechanism (e.g. a
 // proper nostdinc++ system-header set, or hipRTC honoring an explicit include-stub path)
 // so we no longer have to shadow a standard library header by name.

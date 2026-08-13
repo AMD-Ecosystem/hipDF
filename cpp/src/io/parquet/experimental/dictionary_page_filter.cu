@@ -303,8 +303,11 @@ CUDF_KERNEL void query_dictionaries(cudf::device_span<T> decoded_data,
   auto const group = cg::this_thread_block();
 
   // Scalar to evaluate
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   auto const scalar_idx = blockIdx.x;
   auto const scalar     = scalars[scalar_idx];
 
@@ -712,8 +715,11 @@ CUDF_KERNEL void __launch_bounds__(DECODE_BLOCK_SIZE)
   auto const group = cg::this_thread_block();
 
   // Index of the current column chunk of the column
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   auto const row_group_idx = blockIdx.x;
 
   // Global index of the current column chunk (dictionary page)
@@ -907,8 +913,11 @@ CUDF_KERNEL void __launch_bounds__(DECODE_BLOCK_SIZE)
   auto const group = cg::this_thread_block();
 
   // Index of the current column chunk of the column
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   auto const row_group_idx = blockIdx.x;
 
   // Global index of the current column chunk (dictionary page)

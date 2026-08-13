@@ -644,8 +644,8 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
       thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
     auto segment_length_iterator = thrust::transform_iterator(
       segments_begin, cuda::proclaim_return_type<size_type>([] __device__(auto const& segment) {
-        // NOTE(HIP/AMD): rocThrust's zip dereferences to a thrust::tuple; use thrust::get
-        // (cuda::std::get does not accept a thrust::tuple).
+        // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's zip dereferences to a thrust::tuple; use
+        // thrust::get (cuda::std::get does not accept a thrust::tuple).
         auto const begin = thrust::get<0>(segment);
         auto const end   = thrust::get<1>(segment);
         return end - begin;
@@ -863,7 +863,8 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
     thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
   auto const segment_length_iterator = thrust::make_transform_iterator(
     segments_begin, cuda::proclaim_return_type<size_type>([] __device__(auto const& segment) {
-      // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference is a thrust::tuple; use
+      // thrust::get.
       auto const begin = thrust::get<0>(segment);
       auto const end   = thrust::get<1>(segment);
       return end - begin;
@@ -900,7 +901,8 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
     length_and_valid_count + num_segments,
     [null_handling, has_valid_initial_value, valid_initial] __device__(
       auto const& length_and_valid_count) {
-      // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference is a thrust::tuple; use
+      // thrust::get.
       auto const length      = thrust::get<0>(length_and_valid_count);
       auto const valid_count = thrust::get<1>(length_and_valid_count);
       return (null_handling == null_policy::EXCLUDE)

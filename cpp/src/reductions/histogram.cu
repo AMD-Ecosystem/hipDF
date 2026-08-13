@@ -67,8 +67,8 @@ struct is_not_zero {
   template <typename Pair>
   __device__ bool operator()(Pair const input) const
   {
-    // NOTE(HIP/AMD): rocprim passes a rocThrust thrust::tuple here, so use thrust::get
-    // instead of cuda::std::get (which finds no matching overload for thrust::tuple).
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocprim passes a rocThrust thrust::tuple here, so use
+    // thrust::get instead of cuda::std::get (which finds no matching overload for thrust::tuple).
     return thrust::get<1>(input) != 0;
   }
 };

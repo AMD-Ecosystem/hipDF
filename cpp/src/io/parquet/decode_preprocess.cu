@@ -278,8 +278,11 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size)
 
   page_state_s* const s = &state_g[0];
   auto const block      = cg::this_thread_block();
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   int const page_idx    = blockIdx.x;
   int const t           = block.thread_rank();
   PageInfo* pp          = &pages[page_idx];
@@ -416,13 +419,16 @@ CUDF_KERNEL void __launch_bounds__(level_decode_block_size)
                            size_t min_row,
                            size_t num_rows)
 {
-  // NOTE(HIP/AMD): page_state_s has a non-trivial default constructor (in-class initializers),
-  // which HIP/clang forbids for __shared__ variables; wrap in hipcub::Uninitialized.
+  // FIXME(HIP/AMD, <HIP-SHMEM-CTOR>): page_state_s has a non-trivial default constructor (in-class
+  // initializers), which HIP/clang forbids for __shared__ variables; wrap in hipcub::Uninitialized.
   __shared__ hipcub::Uninitialized<page_state_s> state_g_storage;
   page_state_s* const s = &state_g_storage.Alias();
   auto const block      = cg::this_thread_block();
-  // TODO(HIP/AMD): Replace cg::this_grid().block_rank() with blockIdx.x since block_rank() API is
-  // currently missing in HIP cooperative groups
+  // NOTE(HIP/AMD): upstream uses cg::this_grid().block_rank(). These kernels are launched with
+  // 1-D grids, where block_rank() reduces to blockIdx.x but still computes
+  // blockIdx.z*gridDim.y*gridDim.x + blockIdx.y*gridDim.x + blockIdx.x, so blockIdx.x is
+  // equivalent and cheaper. (block_rank() itself has been available in HIP cooperative
+  // groups since ROCm 7.14; this is a deliberate choice, not a missing-API workaround.)
   int const page_idx    = blockIdx.x;
   int const t           = block.thread_rank();
   PageInfo* pp          = &pages[page_idx];

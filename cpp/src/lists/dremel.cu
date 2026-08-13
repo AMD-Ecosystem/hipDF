@@ -342,10 +342,10 @@ dremel_data get_encoding(column_view h_col,
     auto output_zip_it =
       thrust::make_zip_iterator(rep_level.begin(), def_level.begin());
 
-    // NOTE(HIP/AMD): rocprim's merge_by_key combines the (discarded) key output and the
-    // zip value output into a single internal tuple and cannot form a reference to `void`
-    // for a cuda::make_discard_iterator() key-output slot. Write the merged keys to a
-    // throwaway device buffer instead of discarding them.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocprim's merge_by_key combines the (discarded) key output
+    // and the zip value output into a single internal tuple and cannot form a reference to `void`
+    // for a cuda::make_discard_iterator() key-output slot. Write the merged keys to a throwaway
+    // device buffer instead of discarding them.
     rmm::device_uvector<size_type> discarded_keys(max_vals_size, stream);
     auto ends =
       thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
@@ -436,10 +436,10 @@ dremel_data get_encoding(column_view h_col,
     auto output_zip_it =
       thrust::make_zip_iterator(rep_level.begin(), def_level.begin());
 
-    // NOTE(HIP/AMD): rocprim's merge_by_key combines the (discarded) key output and the
-    // zip value output into a single internal tuple and cannot form a reference to `void`
-    // for a cuda::make_discard_iterator() key-output slot. Write the merged keys to a
-    // throwaway device buffer instead of discarding them.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocprim's merge_by_key combines the (discarded) key output
+    // and the zip value output into a single internal tuple and cannot form a reference to `void`
+    // for a cuda::make_discard_iterator() key-output slot. Write the merged keys to a throwaway
+    // device buffer instead of discarding them.
     rmm::device_uvector<size_type> discarded_keys(max_vals_size, stream);
     auto ends =
       thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),

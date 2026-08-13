@@ -151,9 +151,10 @@ struct host_udf_groupby_example : cudf::groupby_host_udf {
       InputType const* group_max;
       InputType const* group_sum;
 
-      // NOTE(HIP/AMD): the output is a thrust::make_zip_iterator whose dereference proxy is
-      // a thrust::tuple; rocThrust cannot assign a cuda::std::tuple to it. Return a
-      // thrust::tuple so the transform output assigns (also accepted by CCCL's thrust zip).
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): the output is a thrust::make_zip_iterator whose
+      // dereference proxy is a thrust::tuple; rocThrust cannot assign a cuda::std::tuple to it.
+      // Return a thrust::tuple so the transform output assigns (also accepted by CCCL's thrust
+      // zip).
       thrust::tuple<OutputType, cudf::size_type> __device__ operator()(cudf::size_type idx) const
       {
         auto const start = offsets[idx];

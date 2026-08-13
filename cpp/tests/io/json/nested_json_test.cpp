@@ -858,7 +858,7 @@ TEST_F(JsonTest, PostProcessTokenStream)
   auto const stream = cudf::get_default_stream();
   std::vector<token_index_t> offsets(input.size());
   std::vector<cuio_json::PdaTokenT> tokens(input.size());
-  // NOTE(HIP/AMD): `input` holds cuda::std::tuple elements; copy them into a
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): `input` holds cuda::std::tuple elements; copy them into a
   // cuda::make_zip_iterator (whose dereference proxy is a cuda::std::tuple) rather than a
   // thrust::make_zip_iterator (rocThrust proxy is a thrust::tuple, which cannot be assigned
   // from a cuda::std::tuple). cuda::make_zip_iterator is portable for this assignment.

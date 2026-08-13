@@ -42,9 +42,10 @@
 
 namespace cudf::io {
 
-// NOTE(HIP/AMD): rocThrust's make_zip_iterator yields thrust::zip_iterator<thrust::tuple<...>>,
-// whereas CCCL-thrust yields thrust::zip_iterator<cuda::std::tuple<...>>. Use a platform-correct
-// alias for the offset-length tuple iterator so the parse/inference signatures match the callers.
+// FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's make_zip_iterator yields
+// thrust::zip_iterator<thrust::tuple<...>>, whereas CCCL-thrust yields
+// thrust::zip_iterator<cuda::std::tuple<...>>. Use a platform-correct alias for the offset-length
+// tuple iterator so the parse/inference signatures match the callers.
 #ifdef __HIP_PLATFORM_AMD__
 using offset_length_iterator =
   thrust::zip_iterator<thrust::tuple<size_type const*, size_type const*>>;

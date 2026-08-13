@@ -213,7 +213,8 @@ std::unique_ptr<column> group_correlation(column_view const& covariance,
                     stddev_iter,
                     d_result,
                     [] __device__(auto const covariance, auto const stddev) {
-                      // NOTE(HIP/AMD): rocThrust zip dereference is a thrust::tuple; use thrust::get.
+                      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust zip dereference is a
+                      // thrust::tuple; use thrust::get.
                       return covariance / thrust::get<0>(stddev) / thrust::get<1>(stddev);
                     });
 

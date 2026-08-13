@@ -460,9 +460,10 @@ std::unique_ptr<cudf::column> byte_pair_encoding(cudf::strings_column_view const
   // this will insert the single-byte separator into positions specified in d_inserts
   auto const sep_char = cuda::constant_iterator<char>(separator.to_string(stream)[0]);
 #ifdef __HIP_PLATFORM_AMD__
-  // NOTE(HIP/AMD): rocThrust's merge_by_key zips the keys-output with the values-output, and a
-  // cuda::discard_iterator (void value_type) makes that zip "form a reference to void". Write the
-  // merged keys into a throwaway device buffer instead of discarding them inline.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's merge_by_key zips the keys-output with the
+  // values-output, and a cuda::discard_iterator (void value_type) makes that zip "form a reference
+  // to void". Write the merged keys into a throwaway device buffer instead of discarding them
+  // inline.
   auto keys_out = rmm::device_uvector<int64_t>(bytes, stream);
   thrust::merge_by_key(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                        d_inserts,      // where to insert separator byte

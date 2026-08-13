@@ -46,7 +46,11 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hipcub/hipcub.hpp>
+#else
+#include <cub/cub.cuh>
+#endif
 #include <cuda/functional>
 #include <cuda/iterator>
 #include <cuda/std/iterator>
@@ -805,8 +809,8 @@ template <typename SymbolT>
 struct to_string_view_pair {
   SymbolT const* data;
   to_string_view_pair(SymbolT const* _data) : data(_data) {}
-  // NOTE(HIP/AMD): the input zip iterator dereferences to a rocThrust thrust::tuple
-  // (not a cuda::std::tuple), so accept a thrust::tuple and use thrust::get here.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): the input zip iterator dereferences to a rocThrust
+  // thrust::tuple (not a cuda::std::tuple), so accept a thrust::tuple and use thrust::get here.
   __device__ cuda::std::pair<char const*, std::size_t> operator()(
     thrust::tuple<size_type, size_type> ip)
   {

@@ -232,8 +232,8 @@ std::unique_ptr<cudf::column> clamper(column_view const& input,
 
   auto trans =
     cuda::proclaim_return_type<T>([] __device__(auto element_optional, auto scalar_tuple) {
-      // NOTE(HIP/AMD): scalar_tuple is a rocThrust zip dereference (thrust::tuple of references);
-      // use thrust::get rather than cuda::std::get.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): scalar_tuple is a rocThrust zip dereference
+      // (thrust::tuple of references); use thrust::get rather than cuda::std::get.
       if (element_optional.has_value()) {
         auto lo_optional = thrust::get<0>(scalar_tuple);
         auto hi_optional = thrust::get<2>(scalar_tuple);

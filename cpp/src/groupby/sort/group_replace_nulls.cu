@@ -56,8 +56,9 @@ std::unique_ptr<column> group_replace_nulls(cudf::column_view const& grouped_val
 
   auto device_in = cudf::column_device_view::create(grouped_value, stream);
   auto index     = cuda::counting_iterator<cudf::size_type>{0};
-  // NOTE(HIP/AMD): CCCL transform_iterator for validity so the cuda::zip_iterator is advanceable
-  // (rocThrust make_validity_iterator does not satisfy cuda::std::random_access). See replace/nulls.cu.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): CCCL transform_iterator for validity so the
+  // cuda::zip_iterator is advanceable (rocThrust make_validity_iterator does not satisfy
+  // cuda::std::random_access). See replace/nulls.cu.
   auto valid_it =
     cuda::make_transform_iterator(index, cudf::detail::validity_accessor<true>{*device_in});
   auto in_begin = cuda::make_zip_iterator(index, valid_it);

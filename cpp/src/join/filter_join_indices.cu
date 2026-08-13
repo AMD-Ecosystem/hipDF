@@ -312,7 +312,7 @@ filter_join_indices(cudf::table_view const& left,
           stream);
       }
 #ifdef __HIP_PLATFORM_AMD__
-      // NOTE(HIP/AMD): hipcub has no DeviceTransform::Fill; use thrust::fill_n.
+      // TODO(HIP/AMD, <ROCPRIM-API>): hipcub has no DeviceTransform::Fill; use thrust::fill_n.
       thrust::fill_n(rmm::exec_policy_nosync(stream),
                      filtered_right_indices->begin() + num_valid,
                      num_invalid,
@@ -353,8 +353,9 @@ filter_join_indices(cudf::table_view const& left,
                       cuda::counting_iterator{static_cast<size_type>(left_indices.size())},
                       thrust::make_zip_iterator(filtered_left_indices->begin(),
                                                                  filtered_right_indices->begin()),
-                      // NOTE(HIP/AMD): output is a rocThrust zip proxy (thrust::tuple of refs);
-                      // return a thrust::tuple so the proxy assignment resolves.
+                      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): output is a rocThrust zip proxy
+                      // (thrust::tuple of refs); return a thrust::tuple so the proxy assignment
+                      // resolves.
                       [=] __device__(size_type i) -> thrust::tuple<size_type, size_type> {
                         auto const left_idx  = left_ptr[i];
                         auto const right_idx = right_ptr[i];
@@ -372,7 +373,8 @@ filter_join_indices(cudf::table_view const& left,
       auto secondary_iter = thrust::make_zip_iterator(filtered_left_indices->begin() + left_indices.size(),
                          filtered_right_indices->begin() + left_indices.size());
 
-      // NOTE(HIP/AMD): copy_if_async writes into a rocThrust zip proxy; produce thrust::tuple.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): copy_if_async writes into a rocThrust zip proxy; produce
+      // thrust::tuple.
       auto failed_match_iter = cudf::detail::make_counting_transform_iterator(
         0, [=] __device__(size_type i) -> thrust::tuple<size_type, size_type> {
           return thrust::make_tuple(JoinNoMatch, right_ptr[i]);

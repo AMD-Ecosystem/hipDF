@@ -93,9 +93,9 @@ struct node_ranges {
   device_span<PdaTokenT const> tokens;
   device_span<SymbolOffsetT const> token_indices;
   bool include_quote_char;
-  // NOTE(HIP/AMD): this functor feeds a transform_output_iterator whose underlying output
-  // is a rocThrust zip iterator; its deref is a thrust::tuple proxy with no viable '=' from
-  // a cuda::std::tuple, so return a thrust::tuple instead.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): this functor feeds a transform_output_iterator whose
+  // underlying output is a rocThrust zip iterator; its deref is a thrust::tuple proxy with no
+  // viable '=' from a cuda::std::tuple, so return a thrust::tuple instead.
   __device__ auto operator()(size_type i) -> thrust::tuple<SymbolOffsetT, SymbolOffsetT>
   {
     // Whether a token expects to be followed by its respective end-of-* token partner
@@ -566,9 +566,9 @@ std::pair<size_t, rmm::device_uvector<size_type>> remapped_field_nodes_after_uni
                     offset_length_it,
                     [node_range_begin = d_tree.node_range_begin.data(),
                      node_range_end   = d_tree.node_range_end.data()] __device__(auto key) {
-                      // NOTE(HIP/AMD): output is a rocThrust zip iterator whose deref is a
-                      // thrust::tuple proxy; return a thrust::make_tuple so the assignment
-                      // matches (cuda::std::make_tuple has no viable '=' to the proxy).
+                      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): output is a rocThrust zip iterator whose
+                      // deref is a thrust::tuple proxy; return a thrust::make_tuple so the
+                      // assignment matches (cuda::std::make_tuple has no viable '=' to the proxy).
                       return thrust::make_tuple(node_range_begin[key],
                                                 node_range_end[key] - node_range_begin[key]);
                     });

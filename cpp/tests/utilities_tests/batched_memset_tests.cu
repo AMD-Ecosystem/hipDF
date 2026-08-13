@@ -40,10 +40,10 @@
 #include <cuda/std/tuple>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
-// NOTE(HIP/AMD): thrust::make_zip_iterator dereferences to a thrust::tuple (rocThrust),
-// so the zip-element accessors below use thrust::get instead of cuda::std::get (which
-// finds no matching overload for thrust::tuple). thrust::get also works on CCCL's
-// thrust::tuple, so this is portable.
+// FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): thrust::make_zip_iterator dereferences to a thrust::tuple
+// (rocThrust), so the zip-element accessors below use thrust::get instead of cuda::std::get (which
+// finds no matching overload for thrust::tuple). thrust::get also works on CCCL's thrust::tuple, so
+// this is portable.
 #include <thrust/tuple.h>
 
 #include <type_traits>

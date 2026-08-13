@@ -406,7 +406,8 @@ std::string construct_arrow_schema_ipc_message(cudf::detail::LinkedColVector con
     thrust::make_zip_iterator(linked_columns.end(), metadata.column_metadata.end()),
     std::back_inserter(field_offsets),
     [&](auto const& elem) {
-      // NOTE(HIP/AMD): elem comes from a rocThrust zip dereference (thrust::tuple); use thrust::get.
+      // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): elem comes from a rocThrust zip dereference
+      // (thrust::tuple); use thrust::get.
       return make_arrow_schema_fields(
         fbb, thrust::get<0>(elem), thrust::get<1>(elem), write_mode, utc_timestamps);
     });

@@ -59,7 +59,8 @@ using pair_type = cuda::std::pair<T, T>;
 template <typename T>
 class recurrence_functor {
  public:
-  // NOTE(HIP/AMD): const-qualified so rocPRIM (which stores the scan op as const) can invoke it.
+  // FIXME(HIP/AMD, <ROCPRIM-CONSTOP>): const-qualified so rocPRIM (which stores the scan op as
+  // const) can invoke it.
   __device__ pair_type<T> operator()(pair_type<T> ci, pair_type<T> cj) const
   {
     return {ci.first * cj.first, ci.second * cj.first + cj.second};
@@ -74,13 +75,14 @@ struct ewma_functor_base {
 
 template <typename T, bool is_numerator>
 struct ewma_adjust_nulls_functor : public ewma_functor_base<T> {
-  // NOTE(HIP/AMD): templated tuple parameter so a rocThrust zip_iterator (thrust::tuple) and a
-  // CCCL zip (cuda::std::tuple) both bind; structured bindings work for either tuple type.
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): templated tuple parameter so a rocThrust zip_iterator
+  // (thrust::tuple) and a CCCL zip (cuda::std::tuple) both bind; structured bindings work for
+  // either tuple type.
   template <typename TupleT>
   __device__ pair_type<T> operator()(TupleT const data) const
   {
-    // NOTE(HIP/AMD): structured bindings over a rocThrust zip dereference bind to references;
-    // copy `input` into a mutable local so it can be reassigned below.
+    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): structured bindings over a rocThrust zip dereference bind
+    // to references; copy `input` into a mutable local so it can be reassigned below.
     auto const [valid, exp, input_in] = data;
     T input                           = input_in;
     if (!valid) { return this->IDENTITY; }
@@ -180,9 +182,9 @@ rmm::device_uvector<cudf::size_type> null_roll_up(column_view const& input,
   return output;
 }
 
-// NOTE(HIP/AMD): rocThrust/rocPRIM's transform_inclusive_scan mis-infers the scan accumulator
-// type when the transform output type (here cuda::std::pair<T,T>) differs from the input
-// iterator's value type, producing a recurrence_functor no-match. WAR: materialize the
+// FIXME(HIP/AMD, <ROCTHRUST-SCAN>): rocThrust/rocPRIM's transform_inclusive_scan mis-infers the
+// scan accumulator type when the transform output type (here cuda::std::pair<T,T>) differs from the
+// input iterator's value type, producing a recurrence_functor no-match. WAR: materialize the
 // transform into the output buffer, then run a plain inclusive_scan with the binary op.
 template <typename InputIt, typename OutputIt, typename TransformOp>
 void ewma_transform_inclusive_scan(InputIt first,

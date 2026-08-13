@@ -27,8 +27,13 @@
 #pragma once
 #include <cudf/detail/utilities/cuda.cuh>
 
+#ifdef __HIP_PLATFORM_AMD__
 #include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
+#else
+#include <cooperative_groups.h>
+#include <cub/cub.cuh>
+#endif
 #include <cuda/std/cstdint>
 #include <cuda/std/cstring>
 
