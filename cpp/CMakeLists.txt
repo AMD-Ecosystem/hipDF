@@ -169,7 +169,12 @@ else()
   )
 endif()
 
-set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
+# NOTE(HIP/AMD): the stream-identification utility (tests/utilities/identify_stream_usage.cpp)
+# includes <generated_cuda_runtime_api_meta.h>, which is supplied by the CUDA Toolkit / Compute
+# Sanitizer and has no ROCm equivalent, so the target cannot compile here. This is a HIP-only build
+# tree (the project FATAL_ERRORs above without a HIP/ROCm compiler), so default it off; without this
+# `build.sh libcudf` fails on the `all` target before linking libcudf.so.
+set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
   set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
@@ -1875,7 +1880,7 @@ endif()
 
 rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
-# NOTE(HIP/AMD): Control section ordering to avoid relocation errors 
+# NOTE(HIP/AMD): Control section ordering to avoid relocation errors
 file(
   WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
   [=[

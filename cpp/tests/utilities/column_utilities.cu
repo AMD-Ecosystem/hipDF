@@ -64,6 +64,11 @@
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
 
+#ifdef __HIP_PLATFORM_AMD__
+// NOTE(HIP/AMD): provides ROCTHRUST_VERSION_MAJOR, used to gate the identity workaround below.
+#include <thrust/rocthrust_version.hpp>
+#endif
+
 #include <numeric>
 #include <sstream>
 #include <iomanip>
@@ -562,28 +567,33 @@ struct column_comparator_impl {
       ComparatorType(
         *d_lhs_row_indices, *d_rhs_row_indices, fp_ulps, device_comparator, *d_lhs, *d_rhs));
 
-    // NOTE(HIP/AMD): ROCm 7.2.x and lower has a const-correctness issue where cuda::std::identity
-    // returns 'const bool&' from its operator() when the input is a prvalue bool. When used
-    // with transform_iterator<cuda::std::identity, bool*> in thrust::copy_if, rocPRIM's select
-    // tries to bind this 'const bool&' to a non-const reference ('bool&'), causing a compilation
-    // error: "binding reference of type 'bool' to value of type 'const bool' drops 'const'
-    // qualifier". The workaround is to use thrust::identity which returns a plain bool value.
-#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-    auto diff_iter = thrust::copy_if(rmm::exec_policy_nosync(cudf::test::get_default_stream()),
-                                     input_iter,
-                                     input_iter + lhs_row_indices.size(),
-                                     diff_map.begin(),
-                                     differences.begin(),
-                                     thrust::identity{});
+    // NOTE(HIP/AMD): thrust::transform_iterator::dereference() binds the base value to
+    // 'iterator_value_t const&' and then returns 'm_f(x)' as super_t::reference. With
+    // cuda::std::identity over a 'bool*' base, that reference deduces to 'bool&&', so returning
+    // the 'const bool&' produced by the functor fails to compile:
+    //   "binding reference of type 'bool' to value of type 'const bool' drops 'const' qualifier"
+    // rocThrust carries an in-place FIXME for this in thrust/iterator/transform_iterator.h.
+    // thrust::identity is unaffected, so use it until the CCCL-3.0-conformant API lands in
+    // rocThrust 5. Verified against rocThrust 4.5.0: cuda::std::identity fails, thrust::identity
+    // compiles.
+#ifdef __HIP_PLATFORM_AMD__
+
+#if defined(ROCTHRUST_VERSION_MAJOR) && (ROCTHRUST_VERSION_MAJOR < 5)
+    using diff_predicate = thrust::identity<>;
 #else
+    using diff_predicate = cuda::std::identity;
+#endif
+
+#else   // !__HIP_PLATFORM_AMD__
+    using diff_predicate = cuda::std::identity;
+#endif  // __HIP_PLATFORM_AMD__
+
     auto diff_iter = thrust::copy_if(rmm::exec_policy_nosync(cudf::test::get_default_stream()),
                                      input_iter,
                                      input_iter + lhs_row_indices.size(),
                                      diff_map.begin(),
                                      differences.begin(),
-                                     cuda::std::identity{});
-#endif
+                                     diff_predicate{});
 
     differences.resize(cuda::std::distance(differences.begin(), diff_iter),
                        cudf::test::get_default_stream());  // shrink back down

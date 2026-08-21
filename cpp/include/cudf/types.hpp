@@ -71,6 +71,10 @@ using uint64_t = __hip_internal::uint64_t;
 #include <cstdint>
 #include <iterator>
 #else
+// NOTE(HIP/AMD): cuda/std/cassert only pulls the host <cassert> when _CCCL_HOSTED(), so under
+// hipRTC it provides no assert(). Include <cassert> so jitify's jit-safe version (which defines
+// assert as a no-op) is used - cudf/types.hpp itself calls assert() below.
+#include <cassert>
 #include <cuda/std/cassert>
 #include <cuda/std/cstddef>
 #include <cuda/std/cstdint>
@@ -86,10 +90,24 @@ using uint64_t = __hip_internal::uint64_t;
 #include <cuda/__cccl_config>
 #endif
 
-// NOTE(HIP/AMD): Conditional macros for tuple/pair types to handle libhipcxx version compatibility
-// with thrust (libhipcxx 2.7.0/3.0.2) datatypes are not compatible with thrust)
-#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
+// NOTE(HIP/AMD): rocThrust's zip_iterator dereferences to
+// thrust::detail::tuple_of_iterator_references and does not accept cuda::std::tuple, so on older
+// rocThrust we must hand thrust its own tuple/pair types. rocThrust 5 adopts the CCCL 3.0
+// conformant API, from which point cuda::std types interoperate and these macros collapse to the
+// upstream spelling.
+//
+// Gate on the rocThrust version rather than the HIP/ROCm version: rocThrust is resolved with
+// find_package (rapids-cmake: "We always use find_package for rocthrust"), so it is NOT pinned to
+// the ROCm release and the two can disagree. The previous HIP_VERSION_MINOR <= 12 gate assumed
+// rocThrust became CCCL-interoperable at ROCm 7.13; it has not (rocThrust 4.5.0 on ROCm 7.14 still
+// uses thrust::tuple), which made every zip_iterator write fail to compile above that cutover.
+// <thrust/rocthrust_version.hpp> is a macro-only header with no includes, so it is safe here and
+// under hipRTC.
+#ifdef __HIP_PLATFORM_AMD__
+
+#include <thrust/rocthrust_version.hpp>
+
+#if defined(ROCTHRUST_VERSION_MAJOR) && (ROCTHRUST_VERSION_MAJOR < 5)
 #define CUDF_TUPLE_PAIR_PROVIDER thrust
 #define CUDF_TUPLE_TYPE thrust::tuple
 #define CUDF_PAIR_TYPE thrust::pair
@@ -100,6 +118,15 @@ using uint64_t = __hip_internal::uint64_t;
 #define CUDF_PAIR_TYPE cuda::std::pair
 #define CUDF_MAKE_TUPLE cuda::std::make_tuple
 #endif
+
+#else  // !__HIP_PLATFORM_AMD__
+
+#define CUDF_TUPLE_PAIR_PROVIDER cuda::std
+#define CUDF_TUPLE_TYPE cuda::std::tuple
+#define CUDF_PAIR_TYPE cuda::std::pair
+#define CUDF_MAKE_TUPLE cuda::std::make_tuple
+
+#endif  // __HIP_PLATFORM_AMD__
 
 // Forward declarations
 /// @cond

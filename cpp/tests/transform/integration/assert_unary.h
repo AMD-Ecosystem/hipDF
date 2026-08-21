@@ -31,20 +31,17 @@
 #include <cudf_test/column_wrapper.hpp>
 #include <cudf_test/cudf_gtest.hpp>
 
+#include <cudf/types.hpp>
+
 #include <cuda/std/tuple>
 #include <thrust/iterator/zip_iterator.h>
 
 #include <algorithm>
 
-// NOTE(HIP/AMD): cuda::std::tuple is not compatible with rocthrust from ROCm 7.2.x and lower
-// as it doesn't provide iterator traits
-// required by thrust::zip_iterator, causing compilation errors. Use thrust::make_tuple for compatibility.
-#if defined(__HIP_PLATFORM_AMD__) && defined(HIP_VERSION_MAJOR) && \
-    ((HIP_VERSION_MAJOR < 7) || (HIP_VERSION_MAJOR == 7 && HIP_VERSION_MINOR <= 12))
-#define MAKE_TUPLE thrust::make_tuple
-#else
-#define MAKE_TUPLE cuda::std::make_tuple
-#endif
+// NOTE(HIP/AMD): cuda::std::tuple does not provide the iterator traits thrust::zip_iterator needs,
+// so the tuple flavour must follow whatever rocThrust supports. Defer to the single source of truth
+// in <cudf/types.hpp> instead of re-deriving the condition here.
+#define MAKE_TUPLE CUDF_MAKE_TUPLE
 
 namespace transformation {
 template <typename TypeOut, typename TypeIn, typename TypeOpe>

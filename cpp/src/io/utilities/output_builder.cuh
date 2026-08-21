@@ -116,7 +116,14 @@ class split_device_span_iterator {
 
   split_device_span_iterator() = default;
 
-  CUDF_HOST_DEVICE constexpr split_device_span_iterator(split_device_span<T> span, size_type offset)
+  // FIXME(HIP/AMD, <LIBHIPCXX>): take the span by const reference rather than by value. The
+  // by-value parameter makes cuda::std::span's range deduction guide recurse into itself
+  // ("satisfaction of constraint __span_compatible_range ...") while checking split_device_span
+  // as a range. Confirmed still required on libhipcxx 3.4 (upgrade/3.4.0_base_enable): reverting
+  // to the upstream by-value form breaks compilation of io/text/multibyte_split.cu. Restore the
+  // by-value form only once the libhipcxx deduction bug is fixed.
+  CUDF_HOST_DEVICE constexpr split_device_span_iterator(split_device_span<T> const& span,
+                                                        size_type offset)
     : _span{span}, _offset{offset}
   {
   }
