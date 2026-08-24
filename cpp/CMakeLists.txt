@@ -1662,7 +1662,7 @@ set_property(
   PROPERTY COMPILE_DEFINITIONS "CUDF_VERSION=${PROJECT_VERSION}"
 )
 
-# NOTE(HIP/AMD): the ROCm 7.2 AMDGPU backend miscompiles the shared-memory groupby aggregation
+# NOTE(HIP/AMD): the ROCm 7.2 AMDGPU backend miscompiled the shared-memory groupby aggregation
 # kernel (single_pass_shmem_aggs_kernel) at the default -O3 ("Illegal instruction detected: Operand
 # has incorrect register class"). A previous workaround forced -O1 on this single TU to dodge the
 # compile error, but -O1 then produces a runtime GPU HANG: the kernel's per-block 128-thread (two
@@ -1672,11 +1672,17 @@ set_property(
 # correctly (GROUPBY_TEST argmin and STREAM_GROUPBY_TEST count both pass), so build this single TU at
 # -O2. This is a HIP-only build tree (the project FATAL_ERRORs above if not using a HIP/ROCm
 # compiler); the CUDA build is unaffected.
-set_property(
-  SOURCE src/groupby/hash/compute_shared_memory_aggs.cu
-  APPEND_STRING
-  PROPERTY COMPILE_FLAGS " -O2"
-)
+# Fixed in ROCm 7.14: -O3 both compiles and runs correctly there (verified on gfx90a: the TU builds
+# with no diagnostics, GROUPBY_TEST 4354/4354 and STREAM_GROUPBY_TEST 28/28 pass), so apply the pin
+# only below that. HIP_VERSION is the full toolchain version reported by the HIP CMake package
+# (e.g. 7.14.60850); if it is somehow unset, keep the pin rather than risk the 7.2 miscompile.
+if(NOT DEFINED HIP_VERSION OR HIP_VERSION VERSION_LESS 7.14)
+  set_property(
+    SOURCE src/groupby/hash/compute_shared_memory_aggs.cu
+    APPEND_STRING
+    PROPERTY COMPILE_FLAGS " -O2"
+  )
+endif()
 
 set_cudf_target_properties()
 
