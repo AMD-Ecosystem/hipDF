@@ -68,6 +68,7 @@ namespace cub = hipcub;
 #include <cuda/std/iterator>
 #include <cuda/std/tuple>
 #include <thrust/binary_search.h>
+#include <thrust/iterator/tabulate_output_iterator.h>
 #include <thrust/fill.h>
 #include <thrust/for_each.h>
 #include <thrust/sort.h>
@@ -80,6 +81,23 @@ namespace cub = hipcub;
 namespace cudf {
 
 namespace {
+
+// FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): cuda::tabulate_output_iterator declares value_type = void,
+// which rocThrust's generic binary_search cannot consume - it zips (values, output) and
+// dereferences the output iterator, and a void value_type gives
+// "invalid application of 'sizeof' to an incomplete type 'void'". rocThrust ships an equivalent
+// iterator with a real value_type, so use that on AMD. Same single pass and same semantics as
+// upstream; only the spelling differs.
+template <typename F>
+auto make_tabulate_output_iterator(F f)
+{
+#ifdef __HIP_PLATFORM_AMD__
+  return thrust::tabulate_output_iterator(cuda::proclaim_return_type<void>(f));
+#else
+  return cuda::tabulate_output_iterator(f);
+#endif
+}
+
 
 /**
  * @brief Functor to map indices through a provided mapping container.
@@ -261,29 +279,10 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
                       match_counts_it,
                       comparator);
 
-  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's generic binary_search zips (values, output) and
-  // dereferences the output iterator, but cuda::tabulate_output_iterator has a void value_type
-  // which cannot form a zip tuple. Write lower_bound results into a real buffer and subtract in a
-  // separate pass.
-#ifdef __HIP_PLATFORM_AMD__
-  rmm::device_uvector<size_type> lower_bounds(larger_numrows, stream, mr);
-  thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-                      smaller_it,
-                      smaller_it + smaller_numrows,
-                      cudf::detail::row::rhs_iterator(0),
-                      cudf::detail::row::rhs_iterator(0) + larger_numrows,
-                      lower_bounds.begin(),
-                      comparator);
-  thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-                    match_counts.begin(),
-                    match_counts.begin() + larger_numrows,
-                    lower_bounds.begin(),
-                    match_counts.begin(),
-                    cuda::std::minus<size_type>{});
-#else
-  auto match_counts_update_it =
-    cuda::tabulate_output_iterator([match_counts = match_counts.begin()] __device__(
-                                     size_type idx, size_type val) { match_counts[idx] -= val; });
+  auto match_counts_update_it = make_tabulate_output_iterator(
+    [match_counts = match_counts.begin()] __device__(size_type idx, size_type val) {
+      match_counts[idx] -= val;
+    });
   thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       smaller_it,
                       smaller_it + smaller_numrows,
@@ -291,7 +290,6 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
                       cudf::detail::row::rhs_iterator(0) + larger_numrows,
                       match_counts_update_it,
                       comparator);
-#endif
 
   return std::make_unique<rmm::device_uvector<size_type>>(std::move(match_counts));
 }
@@ -382,32 +380,7 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
       nonzero_matches.begin(),
       cuda::proclaim_return_type<detail::row::rhs_index_type>(
         [] __device__(size_type idx) { return static_cast<detail::row::rhs_index_type>(idx); }));
-    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's generic binary_search cannot write into a
-    // cuda::tabulate_output_iterator (void value_type breaks the zip tuple). Write lower_bound
-    // results into a real buffer, then scatter them with a separate for_each.
-#ifdef __HIP_PLATFORM_AMD__
-    rmm::device_uvector<size_type> lower_bounds(nonzero_matches.size(), stream, temp_mr);
-    thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-                        smaller_it,
-                        smaller_it + smaller_numrows,
-                        larger_it,
-                        larger_it + nonzero_matches.size(),
-                        lower_bounds.begin(),
-                        comparator);
-    thrust::for_each(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      cuda::counting_iterator<size_type>{0},
-      cuda::counting_iterator<size_type>{static_cast<size_type>(nonzero_matches.size())},
-      [nonzero_matches = nonzero_matches.begin(),
-       match_offsets   = match_offsets.begin(),
-       lower_bounds    = lower_bounds.begin(),
-       smaller_indices = smaller_indices.begin()] __device__(size_type idx) {
-        auto const lhs_idx   = nonzero_matches[idx];
-        auto const pos       = match_offsets[lhs_idx];
-        smaller_indices[pos] = lower_bounds[idx];
-      });
-#else
-    auto smaller_tabulate_it = cuda::tabulate_output_iterator(
+    auto smaller_tabulate_it = make_tabulate_output_iterator(
       [nonzero_matches = nonzero_matches.begin(),
        match_offsets   = match_offsets.begin(),
        smaller_indices = smaller_indices.begin()] __device__(size_type idx, size_type lb) {
@@ -422,7 +395,6 @@ merge<LargerIterator, SmallerIterator>::inner(rmm::cuda_stream_view stream,
                         larger_it + nonzero_matches.size(),
                         smaller_tabulate_it,
                         comparator);
-#endif
   }
 
   // Use cub API to handle large arrays (> INT32_MAX)
@@ -576,33 +548,7 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
       nonzero_matches.begin(),
       cuda::proclaim_return_type<detail::row::rhs_index_type>(
         [] __device__(size_type idx) { return static_cast<detail::row::rhs_index_type>(idx); }));
-    // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's generic binary_search cannot write into a
-    // cuda::tabulate_output_iterator (void value_type breaks the zip tuple). Write lower_bound
-    // results into a real buffer, then scatter them with a separate for_each.
-#ifdef __HIP_PLATFORM_AMD__
-    rmm::device_uvector<size_type> lower_bounds(nonzero_matches.size(), stream, temp_mr);
-    thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-                        smaller_it,
-                        smaller_it + smaller_numrows,
-                        larger_it,
-                        larger_it + nonzero_matches.size(),
-                        lower_bounds.begin(),
-                        comparator);
-    thrust::for_each(
-      rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-      cuda::counting_iterator<size_type>{0},
-      cuda::counting_iterator<size_type>{static_cast<size_type>(nonzero_matches.size())},
-      [nonzero_matches = nonzero_matches.begin(),
-       match_offsets   = match_offsets.begin(),
-       lower_bounds    = lower_bounds.begin(),
-       smaller_indices =
-         smaller_indices.begin() + left_join_only_matches] __device__(size_type idx) {
-        auto const lhs_idx   = nonzero_matches[idx];
-        auto const pos       = match_offsets[lhs_idx];
-        smaller_indices[pos] = lower_bounds[idx];
-      });
-#else
-    auto smaller_tabulate_it = cuda::tabulate_output_iterator(
+    auto smaller_tabulate_it = make_tabulate_output_iterator(
       [nonzero_matches = nonzero_matches.begin(),
        match_offsets   = match_offsets.begin(),
        smaller_indices =
@@ -618,7 +564,6 @@ merge<LargerIterator, SmallerIterator>::left(rmm::cuda_stream_view stream,
                         larger_it + nonzero_matches.size(),
                         smaller_tabulate_it,
                         comparator);
-#endif
   }
 
   // Use cub API to handle large arrays (> INT32_MAX)
