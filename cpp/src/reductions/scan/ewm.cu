@@ -40,6 +40,7 @@
 #include <cuda/functional>
 #include <cuda/iterator>
 #include <cuda/std/utility>
+#include <thrust/iterator/transform_iterator.h>
 #include <thrust/scan.h>
 #include <thrust/transform_scan.h>
 
@@ -184,8 +185,8 @@ rmm::device_uvector<cudf::size_type> null_roll_up(column_view const& input,
 
 // FIXME(HIP/AMD, <ROCTHRUST-SCAN>): rocThrust/rocPRIM's transform_inclusive_scan mis-infers the
 // scan accumulator type when the transform output type (here cuda::std::pair<T,T>) differs from the
-// input iterator's value type, producing a recurrence_functor no-match. WAR: materialize the
-// transform into the output buffer, then run a plain inclusive_scan with the binary op.
+// input iterator's value type, producing a recurrence_functor no-match. WAR: apply the transform
+// through a transform_iterator so the scan's value_type is already the transformed type.
 template <typename InputIt, typename OutputIt, typename TransformOp>
 void ewma_transform_inclusive_scan(InputIt first,
                                    std::size_t count,
@@ -194,16 +195,12 @@ void ewma_transform_inclusive_scan(InputIt first,
                                    rmm::cuda_stream_view stream)
 {
 #ifdef __HIP_PLATFORM_AMD__
-  using value_t   = typename std::iterator_traits<OutputIt>::value_type;
-  auto const dist = static_cast<std::ptrdiff_t>(count);
-  thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-                    first,
-                    first + dist,
-                    out,
-                    transform_op);
+  using value_t     = typename std::iterator_traits<OutputIt>::value_type;
+  auto const dist   = static_cast<std::ptrdiff_t>(count);
+  auto transform_it = thrust::make_transform_iterator(first, transform_op);
   thrust::inclusive_scan(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
-                         out,
-                         out + dist,
+                         transform_it,
+                         transform_it + dist,
                          out,
                          recurrence_functor<typename value_t::first_type>{});
 #else
