@@ -199,6 +199,10 @@ std::unique_ptr<column> group_correlation(column_view const& covariance,
   CUDF_EXPECTS(covariance.type().id() == type_id::FLOAT64, "Covariance result must be FLOAT64");
   auto stddev0_ptr = stddev_0.begin<result_type>();
   auto stddev1_ptr = stddev_1.begin<result_type>();
+  // FIXME(HIP/AMD, <ROCTHRUST-TUPLE>): rocThrust's make_zip_iterator takes the iterators
+  // directly rather than a tuple, because its zip proxy is
+  // thrust::detail::tuple_of_iterator_references rather than cuda::std::tuple. Same root
+  // cause as the thrust::get below. Upstream: make_zip_iterator(cuda::std::make_tuple(...)).
   auto stddev_iter = thrust::make_zip_iterator(stddev0_ptr, stddev1_ptr);
   auto result      = make_numeric_column(covariance.type(),
                                     covariance.size(),

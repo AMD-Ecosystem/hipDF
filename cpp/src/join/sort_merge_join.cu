@@ -253,12 +253,11 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
                                [] __device__(size_type idx) -> detail::row::lhs_index_type {
                                  return static_cast<detail::row::lhs_index_type>(idx);
                                }));
-  auto rhs_values_begin = cudf::detail::row::rhs_iterator(0);
   thrust::upper_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       smaller_it,
                       smaller_it + smaller_numrows,
-                      rhs_values_begin,
-                      rhs_values_begin + larger_numrows,
+                      cudf::detail::row::rhs_iterator(0),
+                      cudf::detail::row::rhs_iterator(0) + larger_numrows,
                       match_counts_it,
                       comparator);
 
@@ -271,8 +270,8 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
   thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       smaller_it,
                       smaller_it + smaller_numrows,
-                      rhs_values_begin,
-                      rhs_values_begin + larger_numrows,
+                      cudf::detail::row::rhs_iterator(0),
+                      cudf::detail::row::rhs_iterator(0) + larger_numrows,
                       lower_bounds.begin(),
                       comparator);
   thrust::transform(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
@@ -288,8 +287,8 @@ merge<LargerIterator, SmallerIterator>::matches_per_row(rmm::cuda_stream_view st
   thrust::lower_bound(rmm::exec_policy_nosync(stream, cudf::get_current_device_resource_ref()),
                       smaller_it,
                       smaller_it + smaller_numrows,
-                      rhs_values_begin,
-                      rhs_values_begin + larger_numrows,
+                      cudf::detail::row::rhs_iterator(0),
+                      cudf::detail::row::rhs_iterator(0) + larger_numrows,
                       match_counts_update_it,
                       comparator);
 #endif
