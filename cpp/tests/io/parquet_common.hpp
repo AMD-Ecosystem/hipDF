@@ -96,13 +96,24 @@ struct ParquetWriterTest : public cudf::test::BaseFixture {};
 
 // Base test fixture for tests
 struct ParquetReaderTest : public cudf::test::BaseFixture {
-  // NOTE(HIP/AMD): this low-memory fixture is a pre-existing hipDF customization, not upstream -
-  // upstream 26.06.01 has a bare `struct ParquetReaderTest : cudf::test::BaseFixture {};`. It is
-  // carried over from hipDF 25.10 and only migrated here to the CCCL MR design (rmm 5.0.0 /
-  // hipMM): the current device resource is now referenced as a device_async_resource_ref /
-  // any_resource rather than a raw device_memory_resource*, because
-  // get_current_device_resource() and the raw-pointer set_current_device_resource() overloads no
-  // longer exist. Not a workaround - no ticket.
+  // NOTE(HIP/AMD): deliberate hipDF customization, not upstream - upstream 26.06.01 has a bare
+  // `struct ParquetReaderTest : cudf::test::BaseFixture {};`.
+  //
+  // Why it exists: hipDF supports GPUs with <= 16 GiB of device memory, and the Parquet reader
+  // tests do not fit there under the default pool resource. The pool pre-reserves a large slab up
+  // front and then fragments it, so these tests OOM even though their working set would fit. On
+  // such a device, swap to a plain cuda_memory_resource for the duration of the fixture so every
+  // allocation goes straight to the driver, then restore the previous resource. The threshold is
+  // on *free* rather than total memory, so this also covers a large GPU that is already busy.
+  //
+  // On CI hardware (gfx90a, 64-128 GiB) the branch never fires, so this is inert there - do not
+  // delete it on the grounds that CI does not need it.
+  //
+  // This PR only migrated it to the CCCL MR design (rmm 5.0.0 / hipMM): the current device
+  // resource is now a device_async_resource_ref / any_resource rather than a raw
+  // device_memory_resource*, because get_current_device_resource() and the raw-pointer
+  // set_current_device_resource() overloads no longer exist. Behaviour is unchanged from
+  // hipDF 25.10. Not a workaround - no ticket.
   rmm::device_async_resource_ref prev_mr_{cudf::get_current_device_resource_ref()};
   bool swapped_mr_{false};
 
