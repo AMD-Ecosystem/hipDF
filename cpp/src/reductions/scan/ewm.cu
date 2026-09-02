@@ -182,10 +182,8 @@ rmm::device_uvector<cudf::size_type> null_roll_up(column_view const& input,
   return output;
 }
 
-// FIXME(HIP/AMD, <ROCTHRUST-SCAN>): rocThrust/rocPRIM's transform_inclusive_scan mis-infers the
-// scan accumulator type when the transform output type (here cuda::std::pair<T,T>) differs from the
-// input iterator's value type, producing a recurrence_functor no-match. WAR: materialize the
-// transform into the output buffer, then run a plain inclusive_scan with the binary op.
+// FIXME(HIP/AMD, <ROCTHRUST-SCAN>): materialize the transform into the output
+// buffer, then run a plain inclusive_scan with the binary op.
 template <typename InputIt, typename OutputIt, typename TransformOp>
 void ewma_transform_inclusive_scan(InputIt first,
                                    std::size_t count,
