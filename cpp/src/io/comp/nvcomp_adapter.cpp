@@ -110,12 +110,17 @@ namespace {
     case nvcompStatus_t::nvcompErrorCudaError: return "nvcompErrorCudaError";
     case nvcompStatus_t::nvcompErrorInternal: return "nvcompErrorInternal";
 #ifndef __HIP_PLATFORM_AMD__
-    // TODO(HIP/AMD, <HIPCOMP-API>): hipcomp's hipcompStatus_t enum does not define these values
-    // (shared_types.h has only Success/InvalidValue/NotSupported/CannotDecompress/
-    // CudaError/Internal). Guard them out on AMD; this also resolves the
-    // 'duplicate case value' diagnostic.
+    // TODO(HIP/AMD, <HIPCOMP-API>): hipcomp's hipcompStatus_t does not define these two, so guard
+    // them out on AMD; this also resolves the 'duplicate case value' diagnostic.
     case nvcompStatus_t::nvcompErrorCannotCompress: return "nvcompErrorCannotCompress";
     case nvcompStatus_t::nvcompErrorWrongInputLength: return "nvcompErrorWrongInputLength";
+#else
+    // NOTE(HIP/AMD): conversely, hipcomp defines two values nvcomp does not. Without these the
+    // switch is non-exhaustive and every build of this TU warns:
+    //   enumeration values 'hipcompErrorOutOfMemory' and 'hipcompInternalSkipped' not handled
+    //   in switch [-Wswitch]
+    case hipcompStatus_t::hipcompErrorOutOfMemory: return "hipcompErrorOutOfMemory";
+    case hipcompStatus_t::hipcompInternalSkipped: return "hipcompInternalSkipped";
 #endif
 #if NVCOMP_VER_MAJOR >= 5 and NVCOMP_VER_MINOR >= 1
     case nvcompStatus_t::nvcompErrorBatchSizeTooLarge: return "nvcompErrorBatchSizeTooLarge";
