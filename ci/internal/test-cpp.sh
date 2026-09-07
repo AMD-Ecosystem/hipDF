@@ -24,25 +24,15 @@
 
 set -xeu
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/_activate-env.sh"
 
-# Env defaults for local execution (override CI-style conda env defaults)
-: ${SRC_DIR:=/home/moberste/Coding}
-: ${BUILD_DIR:=/tmp/hipdf-ci-build}
-: ${INSTALL_DIR:=/tmp/hipdf-ci-install}
-: ${BUILD_ARTIFACTS_DIR:=/tmp/hipdf-ci-artifacts}
-: ${ARTIFACTS_DIR:=/tmp/hipdf-ci-artifacts}
-: ${PROJECT_ID:=hipDF}
-: ${ROCM_PATH:=/opt/rocm}
-: ${AMDGPU_TARGETS:=gfx90a}
-
-# If running locally (SRC_DIR points to nonexistent /src), override with real paths
-if [ "${SRC_DIR}" == "/src" ] && [ ! -d "/src/${PROJECT_ID}" ]; then
-  SRC_DIR=/home/moberste/Coding
-  BUILD_DIR=/tmp/hipdf-ci-build
-  INSTALL_DIR=/tmp/hipdf-ci-install
-  BUILD_ARTIFACTS_DIR=/tmp/hipdf-ci-artifacts
-  ARTIFACTS_DIR=/tmp/hipdf-ci-artifacts
-fi
+: "${PROJECT_ID:=hipdf}"
+: "${BUILD_DIR:=/build}"
+: "${INSTALL_DIR:=/install}"
+: "${BUILD_ARTIFACTS_DIR:=/artifacts}"
+: "${ARTIFACTS_DIR:=/artifacts}"
+: "${ROCM_PATH:=/opt/rocm}"
+: "${AMDGPU_TARGETS:=gfx90a}"
 
 export PROJECT_ID="${PROJECT_ID}"
 
@@ -72,7 +62,7 @@ then
     done
     exit ${success}
 else
-    if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
+    if ! activate_hipdf_conda_env; then
       . ${INSTALL_DIR}/venv/hipdf_dev/bin/activate # ctest
     fi
 
