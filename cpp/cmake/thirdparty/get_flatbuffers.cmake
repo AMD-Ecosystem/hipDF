@@ -31,6 +31,11 @@ function(find_and_configure_flatbuffers VERSION EXCLUDE_FROM_ALL)
     flatbuffers ${VERSION}
     GLOBAL_TARGETS flatbuffers
     CPM_ARGS
+    # NOTE(HIP/AMD): ROCm 10 ships flatbuffers 25.9.23 under ${ROCM_PATH}, and its
+    # config-version file reports every version >= the requested one as compatible.
+    # The checked-in flatc-generated headers in cpp/src/io/parquet/ipc assert on an
+    # exact version match, so only 24.3.25 may be picked up here.
+    FIND_PACKAGE_ARGUMENTS EXACT
     GIT_REPOSITORY https://github.com/google/flatbuffers.git
     GIT_TAG v${VERSION}
     GIT_SHALLOW TRUE
