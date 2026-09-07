@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # MIT License
 #
-# Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (C) 2026 Advanced Micro Devices, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -10,8 +10,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -27,16 +27,13 @@
 #  - PARALLEL_LEVEL
 #  - CXX - Sets it to hipcc
 #  - CMAKE_PREFIX_PATH - appends ROCM_PATH cmake path
-#  - CMAKE_GENERATOR - sets it to "Unix Makefiles" on almalinux
-#  - HIPDF_BUILD_PYTHON - force always true
-#  - HIPDF_BUILD_JAVA - set based on OS
-# activate conda env if specified
-if [ -n "${HIPDF_CONDA_ENV:-}" ]; then
-    set +u # note: conda script may have unbound variables
-    .  ${CONDA_DIR}/etc/profile.d/conda.sh
-    conda activate ${HIPDF_CONDA_ENV}
-    set -u
-else
+
+set -euo pipefail
+
+_PREAMBLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${_PREAMBLE_DIR}/_activate-env.sh"
+
+if ! activate_hipdf_conda_env; then
     python3 -m venv --clear ${INSTALL_DIR}/venv/hipdf_dev
     . ${INSTALL_DIR}/venv/hipdf_dev/bin/activate
     pip install --upgrade pip
@@ -52,6 +49,17 @@ fi
 [[ "${HIPDF_USE_PER_THREAD_DEFAULT_STREAM:-false}" == "true" ]] && use_ptds=1
 [[ "${HIPDF_ASAN_BUILD:-false}" == "true" ]] && asan_build=1
 [[ "${HIPDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS:-false}" == "false" ]] && no_enable_failing_optimization_workarounds=1
+
+# Wheel builds resolve rmm and rapids_logger from ci_packages wheels
+# (amd-libhipmm, amd-rocmds-logger), not from /src checkouts.
+case "${HIPDF_BUILD_TYPE:-}" in
+  wheels|cpp_wheels|install_cpp_wheels) wheel_deps_from_pip=1 ;;
+esac
+
+use_local_rmm_logger=
+if [ -n "${no_use_versions_json:-}" ] && [ -z "${wheel_deps_from_pip:-}" ]; then
+  use_local_rmm_logger=1
+fi
 
 cmake_args=(
   "-DCMAKE_VERBOSE_MAKEFILE=ON"
@@ -72,10 +80,9 @@ cmake_args=(
   ${no_use_versions_json:+"-D CPM_jitify_SOURCE=${SRC_DIR}/jitify"}
   ${no_use_versions_json:+"-D CPM_hipcollections_SOURCE=${SRC_DIR}/hipcollections"}
   ${no_use_versions_json:+"-D CPM_cuco_SOURCE=${SRC_DIR}/hipcollections"}
-  ${no_use_versions_json:+"-D CPM_rmm_SOURCE=${SRC_DIR}/hipmm"}
+  ${use_local_rmm_logger:+"-D CPM_rmm_SOURCE=${SRC_DIR}/hipmm"}
   ${no_use_versions_json:+"-D CPM_cudf_SOURCE=${SRC_DIR}/hipdf"}
-  # NOTE(HIP/AMD): rapids_logger source override for ROCmDS-Logger v2.0.0+
-  ${no_use_versions_json:+"-D CPM_rapids_logger_SOURCE=${SRC_DIR}/rocmds_logger"}
+  ${use_local_rmm_logger:+"-D CPM_rapids_logger_SOURCE=${SRC_DIR}/rocmds_logger"}
   ${use_sccache:+"-D CMAKE_HIP_COMPILER_LAUNCHER=sccache"}
   ${use_sccache:+"-D CMAKE_CXX_COMPILER_LAUNCHER=sccache"}
   ${use_sccache:+"-D CMAKE_C_COMPILER_LAUNCHER=sccache"}
@@ -84,8 +91,6 @@ cmake_args=(
 if [ -d "/opt/rh/gcc-toolset-$(g++ -dumpversion)" ]; then
   toolchain="/opt/rh/gcc-toolset-$(g++ -dumpversion)/root/usr"
   export CCC_OVERRIDE_OPTIONS="+--gcc-toolchain=${toolchain}"
-  # note: in some shells, cmake is using /bin/{cc, c++} as compilers,
-  # which may not be the compilers of the enabled toolchain.
   export CC=${toolchain}/bin/cc
   export CXX=${toolchain}/bin/c++
 fi

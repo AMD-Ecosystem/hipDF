@@ -1,6 +1,7 @@
+#!/usr/bin/env bash
 # MIT License
 #
-# Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (c) 2026 Advanced Micro Devices, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -9,8 +10,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,42 +21,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#!/usr/bin/env bash
-set -xeu
+# Build hipDF C++ library, and optionally Python bindings and docs.
+#
+# Required environment variables:
+#   PROJECT_ID, SRC_DIR, BUILD_DIR, INSTALL_DIR, BUILD_ARTIFACTS_DIR
+#   HIPDF_BUILD_TYPE -- controls what gets built
+#
+# Optional environment variables:
+#   CI_INTERNAL_CREATE_TESTS_TARBALL -- '1' packs the tester tarball (default: 0)
+
+set -euxo pipefail
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+: "${PROJECT_ID:?PROJECT_ID must be set}"
+: "${SRC_DIR:?SRC_DIR must be set}"
+: "${BUILD_DIR:?BUILD_DIR must be set}"
+: "${INSTALL_DIR:?INSTALL_DIR must be set}"
+: "${BUILD_ARTIFACTS_DIR:?BUILD_ARTIFACTS_DIR must be set}"
+: "${AMDGPU_TARGETS:?AMDGPU_TARGETS must be set}"
+: "${ROCM_PATH:?ROCM_PATH must be set}"
 
-# Env defaults for local execution (override CI-style conda env defaults)
-# Note: some conda environments may have SRC_DIR=/src BUILD_DIR=/build set
-# for CI compatibility. For actual local script execution we want real paths.
-: ${SRC_DIR:=/home/moberste/Coding}
-: ${BUILD_DIR:=/tmp/hipdf-ci-build}
-: ${INSTALL_DIR:=/tmp/hipdf-ci-install}
-: ${BUILD_ARTIFACTS_DIR:=/tmp/hipdf-ci-artifacts}
-: ${ARTIFACTS_DIR:=/tmp/hipdf-ci-artifacts}
-: ${PROJECT_ID:=hipDF}
-: ${ROCM_PATH:=/opt/rocm}
-: ${AMDGPU_TARGETS:=gfx90a}
-
-# If running locally (SRC_DIR points to nonexistent /src), override with real paths
-if [ "${SRC_DIR}" == "/src" ] && [ ! -d "/src/${PROJECT_ID}" ]; then
-  SRC_DIR=/home/moberste/Coding
-  BUILD_DIR=/tmp/hipdf-ci-build
-  INSTALL_DIR=/tmp/hipdf-ci-install
-  BUILD_ARTIFACTS_DIR=/tmp/hipdf-ci-artifacts
-  ARTIFACTS_DIR=/tmp/hipdf-ci-artifacts
-fi
-
-# TODO(HIP/AMD): reactivate once JAVA tests are enabled
-# os_id=$(cat /etc/os-release | grep ^ID= | cut -d= -f2 | tr -d '"')
-# if [[ "${os_id}" == *"ubuntu"* ]]; then
-#   export HIPDF_BUILD_JAVA=true # force always true
-# else
-#   export HIPDF_BUILD_JAVA=false # TODO(HIP/AMD): add Java support for other OS,
-#                                 # requires installation of the Java requirements + testing
-# fi
-
-[[ "${HIPDF_BUILD_TYPE:-}" != "install"* ]] && no_install=1 # does not affect Python & Java component
-[[ "${HIPDF_BUILD_TYPE:-}" == *"java"* ]] && build_cudfjar=1 # NOTE: currently not supported
+[[ "${HIPDF_BUILD_TYPE:-}" != "install"* ]] && no_install=1
+[[ "${HIPDF_BUILD_TYPE:-}" == *"java"* ]] && build_cudfjar=1
 [[ "${HIPDF_BUILD_TYPE:-}" == *"all"* ]] && build_python=1
 [[ "${HIPDF_BUILD_TYPE:-}" == *"py"* ]] && build_python=1
 [[ "${HIPDF_BUILD_DASK_CUDF:-false}" == "true" ]] && build_python=1
@@ -83,27 +70,26 @@ build_dir=${BUILD_DIR}/${PROJECT_ID}
 build_build_dir=${BUILD_DIR}/${PROJECT_ID}/cpp/build
 tests_tarball_name="${PROJECT_ID}-tests.tar.gz"
 
-# By default do a clean rebuild. Set HIPDF_INCREMENTAL_BUILD=true to skip
-# the clean + source-copy and reuse an existing build directory instead
-# (useful for local iteration; not recommended in CI).
+case "${CI_INTERNAL_CREATE_TESTS_TARBALL:-0}" in
+  1 | true | yes | on) create_tests_tarball="1" ;;
+  *) create_tests_tarball="" ;;
+esac
+
 if [ "${HIPDF_INCREMENTAL_BUILD:-false}" == "true" ]; then
     echo "HIPDF_INCREMENTAL_BUILD=true: skipping clean, reusing ${build_dir}"
 else
     rm -rf ${build_dir}
-    # Copy source, excluding stale build artifacts to avoid CMakeCache conflicts
     cp -a ${src_dir} ${build_dir}
-    # Clean any pre-existing build directories from the copy
     rm -rf ${build_dir}/cpp/build ${build_dir}/java/target
     find ${build_dir}/python -type d -name build -o -name .pytest_cache -o -name __pycache__ 2>/dev/null | xargs rm -rf 2>/dev/null || true
 fi
 
 cd ${build_dir}
     . "${SCRIPT_DIR}/_build-preamble.sh"
-    . "${SCRIPT_DIR}/_install-build-requirements.sh"
+    . "${SCRIPT_DIR}/_install-build-deps.sh"
 
-    export SHELLOPTS # note: applies `set -xe` to called bash scripts
+    export SHELLOPTS
 
-    # WAR: patch environment for issue https://github.com/AMD-AIOSS/hipDF/issues/99
     _ldflags=(
       -Wl,-O2
       -Wl,--sort-common
@@ -120,12 +106,9 @@ cd ${build_dir}
     )
     export LDFLAGS="${_ldflags[*]}"
 
-    # note: this is not a typo, prefix must be CUDF_
     export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
     export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:${ROCM_PATH}
 
-    # NOTE(HIP/AMD): When -n is passed (no install), pylibcudf needs CMAKE_PREFIX_PATH
-    # to point to the build directory where cudfConfig.cmake is generated
     if [[ -n "${no_install:-}" ]]; then
       export INSTALL_PREFIX=${build_build_dir}
     fi
@@ -133,14 +116,12 @@ cd ${build_dir}
     set +u
     bash build.sh ${build_sh_args[@]} \
      ${cmake_args:+"--cmake-args=\"${cmake_args[@]}\""}
+    set -u
 
     if [ "${HIPDF_BUILD_JAVA:-false}" == "true" ]; then
       cd ${BUILD_DIR}/${PROJECT_ID}/java
       LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"${ROCM_PATH}/lib:${BUILD_DIR}/${PROJECT_ID}/cpp/build/:${BUILD_DIR}/${PROJECT_ID}/java/target/cmake-build:${BUILD_DIR}/${PROJECT_ID}/java/target/libcudf-install/lib:${BUILD_DIR}/${PROJECT_ID}/java/target/libcudf-cmake-build/lib"}
-      # TODO(HIP/AMD): We need to set HIPDF_USE_PER_THREAD_DEFAULT_STREAM=ON otherwise we get RMM related errors.
-      # https://github.com/AMD-AIOSS/hipDF/issues/174
-
-      set +e # NOTE(12/15/2024): This is required as there may be some err code > 0 returned during the mvn build. The build completes though.
+      set +e
       mvn -B clean package -Dmaven.repo.local="$HOME/.m2/repository" \
           -DLD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
           -DskipTests=true \
@@ -164,11 +145,9 @@ cd ${build_dir}
       set -e
     fi
 
-    # build examples
     cd ${BUILD_DIR}/${PROJECT_ID}/cpp/examples
     bash build.sh
 
-    # build docs
     if [ "${HIPDF_BUILD_DOCS:-false}" == "true" ]; then
       cd ${BUILD_DIR}/${PROJECT_ID}/docs
         [ ! -d _venv ] && python3 -m venv _venv --system-site-packages
@@ -178,6 +157,11 @@ cd ${build_dir}
         deactivate
     fi
 
-# archive build folder and source folder for testing purposes
-tar -czvf ${BUILD_ARTIFACTS_DIR}/${tests_tarball_name} ${build_build_dir} ${src_dir}
-du -sh ${BUILD_ARTIFACTS_DIR}/${tests_tarball_name}
+if [ -n "${create_tests_tarball:-}" ]; then
+  dev_venv="${INSTALL_DIR:-}/venv/hipdf_dev"
+  [ -d "${dev_venv}" ] || dev_venv=""
+
+  tar --exclude=.git -czf ${BUILD_ARTIFACTS_DIR}/${tests_tarball_name} \
+    ${build_dir} ${dev_venv}
+  du -sh ${BUILD_ARTIFACTS_DIR}/${tests_tarball_name}
+fi
