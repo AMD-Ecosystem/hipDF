@@ -156,13 +156,9 @@ using ::cooperative_groups::reduce;
 
 #endif  // CUDF_HIP_CG_REDUCE_WAR
 
-// TODO(HIP/AMD, <HIP-CG-INVOKE-ONE>): invoke_one / invoke_one_broadcast are still missing from
-// HIP's cooperative groups as of ROCm 7.14 (unlike cg::reduce, which landed in 7.14 - see the guard
-// above). Portable replacements: - invoke_one(group, fn): the lowest-ranked member of the group
-// calls fn once. - invoke_one_broadcast(group, fn): the lowest-ranked member calls fn and the
-// returned value is broadcast to all members of the (tiled) group via shfl. A HIP
-// cooperative-groups feature request is tracked in <HIP-CG-INVOKE-ONE>; the implementations below
-// serve as its reference. Drop them once the native APIs are available.
+// TODO(HIP/AMD, AIRUNTIME-2740): invoke_one / invoke_one_broadcast are still missing
+// from HIP's cooperative groups as of ROCm 7.14 (unlike cg::reduce). Portable
+// replacements below; drop them once the native APIs are available.
 
 template <typename Group, typename F>
 __device__ __attribute__((always_inline)) void invoke_one(const Group& group, F&& fn) {
