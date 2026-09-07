@@ -55,12 +55,12 @@ fi
 if [ "${HIPDF_TEST_WITH_ASAN:-false}" == "true" ]
 then
     cd ${BUILD_DIR}/${PROJECT_ID}/cpp/build
-    success=1
+    test_failures=0
     for test in gtests/*_TEST
     do
-      ${test} || success=0 || true
+      ${test} || test_failures=1
     done
-    exit ${success}
+    exit ${test_failures}
 else
     if ! activate_hipdf_conda_env; then
       . ${INSTALL_DIR}/venv/hipdf_dev/bin/activate # ctest
