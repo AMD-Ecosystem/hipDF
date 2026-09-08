@@ -96,12 +96,15 @@ def install():
         raise RuntimeError(
             f"Failed to query device properties with error {err}"
         )
-    arch_name = prop.name.decode("utf-8")
-    gcn_arch_name = (
-        prop.gcnArchName.decode("utf-8")
-        if hasattr(prop, "gcnArchName")
-        else ""
-    )
+    # Older hip-python returned the device name fields as bytes, newer ones
+    # return str, so accept either.
+    def _as_text(value):
+        if isinstance(value, bytes):
+            return value.decode("utf-8")
+        return value or ""
+
+    arch_name = _as_text(prop.name)
+    gcn_arch_name = _as_text(getattr(prop, "gcnArchName", ""))
 
     # Extract the base GCN architecture (e.g., "gfx1100")
     import re
