@@ -45,7 +45,7 @@ requires-python = ">=3.11"
 dependencies = [
     "amd-cupy>=13.5.1",
     "amd-hipmm==5.0.*,>=5.0.0a0",
-    "amd-libhipdf==3.*,>=3.0.00",
+    "amd-libhipdf==4.*,>=4.0.0a0",
     "hip-python>=7.0",
     "hip-python-interop>=7.0",
     "numba-hip>=0.0.2",
@@ -154,7 +154,7 @@ dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true;use_cuda_wheels=true"
 requires = [
     "amd-hipmm==5.0.*,>=5.0.0a0",
-    "amd-libhipdf==3.*,>=3.0.0a0",
+    "amd-libhipdf==4.*,>=4.0.0a0",
     "amd-libhipmm==5.0.*,>=5.0.0a0",
     "cmake>=3.30.4",
     "cython>=3.2.2",

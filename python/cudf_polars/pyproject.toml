@@ -43,7 +43,7 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-    "amd-pylibhipdf==3.*,>=3.0.0a0",
+    "amd-pylibhipdf==4.*,>=4.0.0a0",
     "hip-python>=7.0",
     "hip-python-interop>=7.0",
     "packaging",
