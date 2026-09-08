@@ -89,7 +89,3 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     pip install "amd-hipdf[test,cudf-pandas-tests] @ file://${hipdf_wheels[0]}"
     unset hipdf_wheels _prev_nullglob
 fi
-
-# note: for jupyter notebooks. The `cudf-pandas-tests` extra above installs a
-# bare `ipykernel`; pin it here to the version the notebook-based tests expect.
-pip install ipykernel==7.0.0a0
