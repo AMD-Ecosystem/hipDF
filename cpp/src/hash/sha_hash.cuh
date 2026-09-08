@@ -545,13 +545,7 @@ std::unique_ptr<column> sha_hash(table_view const& input,
     rmm::exec_policy_nosync(stream),
     cuda::counting_iterator<cudf::size_type>{0},
     cuda::counting_iterator{input.num_rows()},
-    [d_chars, device_input = *device_input]
-// TODO(HIP/AMD): Unit test failures occur without this workaround. We hypothesize this is due to
-// compiler optimization misbehavior.
-#if defined(CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS)
-    __attribute__((noinline))
-#endif
-    __device__(auto row_index) {
+    [d_chars, device_input = *device_input] __device__(auto row_index) {
       Hasher hasher(d_chars + (static_cast<int64_t>(row_index) * Hasher::digest_size));
       for (auto const& col : device_input) {
         if (col.is_valid(row_index)) {
