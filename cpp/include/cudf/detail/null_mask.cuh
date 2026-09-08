@@ -84,17 +84,7 @@ namespace detail {
 #if defined(__CUDACC__) || defined(__HIPCC__)
 // because set_bit in bit.hpp is wrapped with __CUDACC__
 
-// TODO(HIP/AMD): reimplement this macro
-#define GENERATE_BITMASK(__TYPE__, __INPUT__) \
-    ((__TYPE__) (-((__INPUT__) != 0))) \
-    & (((__TYPE__) -1) >> ((sizeof(__TYPE__) * CHAR_BIT) - (__INPUT__)))
-
-// Rotate right a 64bit by n
-__device__ inline uint64_t rotater64 (const uint64_t a, const int n)
-{
-  return ((a >> n) | (a << (64 - n)));
-}
-// HIP funnelshift implementation using shift and rotate
+// HIP funnelshift: (lo >> s) | (hi << (W - s)), s = shift mod word width
 __device__ inline bitmask_type __m_funnelshift_r(bitmask_type lo, bitmask_type hi, unsigned int shift)
 {
     // NOTE(HIP/AMD): mirror CUDA's __funnelshift_r over a single bitmask word. It concatenates
