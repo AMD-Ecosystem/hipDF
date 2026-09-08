@@ -46,8 +46,16 @@ _DEVICE_SIZE_CACHE: int | None = None
 def _get_device_size():
     try:
         # Use PyNVML to find the worker device size.
+        # NOTE(HIP/AMD): upstream gets the 'pynvml' module from 'nvidia-ml-py';
+        # on ROCm it comes from 'hip-python-interop', which forwards the calls
+        # to rocm.bindings.amdsmi and therefore reports the real device memory
+        # on AMD GPUs too.
         import pynvml
+    except ImportError:
+        # Fall back to a conservative 8GiB default
+        return 8 * 1024**3
 
+    try:
         pynvml.nvmlInit()
         index = os.environ.get("CUDA_VISIBLE_DEVICES", "0").split(",")[0]
         if index and not index.isnumeric():

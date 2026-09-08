@@ -47,6 +47,7 @@ dependencies = [
     "amd-cupy>=13.5.1,!=14.0.0,!=14.1.0",
     "amd-hipdf==4.*,>=4.0.0a0",
     "fsspec>=0.6.0",
+    "hip-python-interop>=7.0",
     "numpy>=1.26,<3.0",
     "pandas>=2.0,<2.4.0",
     "rapids-dask-dependency==26.6.*,>=0.0.0a0",

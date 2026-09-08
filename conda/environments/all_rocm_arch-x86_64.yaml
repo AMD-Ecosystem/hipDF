@@ -103,6 +103,9 @@ dependencies:
 #: - pyarrow>=15.0.0
 - pydata-sphinx-theme>=0.15.4
 # - pynvjitlink
+#: NOTE(HIP/AMD): the 'pynvml' module is provided by hip-python-interop on ROCm, which forwards
+#:                to rocm.bindings.amdsmi. dask_cudf and cudf_polars import it to size the default
+#:                parquet blocksize from the device memory.
 # - pynvml>=12.0.0,<13.0.0a0
 - pytest
 - pytest-benchmark
