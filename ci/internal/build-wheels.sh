@@ -84,8 +84,10 @@ cd ${build_dir}
         . "${SCRIPT_DIR}/_install-build-deps.sh"
 
         if [ -n "${build_libhipdf}" ]; then
-          build_rapids_wheel "python/libcudf" \
-            "-DCMAKE_DISABLE_FIND_PACKAGE_rmm=ON;-DCMAKE_DISABLE_FIND_PACKAGE_cudf=ON"
+          # note: only cudf is disabled, so that the C++ library is built here instead of being
+          # taken from ${INSTALL_DIR}. rmm has to stay findable in the amd-libhipmm wheel installed
+          # above -- a CPM source build installs the rmm headers into this wheel.
+          build_rapids_wheel "python/libcudf" "-DCMAKE_DISABLE_FIND_PACKAGE_cudf=ON"
           verify_wheel_absent 'amd_libhipdf*.whl' 'rmm/|librmm|libhipmm'
         fi
 
