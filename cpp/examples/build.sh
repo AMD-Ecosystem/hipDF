@@ -80,6 +80,10 @@ build_example() {
   example_dir=${1}
   example_dir="${EXAMPLES_DIR}/${example_dir}"
   build_dir="${example_dir}/build"
+  # NOTE(HIP/AMD): ci/internal/build-dev.sh exports SHELLOPTS, so nounset reaches git's own
+  # /bin/sh helpers and breaks the `git submodule` step of a FetchContent clone with
+  # "GIT_TEXTDOMAINDIR: unbound variable". Keep it off while cmake runs.
+  set +u
   # TODO(HIP/AMD): adjus this so that this can be set via environment variable.
   # Configure
   cmake -S "${example_dir}" -B "${build_dir}" -Dcudf_ROOT="${LIB_BUILD_DIR}" -DCMAKE_C_COMPILER=hipcc -DCMAKE_CXX_COMPILER=hipcc -DCMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES}"
@@ -89,6 +93,7 @@ build_example() {
   if [ "$INSTALL_EXAMPLES" = true ]; then
     cmake --install "${build_dir}" --prefix "${INSTALL_PREFIX:-${example_dir}/install}"
   fi
+  set -u
 }
 
 build_example basic
