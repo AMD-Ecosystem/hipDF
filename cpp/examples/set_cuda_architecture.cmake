@@ -24,36 +24,48 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 # OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_REPO})
-  set(RAPIDS_CMAKE_SCRIPT_REPO "$ENV{RAPIDS_CMAKE_SCRIPT_REPO}")
+# NOTE(HIP/AMD): Prefer a ROCmDS-CMake that is already present, the way
+# ../../cmake/rapids_config.cmake does for the main build. Without this the examples bootstrap a
+# second, unrelated copy from GitHub, which needs network access and resolves a different
+# rapids-cmake than the rest of hipDF.
+set(RAPIDS_CMAKE_MODULE_PATH
+    $ENV{RAPIDS_CMAKE_MODULE_PATH}
+    CACHE FILEPATH "Announce that ROCmDS-CMake is available via the provided module path."
+)
+if(NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
+  list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
+  set(rapids-cmake-dir "${RAPIDS_CMAKE_MODULE_PATH}")
 else()
-  set(RAPIDS_CMAKE_SCRIPT_REPO AMD-Ecosystem/ROCmDS-cmake)
-endif()
+  if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_REPO})
+    set(RAPIDS_CMAKE_SCRIPT_REPO "$ENV{RAPIDS_CMAKE_SCRIPT_REPO}")
+  else()
+    set(RAPIDS_CMAKE_SCRIPT_REPO AMD-Ecosystem/ROCmDS-cmake)
+  endif()
 
-if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_BRANCH})
-  set(RAPIDS_CMAKE_SCRIPT_BRANCH "$ENV{RAPIDS_CMAKE_SCRIPT_BRANCH}")
-else()
-  set(RAPIDS_CMAKE_SCRIPT_BRANCH release/rocmds-26.03)
-endif()
+  if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_BRANCH})
+    set(RAPIDS_CMAKE_SCRIPT_BRANCH "$ENV{RAPIDS_CMAKE_SCRIPT_BRANCH}")
+  else()
+    set(RAPIDS_CMAKE_SCRIPT_BRANCH release/rocmds-26.03)
+  endif()
 
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
-  file(
-    DOWNLOAD
-    "https://raw.githubusercontent.com/${RAPIDS_CMAKE_SCRIPT_REPO}/${RAPIDS_CMAKE_SCRIPT_BRANCH}/RAPIDS.cmake"
-    ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake
-  )
+  if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
+    file(
+      DOWNLOAD
+      "https://raw.githubusercontent.com/${RAPIDS_CMAKE_SCRIPT_REPO}/${RAPIDS_CMAKE_SCRIPT_BRANCH}/RAPIDS.cmake"
+      ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake
+    )
+  endif()
+  set(rapids-cmake-fetch-via-git ON)
+  # Fetch the modules from the same place RAPIDS.cmake itself came from, so the two cannot drift
+  # apart. RAPIDS.cmake requires one of these to be set by the caller.
+  if(NOT rapids-cmake-repo)
+    set(rapids-cmake-repo "${RAPIDS_CMAKE_SCRIPT_REPO}")
+  endif()
+  if(NOT rapids-cmake-branch)
+    set(rapids-cmake-branch "${RAPIDS_CMAKE_SCRIPT_BRANCH}")
+  endif()
+  include(${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
 endif()
-set(rapids-cmake-fetch-via-git ON)
-# Fetch the modules from the same place RAPIDS.cmake itself came from, so the two cannot drift
-# apart. RAPIDS.cmake requires one of these to be set by the caller.
-if(NOT rapids-cmake-repo)
-  set(rapids-cmake-repo "${RAPIDS_CMAKE_SCRIPT_REPO}")
-endif()
-if(NOT rapids-cmake-branch)
-  set(rapids-cmake-branch "${RAPIDS_CMAKE_SCRIPT_BRANCH}")
-endif()
-# TODO(HIP/AMD): include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/rapids_config.cmake)?
-include(${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
 
 include(rapids-cmake)
 include(rapids-cpm)
