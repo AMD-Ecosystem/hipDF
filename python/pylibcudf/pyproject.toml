@@ -148,7 +148,7 @@ xfail_strict = true
 [tool.rapids-build-backend]
 build-backend = "scikit_build_core.build"
 commit-files = [
-  "pylibcudf/COMMIT"
+  "pylibcudf/GIT_COMMIT"
 ]
 dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true;use_cuda_wheels=true"

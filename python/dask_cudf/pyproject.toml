@@ -86,7 +86,7 @@ Homepage = "https://github.com/rocm/hipdf"
 [tool.rapids-build-backend]
 build-backend = "setuptools.build_meta"
 commit-files = [
-  "dask_cudf/COMMIT"
+  "dask_cudf/GIT_COMMIT"
 ]
 dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true"

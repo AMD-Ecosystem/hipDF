@@ -109,7 +109,7 @@ regex = "(?P<value>.*)"
 [tool.rapids-build-backend]
 build-backend = "scikit_build_core.build"
 commit-files = [
-  "cudf_kafka/COMMIT"
+  "cudf_kafka/GIT_COMMIT"
 ]
 dependencies-file = "../../dependencies.yaml"
 matrix-entry = "cuda_suffixed=true"
