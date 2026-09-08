@@ -43,12 +43,12 @@ license = "Apache-2.0 AND MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-    "amd-cupy>=13.5.1",
+    "amd-cupy>=13.5.1,!=14.0.0,!=14.1.0",
     "amd-hipmm==5.0.*,>=5.0.0a0",
     "amd-libhipdf==4.*,>=4.0.0a0",
     "hip-python>=7.0",
     "hip-python-interop>=7.0",
-    "numba-hip>=0.0.2",
+    "numba-hip>=0.2.1",
     # "nvtx>=0.2.1", # TODO(HIP/AMD): find replacement
     "packaging",
     "typing_extensions>=4.0.0",
