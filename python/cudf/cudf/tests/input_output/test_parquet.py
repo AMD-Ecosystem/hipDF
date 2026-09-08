@@ -5108,20 +5108,26 @@ def test_read_parquet_case_insensitive_structs():
     ["OFF", "ON"],
 )
 def test_read_parquet_snappy_malformed_copy_elem(
-    datadir, monkeypatch, host_decompression
+    request, datadir, monkeypatch, host_decompression
 ):
-    # NOTE(HIP/AMD): the "OFF" case forces host decompression with
-    # LIBCUDF_NVCOMP_POLICY=OFF, but hipDF requires nvcomp for
-    # compression/decompression on HIP/AMD platforms (see
-    # cpp/src/io/utilities/config_utils.cpp), so that combination raises a
-    # different, AMD-specific error instead of the upstream decompression
-    # message. Only the device-decompression ("ON") path is supported here.
-    if host_decompression == "OFF" and cudf.__is_hip_amd_port__:
-        pytest.skip(
-            "LIBCUDF_NVCOMP_POLICY=OFF (host decompression) is not "
-            "supported on hipDF; nvcomp is required on HIP/AMD."
-        )
-    monkeypatch.setenv("LIBCUDF_NVCOMP_POLICY", "OFF")
+    if cudf.__is_hip_amd_port__:
+        # NOTE(HIP/AMD): upstream sets LIBCUDF_NVCOMP_POLICY=OFF so that the
+        # device case runs cudf's own gpu_unsnap kernel. hipDF rejects that
+        # value (see cpp/src/io/utilities/config_utils.cpp), so leave the policy
+        # alone and let LIBCUDF_HOST_DECOMPRESSION pick the engine on its own.
+        # The host engine still reports the malformed stream; the device engine
+        # then runs through hipcomp, which reports success for it and hands back
+        # garbage, so no RuntimeError reaches the caller.
+        # TODO(HIP/AMD, <HIPCOMP-API>): drop the xfail once hipcomp reports the
+        # per-chunk failure, see #476.
+        if host_decompression == "OFF":
+            request.applymarker(
+                pytest.mark.xfail(
+                    reason="hipcomp accepts the malformed Snappy stream (#476)"
+                )
+            )
+    else:
+        monkeypatch.setenv("LIBCUDF_NVCOMP_POLICY", "OFF")
     monkeypatch.setenv("LIBCUDF_HOST_DECOMPRESSION", host_decompression)
     fname = datadir / "invalid-snappy.parquet"
     match_string = (
