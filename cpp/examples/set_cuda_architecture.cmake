@@ -27,13 +27,13 @@
 if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_REPO})
   set(RAPIDS_CMAKE_SCRIPT_REPO "$ENV{RAPIDS_CMAKE_SCRIPT_REPO}")
 else()
-  set(RAPIDS_CMAKE_SCRIPT_REPO ROCm-DS/ROCmDS-CMake)
+  set(RAPIDS_CMAKE_SCRIPT_REPO AMD-Ecosystem/ROCmDS-cmake)
 endif()
 
 if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_BRANCH})
   set(RAPIDS_CMAKE_SCRIPT_BRANCH "$ENV{RAPIDS_CMAKE_SCRIPT_BRANCH}")
 else()
-  set(RAPIDS_CMAKE_SCRIPT_BRANCH release/1.0.x)
+  set(RAPIDS_CMAKE_SCRIPT_BRANCH release/rocmds-26.03)
 endif()
 
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
@@ -44,6 +44,14 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
   )
 endif()
 set(rapids-cmake-fetch-via-git ON)
+# Fetch the modules from the same place RAPIDS.cmake itself came from, so the two cannot drift
+# apart. RAPIDS.cmake requires one of these to be set by the caller.
+if(NOT rapids-cmake-repo)
+  set(rapids-cmake-repo "${RAPIDS_CMAKE_SCRIPT_REPO}")
+endif()
+if(NOT rapids-cmake-branch)
+  set(rapids-cmake-branch "${RAPIDS_CMAKE_SCRIPT_BRANCH}")
+endif()
 # TODO(HIP/AMD): include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/rapids_config.cmake)?
 include(${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
 

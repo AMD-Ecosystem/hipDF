@@ -29,8 +29,8 @@
 
 set -euo pipefail
 
-# set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
-export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-ROCm-DS}"
+# set ROCm-DS GITHUB organization to AMD-Ecosystem if not set in environment
+export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-AMD-Ecosystem}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
 export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"
@@ -68,29 +68,10 @@ fi
 # libcudf build directory
 LIB_BUILD_DIR=${LIB_BUILD_DIR:-$(readlink -f "${EXAMPLES_DIR}/../build")}
 
-# NOTE(HIP/AMD): Pin the HIP architecture, matching how the main cpp build.sh resolves it via
-# CUDF_CMAKE_HIP_ARCHITECTURES (default = the GPU present). Without this, rapids_hip_init_
-# architectures' NATIVE auto-detect is flaky in the per-example configure context and, on
-# failure, silently falls back to the rapids-cmake "RAPIDS" arch list, which includes archs
-# (e.g. gfx940) that current ROCm/clang rejects with "unsupported HIP gpu architecture". So we
-# resolve the concrete arch of the visible GPU(s) up front. Override by exporting
-# CUDF_CMAKE_HIP_ARCHITECTURES (e.g. gfx90a) or set it to RAPIDS/NATIVE explicitly.
+# Build for the GPU(s) present, matching how the main cpp build.sh resolves it. Override by
+# exporting CUDF_CMAKE_HIP_ARCHITECTURES, either to concrete archs (e.g. gfx90a) or to RAPIDS for
+# the full list of supported ones.
 CUDF_CMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}
-if [ "${CUDF_CMAKE_HIP_ARCHITECTURES}" == "NATIVE" ]; then
-  detected_archs=""
-  if command -v rocm_agent_enumerator >/dev/null 2>&1; then
-    detected_archs=$(rocm_agent_enumerator 2>/dev/null | grep -vx 'gfx000' | sort -u | paste -sd';' -)
-  fi
-  if [ -z "${detected_archs}" ] && command -v rocminfo >/dev/null 2>&1; then
-    detected_archs=$(rocminfo 2>/dev/null | grep -oE 'gfx[0-9a-f]+' | grep -vx 'gfx000' | sort -u | paste -sd';' -)
-  fi
-  if [ -n "${detected_archs}" ]; then
-    echo "Resolved NATIVE HIP architecture(s) to: ${detected_archs}"
-    CUDF_CMAKE_HIP_ARCHITECTURES="${detected_archs}"
-  else
-    echo "WARNING: could not resolve NATIVE HIP architecture; leaving it to CMake." >&2
-  fi
-fi
 
 ################################################################################
 # Add individual libcudf examples build scripts down below
