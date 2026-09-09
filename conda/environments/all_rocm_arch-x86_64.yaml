@@ -33,7 +33,8 @@ dependencies:
 - binutils
 - boto3>=1.21.21
 - botocore>=1.24.21
-- breathe>=4.35.0
+#: NOTE(HIP/AMD): breathe stays disabled because it breaks the ROCm-DS docs build.
+#: - breathe>=4.35.0
 #: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
 # - c-compiler
