@@ -44,14 +44,14 @@ pip install "pytest-rerunfailures!=16.0.0" "pytest-cases>=3.8.2" pytest-xdist "s
 # conda env (e.g. in a pipeline-managed venv).
 if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     specs=(
-        amd-rocmds-logger
-        amd-cupy
-        amd-libhipmm
+        "amd-rocmds-logger${ROCMDS_LOGGER_VERSION:+==${ROCMDS_LOGGER_VERSION}}"
+        "amd-cupy${HIPDF_AMDCUPY_VERSION:+==${HIPDF_AMDCUPY_VERSION}}"
+        "amd-libhipmm${HIPMM_VERSION:+==${HIPMM_VERSION}}"
         rocm-bindings-core
         rocm-bindings-hip
         rocm-bindings-compiler
         hip-python-interop
-        numba-hip
+        "numba-hip${NUMBA_HIP_VERSION:+==${NUMBA_HIP_VERSION}}"
     )
 
     # hipDF wheels are installed separately by test-wheels.sh.

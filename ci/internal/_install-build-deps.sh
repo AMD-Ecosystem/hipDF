@@ -37,8 +37,8 @@ case "${HIPDF_BUILD_TYPE:-}" in
   all|cpp_py|cpp_wheels|wheels|install_all|install_cpp_py|install_cpp_wheels)
     if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
       specs=(
-        amd-rocmds-logger
-        amd-libhipmm
+        "amd-rocmds-logger${ROCMDS_LOGGER_VERSION:+==${ROCMDS_LOGGER_VERSION}}"
+        "amd-libhipmm${HIPMM_VERSION:+==${HIPMM_VERSION}}"
       )
 
       need_hip_python_deps=0
@@ -48,6 +48,7 @@ case "${HIPDF_BUILD_TYPE:-}" in
       hipdf_build_hipdf=${HIPDF_BUILD_HIPDF-1}
       [[ -n "${hipdf_build_pylibcudf}" || -n "${hipdf_build_hipdf}" ]] && need_hip_python_deps=1
 
+      # Deliberately unpinned: their version leads with the ROCm version
       if [ "${need_hip_python_deps}" -eq 1 ]; then
         specs+=(
           rocm-bindings-core
