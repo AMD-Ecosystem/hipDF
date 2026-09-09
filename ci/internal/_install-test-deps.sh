@@ -45,7 +45,7 @@ pip install "pytest-rerunfailures!=16.0.0" "pytest-cases>=3.8.2" pytest-xdist "s
 if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     specs=(
         "amd-rocmds-logger${ROCMDS_LOGGER_VERSION:+==${ROCMDS_LOGGER_VERSION}}"
-        "amd-cupy${HIPDF_AMDCUPY_VERSION:+==${HIPDF_AMDCUPY_VERSION}}"
+        "amd-cupy${CUPY_VERSION:+==${CUPY_VERSION}}"
         "amd-libhipmm${HIPMM_VERSION:+==${HIPMM_VERSION}}"
         rocm-bindings-core
         rocm-bindings-hip
