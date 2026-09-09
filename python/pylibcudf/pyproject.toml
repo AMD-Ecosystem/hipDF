@@ -43,7 +43,6 @@ license = "Apache-2.0 AND MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-    "amd-cupy>=13.5.1,!=14.0.0,!=14.1.0",
     "amd-hipmm==5.0.*,>=5.0.0a0",
     "amd-libhipdf==4.*,>=4.0.0a0",
     "hip-python>=7.0",
@@ -66,7 +65,7 @@ classifiers = [
 
 [project.optional-dependencies]
 test = [
-    "cupy-cuda13x>=13.6.0,!=14.0.0,!=14.1.0",
+    "amd-cupy>=13.5.1,!=14.0.0,!=14.1.0",
     "fastavro>=0.22.9",
     "hypothesis>=6.131.7",
     "mmh3",
