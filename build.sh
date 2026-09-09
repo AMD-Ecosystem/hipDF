@@ -73,8 +73,8 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [dask_cudf] [benchma
    default action (no args) is to build and install 'libcudf', 'pylibcudf', 'cudf', 'cudf_polars', and 'dask_cudf' targets
 "
 
-# set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
-export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-ROCm-DS}"
+# set ROCm-DS GITHUB organization to AMD-Ecosystem if not set in environment
+export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-AMD-Ecosystem}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
 export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"

@@ -31,8 +31,8 @@ ROCM_PATH=${ROCM_PATH:-"/opt/rocm"}
 AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx942"}
 BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
 
-# set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
-export GITHUB_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-ROCm-DS}"
+# set ROCm-DS GITHUB organization to AMD-Ecosystem if not set in environment
+export GITHUB_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-AMD-Ecosystem}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
 export GITHUB_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG:-ROCm}"
