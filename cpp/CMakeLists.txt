@@ -499,15 +499,6 @@ if(CUDF_INSTALL_LIBRARY_DEPS OR NOT _rapids_logger_type STREQUAL "STATIC_LIBRARY
   rapids_export_package(INSTALL rapids_logger cudf-exports VERSION ${rapids_logger_VERSION})
 endif()
 
-# NOTE(HIP/AMD): ROCmDS-Logger's create_logger_macros.cmake is not installed to the CMake package,
-# so include it directly from the fetched source tree. This is a temporary workaround until
-# ROCmDS-Logger exports this function in its package config.
-if(rapids_logger_SOURCE_DIR AND EXISTS
-                                "${rapids_logger_SOURCE_DIR}/cmake/create_logger_macros.cmake"
-)
-  include("${rapids_logger_SOURCE_DIR}/cmake/create_logger_macros.cmake")
-endif()
-
 create_logger_macros(CUDF "cudf::default_logger()" include/cudf)
 
 # find jitify
