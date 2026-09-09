@@ -5108,25 +5108,16 @@ def test_read_parquet_case_insensitive_structs():
     ["OFF", "ON"],
 )
 def test_read_parquet_snappy_malformed_copy_elem(
-    request, datadir, monkeypatch, host_decompression
+    datadir, monkeypatch, host_decompression
 ):
-    if cudf.__is_hip_amd_port__:
-        # NOTE(HIP/AMD): upstream sets LIBCUDF_NVCOMP_POLICY=OFF so that the
-        # device case runs cudf's own gpu_unsnap kernel. hipDF rejects that
-        # value (see cpp/src/io/utilities/config_utils.cpp), so leave the policy
-        # alone and let LIBCUDF_HOST_DECOMPRESSION pick the engine on its own.
-        # The host engine still reports the malformed stream; the device engine
-        # then runs through hipcomp, which reports success for it and hands back
-        # garbage, so no RuntimeError reaches the caller.
-        # TODO(HIP/AMD, <HIPCOMP-API>): drop the xfail once hipcomp reports the
-        # per-chunk failure, see #476.
-        if host_decompression == "OFF":
-            request.applymarker(
-                pytest.mark.xfail(
-                    reason="hipcomp accepts the malformed Snappy stream (#476)"
-                )
-            )
-    else:
+    # NOTE(HIP/AMD): upstream sets LIBCUDF_NVCOMP_POLICY=OFF so that the
+    # device case runs cudf's own gpu_unsnap kernel. hipDF rejects that
+    # value (see cpp/src/io/utilities/config_utils.cpp), so leave the policy
+    # alone and let LIBCUDF_HOST_DECOMPRESSION pick the engine on its own.
+    # The host engine reports the malformed stream, and so does the device
+    # engine, which runs through hipcomp (see AMD-AIOSS/hipcomp-core#153 and
+    # issue #476).
+    if not cudf.__is_hip_amd_port__:
         monkeypatch.setenv("LIBCUDF_NVCOMP_POLICY", "OFF")
     monkeypatch.setenv("LIBCUDF_HOST_DECOMPRESSION", host_decompression)
     fname = datadir / "invalid-snappy.parquet"
