@@ -265,13 +265,9 @@ def set_device(device: int | None) -> Generator[int, None, None]:
             # the HIP runtime. Left uncleared it surfaces on the next, unrelated
             # GPU operation (an `invalid device ordinal` from a later
             # CUDF_CHECK_CUDA, e.g. in HConcat's copy_range). Consume it before
-            # propagating. No-op on CUDA: the library load fails and is ignored.
-            try:
-                import ctypes as _ctypes
-
-                _ctypes.CDLL("libamdhip64.so").hipGetLastError()
-            except OSError:
-                pass
+            # propagating; setDevice has already reported it through the
+            # exception we are re-raising.
+            runtime.cudaGetLastError()
             raise
         try:
             yield to_use
