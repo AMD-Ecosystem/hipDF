@@ -39,6 +39,8 @@ case "${HIPDF_BUILD_TYPE:-}" in
       specs=(
         "amd-rocmds-logger${ROCMDS_LOGGER_VERSION:+==${ROCMDS_LOGGER_VERSION}}"
         "amd-libhipmm${HIPMM_VERSION:+==${HIPMM_VERSION}}"
+        # for pylibhipdf
+        "amd-hipmm${HIPMM_VERSION:+==${HIPMM_VERSION}}"
       )
 
       need_hip_python_deps=0
