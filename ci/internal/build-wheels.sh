@@ -92,11 +92,15 @@ cd ${build_dir}
         fi
 
         if [ -n "${build_pylibcudf}" ]; then
+          # note: load-bearing -- find_package(cudf) resolves here, and --no-build-isolation
+          # means pip installs nothing from [tool.rapids-build-backend] requires itself.
           pip install ${BUILD_ARTIFACTS_DIR}/amd_libhipdf*.whl
           build_rapids_wheel "python/pylibcudf" "" "${hipdf_wheel_config[@]}"
         fi
 
         if [ -n "${build_hipdf}" ]; then
+          # note: both load-bearing -- find_package(cudf) resolves in the first, the pylibhipdf
+          # cimports in the second.
           pip install ${BUILD_ARTIFACTS_DIR}/amd_libhipdf*.whl
           pip install ${BUILD_ARTIFACTS_DIR}/amd_pylibhipdf*.whl
           build_rapids_wheel "python/cudf" "" "${hipdf_wheel_config[@]}"
