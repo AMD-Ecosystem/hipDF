@@ -103,10 +103,9 @@ cd ${build_dir}
         fi
 
         if [ -n "${build_dask_hipdf}" ]; then
-          pip install ${BUILD_ARTIFACTS_DIR}/amd_libhipdf*.whl
-          pip install ${BUILD_ARTIFACTS_DIR}/amd_pylibhipdf*.whl
-          pip install ${BUILD_ARTIFACTS_DIR}/amd_hipdf*.whl
-          build_rapids_wheel "python/dask_cudf" "" "${hipdf_wheel_config[@]}"
+          # note: pure Python on setuptools, so nothing here is built against the other wheels
+          # and the resulting py3-none-any wheel is the same for every interpreter.
+          build_setuptools_wheel "python/dask_cudf"
         fi
 
     deactivate

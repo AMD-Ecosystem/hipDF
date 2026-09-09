@@ -24,9 +24,9 @@
 # Build the hipDF wheel matrix inside a manylinux container.
 #
 #   amd_libhipdf    ... py3-none ... once (python/libcudf)
+#   amd_dask_hipdf  ... py3-none ... once (python/dask_cudf, pure Python)
 #   amd_pylibhipdf  ... cp311-cp311 and cp312-abi3
 #   amd_hipdf       ... cp311-cp311 and cp312-abi3
-#   amd_dask_hipdf  ... cp311-cp311 and cp312-abi3
 #
 # Run this after build-dev.sh, never before.
 
@@ -47,7 +47,6 @@ python_versions=(3.11 3.12)
 sabi_floors=(no 3.12)
 expected_pylib_tags=(cp311-cp311 cp312-abi3)
 expected_hipdf_tags=(cp311-cp311 cp312-abi3)
-expected_dask_tags=(cp311-cp311 cp312-abi3)
 
 python_bins=(
   /opt/python/cp311-cp311/bin
@@ -65,7 +64,7 @@ base_path=${PATH}
 HIPDF_BUILD_TYPE=wheels
 
 echo "=============================================================="
-echo "amd_libhipdf, built once with CPython ${python_versions[0]}"
+echo "amd_libhipdf and amd_dask_hipdf, built once with CPython ${python_versions[0]}"
 echo "=============================================================="
 
 PATH="${python_bins[0]}:${base_path}" \
@@ -73,7 +72,7 @@ BUILD_DIR="${BUILD_DIR}/libhipdf" \
 HIPDF_BUILD_TYPE="${HIPDF_BUILD_TYPE}" \
 HIPDF_BUILD_PYLIBCUDF= \
 HIPDF_BUILD_HIPDF= \
-HIPDF_BUILD_DASK_HIPDF= \
+HIPDF_BUILD_DASK_HIPDF=1 \
   "${SCRIPT_DIR}/build-wheels.sh"
 
 for i in "${!python_versions[@]}"; do
@@ -92,19 +91,6 @@ for i in "${!python_versions[@]}"; do
   HIPDF_BUILD_DASK_HIPDF= \
   USE_SABI="${sabi}" \
     "${SCRIPT_DIR}/build-wheels.sh"
-
-  echo "=============================================================="
-  echo "amd_dask_hipdf for CPython ${python_version} (USE_SABI=${sabi})"
-  echo "=============================================================="
-
-  PATH="${python_bin}:${base_path}" \
-  BUILD_DIR="${BUILD_DIR}/dask_cp${python_version//./}" \
-  HIPDF_BUILD_TYPE="${HIPDF_BUILD_TYPE}" \
-  HIPDF_BUILD_LIBHIPDF= \
-  HIPDF_BUILD_PYLIBCUDF= \
-  HIPDF_BUILD_HIPDF= \
-  USE_SABI="${sabi}" \
-    "${SCRIPT_DIR}/build-wheels.sh"
 done
 
 shopt -s nullglob
@@ -114,11 +100,13 @@ echo "=============================================================="
 echo "Wheels in ${BUILD_ARTIFACTS_DIR}"
 echo "=============================================================="
 
-found=( "${BUILD_ARTIFACTS_DIR}"/amd_libhipdf-*-py3-none-*.whl )
-printf '  %-14s %d wheel(s)\n' "py3-none" "${#found[@]}"
-if [ ${#found[@]} -eq 0 ]; then
-  missing+=("amd_libhipdf (py3-none)")
-fi
+for dist in amd_libhipdf amd_dask_hipdf; do
+  found=( "${BUILD_ARTIFACTS_DIR}/${dist}"-*-py3-none-*.whl )
+  printf '  %-14s %d %s wheel(s)\n' "py3-none" "${#found[@]}" "${dist}"
+  if [ ${#found[@]} -eq 0 ]; then
+    missing+=("${dist} (py3-none)")
+  fi
+done
 
 for i in "${!expected_pylib_tags[@]}"; do
   expected_tag=${expected_pylib_tags[${i}]}
@@ -133,13 +121,6 @@ for i in "${!expected_pylib_tags[@]}"; do
   printf '  %-14s %d hipdf wheel(s)\n' "${expected_tag}" "${#found[@]}"
   if [ ${#found[@]} -eq 0 ]; then
     missing+=("amd_hipdf from CPython ${python_versions[${i}]} (${expected_tag})")
-  fi
-
-  expected_dask_tag=${expected_dask_tags[${i}]}
-  found=( "${BUILD_ARTIFACTS_DIR}"/amd_dask_hipdf-*-"${expected_dask_tag}"-*.whl )
-  printf '  %-14s %d dask_hipdf wheel(s)\n' "${expected_dask_tag}" "${#found[@]}"
-  if [ ${#found[@]} -eq 0 ]; then
-    missing+=("amd_dask_hipdf from CPython ${python_versions[${i}]} (${expected_dask_tag})")
   fi
 done
 
@@ -160,10 +141,6 @@ for bad_tag in cp312-cp312 cp313-cp313; do
   found=( "${BUILD_ARTIFACTS_DIR}"/amd_hipdf-*-"${bad_tag}"-*.whl )
   if [ ${#found[@]} -gt 0 ]; then
     unexpected+=("amd_hipdf ${bad_tag} (${#found[@]} wheel(s))")
-  fi
-  found=( "${BUILD_ARTIFACTS_DIR}"/amd_dask_hipdf-*-"${bad_tag}"-*.whl )
-  if [ ${#found[@]} -gt 0 ]; then
-    unexpected+=("amd_dask_hipdf ${bad_tag} (${#found[@]} wheel(s))")
   fi
 done
 if [ ${#unexpected[@]} -gt 0 ]; then

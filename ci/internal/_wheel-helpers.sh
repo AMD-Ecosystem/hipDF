@@ -132,3 +132,44 @@ build_rapids_wheel() {
 
     rm -rf "${dist_dir}"
 }
+
+# build_setuptools_wheel <pkg-relpath> [extra-pip-args...]
+#
+# Build a pure-Python wheel and repair it with auditwheel. The scikit-build-core
+# settings in RAPIDS_PIP_WHEEL_ARGS do not apply here, but rapidsai.disable-cuda
+# does: these packages still go through rapids-build-backend to resolve the
+# suffixed dependency names.
+#
+# --allow-pure-python-wheel (auditwheel >= 6.6.0) is what makes the repair step
+# a copy rather than an error: a py3-none-any wheel has no ELF file to analyse,
+# so auditwheel otherwise exits 1 on it.
+build_setuptools_wheel() {
+    : "${BUILD_ARTIFACTS_DIR:?BUILD_ARTIFACTS_DIR must be set}"
+    : "${WHEEL_BUILD_ROOT:?WHEEL_BUILD_ROOT must be set}"
+
+    local pkg_relpath=$1
+    local dist_dir
+    dist_dir=$(mktemp -d)
+    local log_file
+    log_file="${BUILD_ARTIFACTS_DIR}/$(basename "${pkg_relpath}")-wheel.log"
+
+    cd "${WHEEL_BUILD_ROOT}/${pkg_relpath}"
+
+    if ! python3 -m pip wheel . -w "${dist_dir}" \
+        --no-deps --no-build-isolation --disable-pip-version-check \
+        --config-settings=rapidsai.disable-cuda=true \
+        "${@:2}" \
+        >"${log_file}" 2>&1; then
+        echo "==== pip wheel failed for ${pkg_relpath}; log: ${log_file} ====" >&2
+        cat "${log_file}" >&2
+        exit 1
+    fi
+
+    python3 -m auditwheel repair \
+        --allow-pure-python-wheel \
+        "${AUDITWHEEL_EXCLUDE_ARGS[@]}" \
+        -w "${BUILD_ARTIFACTS_DIR}" \
+        "${dist_dir}"/*
+
+    rm -rf "${dist_dir}"
+}

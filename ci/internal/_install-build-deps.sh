@@ -66,7 +66,9 @@ case "${HIPDF_BUILD_TYPE:-}" in
     ;;
 esac
 
-pip install wheel auditwheel Cython scikit-build-core \
+# setuptools is not in the venv by default from Python 3.12 on, and dask_hipdf
+# builds against it with --no-build-isolation.
+pip install wheel auditwheel Cython scikit-build-core setuptools \
             patchelf
 pip install --force-reinstall "cmake==${CMAKE_VERSION}"
 pip install ninja
