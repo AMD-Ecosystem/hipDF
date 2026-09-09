@@ -128,16 +128,7 @@ int main(int argc, char const** argv)
   auto const mr_name = std::string("pool");
   auto resource      = create_memory_resource(mr_name);
   auto stats_mr      = rmm::mr::statistics_resource_adaptor{resource};
-#ifdef __HIP_PLATFORM_AMD__
-  // NOTE(HIP/AMD): hipMM 5.0.0's statistics_resource_adaptor cannot be stored by value in
-  // cuda::mr::any_resource (the type set_current_device_resource takes), even though it models
-  // the resource concept. Set it via a non-owning device_async_resource_ref instead; stats_mr
-  // outlives its use here. Matches the CUDF_TEST_SET_STATISTICS_RESOURCE WAR in the gtests.
-  cudf::set_current_device_resource(
-    cuda::mr::any_resource<cuda::mr::device_accessible>{rmm::device_async_resource_ref{stats_mr}});
-#else
   rmm::mr::set_current_device_resource(stats_mr);
-#endif
   auto stream = cudf::get_default_stream();
 
   std::filesystem::path p = input_file;
