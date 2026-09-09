@@ -1191,7 +1191,7 @@ TEST_F(ParquetWriterTest, DictionaryAdaptiveTest)
   auto const filepath = temp_env->get_temp_filepath("DictionaryAdaptiveTest.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+      .compression(cudf::io::compression_type::ZSTD)
       .dictionary_policy(cudf::io::dictionary_policy::ADAPTIVE);
   cudf::io::write_parquet(out_opts);
 
@@ -1242,7 +1242,7 @@ TEST_F(ParquetWriterTest, DictionaryAlwaysTest)
   auto const filepath = temp_env->get_temp_filepath("DictionaryAlwaysTest.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+      .compression(cudf::io::compression_type::ZSTD)
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -1296,7 +1296,7 @@ TEST_F(ParquetWriterTest, DictionaryPageSizeEst)
   auto const filepath = temp_env->get_temp_filepath("DictionaryPageSizeEst.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+      .compression(cudf::io::compression_type::ZSTD)
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -1484,7 +1484,10 @@ TEST_P(ParquetCompressionTest, SkipCompression)
             cudf::io::parquet::Compression::UNCOMPRESSED);
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
+/* TODO(HIP/AMD, <HIPCOMP-API>): hipcomp has no zstd compressor, so ZSTD is left out here. Adding
+ * it would not test device compression: with device zstd disabled, get_host_engine_state() returns
+ * ON regardless of LIBCUDF_HOST_COMPRESSION, so the case would silently run on the host. The host
+ * zstd compressor is covered by the Host instantiation below. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         ParquetCompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
@@ -1500,12 +1503,12 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
 //                                            ::testing::Values(cudf::io::compression_type::AUTO,
 //                                                              cudf::io::compression_type::SNAPPY)));
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         ParquetCompressionTest,
                         ::testing::Combine(::testing::Values("HOST", "HYBRID", "AUTO"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
 
 TEST_F(ParquetWriterTest, NoNullsAsNonNullable)
 {
@@ -1657,7 +1660,7 @@ TEST_F(ParquetWriterTest, RowGroupMetadata)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, table)
       .dictionary_policy(cudf::io::dictionary_policy::NEVER)
       .sorting_columns({{0, false, false}})
-      .compression(cudf::io::compression_type::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+      .compression(cudf::io::compression_type::ZSTD);
   cudf::io::write_parquet(opts);
 
   // check row group metadata to make sure total_byte_size is the uncompressed value
@@ -1798,7 +1801,7 @@ TEST_F(ParquetWriterTest, UserRequestedEncodings)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, table)
       .metadata(table_metadata)
       .stats_level(cudf::io::statistics_freq::STATISTICS_COLUMN)
-      .compression(cudf::io::compression_type::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
+      .compression(cudf::io::compression_type::ZSTD);
   cudf::io::write_parquet(opts);
 
   // check page headers to make sure each column is encoded with the appropriate encoder

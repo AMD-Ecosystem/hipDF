@@ -45,11 +45,11 @@ struct JsonReaderTest : public cudf::test::BaseFixture,
                         public testing::WithParamInterface<cudf::io::compression_type> {};
 
 // Parametrize qualifying JSON tests for multiple compression types
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_SUITE_P(JsonReaderTest,
                          JsonReaderTest,
                          ::testing::Values(cudf::io::compression_type::GZIP,
                                            cudf::io::compression_type::SNAPPY,
+                                           cudf::io::compression_type::ZSTD,
                                            cudf::io::compression_type::NONE));
 
 cudf::test::TempDirTestEnvironment* const temp_env =

@@ -67,7 +67,7 @@ TEST_F(ParquetStringsTest, ReadLargeStrings)
   auto const filepath = g_temp_env->get_temp_filepath("ReadLargeStrings.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::SNAPPY) // NOTE(HIP/AMD): ZSTD is not supported presently.
+      .compression(cudf::io::compression_type::ZSTD)
       .stats_level(cudf::io::STATISTICS_NONE)
       .metadata(expected_metadata);
   cudf::io::write_parquet(out_opts);
@@ -117,8 +117,7 @@ TEST_F(ParquetStringsTest, DISABLED_ChunkedReadLargeStrings)
 
   // Needed to get exactly 2 Parquet subpasses: first with large-strings and the second with
   // regualar ones. This may change in the future and lead to false failures.
-  /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead. */
-  out_opts.set_compression(cudf::io::compression_type::SNAPPY);
+  out_opts.set_compression(cudf::io::compression_type::ZSTD);
 
   // Write to Parquet
   cudf::io::write_parquet(out_opts);

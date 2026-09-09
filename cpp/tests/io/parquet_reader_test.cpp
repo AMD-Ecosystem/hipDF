@@ -3645,13 +3645,13 @@ TEST_P(ParquetDecompressionTest, RoundTripBasic)
   CUDF_TEST_EXPECT_TABLES_EQUAL(custom_tbl.tbl->view(), expected->view());
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         ParquetDecompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4)));
+                                                             cudf::io::compression_type::LZ4,
+                                                             cudf::io::compression_type::ZSTD)));
 
 // TODO(HIP/AMD): Disable DeviceInternal tests - hipDF does not support DEVICE_INTERNAL decompression
 // mode due to missing gpu_unsnap functionality (internal GPU-based decompression). hipcomp should be used instead.
@@ -3661,12 +3661,12 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
 //                                            ::testing::Values(cudf::io::compression_type::AUTO,
 //                                                              cudf::io::compression_type::SNAPPY)));
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         ParquetDecompressionTest,
                         ::testing::Combine(::testing::Values("HOST"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
 
 //////////////////////
 // wide tables tests

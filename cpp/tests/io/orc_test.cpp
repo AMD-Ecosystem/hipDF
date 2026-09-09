@@ -2406,7 +2406,10 @@ TEST_F(OrcReaderTest, DeviceWriteAsyncThrows)
   }
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD, ZLIB (compression) with hipcomp currently. */
+/* TODO(HIP/AMD, <HIPCOMP-API>): hipcomp has no zstd or zlib compressor. ZSTD is left out here
+ * because adding it would not test device compression: with device zstd disabled,
+ * get_host_engine_state() returns ON regardless of LIBCUDF_HOST_COMPRESSION, so the case would
+ * silently run on the host. The host zstd compressor is covered by the Host instantiation below. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         OrcCompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
@@ -2422,20 +2425,21 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
 //                                            ::testing::Values(cudf::io::compression_type::AUTO,
 //                                                              cudf::io::compression_type::SNAPPY)));
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         OrcCompressionTest,
                         ::testing::Combine(::testing::Values("HOST"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
 
-/* TODO(HIP/AMD): We do not support ZSTD, ZLIB (compression) with hipcomp currently. */
+/* TODO(HIP/AMD): ZLIB compression is not supported with hipcomp currently. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         OrcDecompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4)));
+                                                             cudf::io::compression_type::LZ4,
+                                                             cudf::io::compression_type::ZSTD)));
 
 // TODO(HIP/AMD): Disable DeviceInternal tests - hipDF does not support DEVICE_INTERNAL decompression
 // mode due to missing gpu_unsnap functionality (internal GPU-based decompression). hipcomp should be used instead.
@@ -2445,12 +2449,12 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
 //                                            ::testing::Values(cudf::io::compression_type::AUTO,
 //                                                              cudf::io::compression_type::SNAPPY)));
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         OrcDecompressionTest,
                         ::testing::Combine(::testing::Values("HOST", "HYBRID", "AUTO"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
 
 TEST_F(OrcWriterTest, DISABLED_SizeTypeOverflow)
 {

@@ -1043,7 +1043,9 @@ void input_limit_test_write(
   // As such, we may see smaller output chunks for the input data compressed by ZSTD.
   input_limit_test_write_one(
     test_files[0], input, stripe_size_rows, cudf::io::compression_type::NONE);
-  // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+  // TODO(HIP/AMD): ZSTD writes work via the host compressor, but re-enabling this case also needs
+  // input_limit_expected_file_count back at 3 and the expected chunk counts in the input_limit
+  // tests below re-derived for the ZSTD file, so it is left out for now.
   // input_limit_test_write_one(
   //   test_files[1], input, stripe_size_rows, cudf::io::compression_type::ZSTD);
   input_limit_test_write_one(
@@ -1561,13 +1563,14 @@ TEST_P(OrcChunkedDecompressionTest, RoundTripBasic)
   }
 }
 
-/* TODO(HIP/AMD): We do not support ZSTD, ZLIB (compression) with hipComp currently. */
+/* TODO(HIP/AMD): ZLIB compression is not supported with hipComp currently. */
 INSTANTIATE_TEST_CASE_P(Nvcomp,
                         OrcChunkedDecompressionTest,
                         ::testing::Combine(::testing::Values("NVCOMP"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
                                                              cudf::io::compression_type::SNAPPY,
-                                                             cudf::io::compression_type::LZ4)));
+                                                             cudf::io::compression_type::LZ4,
+                                                             cudf::io::compression_type::ZSTD)));
 
 // TODO(HIP/AMD): Disable DeviceInternal tests - hipDF does not support DEVICE_INTERNAL decompression
 // mode due to missing gpu_unsnap functionality (internal GPU-based decompression). hipcomp should be used instead.
@@ -1577,9 +1580,9 @@ INSTANTIATE_TEST_CASE_P(Nvcomp,
 //                                            ::testing::Values(cudf::io::compression_type::AUTO,
 //                                                              cudf::io::compression_type::SNAPPY)));
 
-/* TODO(HIP/AMD): We do not support ZSTD currently. Removed ZSTD from test parameters. */
 INSTANTIATE_TEST_CASE_P(Host,
                         OrcChunkedDecompressionTest,
                         ::testing::Combine(::testing::Values("HOST"),
                                            ::testing::Values(cudf::io::compression_type::AUTO,
-                                                             cudf::io::compression_type::SNAPPY)));
+                                                             cudf::io::compression_type::SNAPPY,
+                                                             cudf::io::compression_type::ZSTD)));
