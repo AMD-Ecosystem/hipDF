@@ -242,8 +242,8 @@ Notes
 
 - Setting the cudf option `io.parquet.low_memory=True` will result in the chunked
   low memory parquet reader being used. This can make it easier to read large
-  parquet datasets on systems with limited GPU memory. See all `available options
-  <https://docs.rapids.ai/api/cudf/nightly/user_guide/api_docs/options/#api-options>`_.
+  parquet datasets on systems with limited GPU memory. See `cudf.read_parquet
+  <https://docs.nvidia.com/cudf/latest/cudf/api_docs/api/cudf.read_parquet/>`_.
 
 Examples
 --------
@@ -814,8 +814,8 @@ Notes
 
 - Setting the cudf option `io.json.low_memory=True` will result in the chunked
   low memory json reader being used. This can make it easier to read large
-  json datasets on systems with limited GPU memory. See all `available options
-  <https://docs.rapids.ai/api/cudf/nightly/user_guide/api_docs/options/#api-options>`_.
+  json datasets on systems with limited GPU memory. See `cudf.read_json
+  <https://docs.rapids.ai/api/cudf/legacy/user_guide/api_docs/api/cudf.read_json/>`_.
 
 See Also
 --------
