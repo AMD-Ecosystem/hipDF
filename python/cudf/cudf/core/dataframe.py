@@ -4788,7 +4788,7 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
         supported by the CUDA Python Numba target
         <https://numba.readthedocs.io/en/stable/cuda/cudapysupported.html>`__.
         For more information, see the `cuDF guide to user defined functions
-        <https://docs.rapids.ai/api/cudf/stable/user_guide/guide-to-udfs.html>`__.
+        <https://docs.nvidia.com/cudf/latest/cudf/guide-to-udfs/>`__.
 
         Some string functions and methods are supported. Refer to the guide
         to UDFs for details.
