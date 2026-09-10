@@ -224,7 +224,8 @@ def pytest_load_initial_conftests(early_config, parser, args):
     # reference.html#pytest.hookspec.pytest_load_initial_conftests
     try:
         install()
-    except RuntimeError:
-        raise RuntimeError(
-            "An existing plugin has already loaded pandas. Interposing failed."
-        )
+    except RuntimeError as e:
+        # install() raises RuntimeError for unrelated setup problems too (GPU
+        # init, RMM mode, HSA_XNACK), so surface the real cause rather than
+        # assuming another plugin already imported pandas.
+        raise RuntimeError(f"Enabling cudf.pandas failed: {e}") from e
