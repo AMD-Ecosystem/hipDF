@@ -45,7 +45,6 @@ requires-python = ">=3.11"
 dependencies = [
     "amd-hipmm==5.0.*,>=5.0.0a0",
     "amd-libhipdf==4.*,>=4.0.0a0",
-    "hip-python>=7.0",
     "hip-python-interop>=7.0",
     # "nvtx>=0.2.1", # TODO(HIP/AMD): find replacement
     "packaging",

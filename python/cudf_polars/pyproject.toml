@@ -44,7 +44,6 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
     "amd-pylibhipdf==4.*,>=4.0.0a0",
-    "hip-python>=7.0",
     "hip-python-interop>=7.0",
     "packaging",
     "polars>=1.35,<1.40",
