@@ -1834,10 +1834,19 @@ def test_numpy_ndarray_numba_ufunc(array):
     assert_eq(add_one_ufunc(arr1), add_one_ufunc(arr2))
 
 
-# NOTE(HIP/AMD): match the warning by message only. Upstream pins the category to
-# numba(.cuda).core.errors.NumbaPerformanceWarning, but `numba.cuda.core.errors`
-# does not exist on numba-hip, so pytest raises a usage error (rc=4) while resolving
-# the filter. A message-only filter is robust across numba-cuda and numba-hip.
+# TODO(HIP/AMD): match the warning by message only. `numba.cuda.core.errors` is a
+# numba-cuda-only location that numba-hip does not provide, and pytest resolves a
+# marker category by importing it, so the upstream markers do not degrade to an
+# unused filter -- they abort the whole run at collection with an INTERNALERROR
+# (`ModuleNotFoundError: No module named 'numba.cuda.core'`, no tests run). A
+# message-only filter is robust across numba-cuda and numba-hip. Restore the
+# upstream markers verbatim once numba-hip exposes numba.cuda.core, see issue #481:
+#     @pytest.mark.filterwarnings(
+#         "ignore:Grid size:numba.core.errors.NumbaPerformanceWarning"
+#     )
+#     @pytest.mark.filterwarnings(
+#         "ignore:Grid size:numba.cuda.core.errors.NumbaPerformanceWarning"
+#     )
 @pytest.mark.filterwarnings("ignore:Grid size")
 def test_numpy_ndarray_numba_cuda_ufunc(array):
     arr1, arr2 = array

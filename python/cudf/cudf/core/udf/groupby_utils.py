@@ -29,8 +29,9 @@ import cupy as cp
 import numpy as np
 from numba import cuda, types
 from numba.core.errors import TypingError as CoreTypingError
-# NOTE(HIP/AMD): numba-hip has no `numba.cuda.core.errors` submodule (a
-# numba-cuda-only location); the TypingError is the same numba.core one.
+# TODO(HIP/AMD): numba-hip has no `numba.cuda.core.errors` submodule (a
+# numba-cuda-only location); the TypingError is the same numba.core one. Drop the
+# fallback once numba-hip exposes numba.cuda.core, see issue #481.
 try:
     from numba.cuda.core.errors import TypingError as CudaTypingError
 except ModuleNotFoundError:
