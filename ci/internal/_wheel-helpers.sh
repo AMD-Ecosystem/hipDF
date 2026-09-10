@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# RAPIDS wheel build helpers, shared across ROCm-DS projects. Meant to be
-# sourced, not executed. Set WHEEL_BUILD_ROOT to a copied checkout, then call
-# build_rapids_wheel per python package directory.
+# RAPIDS wheel helpers, shared across ROCm-DS projects. Meant to be sourced,
+# not executed. Set WHEEL_BUILD_ROOT to a copied checkout, then call
+# build_rapids_wheel per python package directory. install_built_wheel is
+# sourced by the test scripts too, which build nothing.
 #
 # Required environment variables:
-#   BUILD_ARTIFACTS_DIR, WHEEL_BUILD_ROOT
+#   BUILD_ARTIFACTS_DIR
+#   WHEEL_BUILD_ROOT -- for the build functions only
 #
 # Optional environment variables:
 #   RAPIDS_PIP_WHEEL_ARGS, AUDITWHEEL_EXCLUDE_ARGS -- defaults below
@@ -137,37 +139,46 @@ print(f"{pkg}: {len(declared)} declared build requirements satisfied")
 PY
 }
 
-# install_built_wheel <dist>
+# install_built_wheel [pip-arg...] -- <spec>...
 #
-# Install a wheel this run produced, naming the distribution rather than the
-# file. The matrix fills one BUILD_ARTIFACTS_DIR from several interpreters, so
-# a ${dist}*.whl glob also matches the wheels built for the other Python
+# Install wheels this pipeline produced, naming distributions rather than
+# files. One BUILD_ARTIFACTS_DIR is filled by several interpreters, so a
+# ${dist}*.whl glob also matches the wheels built for the other Python
 # versions and pip rejects a file it was handed with a tag it cannot use;
-# naming the distribution lets it take the wheel tagged for this interpreter
-# out of the pool instead.
+# naming the distribution lets it take the wheel tagged for this interpreter.
 #
-# --no-index keeps the proxy out, and --no-deps keeps _install-build-deps.sh the
-# one place this venv is provisioned from. That leaves the wheels in
-# BUILD_ARTIFACTS_DIR as the candidates, along with whatever the rocmds-links
-# page sitting there lists -- pip reads any HTML in a --find-links directory --
-# but that page carries the upstream ROCm-DS dependencies only, never hipDF's
-# own distributions, so these stay local installs.
+# Specs carry their own version pin, so this stays usable from any project.
+# The build passes --no-deps --no-index; the test passes nothing and resolves
+# for real. Every spec goes in one pip call, so the resolver sees them together.
 install_built_wheel() {
-    local dist=$1 version
+    local pip_args=() spec dist
 
-    shopt -s nullglob
-    local wheels=( "${BUILD_ARTIFACTS_DIR}/${dist}"-*.whl )
-    shopt -u nullglob
-    if [ ${#wheels[@]} -eq 0 ]; then
-        echo "ERROR: no ${dist} wheel in ${BUILD_ARTIFACTS_DIR}" >&2
+    while [ $# -gt 0 ] && [ "$1" != "--" ]; do
+        pip_args+=("$1")
+        shift
+    done
+    if [ "${1:-}" != "--" ]; then
+        echo "ERROR: install_built_wheel needs -- before the specs" >&2
         exit 1
     fi
+    shift
 
-    IFS=- read -r _ version _ <<<"$(basename "${wheels[0]}")"
+    for spec in "$@"; do
+        dist=${spec%%"["*}          # drop extras
+        dist=${dist%%[=<>!~]*}      # drop the version specifier
+        shopt -s nullglob
+        # Deliberately unquoted, so the ? substituted for the separator globs:
+        # pip canonicalizes the name and the file on disk may use the other one.
+        # shellcheck disable=SC2206
+        local found=( "${BUILD_ARTIFACTS_DIR}/"${dist//[-_]/?}-*.whl )
+        shopt -u nullglob
+        if [ ${#found[@]} -eq 0 ]; then
+            echo "ERROR: no ${dist} wheel in ${BUILD_ARTIFACTS_DIR}" >&2
+            exit 1
+        fi
+    done
 
-    pip install --no-deps --no-index \
-        --find-links "${BUILD_ARTIFACTS_DIR}" \
-        "${dist}==${version}"
+    pip install "${pip_args[@]}" --find-links "${BUILD_ARTIFACTS_DIR}" "$@"
 }
 
 # build_rapids_wheel <pkg-relpath> [extra-cmake-args] [extra-pip-args...]

@@ -29,6 +29,7 @@
 #
 # Optional environment variables:
 #   HIPDF_BUILD_TYPE, CMAKE_VERSION
+#   HIPDF_VERSION -- pins the wheels this build installs from BUILD_ARTIFACTS_DIR
 #   USE_SABI -- "no", or the stable-ABI floor for pylibhipdf and hipdf, e.g. "3.12"
 #   HIPDF_BUILD_{LIBHIPDF,PYLIBCUDF,HIPDF,DASK_HIPDF} -- set empty to skip a wheel
 
@@ -94,15 +95,17 @@ cd ${build_dir}
         if [ -n "${build_pylibcudf}" ]; then
           # note: load-bearing -- find_package(cudf) resolves here, and --no-build-isolation
           # means pip installs nothing from [tool.rapids-build-backend] requires itself.
-          install_built_wheel amd_libhipdf
+          install_built_wheel --no-deps --no-index -- \
+            "amd_libhipdf${HIPDF_VERSION:+==${HIPDF_VERSION}}"
           build_rapids_wheel "python/pylibcudf" "" "${hipdf_wheel_config[@]}"
         fi
 
         if [ -n "${build_hipdf}" ]; then
           # note: both load-bearing -- find_package(cudf) resolves in the first, the pylibhipdf
           # cimports in the second.
-          install_built_wheel amd_libhipdf
-          install_built_wheel amd_pylibhipdf
+          install_built_wheel --no-deps --no-index -- \
+            "amd_libhipdf${HIPDF_VERSION:+==${HIPDF_VERSION}}" \
+            "amd_pylibhipdf${HIPDF_VERSION:+==${HIPDF_VERSION}}"
           build_rapids_wheel "python/cudf" "" "${hipdf_wheel_config[@]}"
         fi
 

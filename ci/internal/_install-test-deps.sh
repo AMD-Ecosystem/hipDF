@@ -67,7 +67,8 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
     if [ "${HIPDF_TEST_DASK:-0}" = "1" ]; then
         if pip install --no-deps \
                --find-links "${BUILD_ARTIFACTS_DIR}" \
-               amd-dask_hipdf amd-dask-hip amd-distributed-hipucxx \
+               "amd-dask_hipdf${HIPDF_VERSION:+==${HIPDF_VERSION}}" \
+               amd-dask-hip amd-distributed-hipucxx \
            && pip install "rapids-dask-dependency==26.6.*"; then
             :
         else
