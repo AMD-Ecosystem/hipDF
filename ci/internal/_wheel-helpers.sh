@@ -87,6 +87,56 @@ dump_rapids_wheel_build_logs() {
     fi
 }
 
+# verify_build_requires <pkg-relpath>
+#
+# Fail if any requirement the package in the current directory declares is
+# unsatisfied in the venv. --no-build-isolation means pip installs nothing from
+# either requires table, so an unsatisfied entry is a gap in
+# _install-build-deps.sh rather than something pip fixes.
+verify_build_requires() {
+    python3 - "$1" <<'PY' || exit 1
+import sys, tomllib
+from importlib.metadata import distributions
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
+
+pkg = sys.argv[1]
+with open("pyproject.toml", "rb") as fh:
+    data = tomllib.load(fh)
+
+# Both tables are build requirements: pip reads [build-system] requires, and
+# rapids-build-backend adds its own on top via get_requires_for_build_wheel.
+declared = data.get("build-system", {}).get("requires", []) + \
+    data.get("tool", {}).get("rapids-build-backend", {}).get("requires", [])
+
+# Canonicalized, because the tables say cython where the venv has Cython.
+have = {canonicalize_name(d.metadata["Name"]): d.version for d in distributions()}
+
+# Extras are not checked: scikit-build-core[pyproject] names an extra that
+# scikit-build-core no longer provides, so requiring it would be a false alarm.
+missing = []
+for spec in declared:
+    req = Requirement(spec)
+    if req.marker and not req.marker.evaluate():
+        continue
+    version = have.get(canonicalize_name(req.name))
+    if version is None:
+        missing.append(f"  {spec} -- not installed")
+    elif not req.specifier.contains(version, prereleases=True):
+        missing.append(f"  {spec} -- installed {version}")
+
+if missing:
+    print(f"ERROR: {pkg} declares build requirements the venv does not satisfy:",
+          file=sys.stderr)
+    print("\n".join(missing), file=sys.stderr)
+    print("Provision them in ci/internal/_install-build-deps.sh, which resolves "
+          "against the wheel links page via --find-links.", file=sys.stderr)
+    sys.exit(1)
+
+print(f"{pkg}: {len(declared)} declared build requirements satisfied")
+PY
+}
+
 # build_rapids_wheel <pkg-relpath> [extra-cmake-args] [extra-pip-args...]
 #
 # Build one scikit-build wheel under WHEEL_BUILD_ROOT and repair it with
@@ -101,6 +151,7 @@ build_rapids_wheel() {
     local log_file="${BUILD_ARTIFACTS_DIR}/$(basename "${pkg_relpath}")-wheel.log"
 
     cd "${WHEEL_BUILD_ROOT}/${pkg_relpath}"
+    verify_build_requires "${pkg_relpath}"
 
     if [ -n "${2:-}" ]; then
         local saved_cmake_args="${SKBUILD_CMAKE_ARGS:-}"
@@ -154,6 +205,7 @@ build_setuptools_wheel() {
     log_file="${BUILD_ARTIFACTS_DIR}/$(basename "${pkg_relpath}")-wheel.log"
 
     cd "${WHEEL_BUILD_ROOT}/${pkg_relpath}"
+    verify_build_requires "${pkg_relpath}"
 
     if ! python3 -m pip wheel . -w "${dist_dir}" \
         --no-deps --no-build-isolation --disable-pip-version-check \
