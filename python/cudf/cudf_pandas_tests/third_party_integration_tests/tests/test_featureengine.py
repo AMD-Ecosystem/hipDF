@@ -1,9 +1,16 @@
 # SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION.
 # SPDX-License-Identifier: Apache-2.0
+#
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 import numpy as np
 import pandas as pd
+import pytest
 from feature_engine.imputation import DropMissingData
 from feature_engine.preprocessing import MatchVariables
+
+# Both tests return a DataFrame; the default `gold == cudf` comparison is
+# ambiguous for those.
+pytestmark = pytest.mark.assert_eq(fn=pd.testing.assert_frame_equal)
 
 
 def test_drop_missing_data():
@@ -15,9 +22,8 @@ def test_drop_missing_data():
 
     dmd = DropMissingData()
     dmd.fit(df)
-    dmd.transform(df)
 
-    return dmd
+    return dmd.transform(df)
 
 
 def test_match_variables():
