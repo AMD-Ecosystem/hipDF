@@ -61,7 +61,7 @@ function run_tests() {
       -printf "run_tests: found test file: %p\n" \
       -exec bash -c '
         csv_file="$2/{}${5}.csv"
-        pytest $7 $4 -v --timeout $3 {} \
+        pytest $7 $4 --tb=short -ra --timeout $3 {} \
         --continue-on-collection-errors \
         --csv "$csv_file" --csv-columns file,id,status,message
         if [[ -n "$5" && -f "$csv_file" ]]; then
@@ -137,6 +137,6 @@ function run_hipdf_test_suites() {
 
         DASK_CUDA_WAIT_WORKERS_MIN_TIMEOUT=60 \
             run_tests python/dask_cudf/dask_cudf/tests \
-                ${csv_output_dir} ${timeout_per_test_sec} "-rfs"
+                ${csv_output_dir} ${timeout_per_test_sec}
     fi
 }
