@@ -2953,7 +2953,13 @@ class ColumnBase(Serializable, BinaryOperand, Reducible):
                 and not isinstance(col_dtype, IntervalDtype)
                 and getattr(col_dtype, "kind", None) in {"i", "u", "f", "b"}
             ):
-                return plc_scalar.to_py()
+                py_val = plc_scalar.to_py()
+                # A null scalar (e.g. std/var of a single element) must stay
+                # NaN rather than None, and callers rely on reductions
+                # returning numpy scalars, not Python ones.
+                if py_val is None:
+                    return _get_nan_for_dtype(col_dtype)
+                return col_dtype.type(py_val)
             # Hook for subclasses (e.g., DecimalBaseColumn adjusts precision)
             col_dtype = col._adjust_reduce_result_dtype(
                 op, col_dtype, plc_scalar
