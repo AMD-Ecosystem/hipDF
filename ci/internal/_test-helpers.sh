@@ -57,20 +57,37 @@ function run_tests() {
     if [ -n "${config_file}" ]; then
         config_arg="-c ${config_file}"
     fi
+    # Whole-file backstop. --timeout is per test and cannot always fire: a test
+    # blocked inside a native call never reaches a point where the timeout can
+    # act, which used to wedge the job indefinitely. Sized far above any
+    # legitimate single file so only genuine hangs reach it.
+    local file_timeout=$(( $3 * 15 ))
     find $1 -name "test_*.py" \
       -printf "run_tests: found test file: %p\n" \
       -exec bash -c '
         csv_file="$2/{}${5}.csv"
-        pytest $7 $4 --tb=short -ra --timeout $3 {} \
+        timeout -k 30 "$8" pytest $7 $4 --tb=short -ra --timeout $3 {} \
         --continue-on-collection-errors \
         --csv "$csv_file" --csv-columns file,id,status,message
+        pytest_rc=$?
+        # No CSV with exit 0 or 5 is normal: pytest-csv writes no file when
+        # every test in it was skipped at module level, or nothing was
+        # collected. Any other exit with no CSV means pytest died without
+        # reporting (killed by the backstop above, or crashed), and
+        # merge_test_results would otherwise see no CSV and count the file as
+        # a pass, so synthesise an error row for it.
+        if [[ ! -f "$csv_file" && "$pytest_rc" != 0 && "$pytest_rc" != 5 ]]; then
+          mkdir -p "$(dirname "$csv_file")"
+          printf "file,id,status,message\n%s,%s,error,pytest exited %s without writing results (hang or crash)\n" \
+            "{}" "{}" "$pytest_rc" > "$csv_file"
+        fi
         if [[ -n "$5" && -f "$csv_file" ]]; then
           temp_file=$(mktemp)
           head -n 1 "$csv_file" > "$temp_file"
           tail -n +2 "$csv_file" | awk -F"," -v suffix="$6" "BEGIN{OFS=\",\"} {\$2=\$2 suffix; print}" >> "$temp_file"
           mv "$temp_file" "$csv_file"
         fi
-        ' _ "$1" "$2" "$3" "$pytest_args" "$suffix" "$id_suffix" "$config_arg" \;
+        ' _ "$1" "$2" "$3" "$pytest_args" "$suffix" "$id_suffix" "$config_arg" "$file_timeout" \;
     set -e
 }
 
