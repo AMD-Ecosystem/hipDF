@@ -63,7 +63,7 @@ classifiers = [
 
 [project.optional-dependencies]
 test = [
-    "dask-cuda==26.6.*,>=0.0.0a0",
+    "amd-dask-hip==1.0.*",
     "pytest",
     "pytest-cov",
     "pytest-httpserver",
