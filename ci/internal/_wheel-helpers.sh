@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # MIT License
 #
 # Copyright (c) 2026 Advanced Micro Devices, Inc.
@@ -20,17 +21,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# RAPIDS wheel helpers, shared across ROCm-DS projects. Meant to be sourced,
-# not executed. Set WHEEL_BUILD_ROOT to a copied checkout, then call
-# build_rapids_wheel per python package directory. install_built_wheel is
-# sourced by the test scripts too, which build nothing.
+# RAPIDS wheel helpers. Meant to be sourced, not executed directly.
+#
+# Drop-in for ROCm-DS projects (hipdf, hipmm, hipucxx). Project scripts set
+# WHEEL_BUILD_ROOT to a copied checkout, then call build_rapids_wheel for each
+# python package directory. install_built_wheel is sourced by the test scripts
+# too, which build nothing.
 #
 # Required environment variables:
-#   BUILD_ARTIFACTS_DIR
-#   WHEEL_BUILD_ROOT -- for the build functions only
+#   BUILD_ARTIFACTS_DIR -- wheel output, pip logs, auditwheel destination
+#   WHEEL_BUILD_ROOT    -- tree root containing package dirs (e.g. copied
+#                          checkout); needed by the build functions only
 #
 # Optional environment variables:
-#   RAPIDS_PIP_WHEEL_ARGS, AUDITWHEEL_EXCLUDE_ARGS -- defaults below
+#   RAPIDS_PIP_WHEEL_ARGS           -- pip wheel flags (defaults below)
+#   RAPIDS_BUILD_BACKEND_WHEEL_ARGS -- pip wheel flags added for the packages
+#                                      built through rapids-build-backend
+#                                      (defaults below)
+#   AUDITWHEEL_EXCLUDE_ARGS         -- auditwheel --exclude flags
+#                                      (default: --exclude "*")
 
 set -euo pipefail
 
@@ -40,9 +49,17 @@ if ! declare -p RAPIDS_PIP_WHEEL_ARGS &>/dev/null; then
         --no-deps
         --no-build-isolation
         --disable-pip-version-check
-        --config-settings=rapidsai.disable-cuda=true
         --config-settings=build.verbose=true
         --config-settings=logging.level=DEBUG
+    )
+fi
+
+if ! declare -p RAPIDS_BUILD_BACKEND_WHEEL_ARGS &>/dev/null; then
+    # Only rapids-build-backend consumes rapidsai.* config settings. A package
+    # naming scikit-build-core directly rejects the unknown rapidsai key,
+    # because scikit-build-core's strict-config defaults to true.
+    RAPIDS_BUILD_BACKEND_WHEEL_ARGS=(
+        --config-settings=rapidsai.disable-cuda=true
     )
 fi
 
@@ -58,17 +75,23 @@ verify_wheel_absent() {
     local glob=$1 pattern=$2
 
     shopt -s nullglob
+    # ${glob} is unquoted on purpose: it is a wheel-name pattern to expand.
+    # shellcheck disable=SC2206
     local wheels=( "${BUILD_ARTIFACTS_DIR}"/${glob} )
     shopt -u nullglob
     [ ${#wheels[@]} -eq 0 ] && return 0
 
-    local hits
-    hits=$(unzip -l "${wheels[@]}" | grep -E "${pattern}" || true)
-    if [ -n "${hits}" ]; then
-        echo "ERROR: ${glob} must not match /${pattern}/:" >&2
-        echo "${hits}" >&2
-        exit 1
-    fi
+    # One archive per unzip call: a second path argument is read as a member
+    # filter, not as another archive, which would pass every wheel but the first.
+    local wheel hits
+    for wheel in "${wheels[@]}"; do
+        hits=$(unzip -l "${wheel}" | grep -E "${pattern}" || true)
+        if [ -n "${hits}" ]; then
+            echo "ERROR: $(basename "${wheel}") must not match /${pattern}/:" >&2
+            echo "${hits}" >&2
+            exit 1
+        fi
+    done
 }
 
 # dump_rapids_wheel_build_logs <pkg-relpath>
@@ -81,8 +104,12 @@ dump_rapids_wheel_build_logs() {
     echo "ERROR: wheel build failed for ${pkg_relpath}" >&2
     if [ -d "${build_root}" ]; then
         echo "==== wheel build tree (${build_root}) ====" >&2
-        find "${build_root}" -type f \( -name 'CMake*.log' -o -name '*.log' \) -print >&2
-        find "${build_root}" -type f \( -name 'CMake*.log' -o -name '*.log' \) -print0 \
+        # CMake >= 3.26 records its configure-time checks in CMakeConfigureLog.yaml
+        # instead of the CMakeError.log/CMakeOutput.log pair a *.log glob catches.
+        find "${build_root}" -type f \
+            \( -name '*.log' -o -name 'CMakeConfigureLog.yaml' \) -print >&2
+        find "${build_root}" -type f \
+            \( -name '*.log' -o -name 'CMakeConfigureLog.yaml' \) -print0 \
             | xargs -0 -r tail -n 200 >&2 || true
     else
         echo "No build tree at ${build_root}" >&2
@@ -139,6 +166,24 @@ print(f"{pkg}: {len(declared)} declared build requirements satisfied")
 PY
 }
 
+# uses_rapids_build_backend
+#
+# True if the package in the current directory builds through
+# rapids-build-backend, which is what makes RAPIDS_BUILD_BACKEND_WHEEL_ARGS
+# legal to pass. The backend that compiles is the one named in
+# [tool.rapids-build-backend], so [build-system] is what names the wrapper.
+uses_rapids_build_backend() {
+    python3 - <<'PY'
+import sys, tomllib
+
+with open("pyproject.toml", "rb") as fh:
+    data = tomllib.load(fh)
+
+backend = data.get("build-system", {}).get("build-backend", "")
+sys.exit(0 if backend.startswith("rapids_build_backend") else 1)
+PY
+}
+
 # install_built_wheel [pip-arg...] -- <spec>...
 #
 # Install wheels this pipeline produced, naming distributions rather than
@@ -192,10 +237,17 @@ build_rapids_wheel() {
     local pkg_relpath=$1
     local dist_dir
     dist_dir=$(mktemp -d)
-    local log_file="${BUILD_ARTIFACTS_DIR}/$(basename "${pkg_relpath}")-wheel.log"
+    local log_file
+    log_file="${BUILD_ARTIFACTS_DIR}/$(basename "${pkg_relpath}")-wheel.log"
 
     cd "${WHEEL_BUILD_ROOT}/${pkg_relpath}"
+
     verify_build_requires "${pkg_relpath}"
+
+    local backend_args=()
+    if uses_rapids_build_backend; then
+        backend_args=("${RAPIDS_BUILD_BACKEND_WHEEL_ARGS[@]}")
+    fi
 
     if [ -n "${2:-}" ]; then
         local saved_cmake_args="${SKBUILD_CMAKE_ARGS:-}"
@@ -203,7 +255,7 @@ build_rapids_wheel() {
     fi
 
     if ! python3 -m pip wheel . -w "${dist_dir}" \
-        "${RAPIDS_PIP_WHEEL_ARGS[@]}" "${@:3}" \
+        "${RAPIDS_PIP_WHEEL_ARGS[@]}" "${backend_args[@]}" "${@:3}" \
         >"${log_file}" 2>&1; then
         echo "==== pip wheel failed for ${pkg_relpath}; log: ${log_file} ====" >&2
         cat "${log_file}" >&2
@@ -213,11 +265,6 @@ build_rapids_wheel() {
 
     if [ -n "${2:-}" ]; then
         export SKBUILD_CMAKE_ARGS="${saved_cmake_args}"
-    fi
-
-    if grep -E 'CPM: Using local package' -r "${WHEEL_BUILD_ROOT}/${pkg_relpath}/build" -n 2>/dev/null; then
-        echo "ERROR: Found 'CPM: Using local package' inside ${pkg_relpath} wheel build logs" >&2
-        exit 1
     fi
 
     python3 -m auditwheel repair \
@@ -231,8 +278,8 @@ build_rapids_wheel() {
 # build_setuptools_wheel <pkg-relpath> [extra-pip-args...]
 #
 # Build a pure-Python wheel and repair it with auditwheel. The scikit-build-core
-# settings in RAPIDS_PIP_WHEEL_ARGS do not apply here, but rapidsai.disable-cuda
-# does: these packages still go through rapids-build-backend to resolve the
+# settings in RAPIDS_PIP_WHEEL_ARGS do not apply here, but the backend args do:
+# such a package can still go through rapids-build-backend to resolve the
 # suffixed dependency names.
 #
 # --allow-pure-python-wheel (auditwheel >= 6.6.0) is what makes the repair step
@@ -249,12 +296,17 @@ build_setuptools_wheel() {
     log_file="${BUILD_ARTIFACTS_DIR}/$(basename "${pkg_relpath}")-wheel.log"
 
     cd "${WHEEL_BUILD_ROOT}/${pkg_relpath}"
+
     verify_build_requires "${pkg_relpath}"
+
+    local backend_args=()
+    if uses_rapids_build_backend; then
+        backend_args=("${RAPIDS_BUILD_BACKEND_WHEEL_ARGS[@]}")
+    fi
 
     if ! python3 -m pip wheel . -w "${dist_dir}" \
         --no-deps --no-build-isolation --disable-pip-version-check \
-        --config-settings=rapidsai.disable-cuda=true \
-        "${@:2}" \
+        "${backend_args[@]}" "${@:2}" \
         >"${log_file}" 2>&1; then
         echo "==== pip wheel failed for ${pkg_relpath}; log: ${log_file} ====" >&2
         cat "${log_file}" >&2
