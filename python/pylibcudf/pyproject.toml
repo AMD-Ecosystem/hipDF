@@ -47,7 +47,6 @@ dependencies = [
     "amd-libhipdf==4.*,>=4.0.0a0",
     "hip-python>=7.0",
     "hip-python-interop>=7.0",
-    "numba-hip>=0.2.1",
     # "nvtx>=0.2.1", # TODO(HIP/AMD): find replacement
     "packaging",
     "typing_extensions>=4.0.0",
@@ -70,7 +69,7 @@ test = [
     "hypothesis>=6.131.7",
     "mmh3",
     "nanoarrow",
-    "numba-cuda>=0.22.2,<0.29.0",
+    "numba-hip>=0.2.1",
     "numba>=0.60.0,<0.65.0",
     "pandas>=2.0,<2.4.0",
     "pyarrow>=19.0.0,<24",
