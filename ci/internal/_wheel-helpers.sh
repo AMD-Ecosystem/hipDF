@@ -137,6 +137,39 @@ print(f"{pkg}: {len(declared)} declared build requirements satisfied")
 PY
 }
 
+# install_built_wheel <dist>
+#
+# Install a wheel this run produced, naming the distribution rather than the
+# file. The matrix fills one BUILD_ARTIFACTS_DIR from several interpreters, so
+# a ${dist}*.whl glob also matches the wheels built for the other Python
+# versions and pip rejects a file it was handed with a tag it cannot use;
+# naming the distribution lets it take the wheel tagged for this interpreter
+# out of the pool instead.
+#
+# --no-index keeps the proxy out, and --no-deps keeps _install-build-deps.sh the
+# one place this venv is provisioned from. That leaves the wheels in
+# BUILD_ARTIFACTS_DIR as the candidates, along with whatever the rocmds-links
+# page sitting there lists -- pip reads any HTML in a --find-links directory --
+# but that page carries the upstream ROCm-DS dependencies only, never hipDF's
+# own distributions, so these stay local installs.
+install_built_wheel() {
+    local dist=$1 version
+
+    shopt -s nullglob
+    local wheels=( "${BUILD_ARTIFACTS_DIR}/${dist}"-*.whl )
+    shopt -u nullglob
+    if [ ${#wheels[@]} -eq 0 ]; then
+        echo "ERROR: no ${dist} wheel in ${BUILD_ARTIFACTS_DIR}" >&2
+        exit 1
+    fi
+
+    IFS=- read -r _ version _ <<<"$(basename "${wheels[0]}")"
+
+    pip install --no-deps --no-index \
+        --find-links "${BUILD_ARTIFACTS_DIR}" \
+        "${dist}==${version}"
+}
+
 # build_rapids_wheel <pkg-relpath> [extra-cmake-args] [extra-pip-args...]
 #
 # Build one scikit-build wheel under WHEEL_BUILD_ROOT and repair it with
