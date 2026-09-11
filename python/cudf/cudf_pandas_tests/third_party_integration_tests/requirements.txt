@@ -68,20 +68,23 @@ stumpy
 # tensorflow-rocm is a supported framework on both 7.14.1 and 10.0.0, but it
 # ships from a third index, https://rocm.frameworks.amd.com/whl-multi-arch/,
 # and only ever as cp312 wheels tagged plain linux_x86_64 -- built for the
-# Ubuntu 24.04 images AMD publishes alongside them, not for manylinux. In the
-# manylinux_2_28 test image (AlmaLinux 8.10, glibc 2.28, GLIBCXX up to 3.4.25)
-# tensorflow-rocm==2.21.0+rocm10.0.0 installs but cannot be imported:
+# Ubuntu 24.04 images AMD publishes alongside them, not for manylinux.
 #
-#     ImportError: librocm_sysdeps_asm.so.1: cannot open shared object file
-#
-# and once LD_LIBRARY_PATH is set per the "Known issues" section of the
-# install guide, the next wall is the real one:
+# The pip procedure from the install guide was run in full on the tester
+# image: `rocm[libraries,device-gfx90a]==10.0.0` from whl-next, then
+# `tensorflow-rocm==2.21.0+rocm10.0.0`, then the LD_LIBRARY_PATH from the
+# guide's "Known issues" section, and numactl-libs on top of that. Everything
+# installs. The import still ends at:
 #
 #     ImportError: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found
 #
-# The wheel wants up to GLIBCXX_3.4.30 and glibc 2.38. No pin or path setting
-# fixes that; running these tests needs a newer base image. Until then
-# tests/test_tensorflow.py skips itself while the module is absent.
+# The wheels need GLIBCXX up to 3.4.32 and glibc up to 2.38. The image
+# (AlmaLinux 8.10) has GLIBCXX 3.4.25 and glibc 2.28, and gcc-toolset-14 does
+# not help because it ships only a static libstdc++. 2.19.1 and 2.20.0 need
+# the same symbols, so downgrading does not help either. Running these tests
+# needs a newer base image -- AMD publishes
+# rocm/tensorflow:rocm10.0-ubuntu24.04-py3.12-tf2.21 -- not a pin here. Until
+# then tests/test_tensorflow.py skips while the module is absent.
 
 # test_xgboost
 hypothesis>=6.131.7
