@@ -35,12 +35,12 @@
 --index-url https://stable.repo.amd.com/rocm/whl-next/
 
 # test_pytorch (ROCm)
-# device-all covers every gfx target the CI fleet may schedule onto; the
-# MI210 (gfx90a) runners resolve amd-torch-device-gfx90a from it. Narrow this
-# to device-gfx90a if the download size becomes a problem and the fleet is
-# known to be homogeneous.
-torch[device-all]==2.13.0+rocm10.0.0
-torchvision[device-all]==0.28.0+rocm10.0.0
+# Instinct targets only: gfx90a (MI210/MI250), gfx942 (MI300/MI325) and
+# gfx950 (MI350/MI355). The install guide's device-all also pulls every
+# Radeon and APU target, which measures 9.25 GiB of wheels against 4.14 GiB
+# for these three, per job. Add a target here if the fleet grows one.
+torch[device-gfx90a,device-gfx942,device-gfx950]==2.13.0+rocm10.0.0
+torchvision[device-gfx90a,device-gfx942,device-gfx950]==0.28.0+rocm10.0.0
 torchaudio==2.11.0.2+rocm10.0.0
 
 # test_tensorflow (ROCm)
