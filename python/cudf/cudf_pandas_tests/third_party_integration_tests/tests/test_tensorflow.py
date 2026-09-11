@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
+import importlib.util
 import warnings
 
 import numpy as np
@@ -32,13 +32,21 @@ import pytest
 
 import cudf
 
-# Skip the entire file if running on the HIP AMD port with Python 3.11 or 3.13
-if getattr(cudf, "__is_hip_amd_port__", False) and sys.version_info[:2] in [
-    (3, 11),
-    (3, 13),
-]:
+# Skip the entire file when tensorflow is not installed. On ROCm it currently
+# never is: the published tensorflow-rocm wheels are cp312-only and built
+# against a newer toolchain than the manylinux_2_28 test image, so
+# third_party_integration_tests/requirements.txt deliberately leaves them out
+# and explains why. Ask for the module rather than keeping a list of
+# interpreters and ROCm releases in step with the requirements files.
+# find_spec, not an import, so the keras FutureWarning stays inside the filter
+# below.
+if (
+    getattr(cudf, "__is_hip_amd_port__", False)
+    and importlib.util.find_spec("tensorflow") is None
+):
     pytest.skip(
-        "TensorFlow is not available on ROCm/HIP for Python 3.11 and 3.13",
+        "tensorflow is not installed; see the tensorflow note in "
+        "third_party_integration_tests/requirements.txt",
         allow_module_level=True,
     )
 

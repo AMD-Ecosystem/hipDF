@@ -20,6 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Portable third-party integration test dependencies, resolved from PyPI.
+#
+# The ROCm-specific wheels (torch and friends) are NOT here: they come from an
+# AMD wheelhouse that changes with every ROCm release, so they live in a
+# sibling requirements-rocm-<release>.txt. ci/internal/_install-test-deps.sh
+# installs this file and the ROCm one selected by HIPDF_ROCM_WHEELHOUSE in two
+# separate pip invocations. Keep them separate: the ROCm indexes are
+# self-contained and serve their own copies of numpy, pillow and the rest of
+# torch's dependency closure, which must not be allowed to resolve the
+# packages below.
+
 # Base test dependencies
 pytest
 pytest-xdist
@@ -50,14 +61,27 @@ feature_engine>=1.9.3
 # test_stumpy
 stumpy
 
-# test_tensorflow (ROCm)
---find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/
-tensorflow-rocm==2.18.1
+# test_pytorch is served by requirements-rocm-<release>.txt.
 
-# test pytorch (ROCm)
-torch==2.8
-torchvision==0.24
-torchaudio==2.8
+# test_tensorflow is served by nothing, and cannot currently be.
+#
+# tensorflow-rocm is a supported framework on both 7.14.1 and 10.0.0, but it
+# ships from a third index, https://rocm.frameworks.amd.com/whl-multi-arch/,
+# and only ever as cp312 wheels tagged plain linux_x86_64 -- built for the
+# Ubuntu 24.04 images AMD publishes alongside them, not for manylinux. In the
+# manylinux_2_28 test image (AlmaLinux 8.10, glibc 2.28, GLIBCXX up to 3.4.25)
+# tensorflow-rocm==2.21.0+rocm10.0.0 installs but cannot be imported:
+#
+#     ImportError: librocm_sysdeps_asm.so.1: cannot open shared object file
+#
+# and once LD_LIBRARY_PATH is set per the "Known issues" section of the
+# install guide, the next wall is the real one:
+#
+#     ImportError: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found
+#
+# The wheel wants up to GLIBCXX_3.4.30 and glibc 2.38. No pin or path setting
+# fixes that; running these tests needs a newer base image. Until then
+# tests/test_tensorflow.py skips itself while the module is absent.
 
 # test_xgboost
 hypothesis>=6.131.7
