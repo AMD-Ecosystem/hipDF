@@ -129,8 +129,8 @@ function run_hipdf_test_suites() {
 
     export DASK_DISTRIBUTED__DIAGNOSTICS__NVML=False
 
-    python3 -m pip install -r python/cudf/cudf_pandas_tests/third_party_integration_tests/requirements.txt || \
-        echo "WARNING: some third-party integration test deps failed to install (e.g. tensorflow-rocm); continuing"
+    # The third-party integration test dependencies are installed by
+    # _install-test-deps.sh, which both callers of this function source first.
 
     run_tests python/cudf/hipdf/tests ${csv_output_dir} ${timeout_per_test_sec}
     run_tests python/cudf/cudf/tests ${csv_output_dir} ${timeout_per_test_sec}

@@ -28,6 +28,9 @@
 
 set -euo pipefail
 
+_TEST_DEPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_REPO_ROOT="$(cd "${_TEST_DEPS_DIR}/../.." && pwd)"
+
 pip install --upgrade pip
 # pytest 9.1 dropped a positional parameter from _pytest.python.IdMaker, which
 # pytest-cases probes at import time. Since it registers as a global pytest11
@@ -77,6 +80,42 @@ if [ -z "${HIPDF_CONDA_ENV:-}" ]; then
         fi
     fi
 fi
+
+# Third-party integration test dependencies for cudf_pandas_tests. Two files,
+# two pip invocations: the portable set resolves from PyPI, the torch wheels
+# come from an AMD wheelhouse that changes per ROCm release and serves its own
+# copy of their dependency closure, which must not be used to resolve the
+# portable set.
+#
+# Both installs are fatal on failure, deliberately. This used to run inside
+# run_hipdf_test_suites under `|| echo WARNING`, and because pip resolves a
+# requirements file completely before installing any of it, a single
+# unsatisfiable pin left the venv with none of these packages. The suite then
+# reported twelve third-party modules as import errors that were invisible to
+# merge_test_results, so the job passed with them all broken.
+third_party_dir="${_REPO_ROOT}/python/cudf/cudf_pandas_tests/third_party_integration_tests"
+
+# Which wheelhouse to pin against. Default to the ROCm the image actually
+# carries rather than a hard-coded release: naming one by hand is how the
+# suite ended up installing rocm-rel-7.2 torch wheels inside a ROCm 10.0.0
+# image. Override with HIPDF_ROCM_WHEELHOUSE to test a different pin set.
+if [ -z "${HIPDF_ROCM_WHEELHOUSE:-}" ] && [ -r /opt/rocm/.info/version ]; then
+    HIPDF_ROCM_WHEELHOUSE="$(cut -d- -f1 < /opt/rocm/.info/version | tr -d '[:space:]')"
+fi
+rocm_wheelhouse="${HIPDF_ROCM_WHEELHOUSE:-10.0.0}"
+rocm_requirements="${third_party_dir}/requirements-rocm-${rocm_wheelhouse}.txt"
+
+if [ ! -f "${rocm_requirements}" ]; then
+    echo "ERROR: no third-party test requirements for ROCm '${rocm_wheelhouse}';" \
+         "${rocm_requirements} does not exist. Available:" >&2
+    ls -1 "${third_party_dir}"/requirements-rocm-*.txt >&2
+    echo "Set HIPDF_ROCM_WHEELHOUSE to one of the releases above, or add a" \
+         "requirements file for this one." >&2
+    exit 1
+fi
+
+pip install -r "${third_party_dir}/requirements.txt"
+pip install -r "${rocm_requirements}"
 
 # For jupyter notebooks. The `cudf-pandas-tests` extra installs a bare
 # `ipykernel`; pin it here to the version the notebook-based tests expect.
