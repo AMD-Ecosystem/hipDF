@@ -117,6 +117,8 @@ fi
 pip install -r "${third_party_dir}/requirements.txt"
 pip install -r "${rocm_requirements}"
 
-# For jupyter notebooks. The `cudf-pandas-tests` extra installs a bare
-# `ipykernel`; pin it here to the version the notebook-based tests expect.
-pip install ipykernel==7.0.0a0
+# For jupyter notebooks: test_notebook_slow_repr executes one through
+# nbconvert. The `cudf-pandas-tests` extra installs a bare `ipykernel`;
+# upgrade it here so an environment that already has the old 7.0.0a0
+# prerelease does not keep it.
+pip install --upgrade "ipykernel>=7.3"
