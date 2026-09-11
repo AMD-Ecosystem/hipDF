@@ -53,7 +53,7 @@ build_dask_hipdf=${HIPDF_BUILD_DASK_HIPDF-1}
 if [ "${USE_SABI:-no}" = "no" ]; then
   hipdf_wheel_config=(--config-settings=skbuild.wheel.py-api=)
 else
-  hipdf_wheel_config=(--config-settings=skbuild.wheel.py-api=cp${USE_SABI//./})
+  hipdf_wheel_config=("--config-settings=skbuild.wheel.py-api=cp${USE_SABI//./}")
 fi
 
 src_dir=${SRC_DIR}/${PROJECT_ID}
@@ -68,12 +68,20 @@ cd ${build_dir}
 
     export CC=hipcc
     export CXX=hipcc
-    cmake_args+=(
-        "-DAMDGPU_TARGETS=${AMDGPU_TARGETS}"
-        "-DCMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}"
-        "-DGPU_TARGETS=${AMDGPU_TARGETS}"
-    )
-    export SKBUILD_CMAKE_ARGS="$(IFS=';'; echo "${cmake_args[*]}")"
+    # scikit-build-core splits SKBUILD_CMAKE_ARGS on ';' and offers no escape for it, so a
+    # semicolon-separated architecture list cannot travel there: it would arrive as one
+    # argument per architecture and the build would keep only the first. CMAKE_ARGS is
+    # shlex-split instead, so the list survives as a single argument. That is also why the
+    # preamble's own copy of CMAKE_HIP_ARCHITECTURES is dropped here.
+    skbuild_cmake_args=()
+    # shellcheck disable=SC2154  # cmake_args is set by _build-preamble.sh
+    for cmake_arg in "${cmake_args[@]}"; do
+        [[ "${cmake_arg}" == *CMAKE_HIP_ARCHITECTURES* ]] && continue
+        skbuild_cmake_args+=("${cmake_arg}")
+    done
+    SKBUILD_CMAKE_ARGS="$(IFS=';'; echo "${skbuild_cmake_args[*]}")"
+    export SKBUILD_CMAKE_ARGS
+    export CMAKE_ARGS="${CMAKE_ARGS:+${CMAKE_ARGS} }-DAMDGPU_TARGETS=${AMDGPU_TARGETS} -DCMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS} -DGPU_TARGETS=${AMDGPU_TARGETS}"
     export RAPIDS_DISABLE_CUDA=true
     export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
     export WHEEL_BUILD_ROOT="${build_dir}"
