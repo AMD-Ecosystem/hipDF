@@ -48,7 +48,9 @@ fi
 [[ "${HIPDF_USE_WARPSIZE_32:-false}" == "true" ]] && use_warpsize_32=1
 [[ "${HIPDF_USE_PER_THREAD_DEFAULT_STREAM:-false}" == "true" ]] && use_ptds=1
 [[ "${HIPDF_ASAN_BUILD:-false}" == "true" ]] && asan_build=1
-[[ "${HIPDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS:-false}" == "false" ]] && no_enable_failing_optimization_workarounds=1
+# Inverted on purpose: CUDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS defaults to ON in
+# cpp/CMakeLists.txt, so only an explicit "false" here may turn the workarounds off.
+[[ "${HIPDF_ENABLE_FAILING_OPTIMIZATION_WORKAROUNDS:-true}" == "false" ]] && no_enable_failing_optimization_workarounds=1
 
 # Wheel builds resolve rmm and rapids_logger from ci_packages wheels
 # (amd-libhipmm, amd-rocmds-logger), not from /src checkouts.
