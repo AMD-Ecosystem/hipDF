@@ -40,6 +40,23 @@ pip install 'pytest<9.1' pytest-timeout pytest-csv pytest-benchmark
 # Runtime deps required by the cudf test/benchmark suite.
 pip install pyarrow cachetools "pandas<2.4.0dev0"
 
+# Optional backends that cudf's own tests reach for through importorskip, so a
+# missing one costs coverage quietly instead of failing. Neither is in the cudf
+# [test] extra nor in the third-party requirements, so nothing installed them
+# here and mi355x #38 skipped every test in input_output/test_s3.py and
+# test_hdf5.py. With them: 33 pass and 5 skip in the first, 18 pass and 14 skip
+# in the second.
+#
+# moto needs its [server] extra, because test_s3.py drives a ThreadedMotoServer
+# and moto.server does not import without flask. moto is already in
+# conda/environments/all_rocm_arch-x86_64.yaml, so the dev environment has had
+# it all along.
+#
+# gcsfs is deliberately left out. It would un-skip test_read_csv_gcs and
+# test_write_orc_gcs, which reach a real bucket and fail without Google
+# application credentials, turning two quiet skips into two standing failures.
+pip install "moto[server]>=4.0.8" tables
+
 pip install "pytest-rerunfailures!=16.0.0" "pytest-cases>=3.8.2" pytest-xdist "scipy==1.15.3"
 
 # When using a conda env, dependency packages and hipDF itself are already
