@@ -119,6 +119,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/sphinx/_toc.yml
 
 # PyBuilder
 target/

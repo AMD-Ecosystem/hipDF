@@ -23,7 +23,7 @@
 
 .. meta::
   :description: hipDF documentation and API reference library
-  :keywords: hipDF, cuDF, Pandas, ROCm-DS, API, documentation
+  :keywords: hipDF, cuDF, Pandas, AMD-DS, API, documentation
 
 .. _what-is-hipDF:
 
@@ -33,11 +33,11 @@ What is hipDF?
 
 In addition to containing the necessary tools to build powerful new data processing applications,
 hipDF enables you to easily port your existing Pandas and cuDF workloads to AMD GPUs. hipDF
-is aligned with and is API-compatible with RAPIDS® cuDF 25.10, allowing for workloads to be
+is aligned with and is API-compatible with RAPIDS® cuDF 26.06, allowing for workloads to be
 transitioned to AMD devices without hipification. Support is limited to C++ and Python interfaces.
 A Java interface is not supported.
 
-hipDF v3.0.0 includes the following features:
+hipDF v4.0.0 includes the following features:
 
 * hipDF offers Series and DataFrame data structures for storing and manipulating data
   directly on the GPU. The Series data structure acts as a one-dimensional array, while the DataFrame

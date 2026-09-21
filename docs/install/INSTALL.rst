@@ -52,7 +52,7 @@ Install hipDF via AMD PyPI
    To ensure security, integrity, and supportability of your builds, consume packages exclusively from AMD's official package index. Do not install, mirror, or resolve dependencies from any third‑party or unofficial indexes.
 
 Packaged versions of hipDF and its dependencies are distributed via
-`AMD PyPI <https://pypi.amd.com/rocm-7.2.3/simple>`__. This section discusses how to install
+`AMD PyPI <https://pypi.amd.com/rocm-10.0.0/simple>`__. This section discusses how to install
 hipDF via this package index.
 
 Create and activate a Conda environment with a compatible Python version, such as 3.11 or 3.12 as shown below. For more information on compatible Python versions, see :ref:`hipDF-support`.
@@ -66,7 +66,27 @@ hipDF can then be installed into this environment using pip and the AMD PyPI URL
 
 .. code-block:: bash
 
-   pip install amd-hipdf==4.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.2.3/simple
+   pip install amd-hipdf==4.0.0 --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple
+
+Installing ``amd-hipdf`` pulls in the matching ``amd-libhipdf`` and
+``amd-pylibhipdf`` packages, so most users need only the command above. This
+release publishes the following wheels:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Package
+     - Contents
+   * - ``amd-libhipdf``
+     - The hipDF C++ headers and the libhipdf shared library. Install this on
+       its own for a C++-only deployment.
+   * - ``amd-pylibhipdf``
+     - The low-level Python bindings for libhipdf.
+   * - ``amd-hipdf``
+     - The hipDF DataFrame library, and the package most users install.
+   * - ``amd-dask_hipdf``
+     - The Dask integration, for distributing hipDF DataFrames across
+       multiple GPUs.
 
 Verify correct installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

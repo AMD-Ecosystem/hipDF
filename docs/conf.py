@@ -51,7 +51,7 @@ article_pages = [
 
 html_theme = "rocm_docs_theme"
 html_theme_options = {"flavor": "rocm-ds"}
-html_context = {"docs_header_version": "26.03"}
+html_context = {"docs_header_version": "26.09"}
 
 external_toc_path = "./sphinx/_toc.yml"
 
@@ -74,7 +74,7 @@ extensions = [
 
 
 # for PDF output on Read the Docs
-version_number = "3.0.0"
+version_number = "4.0.0"
 project = "hipDF"
 author = "Advanced Micro Devices, Inc."
 copyright = f"Copyright (c) 2023-{_today.strftime(r'%Y')} Advanced Micro Devices, Inc. All rights reserved."

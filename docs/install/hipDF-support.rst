@@ -23,7 +23,7 @@
 
 .. meta::
   :description: hipDF documentation and API reference library
-  :keywords: hipDF, cuDF, Pandas, ROCm-DS, API, documentation
+  :keywords: hipDF, cuDF, Pandas, AMD-DS, API, documentation
 
 .. _hipDF-support:
 
@@ -33,7 +33,7 @@ System requirements
 
 This topic lists the system requirements for using hipDF.
 
-* ROCm version: `7.2.3 <https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.3/>`__
+* ROCm version: `10.0.0 <https://rocm.docs.amd.com/en/docs-10.0.0/>`__
 * Operating Systems: Ubuntu 24.04 and 22.04  
 
 .. note::
@@ -45,7 +45,7 @@ This topic lists the system requirements for using hipDF.
   - MI325X / MI300X (GPU target gfx942) 
   - MI250 / MI210 (GPU target gfx90a) 
 
-* Python versions: 3.10, 3.11, 3.12, 3.13
+* Python versions: 3.11, 3.12, 3.13
 
 Conda virtual environment
 -------------------------

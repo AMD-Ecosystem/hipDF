@@ -35,7 +35,7 @@ follow the latter's directory structure and API naming as closely as possible to
 ## Resources
 
 - [hipDF documentation](https://rocm.docs.amd.com/projects/hipDF/en/latest/)
-- [ROCm-DS documentation](https://rocm.docs.amd.com/projects/rocm-ds/en/latest/)
+- [AMD Data Science documentation](https://rocm.docs.amd.com/projects/rocm-ds/en/latest/)
 
 RAPIDS resources:
 
@@ -72,7 +72,7 @@ data structures and fundamental algorithms for tabular data.
 ## Installation
 
 > [!CAUTION]
-> Incompatibility notice: Mixing RAPIDS and ROCmDS packages/installations is not supported. To avoid conflicts, strictly separate and isolated environments must be maintained if it is required to install both RAPIDS and ROCm-DS packages on the same system.
+> Incompatibility notice: Mixing RAPIDS and AMD-DS packages/installations is not supported. To avoid conflicts, strictly separate and isolated environments must be maintained if it is required to install both RAPIDS and AMD-DS packages on the same system.
 
 > [!NOTE]
 > We support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
@@ -204,7 +204,7 @@ See build [instructions](docs/install/BUILD.md).
 
 ## Open GPU Data Science
 
-The ROCm-DS suite of open source software libraries aims to enable execution of end-to-end data science and analytics pipelines entirely on AMD GPUs. It relies on ROCm HIP primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
+The AMD Data Science suite of open source software libraries aims to enable execution of end-to-end data science and analytics pipelines entirely on AMD GPUs. It relies on ROCm HIP primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
 
 ## Questions and Discussion
 
