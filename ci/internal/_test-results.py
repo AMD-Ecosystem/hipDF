@@ -30,7 +30,8 @@ must be handled with a CSV parser rather than line by line.
       Append <suffix> to the id of every row of <csv_file>, in place.
 
   _test-results.py merge <csv_output_dir>
-      Write every report under <csv_output_dir> to stdout as one CSV.
+      Write every report under <csv_output_dir> to stdout as one CSV,
+      without the attempts of flaky tests that a rerun superseded.
       Exit 1 if any test ended in error or failed.
 """
 
@@ -66,6 +67,30 @@ def suffix_ids(csv_file, suffix):
     return 0
 
 
+def status(row, status_col):
+    # A row too short to have a status can only come from a corrupted report.
+    return row[status_col] if len(row) > status_col else "error"
+
+
+def final_attempts(rows, id_col, status_col):
+    """Drop the rows of attempts that pytest-rerunfailures superseded.
+
+    pytest-csv builds a row before the plugin relabels an attempt as a
+    rerun, so a flaky test that passes on its second try leaves a failed row
+    and then a passed one. One attempt can also leave two rows, a call and a
+    failed teardown. An attempt that passed leaves only its call row, so a
+    test whose last row passed is the one case where every earlier row
+    belongs to an attempt that was rerun.
+    """
+    last_row = {row[id_col]: row for row in rows}
+    return [
+        row
+        for row in rows
+        if row is last_row[row[id_col]]
+        or status(last_row[row[id_col]], status_col) != "passed"
+    ]
+
+
 def merge(csv_output_dir):
     writer = csv.writer(sys.stdout)
     header_written = False
@@ -77,10 +102,10 @@ def merge(csv_output_dir):
         if not header_written:
             writer.writerow(header)
             header_written = True
-        status_col = header.index("status")
-        for row in rows:
+        id_col, status_col = header.index("id"), header.index("status")
+        for row in final_attempts(rows, id_col, status_col):
             writer.writerow(row)
-            if len(row) <= status_col or row[status_col] in FAILURE_STATUSES:
+            if status(row, status_col) in FAILURE_STATUSES:
                 failed = True
     return 1 if failed else 0
 
