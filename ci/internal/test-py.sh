@@ -41,7 +41,7 @@ cd ${BUILD_DIR}/${PROJECT_ID}
 
     run_hipdf_test_suites ${CSV_OUTPUT_DIR} ${TIMEOUT_PER_TEST_SEC}
 
-    result=$(merge_test_results ${CSV_OUTPUT_DIR}) || test_failures=1
-    echo $result > ${ARTIFACTS_DIR}/${PROJECT_ID}-test-results-py.csv
+    merge_test_results ${CSV_OUTPUT_DIR} \
+        > ${ARTIFACTS_DIR}/${PROJECT_ID}-test-results-py.csv || test_failures=1
 
 exit $test_failures

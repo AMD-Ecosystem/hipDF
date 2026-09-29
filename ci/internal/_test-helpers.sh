@@ -25,6 +25,8 @@
 
 set -euo pipefail
 
+_TEST_HELPERS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Map a test directory to the pytest config file that declares the intended
 # options for that package (filterwarnings=error, --strict-markers, xfail_strict,
 # registered markers, ...).
@@ -82,44 +84,17 @@ function run_tests() {
             "{}" "{}" "$pytest_rc" > "$csv_file"
         fi
         if [[ -n "$5" && -f "$csv_file" ]]; then
-          temp_file=$(mktemp)
-          head -n 1 "$csv_file" > "$temp_file"
-          tail -n +2 "$csv_file" | awk -F"," -v suffix="$6" "BEGIN{OFS=\",\"} {\$2=\$2 suffix; print}" >> "$temp_file"
-          mv "$temp_file" "$csv_file"
+          python3 "$9/_test-results.py" suffix-ids "$csv_file" "$6"
         fi
-        ' _ "$1" "$2" "$3" "$pytest_args" "$suffix" "$id_suffix" "$config_arg" "$file_timeout" \;
+        ' _ "$1" "$2" "$3" "$pytest_args" "$suffix" "$id_suffix" "$config_arg" "$file_timeout" \
+          "${_TEST_HELPERS_DIR}" \;
     set -e
 }
 
-# Merges all per-file results in a folder (1st arg) into a single CSV.
+# Merges all per-file results in a folder (1st arg) into a single CSV on
+# stdout. Returns 1 if any test ended in error or failed.
 function merge_test_results() {
-    FAILURE_EXPR=",\(error\|failed\),"
-
-    result=""
-    test_failures=0
-    i=0
-    for f in $(grep -rL "${FAILURE_EXPR}" --include="*.csv" $1); do
-        if (( i == 0 )); then
-            result+=$(cat $f)
-        else
-            result+=$(tail -n +2 $f)
-        fi
-        i=1
-    done
-    for f in $(grep -rl "${FAILURE_EXPR}" --include="*.csv" $1); do
-        has_errors=$(cat $f | grep -n "error" | grep -v "passed"  | grep -v "xfailed" || true)
-        if [ -n "$has_errors" ]; then
-            test_failures=1
-        fi
-        if (( i == 0 )); then
-            result+=$(cat $f)
-        else
-            result+=$(tail -n +2 $f)
-        fi
-        i=1
-    done
-    echo $result
-    return $test_failures
+    python3 "${_TEST_HELPERS_DIR}/_test-results.py" merge "$1"
 }
 
 # run_hipdf_test_suites <csv_output_dir> <timeout_per_test_sec>
