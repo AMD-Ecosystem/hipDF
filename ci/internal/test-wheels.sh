@@ -56,7 +56,8 @@ python3 -m venv ${wheels_test_env}
     "amd_hipdf${HIPDF_VERSION:+==${HIPDF_VERSION}}"
 
   install_built_wheel -- \
-    "amd-hipdf[test,cudf-pandas-tests]${HIPDF_VERSION:+==${HIPDF_VERSION}}"
+    "amd-hipdf[test,cudf-pandas-tests]${HIPDF_VERSION:+==${HIPDF_VERSION}}" \
+    "amd-pylibhipdf[test]${HIPDF_VERSION:+==${HIPDF_VERSION}}"
 
   test_failures=0
   cd ${BUILD_DIR}/${PROJECT_ID}

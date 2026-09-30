@@ -118,8 +118,15 @@ function run_hipdf_test_suites() {
     export HSA_XNACK=1
     run_tests python/cudf/cudf_pandas_tests \
         ${csv_output_dir} ${timeout_per_test_sec} "-p cudf.pandas" "_xnack1" "[xnack=1]"
-    run_tests python/pylibcudf/pylibcudf/tests \
-        ${csv_output_dir} ${timeout_per_test_sec}
+    # WORKAROUND(two-rocms): pylibcudf only imports once librmm.so is loaded.
+    # libcudf.load_library() loads librmm and rapids_logger only if libkvikio
+    # and nvidia.libnvcomp import too, and hipDF ships neither. Loading them
+    # regardless would make librmm resolve /opt/rocm's HIP before hip-python
+    # opens rocm-sdk's, and a plain `import cudf` would then abort wherever both
+    # ROCms are installed. Once they no longer clash, load each dependency on
+    # its own in python/libcudf/libcudf/load.py and drop -p rmm.
+    run_tests python/pylibcudf/tests \
+        ${csv_output_dir} ${timeout_per_test_sec} "-p rmm"
 
     if [ "${HIPDF_TEST_DASK:-0}" = "1" ] && [ -d python/dask_cudf/dask_cudf/tests ]; then
         export UCX_TLS=sm,rocm_copy,rocm_ipc,self,tcp
