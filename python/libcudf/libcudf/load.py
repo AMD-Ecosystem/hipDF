@@ -61,8 +61,34 @@ def _load_wheel_installation(soname: str):
     return None
 
 
+def _preload_rocm_sdk():
+    """Load the ROCm runtime from the rocm-sdk wheels, if they are installed.
+
+    torch and hip-python always load ROCm from the rocm-sdk wheels when they
+    are present, while libcudf.so would otherwise resolve libamdhip64.so.7
+    through LD_LIBRARY_PATH or the system loader, typically from /opt/rocm.
+    Two ROCm runtimes in one process abort in LLVM ("Option ... registered
+    more than once"). Once loaded, the rocm-sdk copy satisfies every later
+    lookup of the same soname, whatever LD_LIBRARY_PATH says.
+    """
+    try:
+        import rocm_sdk
+    except ImportError:
+        return
+    try:
+        rocm_sdk.initialize_process(preload_shortnames=["amdhip64"])
+    except Exception:
+        # find_libraries() raises a variety of errors for partial
+        # installations; fall back to the system loader in that case.
+        pass
+
+
 def load_library():
     """Dynamically load libcudf.so and its dependencies"""
+    # NOTE(HIP/AMD): must run before anything that links libamdhip64.so.7,
+    # rapids_logger included.
+    _preload_rocm_sdk()
+
     try:
         from cuda.pathfinder import load_nvidia_dynamic_lib
 
