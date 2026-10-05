@@ -70,18 +70,21 @@ def _preload_rocm_sdk():
     through LD_LIBRARY_PATH or the system loader, typically from /opt/rocm.
     Two ROCm runtimes in one process abort in LLVM ("Option ... registered
     more than once"). Once loaded, the rocm-sdk copy satisfies every later
-    lookup of the same soname, whatever LD_LIBRARY_PATH says.
+    lookup of the same soname, whatever LD_LIBRARY_PATH says. libhiprtc.so.7
+    is not linked but dlopened by jitify for JIT kernels, so it is preloaded
+    as well.
     """
     try:
         import rocm_sdk
     except ImportError:
         return
-    try:
-        rocm_sdk.initialize_process(preload_shortnames=["amdhip64"])
-    except Exception:
-        # find_libraries() raises a variety of errors for partial
-        # installations; fall back to the system loader in that case.
-        pass
+    for shortname in ("amdhip64", "hiprtc"):
+        try:
+            rocm_sdk.initialize_process(preload_shortnames=[shortname])
+        except Exception:
+            # find_libraries() raises a variety of errors for partial
+            # installations; fall back to the system loader in that case.
+            pass
 
 
 def load_library():
