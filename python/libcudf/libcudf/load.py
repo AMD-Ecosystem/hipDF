@@ -25,6 +25,7 @@
 # SOFTWARE.
 
 import ctypes
+import importlib
 import os
 
 # Loading with RTLD_LOCAL adds the library itself to the loader's
@@ -96,23 +97,25 @@ def load_library():
     except ModuleNotFoundError:
         pass
 
-    try:
-        # librmm and libkvikio must be loaded before libcudf because libcudf references
-        # them.
-        import libkvikio
-        import librmm
-        import nvidia.libnvcomp
-        import rapids_logger
-
-        rapids_logger.load_library()
-        librmm.load_library()
-        libkvikio.load_library()
-        nvidia.libnvcomp.load_library()
-    except ModuleNotFoundError:
-        # libcudf's runtime dependency on libkvikio may be satisfied by a natively
-        # installed library or a conda package, in which case the import will fail and
-        # we assume the library is discoverable on system paths.
-        pass
+    # librmm and libkvikio must be loaded before libcudf because libcudf
+    # references them. Each of these runtime dependencies may instead be
+    # satisfied by a natively installed library or a conda package, in which
+    # case the import fails and we assume the library is discoverable on
+    # system paths.
+    # NOTE(HIP/AMD): hipDF ships neither libkvikio nor nvidia.libnvcomp, so
+    # each dependency is loaded on its own; a missing one must not skip
+    # librmm.
+    for module_name in (
+        "rapids_logger",
+        "librmm",
+        "libkvikio",
+        "nvidia.libnvcomp",
+    ):
+        try:
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            continue
+        module.load_library()
 
     return _load_library("libcudf.so")
 
