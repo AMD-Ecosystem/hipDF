@@ -341,6 +341,9 @@ __device__ int skip_validity_and_row_indices_nonlist(
     __shared__ typename block_scan::TempStorage scan_storage;
     int thread_valid_count = 0, block_valid_count = 0;
     block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);
+    // scan_storage is reused by the next iteration, so it must not be overwritten while other
+    // warps are still reading it. Without this, block_valid_count is not block-uniform.
+    __syncthreads();
 
     value_count += batch_size;
     max_depth_valid_count += block_valid_count;
@@ -415,6 +418,10 @@ __device__ int update_validity_and_row_indices_nested(
       __shared__ typename block_scan::TempStorage scan_storage;
       int thread_valid_count, block_valid_count;
       block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);
+      // scan_storage is reused by the next depth/value iteration, so it must not be overwritten
+      // while other warps are still reading it. Without this, block_valid_count is not
+      // block-uniform.
+      __syncthreads();
 
       // validity is processed per-warp
       //
@@ -528,6 +535,9 @@ __device__ int update_validity_and_row_indices_flat(
     __shared__ typename block_scan::TempStorage scan_storage;
     int thread_valid_count, block_valid_count;
     block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);
+    // scan_storage is reused by the next iteration, so it must not be overwritten while other
+    // warps are still reading it. Without this, block_valid_count is not block-uniform.
+    __syncthreads();
     bitmask_type const warp_validity_mask = ballot(is_valid);
 
     // validity is processed per-warp
