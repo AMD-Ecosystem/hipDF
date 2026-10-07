@@ -4,7 +4,7 @@
  */
 // MIT License
 //
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -101,6 +101,22 @@ inline bool should_skip_large_sizes(nvbench::state& state, bool build_is_right =
   return false;
 }
 
+// Returns true (and marks `state` as skipped) when `multiplicity` exceeds the number of rows in
+// the build table, which `generate_input_tables` always takes from the right table. That case
+// cannot be realised: the generator derives the number of distinct keys as
+// `build_table_numrows / multiplicity`, which truncates to zero, and the resulting empty key
+// table is then gathered from with `out_of_bounds_policy::DONT_CHECK`. The gather reads through
+// the null data pointer of the empty column and faults on the device.
+inline bool should_skip_degenerate_multiplicity(nvbench::state& state, int multiplicity)
+{
+  auto const build_table_numrows = state.get_int64("right_size");
+  if (static_cast<nvbench::int64_t>(multiplicity) > build_table_numrows) {
+    state.skip("multiplicity exceeds build table size");
+    return true;
+  }
+  return false;
+}
+
 template <bool Nullable,
           join_t join_type                  = join_t::HASH,
           cudf::null_equality compare_nulls = cudf::null_equality::UNEQUAL,
@@ -114,6 +130,7 @@ void BM_join(state_type& state,
              bool build_is_right = true)
 {
   if (should_skip_large_sizes(state, build_is_right)) { return; }
+  if (should_skip_degenerate_multiplicity(state, multiplicity)) { return; }
 
   auto const right_size = static_cast<size_t>(state.get_int64("right_size"));
   auto const left_size  = static_cast<size_t>(state.get_int64("left_size"));
