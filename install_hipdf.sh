@@ -1,7 +1,7 @@
 #!/usr/bin/env -S bash -i
 # MIT License
 #
-# Copyright (c) 2023-2025 Advanced Micro Devices, Inc.
+# Copyright (c) 2023-2026 Advanced Micro Devices, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,12 +30,16 @@ set +H # NOTE: Disables '!' style history substitution of 'bash' -i shell.
 ROCM_PATH=${ROCM_PATH:-"/opt/rocm"}
 AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx942"}
 BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
+PYTHON_VERSION=${PYTHON_VERSION:-"3.12"}
 
 # set ROCm-DS GITHUB organization to AMD-Ecosystem if not set in environment
-export GITHUB_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-AMD-Ecosystem}"
+# NOTE: ROCmDS-CMake fetches dependencies from RAPIDS_CMAKE_ROCM_DS_ORG and defaults to the former name of the organization, ROCm-DS.
+export RAPIDS_CMAKE_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-AMD-Ecosystem}"
+export GITHUB_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
-export GITHUB_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG:-ROCm}"
+export RAPIDS_CMAKE_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG:-ROCm}"
+export GITHUB_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG}"
 
 BUILD_CUPY=${BUILD_CUPY:-"false"}
 BUILD_HIPMM=${BUILD_HIPMM:-"false"}
@@ -47,18 +51,21 @@ CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
 CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
 CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
 
-GITHUB_ROCM_DS_BRANCH="release/rocmds-26.03"
+GITHUB_ROCM_DS_BRANCH=${GITHUB_ROCM_DS_BRANCH:-"release/26.09"}
 
-NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
-NUMBA_BRANCH=${NUMBA_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
+# Numba HIP lives in the 'packages/numba-hip' subdirectory of the HIP Python monorepo.
+NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/hip-python"}
+NUMBA_BRANCH=${NUMBA_BRANCH:-"release/rocm-rel-10.0.0"}
 CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
 CUPY_BRANCH=${CUPY_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
 HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
 HIPMM_BRANCH=${HIPMM_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
 HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
 HIPDF_BRANCH=${HIPDF_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
+ROCMDS_CMAKE_URL=${ROCMDS_CMAKE_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/ROCmDS-cmake"}
+ROCMDS_CMAKE_BRANCH=${ROCMDS_CMAKE_BRANCH:-"${GITHUB_ROCM_DS_BRANCH}"}
 
-AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/rocm-7.2.1/simple"}
+AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/rocm-10.0.0/simple"}
 
 # We assume that you have already installed ROCm into /opt/rocm
 
@@ -94,8 +101,8 @@ function get_rocm_version_linearized() {
   __get_rocm_version_linearized ${major} ${minor} ${patch}
 }
 
-# Prints a key 'rocm-X-Y-Z'
-function get_rocm_pip_key() {
+# Prints the ROCm version 'X.Y.Z'
+function get_rocm_version() {
   local rocm_version_h
   local major
   local minor
@@ -104,7 +111,7 @@ function get_rocm_pip_key() {
   major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
   minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
   patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
-  printf "rocm-${major}-${minor}-${patch}"
+  printf "${major}.${minor}.${patch}"
 }
 
 # Matches empty vars, and vars that contain spaces. Does not match undefined variables.
@@ -161,6 +168,7 @@ err_if_no_boolean "${CUDF_USE_PER_THREAD_DEFAULT_STREAM}"
 err_if_blank AMDGPU_TARGETS
 err_if_blank BUILD_DIR
 err_if_blank ROCM_PATH
+err_if_blank PYTHON_VERSION
 
 err_if_blank NUMBA_URL
 err_if_blank NUMBA_BRANCH
@@ -170,12 +178,14 @@ err_if_blank HIPMM_URL
 err_if_blank HIPMM_BRANCH
 err_if_blank HIPDF_URL
 err_if_blank HIPDF_BRANCH
+err_if_blank ROCMDS_CMAKE_URL
+err_if_blank ROCMDS_CMAKE_BRANCH
 
 # Allow to find ROCm-related CMake package config files
 export CMAKE_PREFIX_PATH="${ROCM_PATH}/lib/cmake"
 
-if ((  $(get_rocm_version_linearized) < 70000 )); then
-  echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 7.0.0"
+if ((  $(get_rocm_version_linearized) < 100000 )); then
+  echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 10.0.0"
   exit 1
 fi
 
@@ -197,14 +207,25 @@ if [ ! -d "hipDF" ]; then
 git clone ${HIPDF_URL} -b ${HIPDF_BRANCH} hipDF
 fi
 
+# NOTE: Without a local ROCmDS-CMake, hipMM and hipDF download the 'RAPIDS.cmake' of an older ROCm-DS release,
+#       which pins incompatible dependency versions, e.g. ROCm-DS Logger 1.0.
+if [ ! -d "ROCmDS-cmake" ]; then
+  git clone ${ROCMDS_CMAKE_URL} -b ${ROCMDS_CMAKE_BRANCH} ROCmDS-cmake
+fi
+export RAPIDS_CMAKE_MODULE_PATH=${BUILD_DIR}/ROCmDS-cmake/rapids-cmake
+
 # Step 3: Create and activate hipDF Conda environment `hipdf_dev`
 cd ${BUILD_DIR}/hipDF
-conda env create --name hipdf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
+# NOTE: The environment file only requires 'python>=3.11', but the AMD PyPI wheels are not built for every newer Python.
+sed "s/^- python>=.*$/- python=${PYTHON_VERSION}/" conda/environments/all_rocm_arch-x86_64.yaml > ${BUILD_DIR}/hipdf_dev.yaml
+conda env create --name hipdf_dev --file ${BUILD_DIR}/hipdf_dev.yaml
+# NOTE: The ROCm 10 packages do not add '${ROCM_PATH}/lib' to the dynamic linker's search path, but CuPy and hipDF load the ROCm libraries from there.
+conda env config vars set --name hipdf_dev LD_LIBRARY_PATH="${ROCM_PATH}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 conda activate hipdf_dev
 
 # Step 4: Install CuPy into hipdf_dev
 if [ "$(is_false "${BUILD_CUPY}")" ]; then
-  pip install amd-cupy~=13.5.1 --extra-index-url=${AMD_PYPI_URL}
+  pip install amd-cupy~=14.1.1 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
 
@@ -226,14 +247,19 @@ else
   pip install ${CUPY_WHEEL}
 fi
 
-# Step 5: Install Numba HIP into `hipdf_dev`
-ROCM_KEY=$(get_rocm_pip_key)
+# Step 5: Install Numba HIP and the HIP Python bindings into `hipdf_dev`
+# NOTE: The versions of the binding packages lead with the ROCm version, e.g. 10.0.0.0.1.2.
+ROCM_VERSION=$(get_rocm_version)
 pip install --extra-index-url=${AMD_PYPI_URL} \
-  numba-hip[${ROCM_KEY}]@git+${NUMBA_URL}#${NUMBA_BRANCH}
+  "numba-hip @ git+${NUMBA_URL}@${NUMBA_BRANCH}#subdirectory=packages/numba-hip" \
+  "rocm-bindings-core==${ROCM_VERSION}.*" \
+  "rocm-bindings-hip==${ROCM_VERSION}.*" \
+  "rocm-bindings-compiler==${ROCM_VERSION}.*" \
+  "hip-python-interop==${ROCM_VERSION}.*"
 
 # Step 6: Install hipMM into `hipdf_dev`.
 if [ "$(is_false "${BUILD_HIPMM}")" ]; then
-  pip install amd-hipmm==3.0.0 --extra-index-url=${AMD_PYPI_URL}
+  pip install amd-hipmm==5.0.0 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
 
@@ -283,8 +309,6 @@ if [[ ${CUDF_USE_PER_THREAD_DEFAULT_STREAM} == "true" ]]; then
   cmake_extra_args+=" -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON"
 fi
 
-if [ ! -z "${cmake_extra_args}" ]; then
-  cmake_extra_args="--cmake-args=${cmake_extra_args}"
-fi
-
-CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake bash build.sh ${components} ${cmake_extra_args}
+# NOTE: 'build.sh' only accepts the CMake arguments as a single argument in the form '--cmake-args="<args>"'.
+CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake bash build.sh ${components} \
+  ${cmake_extra_args:+"--cmake-args=\"${cmake_extra_args# }\""}
