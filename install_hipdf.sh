@@ -51,7 +51,7 @@ CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
 CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
 CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
 
-GITHUB_ROCM_DS_BRANCH=${GITHUB_ROCM_DS_BRANCH:-"release/26.09"}
+GITHUB_ROCM_DS_BRANCH=${GITHUB_ROCM_DS_BRANCH:-"release/26.10"}
 
 # Numba HIP lives in the 'packages/numba-hip' subdirectory of the HIP Python monorepo.
 NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/hip-python"}
