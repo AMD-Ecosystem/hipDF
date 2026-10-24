@@ -42,7 +42,7 @@ if(NOT "$ENV{RAPIDS_CMAKE_ROCM_DS_ORG}" STREQUAL "")
   message(STATUS "RAPIDS_CMAKE_ROCM_DS_ORG=${RAPIDS_CMAKE_ROCM_DS_ORG}")
 else()
   set(RAPIDS_CMAKE_ROCM_DS_ORG
-      AMD-AIOSS
+      AMD-Ecosystem
       CACHE STRING "ROCm-DS GitHub organization"
   )
   message(STATUS "Using default RAPIDS_CMAKE_ROCM_DS_ORG=${RAPIDS_CMAKE_ROCM_DS_ORG}")

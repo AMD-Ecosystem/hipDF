@@ -74,7 +74,7 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [dask_cudf] [benchma
 "
 
 # set the AMD Data Science GitHub organization if not set in the environment
-export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-AMD-AIOSS}"
+export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-AMD-Ecosystem}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
 export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"

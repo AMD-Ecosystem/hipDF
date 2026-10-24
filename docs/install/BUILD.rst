@@ -26,7 +26,7 @@ Building and installing hipDF from source
 
 For developers, the following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
-into the `install_hipdf.sh <https://github.com/AMD-AIOSS/hipDF/blob/release/26.10/install_hipdf.sh>`__ script. Read and edit the
+into the `install_hipdf.sh <https://github.com/AMD-Ecosystem/hipDF/blob/release/26.10/install_hipdf.sh>`__ script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
 The following provides details on building the C++ components, running tests and benchmarks, and for building
@@ -114,7 +114,7 @@ Create a work directory ``/tmp/hipdf`` and clone the hipDF release branch into t
    mkdir -p /tmp/hipdf # NOTE: feel free to adapt
    cd /tmp/hipdf
 
-   git clone -b release/26.10 https://github.com/AMD-AIOSS/hipDF hipdf
+   git clone -b release/26.10 https://github.com/AMD-Ecosystem/hipDF hipdf
 
 .. _step-3-create-and-activate-hipdf-conda-environment-hipdf_dev:
 
@@ -176,7 +176,7 @@ as an example. ``HCC_AMDGPU_TARGET`` can be set to `any supported architecture <
    .. code-block:: bash
 
       cd /tmp/hipdf
-      git clone -b release/26.10 https://github.com/AMD-AIOSS/cupy cupy
+      git clone -b release/26.10 https://github.com/AMD-Ecosystem/cupy cupy
 
 3. Build and install the CuPy wheel:
 
@@ -239,7 +239,7 @@ set to `any supported architecture <./hipDF-support.html>`__.
    .. code-block:: bash
 
       cd /tmp/hipdf
-      git clone -b release/26.10 https://github.com/AMD-AIOSS/hipMM hipmm
+      git clone -b release/26.10 https://github.com/AMD-Ecosystem/hipMM hipmm
 
 2. Build and install the hipMM wheel:
 

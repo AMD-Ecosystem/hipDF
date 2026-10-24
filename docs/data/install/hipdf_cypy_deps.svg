@@ -40,7 +40,7 @@
 <!-- hipDF -->
 <g id="node1" class="node">
 <title>hipDF</title>
-<g id="a_node1"><a xlink:href="https://github.com/AMD-AIOSS/hipDF" xlink:title="https://github.com/AMD-AIOSS/hipDF">
+<g id="a_node1"><a xlink:href="https://github.com/AMD-Ecosystem/hipDF" xlink:title="https://github.com/AMD-Ecosystem/hipDF">
 <polygon fill="none" stroke="#000000" points="192.777,-302.4 138.777,-302.4 138.777,-266.4 192.777,-266.4 192.777,-302.4"/>
 <text text-anchor="middle" x="165.777" y="-280.2" font-family="Times,serif" font-size="14.00" fill="#000000">hipDF</text>
 </a>
@@ -49,7 +49,7 @@
 <!-- hipMM -->
 <g id="node2" class="node">
 <title>hipMM</title>
-<g id="a_node2"><a xlink:href="https://github.com/AMD-AIOSS/hipMM" xlink:title="https://github.com/AMD-AIOSS/hipMM">
+<g id="a_node2"><a xlink:href="https://github.com/AMD-Ecosystem/hipMM" xlink:title="https://github.com/AMD-Ecosystem/hipMM">
 <polygon fill="none" stroke="#000000" points="238.0572,-213.6 179.4968,-213.6 179.4968,-177.6 238.0572,-177.6 238.0572,-213.6"/>
 <text text-anchor="middle" x="208.777" y="-191.4" font-family="Times,serif" font-size="14.00" fill="#000000">hipMM</text>
 </a>
