@@ -32,13 +32,13 @@ AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx942"}
 BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
 PYTHON_VERSION=${PYTHON_VERSION:-"3.12"}
 
-# set ROCm-DS GITHUB organization to AMD-Ecosystem if not set in environment
+# set the AMD Data Science GitHub organization if not set in the environment
 # NOTE: ROCmDS-CMake fetches dependencies from RAPIDS_CMAKE_ROCM_DS_ORG and defaults to the former name of the organization, ROCm-DS.
-export RAPIDS_CMAKE_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-AMD-Ecosystem}"
+export RAPIDS_CMAKE_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG:-AMD-AIOSS}"
 export GITHUB_ROCM_DS_ORG="${RAPIDS_CMAKE_ROCM_DS_ORG}"
 
-# set ROCm GITHUB organization to ROCm if not set in environment
-export RAPIDS_CMAKE_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG:-ROCm}"
+# set the GitHub organization for ROCm-derived release repositories
+export RAPIDS_CMAKE_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG:-AMD-AIOSS}"
 export GITHUB_ROCM_ORG="${RAPIDS_CMAKE_ROCM_ORG}"
 
 BUILD_CUPY=${BUILD_CUPY:-"false"}
