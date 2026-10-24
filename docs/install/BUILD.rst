@@ -176,7 +176,7 @@ as an example. ``HCC_AMDGPU_TARGET`` can be set to `any supported architecture <
    .. code-block:: bash
 
       cd /tmp/hipdf
-      git clone -b release/rocmds-26.03 https://github.com/ROCm/cupy cupy
+      git clone -b release/26.10 https://github.com/AMD-AIOSS/cupy cupy
 
 3. Build and install the CuPy wheel:
 

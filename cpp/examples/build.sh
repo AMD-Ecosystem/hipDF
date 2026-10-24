@@ -29,8 +29,8 @@
 
 set -euo pipefail
 
-# set ROCm-DS GITHUB organization to AMD-Ecosystem if not set in environment
-export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-AMD-Ecosystem}"
+# set the AMD Data Science GitHub organization if not set in the environment
+export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-AMD-AIOSS}"
 
 # set ROCm GITHUB organization to ROCm if not set in environment
 export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"

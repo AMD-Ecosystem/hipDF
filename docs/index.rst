@@ -39,7 +39,7 @@ GPUs, enabling data manipulation tasks such as loading, joining, aggregating, an
 to be performed on data in GPU memory. hipDF offers both a Python and C++ API, supporting
 a wide range of use cases. For more information and to learn about what's new in the latest release, see :ref:`what-is-hipdf`
 
-The hipDF code is open and hosted at `https://github.com/AMD-Ecosystem/hipDF <https://github.com/AMD-Ecosystem/hipDF>`_.
+The hipDF code is open and hosted at `https://github.com/AMD-AIOSS/hipDF <https://github.com/AMD-AIOSS/hipDF>`_.
 
 The hipDF documentation is structured as follows:
 
