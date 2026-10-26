@@ -62,6 +62,6 @@ The hipDF documentation is structured as follows:
     * :ref:`hipDF-reference`
     * :ref:`pylibhipdf-reference`
 
-To contribute to the documentation refer to `Contributing to AMD Data Science  <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/contribute/contributing.html>`__.
+To contribute to the documentation refer to `Contributing to AMD Data Science  <https://rocm.docs.amd.com/projects/datascience/en/latest/contribute/contributing.html>`__.
 
-You can find licensing information on the `Licenses <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/about/license.html>`__ page.
+You can find licensing information on the `Licenses <https://rocm.docs.amd.com/projects/datascience/en/latest/about/license.html>`__ page.

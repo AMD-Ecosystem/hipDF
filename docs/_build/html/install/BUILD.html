@@ -86,7 +86,7 @@
 <img alt="AMD Logo" class="d-inline-block align-text-top hover-opacity" src="../_static/images/amd-header-logo.svg" title="AMD Logo" width="90"/>
 </a>
 <div class="vr mx-40 my-25"></div>
-<a class="klavika-font hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest">Data Science 26.09</a>
+<a class="klavika-font hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest">Data Science 26.10</a>
 </div>
 <a class="header-all-versions hover-opacity" href="https://rocm.docs.amd.com/projects/rocm-ds/en/latest/release/versions.html">Version List</a>
 </div>
@@ -1267,7 +1267,7 @@
 <path d="M4.75 0a.75.75 0 01.75.75V2h5V.75a.75.75 0 011.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0113.25 16H2.75A1.75 1.75 0 011 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 014.75 0zm0 3.5h8.5a.25.25 0 01.25.25V6h-11V3.75a.25.25 0 01.25-.25h2zm-2.25 4v6.75c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25V7.5h-11z" fill-rule="evenodd"></path>
 </svg>
 </span>
-                            2026-09-20
+                            2026-10-23
                         </p>
 </div>
 <div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
@@ -1294,7 +1294,7 @@
 
 <p>For developers, the following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
-into the <a class="reference external" href="https://github.com/AMD-Ecosystem/hipDF/blob/release/26.09/install_hipdf.sh">install_hipdf.sh</a> script. Read and edit the
+into the <a class="reference external" href="https://github.com/AMD-Ecosystem/hipDF/blob/release/26.10/install_hipdf.sh">install_hipdf.sh</a> script. Read and edit the
 script carefully to adapt the environment variables for your installation.</p>
 <p>The following provides details on building the C++ components, running tests and benchmarks, and for building
 the full hipDF installation including the Python layer. End users should see the <a class="reference internal" href="INSTALL.html"><span class="doc">Installation instructions</span></a>.</p>
@@ -1358,7 +1358,7 @@ sh<span class="w"> </span>Miniforge3-Linux-x86_64.sh
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/hipdf<span class="w"> </span><span class="c1"># NOTE: feel free to adapt</span>
 <span class="nb">cd</span><span class="w"> </span>/tmp/hipdf
 
-git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release/26.09<span class="w"> </span>https://github.com/AMD-Ecosystem/hipDF<span class="w"> </span>hipdf
+git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release/26.10<span class="w"> </span>https://github.com/AMD-Ecosystem/hipDF<span class="w"> </span>hipdf
 </pre></div>
 </div>
 </section>
@@ -1409,7 +1409,7 @@ dependencies accordingly.</p>
 </li>
 <li><p>Clone the CuPy release branch into the work directory:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/tmp/hipdf
-git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release/rocmds-26.03<span class="w"> </span>https://github.com/ROCm/cupy<span class="w"> </span>cupy
+git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release/26.10<span class="w"> </span>https://github.com/AMD-Ecosystem/cupy<span class="w"> </span>cupy
 </pre></div>
 </div>
 </li>
@@ -1463,7 +1463,7 @@ set to <a class="reference external" href="./hipDF-support.html">any supported a
 <ol class="arabic">
 <li><p>Clone the hipMM release branch into the work directory:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/tmp/hipdf
-git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release/26.09<span class="w"> </span>https://github.com/AMD-Ecosystem/hipMM<span class="w"> </span>hipmm
+git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release/26.10<span class="w"> </span>https://github.com/AMD-Ecosystem/hipMM<span class="w"> </span>hipmm
 </pre></div>
 </div>
 </li>
