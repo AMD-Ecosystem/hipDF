@@ -36,9 +36,9 @@ can run on AMD GPUs using accelerated DataFrame operations. ``cudf.pandas`` allo
 by default via ``hipMallocManaged``. On Linux kernels with Heterogeneous Memory Management (HMM) support and on
 supported AMD GPUs, managed memory pages can be transparently migrated to the device on GPU page faults.
 
-This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__,
+This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/docs-10.0.0/how-to/hip_runtime_api/memory_management/unified_memory.html>`__,
 and how to configure your environment for best performance on AMD GPUs depending on your use case. For more information,
-see `HIP memory management <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html>`__.
+see `HIP memory management <https://rocm.docs.amd.com/projects/HIP/en/docs-10.0.0/how-to/hip_runtime_api/memory_management.html>`__.
 
 Recommended: Enable page migration with HSA_XNACK=1
 ---------------------------------------------------
@@ -64,7 +64,7 @@ Experimental: When to use HSA_XNACK=0
       export CUDF_PANDAS_BYPASS_XNACK_CHECK=1
 
 With ``HSA_XNACK=0``, the managed memory will reside on the host (DRAM) and be accessed by the GPU via
-`zero-copy <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html#zc>`_,
+`zero-copy <https://rocm.docs.amd.com/projects/HIP/en/docs-10.0.0/how-to/hip_runtime_api/memory_management/unified_memory.html#zc>`_,
 which can be beneficial in certain scenarios described below. While page migration often improves performance, there are cases
 where disabling it may be preferable:
 

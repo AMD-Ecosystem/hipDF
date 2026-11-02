@@ -1252,7 +1252,7 @@
 <path d="M4.75 0a.75.75 0 01.75.75V2h5V.75a.75.75 0 011.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0113.25 16H2.75A1.75 1.75 0 011 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 014.75 0zm0 3.5h8.5a.25.25 0 01.25.25V6h-11V3.75a.25.25 0 01.25-.25h2zm-2.25 4v6.75c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25V7.5h-11z" fill-rule="evenodd"></path>
 </svg>
 </span>
-                            2026-06-23
+                            2026-11-02
                         </p>
 </div>
 <div class="sd-col sd-col-auto sd-d-flex-row sd-align-minor-center docutils">
@@ -1281,9 +1281,9 @@
 can run on AMD GPUs using accelerated DataFrame operations. <code class="docutils literal notranslate"><span class="pre">cudf.pandas</span></code> allocates unified (managed) memory
 by default via <code class="docutils literal notranslate"><span class="pre">hipMallocManaged</span></code>. On Linux kernels with Heterogeneous Memory Management (HMM) support and on
 supported AMD GPUs, managed memory pages can be transparently migrated to the device on GPU page faults.</p>
-<p>This topic describes how the <code class="docutils literal notranslate"><span class="pre">cudf.pandas</span></code> acceleration layer uses <a class="reference external" href="https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html">HIP unified managed memory</a>,
+<p>This topic describes how the <code class="docutils literal notranslate"><span class="pre">cudf.pandas</span></code> acceleration layer uses <a class="reference external" href="https://rocm.docs.amd.com/projects/HIP/en/docs-10.0.0/how-to/hip_runtime_api/memory_management/unified_memory.html">HIP unified managed memory</a>,
 and how to configure your environment for best performance on AMD GPUs depending on your use case. For more information,
-see <a class="reference external" href="https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html">HIP memory management</a>.</p>
+see <a class="reference external" href="https://rocm.docs.amd.com/projects/HIP/en/docs-10.0.0/how-to/hip_runtime_api/memory_management.html">HIP memory management</a>.</p>
 <section id="recommended-enable-page-migration-with-hsa-xnack-1">
 <h2>Recommended: Enable page migration with HSA_XNACK=1<a class="headerlink" href="#recommended-enable-page-migration-with-hsa-xnack-1" title="Link to this heading">#</a></h2>
 <p>Enabling GPU page-fault retry requires running the workload with the environment variable <code class="docutils literal notranslate"><span class="pre">HSA_XNACK=1</span></code>. This activates
@@ -1304,7 +1304,7 @@ To bypass this check for experimental purposes, set:</p>
 </div>
 </div>
 <p>With <code class="docutils literal notranslate"><span class="pre">HSA_XNACK=0</span></code>, the managed memory will reside on the host (DRAM) and be accessed by the GPU via
-<a class="reference external" href="https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html#zc">zero-copy</a>,
+<a class="reference external" href="https://rocm.docs.amd.com/projects/HIP/en/docs-10.0.0/how-to/hip_runtime_api/memory_management/unified_memory.html#zc">zero-copy</a>,
 which can be beneficial in certain scenarios described below. While page migration often improves performance, there are cases
 where disabling it may be preferable:</p>
 <ul class="simple">
