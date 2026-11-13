@@ -141,7 +141,7 @@ Via AMD PyPI (recommended)
 .. code-block:: bash
 
    conda activate hipdf_dev
-   pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple
+   pip install amd-cupy~=14.1.1 --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple
 
 From source
 ^^^^^^^^^^^
